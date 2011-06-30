@@ -1,0 +1,35 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+ThermoRawFileReaderDLL
+</name>
+</assembly>
+<members>
+<member name="M:ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO.ValidateMSScan(System.String,System.Int32@,System.Boolean@,ThermoRawFileReaderDLL.FinniganFileIO.FinniganFileReaderBaseClass.MRMScanTypeConstants@,System.Boolean@)">
+	<summary>
+ Examines strFilterText to validate that it is a supported scan type
+ </summary>
+	<param name="strFilterText"></param>
+	<param name="intMSLevel"></param>
+	<param name="blnSIMScan"></param>
+	<param name="eMRMScanType"></param>
+	<param name="blnZoomScan"></param>
+	<returns>True if strFilterText contains a known MS scan type</returns>
+	<remarks></remarks>
+</member><member name="P:ThermoRawFileReaderDLL.My.Resources.Resources.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:ThermoRawFileReaderDLL.My.Resources.Resources.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="T:ThermoRawFileReaderDLL.My.Resources.Resources">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+</members>
+</doc>
