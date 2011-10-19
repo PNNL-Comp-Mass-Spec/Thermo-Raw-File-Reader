@@ -1,0 +1,7 @@
+ThermoRawFileReaderDLL Change Log
+
+Version 1.0.4309; October 19, 2011
+	- Added support for CRM in the scan filter text
+
+Version 1.0; June 29, 2011
+	- Initial version
