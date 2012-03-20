@@ -98,7 +98,7 @@ Namespace FinniganFileIO
 #Region "Classwide Variables"
 
 		' Cached XRawFile object, for faster accessing
-		Private mXRawFile As XRAWFILE2Lib.XRawfile
+		Private mXRawFile As MSFileReaderLib.MSFileReader_XRawfile
 
 		Private mCorruptMemoryEncountered As Boolean
 
@@ -108,7 +108,7 @@ Namespace FinniganFileIO
 			' I have a feeling this doesn't actually work, and will always return True
 
 			Try
-				Dim objXRawFile As New XRAWFILE2Lib.XRawfile
+				Dim objXRawFile As New MSFileReaderLib.MSFileReader_XRawfile
 				objXRawFile = Nothing
 
 				' If we get here, then all is fine
@@ -1351,7 +1351,7 @@ Namespace FinniganFileIO
 				CloseRawFile()
 
 				If mXRawFile Is Nothing Then
-					mXRawFile = New XRAWFILE2Lib.XRawfile
+					mXRawFile = New MSFileReaderLib.MSFileReader_XRawfile
 				End If
 
 				mXRawFile.Open(FileName)

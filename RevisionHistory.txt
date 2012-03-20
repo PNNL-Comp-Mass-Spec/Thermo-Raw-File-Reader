@@ -1,5 +1,10 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.4461; March 19, 2012
+	- Switched from xrawfile2.dll to MSFileReader.XRawfile2.dll
+		- New version supports Xcalibur v2.2
+	- Updated to .NET Framework 4.0
+
 Version 1.0.4309; October 19, 2011
 	- Added support for CRM in the scan filter text
 
