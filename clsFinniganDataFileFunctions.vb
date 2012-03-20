@@ -1,14 +1,16 @@
 Option Strict On
 
-' These functions utilize the XRawfile.ocx com object to extract scan header info and
+' These functions utilize MSFileReader.XRawfile2.dll to extract scan header info and
 ' raw mass spectrum info from Finnigan LCQ, LTQ, and LTQ-FT files
 ' 
-' Required Dlls (copy from Xcalibur installation folders): FControl2.dll, Fglobal.dll, Fileio.dll, Fregistry.dll, & XRawfile.ocx
+' Required Dlls: fileio.dll, fregistry.dll, and MSFileReader.XRawfile2.dll
+' DLLs obtained from: Thermo software named "MS File Reader 2.2"
+' Download link: http://sjsupport.thermofinnigan.com/public/detail.asp?id=703
 ' 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified October 19, 2011
+' Switched from XRawFile2.dll to MSFileReader.XRawfile2.dll in March 2012
 
 Namespace FinniganFileIO
 
@@ -140,7 +142,7 @@ Namespace FinniganFileIO
 			Dim eMRMScanType As MRMScanTypeConstants
 
 			eMRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM
-			If Not String.IsNullOrEmpty(strFilterText) Then
+			If Not String.IsNullOrWhiteSpace(strFilterText) Then
 				If strFilterText.ToLower.IndexOf(MRM_Q1MS_TEXT.ToLower) > 0 OrElse _
 				   strFilterText.ToLower.IndexOf(MRM_Q3MS_TEXT.ToLower) > 0 Then
 					eMRMScanType = MRMScanTypeConstants.MRMQMS
@@ -155,8 +157,8 @@ Namespace FinniganFileIO
 		End Function
 
 		Public Shared Sub ExtractMRMMasses(ByVal strFilterText As String, _
-				   ByVal eMRMScanType As MRMScanTypeConstants, _
-				   ByRef udtMRMInfo As udtMRMInfoType)
+										   ByVal eMRMScanType As MRMScanTypeConstants, _
+										   ByRef udtMRMInfo As udtMRMInfoType)
 
 			' Parse out the MRM_QMS or SRM mass info from strFilterText
 			' It should be of the form 
@@ -192,7 +194,7 @@ Namespace FinniganFileIO
 				udtMRMInfo.MRMMassCount = 0
 			End If
 
-			If Not strFilterText Is Nothing AndAlso strFilterText.Length > 0 Then
+			If Not String.IsNullOrWhiteSpace(strFilterText) Then
 
 				If eMRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.MRMQMS Or _
 				   eMRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.SRM Then
@@ -488,14 +490,21 @@ Namespace FinniganFileIO
 
 				With mFileInfo
 
+					.CreationDate = Nothing
 					mXRawFile.GetCreationDate(.CreationDate)
 					mXRawFile.IsError(intResult)						' Unfortunately, .IsError() always returns 0, even if an error occurred
 					If intResult <> 0 Then Return False
 
+					.CreatorID = Nothing
 					mXRawFile.GetCreatorID(.CreatorID)
 
+					.InstFlags = Nothing
 					mXRawFile.GetInstFlags(.InstFlags)
+
+					.InstHardwareVersion = Nothing
 					mXRawFile.GetInstHardwareVersion(.InstHardwareVersion)
+
+					.InstSoftwareVersion = Nothing
 					mXRawFile.GetInstSoftwareVersion(.InstSoftwareVersion)
 
 					If Not mLoadMSMethodInfo Then
@@ -506,10 +515,21 @@ Namespace FinniganFileIO
 						ReDim .InstMethods(intMethodCount - 1)
 
 						For intIndex = 0 To intMethodCount - 1
+							strMethod = Nothing
 							mXRawFile.GetInstMethod(intIndex, strMethod)
-							.InstMethods(intIndex) = String.Copy(strMethod)
+							If String.IsNullOrWhiteSpace(strMethod) Then
+								.InstMethods(intIndex) = String.Empty
+							Else
+								.InstMethods(intIndex) = String.Copy(strMethod)
+							End If
+
 						Next intIndex
 					End If
+
+					.InstModel = Nothing
+					.InstName = Nothing
+					.InstrumentDescription = Nothing
+					.InstSerialNumber = Nothing
 
 					mXRawFile.GetInstModel(.InstModel)
 					mXRawFile.GetInstName(.InstName)
@@ -522,9 +542,16 @@ Namespace FinniganFileIO
 					mXRawFile.GetFirstSpectrumNumber(.ScanStart)
 					mXRawFile.GetLastSpectrumNumber(.ScanEnd)
 
+					.AcquisitionDate = Nothing
+					.AcquisitionFilename = Nothing
+					.Comment1 = Nothing
+					.Comment2 = Nothing
+					.SampleName = Nothing
+					.SampleComment = Nothing
+
 					' Note that the following are typically blank
 					mXRawFile.GetAcquisitionDate(.AcquisitionDate)
-					mXRawFile.GetAcquisitionFileName(.AcquisitionFilename)
+					mXRawFile.GetAcquisitionFileName(.AcquisitionFileName)
 					mXRawFile.GetComment1(.Comment1)
 					mXRawFile.GetComment2(.Comment2)
 					mXRawFile.GetSeqRowSampleName(.SampleName)
@@ -600,7 +627,8 @@ Namespace FinniganFileIO
 										' Step through the names and store in the .Setting() arrays
 										strTuneCategory = "General"
 										For intSettingIndex = 0 To intTuneLabelCount - 1
-											If String.IsNullOrEmpty(strTuneSettingValues(intSettingIndex)) AndAlso Not strTuneSettingNames(intSettingIndex).EndsWith(":") Then
+											If strTuneSettingValues(intSettingIndex).Length = 0 AndAlso _
+											Not strTuneSettingNames(intSettingIndex).EndsWith(":") Then
 												' New category
 												If strTuneSettingNames(intSettingIndex).Length > 0 Then
 													strTuneCategory = String.Copy(strTuneSettingNames(intSettingIndex))
@@ -687,7 +715,7 @@ Namespace FinniganFileIO
 			Dim intArrayCount As Integer
 			Dim intIndex As Integer
 
-			Dim strFilterText As String = String.Empty
+			Dim strFilterText As String
 
 			Dim dblStatusLogRT As Double
 			Dim intBooleanVal As Integer
@@ -785,9 +813,12 @@ Namespace FinniganFileIO
 
 						' Lookup the filter text for this scan
 						' Parse out the parent ion m/z for fragmentation scans
+						' Must set strFilterText to Nothing prior to calling .GetFilterForScanNum()
+						strFilterText = Nothing
 						mXRawFile.GetFilterForScanNum(Scan, strFilterText)
+
 						.FilterText = String.Copy(strFilterText)
-						If String.IsNullOrEmpty(.FilterText) Then .FilterText = String.Empty
+						If String.IsNullOrWhiteSpace(.FilterText) Then .FilterText = String.Empty
 
 						If .EventNumber <= 1 Then
 							' XRaw periodically mislabels a scan as .EventNumber = 1 when it's really an MS/MS scan; check for this
@@ -951,7 +982,7 @@ Namespace FinniganFileIO
 				blnSIMScan = False
 				blnZoomScan = False
 
-				If String.IsNullOrEmpty(strFilterText) Then
+				If strFilterText.Length = 0 Then
 					strScanTypeName = "MS"
 					Exit Try
 				End If
@@ -1096,7 +1127,7 @@ Namespace FinniganFileIO
 			Dim reCollisionSpecs As System.Text.RegularExpressions.Regex
 
 			Try
-				If String.IsNullOrEmpty(strFilterText) Then Exit Try
+				If String.IsNullOrWhiteSpace(strFilterText) Then Exit Try
 
 				strGenericScanFilterText = String.Copy(strFilterText)
 
@@ -1188,10 +1219,10 @@ Namespace FinniganFileIO
 		''' <returns>True if strFilterText contains a known MS scan type</returns>
 		''' <remarks></remarks>
 		Public Shared Function ValidateMSScan(ByVal strFilterText As String, _
-				   ByRef intMSLevel As Integer, _
-				   ByRef blnSIMScan As Boolean, _
-				   ByRef eMRMScanType As MRMScanTypeConstants, _
-				   ByRef blnZoomScan As Boolean) As Boolean
+											  ByRef intMSLevel As Integer, _
+											  ByRef blnSIMScan As Boolean, _
+											  ByRef eMRMScanType As MRMScanTypeConstants, _
+											  ByRef blnZoomScan As Boolean) As Boolean
 
 			Dim blnValidScan As Boolean
 
@@ -1200,9 +1231,9 @@ Namespace FinniganFileIO
 			blnZoomScan = False
 
 			If strFilterText.ToLower.IndexOf(FULL_MS_TEXT.ToLower) > 0 OrElse _
-			 strFilterText.ToLower.IndexOf(MS_ONLY_C_TEXT.ToLower) > 0 OrElse _
-			 strFilterText.ToLower.IndexOf(MS_ONLY_P_TEXT.ToLower) > 0 OrElse _
-			 strFilterText.ToLower.IndexOf(FULL_PR_TEXT.ToLower) > 0 Then
+				strFilterText.ToLower.IndexOf(MS_ONLY_C_TEXT.ToLower) > 0 OrElse _
+				strFilterText.ToLower.IndexOf(MS_ONLY_P_TEXT.ToLower) > 0 OrElse _
+				strFilterText.ToLower.IndexOf(FULL_PR_TEXT.ToLower) > 0 Then
 				' This is really a Full MS scan
 				intMSLevel = 1
 				blnSIMScan = False
@@ -1214,8 +1245,8 @@ Namespace FinniganFileIO
 					blnSIMScan = True
 					blnValidScan = True
 				ElseIf strFilterText.ToLower.IndexOf(MS_ONLY_Z_TEXT.ToLower) > 0 OrElse _
-					strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 OrElse _
-					strFilterText.ToLower.IndexOf(MS_ONLY_DZ_TEXT.ToLower) > 0 Then
+					   strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 OrElse _
+					   strFilterText.ToLower.IndexOf(MS_ONLY_DZ_TEXT.ToLower) > 0 Then
 					intMSLevel = 1
 					blnZoomScan = True
 					blnValidScan = True

@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.4462; March 20, 2012
+	- Now setting String values to Nothing prior to calling XRawFile functions that return string values via a pbstr variable
+
 Version 1.1.4461; March 19, 2012
 	- Switched from xrawfile2.dll to MSFileReader.XRawfile2.dll
 		- New version supports Xcalibur v2.2
