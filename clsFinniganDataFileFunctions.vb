@@ -14,6 +14,8 @@ Option Strict On
 
 ' Last modified April 19, 2012
 
+Imports System.Runtime.InteropServices
+
 Namespace FinniganFileIO
 
 	Public Class XRawFileIO
@@ -196,8 +198,8 @@ Namespace FinniganFileIO
 		End Function
 
 		Public Shared Sub ExtractMRMMasses(ByVal strFilterText As String, _
-										   ByVal eMRMScanType As MRMScanTypeConstants, _
-										   ByRef udtMRMInfo As udtMRMInfoType)
+		  ByVal eMRMScanType As MRMScanTypeConstants, _
+		   <Out()> ByRef udtMRMInfo As udtMRMInfoType)
 
 			' Parse out the MRM_QMS or SRM mass info from strFilterText
 			' It should be of the form 
@@ -227,6 +229,7 @@ Namespace FinniganFileIO
 			End If
 
 
+			udtMRMInfo = New udtMRMInfoType
 			If udtMRMInfo.MRMMassList Is Nothing Then
 				InitializeMRMInfo(udtMRMInfo, 0)
 			Else
@@ -291,7 +294,7 @@ Namespace FinniganFileIO
 
 		End Sub
 
-		Public Shared Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, ByRef dblParentIonMZ As Double, ByRef intMSLevel As Integer, ByRef strCollisionMode As String) As Boolean
+		Public Shared Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, <Out()> ByRef dblParentIonMZ As Double, <Out()> ByRef intMSLevel As Integer, <Out()> ByRef strCollisionMode As String) As Boolean
 
 			' Parse out the parent ion and collision energy from strFilterText
 			' It should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
@@ -456,7 +459,7 @@ Namespace FinniganFileIO
 
 		End Function
 
-		Public Shared Function ExtractMSLevel(ByVal strFilterText As String, ByRef intMSLevel As Integer, ByRef strMZText As String) As Boolean
+		Public Shared Function ExtractMSLevel(ByVal strFilterText As String, <Out()> ByRef intMSLevel As Integer, <Out()> ByRef strMZText As String) As Boolean
 			' Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in strFilterText
 			' Returns True if found and False if no match
 
@@ -590,7 +593,7 @@ Namespace FinniganFileIO
 
 					' Note that the following are typically blank
 					mXRawFile.GetAcquisitionDate(.AcquisitionDate)
-					mXRawFile.GetAcquisitionFileName(.AcquisitionFileName)
+					mXRawFile.GetAcquisitionFileName(.AcquisitionFilename)
 					mXRawFile.GetComment1(.Comment1)
 					mXRawFile.GetComment2(.Comment2)
 					mXRawFile.GetSeqRowSampleName(.SampleName)
@@ -743,7 +746,7 @@ Namespace FinniganFileIO
 
 		End Function
 
-		Public Overrides Function GetScanInfo(ByVal Scan As Integer, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
+		Public Overrides Function GetScanInfo(ByVal Scan As Integer, <Out()> ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
 			' Function returns True if no error, False if an error
 
 			Dim intResult As Integer
@@ -777,6 +780,7 @@ Namespace FinniganFileIO
 				' Make sure the MS controller is selected
 				If Not SetMSController() Then Return False
 
+				udtScanHeaderInfo = New udtScanHeaderInfoType
 				With udtScanHeaderInfo
 					' Reset the values
 					.NumPeaks = 0
@@ -1262,21 +1266,22 @@ Namespace FinniganFileIO
 		''' <returns>True if strFilterText contains a known MS scan type</returns>
 		''' <remarks></remarks>
 		Public Shared Function ValidateMSScan(ByVal strFilterText As String, _
-											  ByRef intMSLevel As Integer, _
-											  ByRef blnSIMScan As Boolean, _
-											  ByRef eMRMScanType As MRMScanTypeConstants, _
-											  ByRef blnZoomScan As Boolean) As Boolean
+		   <Out()> ByRef intMSLevel As Integer, _
+		   <Out()> ByRef blnSIMScan As Boolean, _
+		   <Out()> ByRef eMRMScanType As MRMScanTypeConstants, _
+		   <Out()> ByRef blnZoomScan As Boolean) As Boolean
 
 			Dim blnValidScan As Boolean
 
+			intMSLevel = 0
 			blnSIMScan = False
 			eMRMScanType = MRMScanTypeConstants.NotMRM
 			blnZoomScan = False
 
 			If strFilterText.ToLower.IndexOf(FULL_MS_TEXT.ToLower) > 0 OrElse _
-				strFilterText.ToLower.IndexOf(MS_ONLY_C_TEXT.ToLower) > 0 OrElse _
-				strFilterText.ToLower.IndexOf(MS_ONLY_P_TEXT.ToLower) > 0 OrElse _
-				strFilterText.ToLower.IndexOf(FULL_PR_TEXT.ToLower) > 0 Then
+			 strFilterText.ToLower.IndexOf(MS_ONLY_C_TEXT.ToLower) > 0 OrElse _
+			 strFilterText.ToLower.IndexOf(MS_ONLY_P_TEXT.ToLower) > 0 OrElse _
+			 strFilterText.ToLower.IndexOf(FULL_PR_TEXT.ToLower) > 0 Then
 				' This is really a Full MS scan
 				intMSLevel = 1
 				blnSIMScan = False
@@ -1288,8 +1293,8 @@ Namespace FinniganFileIO
 					blnSIMScan = True
 					blnValidScan = True
 				ElseIf strFilterText.ToLower.IndexOf(MS_ONLY_Z_TEXT.ToLower) > 0 OrElse _
-					   strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 OrElse _
-					   strFilterText.ToLower.IndexOf(MS_ONLY_DZ_TEXT.ToLower) > 0 Then
+				 strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 OrElse _
+				 strFilterText.ToLower.IndexOf(MS_ONLY_DZ_TEXT.ToLower) > 0 Then
 					intMSLevel = 1
 					blnZoomScan = True
 					blnValidScan = True
@@ -1370,8 +1375,8 @@ Namespace FinniganFileIO
 				intCentroidResult = 0			' Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
 
 				mXRawFile.GetMassListFromScanNum(Scan, strFilter, IntensityCutoffTypeConstants.None, _
-						 intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth, _
-						 MassIntensityPairsList, PeakList, intDataCount)
+				   intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth, _
+				   MassIntensityPairsList, PeakList, intDataCount)
 
 				If intDataCount > 0 Then
 					dblData = CType(MassIntensityPairsList, Double(,))
@@ -1403,12 +1408,13 @@ Namespace FinniganFileIO
 
 		End Function
 
-		Public Shared Sub InitializeMRMInfo(ByRef udtMRMInfo As udtMRMInfoType, ByVal intInitialMassCountCapacity As Integer)
+		Public Shared Sub InitializeMRMInfo(<Out()> ByRef udtMRMInfo As udtMRMInfoType, ByVal intInitialMassCountCapacity As Integer)
 
 			If intInitialMassCountCapacity < 0 Then
 				intInitialMassCountCapacity = 0
 			End If
 
+			udtMRMInfo = New udtMRMInfoType
 			With udtMRMInfo
 				.MRMMassCount = 0
 				ReDim .MRMMassList(intInitialMassCountCapacity - 1)

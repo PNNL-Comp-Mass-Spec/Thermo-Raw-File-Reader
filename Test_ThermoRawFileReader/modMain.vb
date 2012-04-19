@@ -19,22 +19,24 @@
             ReDim dblMzList(0)
             ReDim dblIntensityList(0)
 
-            For iScanNum As Integer = 1 To iNumScans
-                
-                bSuccess = oReader.GetScanInfo(iScanNum, udtScanHeaderInfo)
-                If bSuccess Then
-                    Console.WriteLine("Scan " & iScanNum & " at " & udtScanHeaderInfo.RetentionTime.ToString("0.00") & " minutes: " & udtScanHeaderInfo.FilterText)
+			udtScanHeaderInfo = New ThermoRawFileReaderDLL.FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
 
-                    If iScanNum Mod 50 = 0 Then
-                        bSuccess = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, udtScanHeaderInfo)
-                        For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step 50
-                            Console.WriteLine("  " & dblMzList(iDataPoint).ToString("0.000") & " mz   " & dblIntensityList(iDataPoint).ToString("0"))
-                        Next
-                        Console.WriteLine()
-                    End If
+			For iScanNum As Integer = 1 To iNumScans
 
-                End If
-            Next
+				bSuccess = oReader.GetScanInfo(iScanNum, udtScanHeaderInfo)
+				If bSuccess Then
+					Console.WriteLine("Scan " & iScanNum & " at " & udtScanHeaderInfo.RetentionTime.ToString("0.00") & " minutes: " & udtScanHeaderInfo.FilterText)
+
+					If iScanNum Mod 50 = 0 Then
+						bSuccess = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, udtScanHeaderInfo)
+						For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step 50
+							Console.WriteLine("  " & dblMzList(iDataPoint).ToString("0.000") & " mz   " & dblIntensityList(iDataPoint).ToString("0"))
+						Next
+						Console.WriteLine()
+					End If
+
+				End If
+			Next
 
 
             oReader.CloseRawFile()
