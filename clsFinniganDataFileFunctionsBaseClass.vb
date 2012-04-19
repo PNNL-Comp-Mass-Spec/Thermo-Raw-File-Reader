@@ -5,7 +5,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified November 29, 2010
+' Last modified April 19, 2012
 
 Namespace FinniganFileIO
 
@@ -17,6 +17,12 @@ Namespace FinniganFileIO
 			MRMQMS = 1				' Multiple SIM ranges in a single scan
 			SRM = 2					' Monitoring a parent ion and one or more daughter ions
 			FullNL = 3				' Full neutral loss scan
+		End Enum
+
+		Public Enum IonModeConstants
+			Unknown = 0
+			Positive = 1
+			Negative = 2
 		End Enum
 #End Region
 
@@ -83,7 +89,7 @@ Namespace FinniganFileIO
 			Public FilterText As String
 			Public ParentIonMZ As Double
 			Public CollisionMode As String
-
+			Public IonMode As IonModeConstants
 			Public MRMInfo As udtMRMInfoType
 
 			Public NumChannels As Integer

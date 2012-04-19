@@ -10,9 +10,9 @@ Imports System.Runtime.InteropServices
 
 <Assembly: AssemblyTitle("Test_ThermoRawFileReader")> 
 <Assembly: AssemblyDescription("")> 
-<Assembly: AssemblyCompany("Microsoft")> 
+<Assembly: AssemblyCompany("PNNL")> 
 <Assembly: AssemblyProduct("Test_ThermoRawFileReader")> 
-<Assembly: AssemblyCopyright("Copyright © Microsoft 2011")> 
+<Assembly: AssemblyCopyright("")> 
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)>

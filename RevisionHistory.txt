@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.4492; April 19, 2012
+	- Now determining the Ion Mode for each scan (positive or negative)
+
 Version 1.1.4462; March 20, 2012
 	- Now setting String values to Nothing prior to calling XRawFile functions that return string values via a pbstr variable
 
