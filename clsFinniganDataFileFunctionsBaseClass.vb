@@ -1,4 +1,5 @@
 Option Strict On
+<Assembly: CLSCompliant(True)> 
 
 ' Base class for derived classes that can read Finnigan .Raw files (LCQ, LTQ, etc.)
 ' 
