@@ -1,23 +1,30 @@
-﻿Module modMain
+﻿Option Strict On
 
-    Sub Main()
+Module modMain
 
-        Try
-            Dim oReader As ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO
-            oReader = New ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO()
+	Public Sub Main()
 
-            oReader.OpenRawFile("..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")
+		Try
+			Dim oReader As ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO
+			oReader = New ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO()
 
-            Dim iNumScans = oReader.GetNumScans()
+			oReader.OpenRawFile("..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")
 
-            Dim udtScanHeaderInfo As ThermoRawFileReaderDLL.FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
-            Dim bSuccess As Boolean
+			For intIndex As Integer = 0 To oReader.FileInfo.InstMethods.Length - 1
+				Console.WriteLine(oReader.FileInfo.InstMethods(intIndex))
+			Next
 
-            Dim dblMzList() As Double
-            Dim dblIntensityList() As Double
+			Dim iNumScans = oReader.GetNumScans()
 
-            ReDim dblMzList(0)
-            ReDim dblIntensityList(0)
+			Dim udtScanHeaderInfo As ThermoRawFileReaderDLL.FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
+			Dim bSuccess As Boolean
+			Dim intDataCount As Integer
+
+			Dim dblMzList() As Double
+			Dim dblIntensityList() As Double
+
+			ReDim dblMzList(0)
+			ReDim dblIntensityList(0)
 
 			udtScanHeaderInfo = New ThermoRawFileReaderDLL.FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
 
@@ -28,7 +35,7 @@
 					Console.WriteLine("Scan " & iScanNum & " at " & udtScanHeaderInfo.RetentionTime.ToString("0.00") & " minutes: " & udtScanHeaderInfo.FilterText)
 
 					If iScanNum Mod 50 = 0 Then
-						bSuccess = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, udtScanHeaderInfo)
+						intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, udtScanHeaderInfo)
 						For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step 50
 							Console.WriteLine("  " & dblMzList(iDataPoint).ToString("0.000") & " mz   " & dblIntensityList(iDataPoint).ToString("0"))
 						Next
@@ -39,14 +46,14 @@
 			Next
 
 
-            oReader.CloseRawFile()
+			oReader.CloseRawFile()
 
-        Catch ex As Exception
-            Console.WriteLine("Error in sub Main: " & ex.Message)
-        End Try
-        
-        Console.WriteLine("Done")
+		Catch ex As Exception
+			Console.WriteLine("Error in sub Main: " & ex.Message)
+		End Try
 
-    End Sub
+		Console.WriteLine("Done")
+
+	End Sub
 
 End Module
