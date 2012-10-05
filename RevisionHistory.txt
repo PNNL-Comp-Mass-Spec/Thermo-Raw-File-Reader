@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.4661; October 5, 2012
+	- Added function GetCollisionEnergy
+
 Version 1.1.4492; April 19, 2012
 	- Now determining the Ion Mode for each scan (positive or negative)
 	- Now using <Out()> for ByRef parameters that are really out parameters (improves compatibility with C#)

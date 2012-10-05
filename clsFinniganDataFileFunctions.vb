@@ -103,7 +103,7 @@ Namespace FinniganFileIO
 #Region "Classwide Variables"
 
 		' Cached XRawFile object, for faster accessing
-		Private mXRawFile As MSFileReaderLib.MSFileReader_XRawfile
+		Private mXRawFile As MSFileReaderLib.IXRawfile5
 
 		Private mCorruptMemoryEncountered As Boolean
 
@@ -721,6 +721,35 @@ Namespace FinniganFileIO
 			End Try
 
 			Return True
+
+		End Function
+
+		Public Function GetCollisionEnergy(ByVal Scan As Integer) As System.Collections.Generic.List(Of Double)
+
+			Dim intNumMSOrders As Integer
+			Dim lstCollisionEnergies As System.Collections.Generic.List(Of Double) = New System.Collections.Generic.List(Of Double)
+			Dim dblCollisionEnergy As Double
+
+			Try
+				If mXRawFile Is Nothing Then Return lstCollisionEnergies
+
+				mXRawFile.GetNumberOfMSOrdersFromScanNum(Scan, intNumMSOrders)
+
+				For intMSOrder As Integer = 1 To intNumMSOrders
+					dblCollisionEnergy = 0
+					mXRawFile.GetCollisionEnergyForScanNum(Scan, intMSOrder, dblCollisionEnergy)
+
+					If (dblCollisionEnergy > 0) Then
+						lstCollisionEnergies.Add(dblCollisionEnergy)
+					End If
+				Next
+
+			Catch ex As System.Exception
+				Dim strError As String = "Error: Exception in GetCollisionEnergy: " & ex.Message
+				RaiseErrorMessage(strError)
+			End Try
+
+			Return lstCollisionEnergies
 
 		End Function
 
@@ -1431,7 +1460,7 @@ Namespace FinniganFileIO
 				CloseRawFile()
 
 				If mXRawFile Is Nothing Then
-					mXRawFile = New MSFileReaderLib.MSFileReader_XRawfile
+					mXRawFile = CType(New MSFileReaderLib.MSFileReader_XRawfile, MSFileReaderLib.IXRawfile5)
 				End If
 
 				mXRawFile.Open(FileName)
