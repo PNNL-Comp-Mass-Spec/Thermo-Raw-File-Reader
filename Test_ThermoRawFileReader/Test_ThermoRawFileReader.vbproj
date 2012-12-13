@@ -74,6 +74,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Xml" />
+    <Reference Include="ThermoRawFileReaderDLL">
+      <HintPath>..\bin\Debug\ThermoRawFileReaderDLL.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Import Include="Microsoft.VisualBasic" />
@@ -86,12 +89,6 @@
   <ItemGroup>
     <Compile Include="modMain.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ThermoRawFileReaderDLL.vbproj">
-      <Project>{9A814C6C-BD10-4CE3-BD68-BB4774FB10A8}</Project>
-      <Name>ThermoRawFileReaderDLL</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
