@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,8 +9,8 @@
     </SchemaVersion>
     <ProjectGuid>{7B694C74-E420-4088-86EA-FC5C7D9F48B6}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>ThermoRawFileReaderDLL64</RootNamespace>
-    <AssemblyName>ThermoRawFileReaderDLL64</AssemblyName>
+    <RootNamespace>ThermoRawFileReaderDLL</RootNamespace>
+    <AssemblyName>ThermoRawFileReaderDLL</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -20,8 +20,8 @@
     <DebugType>full</DebugType>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DocumentationFile>ThermoRawFileReaderDLL64.xml</DocumentationFile>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>ThermoRawFileReaderDLL.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -30,7 +30,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>ThermoRawFileReaderDLL64.xml</DocumentationFile>
+    <DocumentationFile>ThermoRawFileReaderDLL.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
@@ -39,7 +39,7 @@
   <PropertyGroup>
     <OptionCompare>Binary</OptionCompare>
   </PropertyGroup>
-  <PropertyGroup>	
+  <PropertyGroup>
     <OptionStrict>Off</OptionStrict>
   </PropertyGroup>
   <PropertyGroup>
@@ -50,7 +50,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\x64\Debug\</OutputPath>
-    <DocumentationFile>ThermoRawFileReaderDLL64.xml</DocumentationFile>
+    <DocumentationFile>ThermoRawFileReaderDLL.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -60,34 +60,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\x64\Release\</OutputPath>
-    <DocumentationFile>ThermoRawFileReaderDLL64.xml</DocumentationFile>
+    <DocumentationFile>ThermoRawFileReaderDLL.xml</DocumentationFile>
     <Optimize>true</Optimize>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
-    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <DefineDebug>true</DefineDebug>
-    <DefineTrace>true</DefineTrace>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DocumentationFile>ThermoRawFileReaderDLL64.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
-    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <DefineTrace>true</DefineTrace>
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DocumentationFile>ThermoRawFileReaderDLL64.xml</DocumentationFile>
-    <Optimize>true</Optimize>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
@@ -113,39 +90,6 @@
     <Compile Include="..\clsFinniganDataFileFunctions.vb" />
     <Compile Include="..\clsFinniganDataFileFunctionsBaseClass.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
-    <Compile Include="My Project\Application.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Application.myapp</DependentUpon>
-    </Compile>
-    <Compile Include="My Project\Resources.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="My Project\Settings.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="My Project\Resources.resx">
-      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
-      <CustomToolNamespace>My.Resources</CustomToolNamespace>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="My Project\Application.myapp">
-      <Generator>MyApplicationCodeGenerator</Generator>
-      <LastGenOutput>Application.Designer.vb</LastGenOutput>
-    </None>
-    <None Include="My Project\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <CustomToolNamespace>My</CustomToolNamespace>
-      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="MSFileReaderLib">
