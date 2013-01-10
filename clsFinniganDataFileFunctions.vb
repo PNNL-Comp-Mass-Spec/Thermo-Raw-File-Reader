@@ -12,7 +12,7 @@ Option Strict On
 '
 ' Switched from XRawFile2.dll to MSFileReader.XRawfile2.dll in March 2012
 
-' Last modified April 19, 2012
+' Last modified January 9, 2013
 
 Imports System.Runtime.InteropServices
 
@@ -44,7 +44,8 @@ Namespace FinniganFileIO
 		' It also matches p ms2
 		' It also matches SRM ms2
 		' It also matches CRM ms3
-		Private Const MS2_REGEX As String = "( p|Full|SRM|CRM) ms([2-9]|[1-9][0-9]) "
+		' It also matches Full msx ms2 (multiplexed parent ion selection, introduced with the Q-Exactive)
+		Private Const MS2_REGEX As String = "( p|Full|SRM|CRM|Full msx) ms([2-9]|[1-9][0-9]) "
 
 		' Used with .GetSeqRowSampleType()
 		Public Enum SampleTypeConstants
@@ -97,7 +98,18 @@ Namespace FinniganFileIO
 #End Region
 
 #Region "Structures"
-
+		Public Structure udtParentIonInfoType
+			Public MSLevel As Integer
+			Public ParentIonMZ As Double
+			Public CollisionEnergy As Single
+			Public CollisionMode As String
+			Public Sub Clear()
+				MSLevel = 1
+				ParentIonMZ = 0
+				CollisionEnergy = 0
+				CollisionMode = String.Empty
+			End Sub
+		End Structure
 #End Region
 
 #Region "Classwide Variables"
@@ -294,10 +306,35 @@ Namespace FinniganFileIO
 
 		End Sub
 
+		''' <summary>
+		''' Parse out the parent ion and collision energy from strFilterText
+		''' </summary>
+		''' <param name="strFilterText"></param>
+		''' <param name="dblParentIonMZ">Parent ion m/z (output)</param>
+		''' <param name="intMSLevel">MSLevel (output)</param>
+		''' <param name="strCollisionMode">Collision mode (output)</param>
+		''' <returns>True if success</returns>
+		''' <remarks>If multiple parent ion m/z values are listed then dblParentIonMZ will have the last one.  However, if the filter text contains "Full msx" then dblParentIonMZ will have the first parent ion listed</remarks>
 		Public Shared Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, <Out()> ByRef dblParentIonMZ As Double, <Out()> ByRef intMSLevel As Integer, <Out()> ByRef strCollisionMode As String) As Boolean
+			Dim lstParentIons As Generic.List(Of udtParentIonInfoType) = Nothing
 
-			' Parse out the parent ion and collision energy from strFilterText
-			' It should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
+			Return ExtractParentIonMZFromFilterText(strFilterText, dblParentIonMZ, intMSLevel, strCollisionMode, lstParentIons)
+
+		End Function
+
+		''' <summary>
+		''' Parse out the parent ion and collision energy from strFilterText
+		''' </summary>
+		''' <param name="strFilterText"></param>
+		''' <param name="dblParentIonMZ">Parent ion m/z (output)</param>
+		''' <param name="intMSLevel">MSLevel (output)</param>
+		''' <param name="strCollisionMode">Collision mode (output)</param>
+		''' <returns>True if success</returns>
+		''' <remarks>If multiple parent ion m/z values are listed then dblParentIonMZ will have the last one.  However, if the filter text contains "Full msx" then dblParentIonMZ will have the first parent ion listed</remarks>
+		Public Shared Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, <Out()> ByRef dblParentIonMZ As Double, <Out()> ByRef intMSLevel As Integer, <Out()> ByRef strCollisionMode As String, <Out()> ByRef lstParentIons As Generic.List(Of udtParentIonInfoType)) As Boolean
+
+
+			' strFilterText should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
 			' or "+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]"
 			' or "ITMS + c NSI d Full ms10 421.76@35.00"
 			' or "ITMS + c NSI d sa Full ms2 467.16@etd100.00 [50.00-1880.00]"              ' Note: sa stands for "supplemental activation"
@@ -310,12 +347,15 @@ Namespace FinniganFileIO
 			' or "ITMS + p ESI d Z ms [1108.00-1118.00]"  (zoom scan)
 			' or "+ p ms2 777.00@cid30.00 [210.00-1200.00]
 			' or "+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]
+			' or "FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]"
 
 			' This RegEx matches text like 1312.95@45.00 or 756.98@cid35.00
-			Const PARENTION_REGEX As String = "([0-9.]+)@([a-z]*)[0-9.]+"
+			Const PARENTION_REGEX As String = "([0-9.]+)@([a-z]*)([0-9.]+)"
 
 			' This RegEx looks for "sa" prior to Full ms"
 			Const SA_REGEX As String = " sa Full ms"
+
+			Const MSX_REGEX As String = " Full msx "
 
 			Dim intCharIndex As Integer
 			Dim intStartIndex As Integer
@@ -326,12 +366,19 @@ Namespace FinniganFileIO
 			Dim blnSuccess As Boolean
 
 			Dim blnSupplementalActivationEnabled As Boolean
+			Dim blnMultiplexedMSnEnabled As Boolean
 
 			Static reFindParentIon As System.Text.RegularExpressions.Regex
 			Static reFindSAFullMS As System.Text.RegularExpressions.Regex
+			Static reFindFullMSx As System.Text.RegularExpressions.Regex
 
 			Dim reMatchParentIon As System.Text.RegularExpressions.Match
-			Dim reMatchSAFullMS As System.Text.RegularExpressions.Match
+
+			Dim strCollisionEnergy As String
+			Dim sngCollisionEngergy As Single
+
+			Dim udtBestParentIon As udtParentIonInfoType = New udtParentIonInfoType
+			udtBestParentIon.Clear()
 
 			intMSLevel = 1
 			dblParentIonMZ = 0
@@ -339,19 +386,23 @@ Namespace FinniganFileIO
 			strMZText = String.Empty
 			blnMatchFound = False
 
+			If lstParentIons Is Nothing Then
+				lstParentIons = New Generic.List(Of udtParentIonInfoType)
+			Else
+				lstParentIons.Clear()
+			End If
+
 			Try
 
 				If reFindSAFullMS Is Nothing Then
 					reFindSAFullMS = New System.Text.RegularExpressions.Regex(SA_REGEX, Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
 				End If
-				reMatchSAFullMS = reFindSAFullMS.Match(strFilterText)
+				blnSupplementalActivationEnabled = reFindSAFullMS.IsMatch(strFilterText)
 
-				blnSupplementalActivationEnabled = False
-				If Not reMatchSAFullMS Is Nothing Then
-					If reMatchSAFullMS.Success Then
-						blnSupplementalActivationEnabled = True
-					End If
+				If reFindFullMSx Is Nothing Then
+					reFindFullMSx = New System.Text.RegularExpressions.Regex(MSX_REGEX, Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
 				End If
+				blnMultiplexedMSnEnabled = reFindFullMSx.IsMatch(strFilterText)
 
 				blnSuccess = ExtractMSLevel(strFilterText, intMSLevel, strMZText)
 
@@ -360,6 +411,8 @@ Namespace FinniganFileIO
 					' For example, grab 1312.95 out of "1312.95@45.00 [ 350.00-2000.00]"
 					' or, grab 873.85 out of "1312.95@45.00 873.85@45.00 [ 350.00-2000.00]"
 					' or, grab 756.98 out of "756.98@etd100.00 [50.00-2000.00]"
+					'
+					' However, if using multiplex ms/ms (msx) then we return the first parent ion listed
 
 					' For safety, remove any text after a square bracket
 					intCharIndex = strMZText.IndexOf("["c)
@@ -371,8 +424,7 @@ Namespace FinniganFileIO
 						reFindParentIon = New System.Text.RegularExpressions.Regex(PARENTION_REGEX, Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
 					End If
 
-					' Note: I should be able to use .Match() and .NextMatch() to find the last valid match, but that didn't work
-					' Thus, I'm using a Do While loop and specifing an index to start the search at in strMZText
+					' Find all of the parent ion m/z's present in strMZText
 					intStartIndex = 0
 					Do
 						reMatchParentIon = reFindParentIon.Match(strMZText, intStartIndex)
@@ -380,6 +432,9 @@ Namespace FinniganFileIO
 						If Not reMatchParentIon Is Nothing Then
 							If reMatchParentIon.Groups.Count >= 2 Then
 								dblParentIonMZ = Double.Parse(reMatchParentIon.Groups(1).Value)
+								strCollisionMode = String.Empty
+								sngCollisionEngergy = 0
+
 								blnMatchFound = True
 
 								intStartIndex = reMatchParentIon.Index + reMatchParentIon.Length
@@ -393,22 +448,51 @@ Namespace FinniganFileIO
 											strCollisionMode = "sa_" & strCollisionMode
 										End If
 									End If
+
+								End If
+
+								If reMatchParentIon.Groups.Count >= 4 Then
+									strCollisionEnergy = reMatchParentIon.Groups(3).Value
+									If Not strCollisionEnergy Is Nothing Then
+										Single.TryParse(strCollisionEnergy, sngCollisionEngergy)
+									End If
+								End If
+
+								Dim udtParentIonInfo As udtParentIonInfoType
+								With udtParentIonInfo
+									.MSLevel = intMSLevel
+									.ParentIonMZ = dblParentIonMZ
+									.CollisionEnergy = sngCollisionEngergy
+									.CollisionMode = String.Copy(strCollisionMode)
+								End With
+								lstParentIons.Add(udtParentIonInfo)
+
+								If Not blnMultiplexedMSnEnabled OrElse (lstParentIons.Count = 1 AndAlso blnMultiplexedMSnEnabled) Then
+									udtBestParentIon = udtParentIonInfo
 								End If
 
 							ElseIf intStartIndex > 0 Then
-								' Second match not found, exit the loop
+								' Additional match was not found, exit the loop
 								Exit Do
 							Else
 								' Match not found
 								blnMatchFound = False
 								Exit Do
 							End If
+
 						Else
 							Exit Do
 						End If
 					Loop While intStartIndex < strMZText.Length - 1
 
-					If Not blnMatchFound Then
+					If blnMatchFound Then
+						' Update the output values using udtBestParentIon
+						With udtBestParentIon
+							intMSLevel = .MSLevel
+							dblParentIonMZ = .ParentIonMZ
+							strCollisionMode = .CollisionMode
+						End With
+					Else
 						' Match not found using RegEx
 						' Use manual text parsing instead
 
@@ -1027,6 +1111,8 @@ Namespace FinniganFileIO
 			' ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]              PQD-MSn
 			' FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]             HCD-HMSn
 			' ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]          ETD-MSn
+
+			' FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]         HCD-HMSn using multiplexed MSn (introduced with the Q-Exactive)
 
 			' + c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                       MSn
 			' + c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]          MSn

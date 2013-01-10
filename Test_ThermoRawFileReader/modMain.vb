@@ -1,10 +1,12 @@
 ﻿Option Strict On
 
+Imports ThermoRawFileReaderDLL.FinniganFileIO
+
 Module modMain
 
 	Public Sub Main()
 
-		If True Then
+		If False Then
 			Dim strRawFilePath As String = "..\60999_MouseIslet_HOM_LC_4Oct12_Samwise_12-05-13.raw"
 			Dim intPointsPerSpectrumToKeep As Integer = 250
 
@@ -12,6 +14,7 @@ Module modMain
 
 		Else
 			TestReader("..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")
+			'TestReader("..\QC_Shew_12_02-250ng-Multiplex_08Jan13_Frodo_12-2-34.raw")
 
 			' Uncomment the following to test the GetCollisionEnergy() function
 			'TestReader("..\EDRN_ERG_Spop_ETV1_50fmolHeavy_0p5ugB53A_Frac48_3Oct12_Gandalf_W33A1_16a.raw")
@@ -33,14 +36,14 @@ Module modMain
 				strOutputFilePath = IO.Path.Combine(fiOutputFile.Directory.FullName, IO.Path.GetFileNameWithoutExtension(fiOutputFile.Name) & "_Top" & intPointsPerSpectrumToKeep & IO.Path.GetExtension(fiOutputFile.Name))
 			End If
 
-			Dim oReader As ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO
-			oReader = New ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO()
+			Dim oReader As XRawFileIO
+			oReader = New XRawFileIO()
 
 			oReader.OpenRawFile(strRawFilePath)
 
 			Dim iNumScans = oReader.GetNumScans()
 
-			Dim udtScanHeaderInfo As ThermoRawFileReaderDLL.FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
+			Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType
 			Dim bSuccess As Boolean
 			Dim intDataCount As Integer
 			Dim intDataCountToWrite As Integer
@@ -52,7 +55,7 @@ Module modMain
 			ReDim dblMzList(0)
 			ReDim dblIntensityList(0)
 
-			udtScanHeaderInfo = New ThermoRawFileReaderDLL.FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
+			udtScanHeaderInfo = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
 
 			Using swOutFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strOutputFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
 
@@ -132,8 +135,8 @@ Module modMain
 
 	Private Sub TestReader(strRawFilePath As String)
 		Try
-			Dim oReader As ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO
-			oReader = New ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO()
+			Dim oReader As XRawFileIO
+			oReader = New XRawFileIO()
 
 			oReader.OpenRawFile(strRawFilePath)
 
@@ -143,7 +146,7 @@ Module modMain
 
 			Dim iNumScans = oReader.GetNumScans()
 
-			Dim udtScanHeaderInfo As ThermoRawFileReaderDLL.FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
+			Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType
 			Dim bSuccess As Boolean
 			Dim intDataCount As Integer
 
@@ -156,7 +159,7 @@ Module modMain
 			ReDim dblMzList(0)
 			ReDim dblIntensityList(0)
 
-			udtScanHeaderInfo = New ThermoRawFileReaderDLL.FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
+			udtScanHeaderInfo = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
 
 			For iScanNum As Integer = 1 To iNumScans
 
@@ -169,10 +172,12 @@ Module modMain
 						strCollisionEnergies = String.Empty
 					ElseIf lstCollisionEnergies.Count >= 1 Then
 						strCollisionEnergies = lstCollisionEnergies.Item(0).ToString("0.0")
-					Else
-						For intIndex = 1 To lstCollisionEnergies.Count - 1
-							strCollisionEnergies &= ", " & lstCollisionEnergies.Item(intIndex).ToString("0.0")
-						Next
+
+						If lstCollisionEnergies.Count > 1 Then
+							For intIndex = 1 To lstCollisionEnergies.Count - 1
+								strCollisionEnergies &= ", " & lstCollisionEnergies.Item(intIndex).ToString("0.0")
+							Next
+						End If
 					End If
 
 					If String.IsNullOrEmpty(strCollisionEnergies) Then

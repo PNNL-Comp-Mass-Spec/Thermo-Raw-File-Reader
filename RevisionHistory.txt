@@ -1,5 +1,9 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.4757; January 9, 2013
+	- Added support for scan filter text with Full msx ms2
+		- Used with multiplexed parent ion selection
+
 Version 1.1.4661; October 5, 2012
 	- Added function GetCollisionEnergy
 
