@@ -13,11 +13,13 @@ Module modMain
 			ConvertRawFileToCSVForLars(strRawFilePath, intPointsPerSpectrumToKeep)
 
 		Else
-			TestReader("..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")
+			'TestReader("..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")
 			'TestReader("..\QC_Shew_12_02-250ng-Multiplex_08Jan13_Frodo_12-2-34.raw")
 
 			' Uncomment the following to test the GetCollisionEnergy() function
 			'TestReader("..\EDRN_ERG_Spop_ETV1_50fmolHeavy_0p5ugB53A_Frac48_3Oct12_Gandalf_W33A1_16a.raw")
+
+			TestReader("..\CPTAC_10Pep_UndepPlas__Schedule_24Mar13_Gandalf_W22511A1.raw")
 		End If
 
 		Console.WriteLine("Done")
@@ -161,6 +163,8 @@ Module modMain
 
 			udtScanHeaderInfo = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
 
+			ShowMethod(oReader)
+
 			For iScanNum As Integer = 1 To iNumScans
 
 				bSuccess = oReader.GetScanInfo(iScanNum, udtScanHeaderInfo)
@@ -205,6 +209,44 @@ Module modMain
 		End Try
 	End Sub
 
+	Private Function ShowMethod(ByVal oReader As XRawFileIO) As Boolean
+		Dim intInstMethodCount As Integer
+		Dim strMethodNum As String
+
+		Try
+			intInstMethodCount = oReader.FileInfo.InstMethods.Length
+		Catch ex As Exception
+			Return False
+		End Try
+
+		Try
+			For intIndex = 0 To intInstMethodCount - 1
+				If intIndex = 0 And oReader.FileInfo.InstMethods.Length = 1 Then
+					strMethodNum = String.Empty
+				Else
+					strMethodNum = (intIndex + 1).ToString.Trim
+				End If
+
+				With oReader.FileInfo
+					Console.WriteLine("Instrument model: " & .InstModel)
+					Console.WriteLine("Instrument name: " & .InstName)
+					Console.WriteLine("Instrument description: " & .InstrumentDescription)
+					Console.WriteLine("Instrument serial number: " & .InstSerialNumber)
+					Console.WriteLine()
+
+					Console.WriteLine(oReader.FileInfo.InstMethods(intIndex))
+				End With
+
+
+			Next intIndex
+
+		Catch ex As Exception
+			Console.WriteLine("Error loading the MS Method: " & ex.Message)
+			Return False
+		End Try
+
+		Return True
+	End Function
 	Private Class clsMzListComparer
 		Inherits Generic.Comparer(Of KeyValuePair(Of Double, Double))
 
