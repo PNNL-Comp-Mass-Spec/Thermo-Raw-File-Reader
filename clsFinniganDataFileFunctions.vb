@@ -15,6 +15,8 @@ Option Strict On
 ' Last modified January 9, 2013
 
 Imports System.Runtime.InteropServices
+Imports MSFileReaderLib
+Imports System.Text.RegularExpressions
 
 Namespace FinniganFileIO
 
@@ -115,7 +117,7 @@ Namespace FinniganFileIO
 #Region "Classwide Variables"
 
 		' Cached XRawFile object, for faster accessing
-		Private mXRawFile As MSFileReaderLib.IXRawfile5
+		Private mXRawFile As IXRawfile5
 
 		Private mCorruptMemoryEncountered As Boolean
 
@@ -125,12 +127,12 @@ Namespace FinniganFileIO
 			' I have a feeling this doesn't actually work, and will always return True
 
 			Try
-				Dim objXRawFile As New MSFileReaderLib.MSFileReader_XRawfile
+				Dim objXRawFile As New MSFileReader_XRawfile
 				objXRawFile = Nothing
 
 				' If we get here, then all is fine
 				Return True
-			Catch ex As System.Exception
+			Catch ex As Exception
 				Return False
 			End Try
 
@@ -144,7 +146,7 @@ Namespace FinniganFileIO
 				End If
 				mCorruptMemoryEncountered = False
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				' Ignore any errors
 			Finally
 				mXRawFile = Nothing
@@ -156,14 +158,14 @@ Namespace FinniganFileIO
 		Public Shared Function DetermineMRMScanType(ByVal strFilterText As String) As MRMScanTypeConstants
 			Dim eMRMScanType As MRMScanTypeConstants
 
-			eMRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM
+			eMRMScanType = MRMScanTypeConstants.NotMRM
 			If Not String.IsNullOrWhiteSpace(strFilterText) Then
-				If strFilterText.ToLower.IndexOf(MRM_Q1MS_TEXT.ToLower) > 0 OrElse _
-				   strFilterText.ToLower.IndexOf(MRM_Q3MS_TEXT.ToLower) > 0 Then
+				If strFilterText.IndexOf(MRM_Q1MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
+				   strFilterText.IndexOf(MRM_Q3MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
 					eMRMScanType = MRMScanTypeConstants.MRMQMS
-				ElseIf strFilterText.ToLower.IndexOf(MRM_SRM_TEXT.ToLower) > 0 Then
+				ElseIf strFilterText.IndexOf(MRM_SRM_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
 					eMRMScanType = MRMScanTypeConstants.SRM
-				ElseIf strFilterText.ToLower.IndexOf(MRM_FullNL_TEXT.ToLower) > 0 Then
+				ElseIf strFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
 					eMRMScanType = MRMScanTypeConstants.FullNL
 				End If
 			End If
@@ -177,13 +179,13 @@ Namespace FinniganFileIO
 
 			Const IONMODE_REGEX As String = "[+-]"
 
-			Static reIonMode As System.Text.RegularExpressions.Regex
+			Static reIonMode As Regex
 
 			Dim eIonMode As IonModeConstants
-			Dim reMatch As System.Text.RegularExpressions.Match
+			Dim reMatch As Match
 
 			If reIonMode Is Nothing Then
-				reIonMode = New System.Text.RegularExpressions.Regex(IONMODE_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
+				reIonMode = New Regex(IONMODE_REGEX, RegexOptions.Compiled)
 			End If
 
 			eIonMode = IonModeConstants.Unknown
@@ -227,17 +229,17 @@ Namespace FinniganFileIO
 			Const MASSLIST_REGEX As String = "\[[0-9.]+-[0-9.]+.*\]"
 			Const MASSRANGES_REGEX As String = "([0-9.]+)-([0-9.]+)"
 
-			Static reMassList As System.Text.RegularExpressions.Regex
-			Static reMassRanges As System.Text.RegularExpressions.Regex
+			Static reMassList As Regex
+			Static reMassRanges As Regex
 
-			Dim reMatch As System.Text.RegularExpressions.Match
+			Dim reMatch As Match
 
 			If reMassList Is Nothing Then
-				reMassList = New System.Text.RegularExpressions.Regex(MASSLIST_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
+				reMassList = New Regex(MASSLIST_REGEX, RegexOptions.Compiled)
 			End If
 
 			If reMassRanges Is Nothing Then
-				reMassRanges = New System.Text.RegularExpressions.Regex(MASSRANGES_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
+				reMassRanges = New Regex(MASSRANGES_REGEX, RegexOptions.Compiled)
 			End If
 
 
@@ -250,8 +252,8 @@ Namespace FinniganFileIO
 
 			If Not String.IsNullOrWhiteSpace(strFilterText) Then
 
-				If eMRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.MRMQMS Or _
-				   eMRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.SRM Then
+				If eMRMScanType = MRMScanTypeConstants.MRMQMS Or _
+				   eMRMScanType = MRMScanTypeConstants.SRM Then
 
 					' Parse out the text between the square brackets
 					reMatch = reMassList.Match(strFilterText)
@@ -282,7 +284,7 @@ Namespace FinniganFileIO
 										udtMRMInfo.MRMMassCount += 1
 									End If
 
-								Catch ex As System.Exception
+								Catch ex As Exception
 									' Error parsing out the mass values; skip this group
 								End Try
 
@@ -316,7 +318,7 @@ Namespace FinniganFileIO
 		''' <returns>True if success</returns>
 		''' <remarks>If multiple parent ion m/z values are listed then dblParentIonMZ will have the last one.  However, if the filter text contains "Full msx" then dblParentIonMZ will have the first parent ion listed</remarks>
 		Public Shared Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, <Out()> ByRef dblParentIonMZ As Double, <Out()> ByRef intMSLevel As Integer, <Out()> ByRef strCollisionMode As String) As Boolean
-			Dim lstParentIons As Generic.List(Of udtParentIonInfoType) = Nothing
+			Dim lstParentIons As List(Of udtParentIonInfoType) = Nothing
 
 			Return ExtractParentIonMZFromFilterText(strFilterText, dblParentIonMZ, intMSLevel, strCollisionMode, lstParentIons)
 
@@ -331,7 +333,12 @@ Namespace FinniganFileIO
 		''' <param name="strCollisionMode">Collision mode (output)</param>
 		''' <returns>True if success</returns>
 		''' <remarks>If multiple parent ion m/z values are listed then dblParentIonMZ will have the last one.  However, if the filter text contains "Full msx" then dblParentIonMZ will have the first parent ion listed</remarks>
-		Public Shared Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, <Out()> ByRef dblParentIonMZ As Double, <Out()> ByRef intMSLevel As Integer, <Out()> ByRef strCollisionMode As String, <Out()> ByRef lstParentIons As Generic.List(Of udtParentIonInfoType)) As Boolean
+		Public Shared Function ExtractParentIonMZFromFilterText(
+		   ByVal strFilterText As String,
+		   <Out()> ByRef dblParentIonMZ As Double,
+		   <Out()> ByRef intMSLevel As Integer,
+		   <Out()> ByRef strCollisionMode As String,
+		   <Out()> ByRef lstParentIons As List(Of udtParentIonInfoType)) As Boolean
 
 
 			' strFilterText should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
@@ -368,11 +375,11 @@ Namespace FinniganFileIO
 			Dim blnSupplementalActivationEnabled As Boolean
 			Dim blnMultiplexedMSnEnabled As Boolean
 
-			Static reFindParentIon As System.Text.RegularExpressions.Regex
-			Static reFindSAFullMS As System.Text.RegularExpressions.Regex
-			Static reFindFullMSx As System.Text.RegularExpressions.Regex
+			Static reFindParentIon As Regex
+			Static reFindSAFullMS As Regex
+			Static reFindFullMSx As Regex
 
-			Dim reMatchParentIon As System.Text.RegularExpressions.Match
+			Dim reMatchParentIon As Match
 
 			Dim strCollisionEnergy As String
 			Dim sngCollisionEngergy As Single
@@ -387,7 +394,7 @@ Namespace FinniganFileIO
 			blnMatchFound = False
 
 			If lstParentIons Is Nothing Then
-				lstParentIons = New Generic.List(Of udtParentIonInfoType)
+				lstParentIons = New List(Of udtParentIonInfoType)
 			Else
 				lstParentIons.Clear()
 			End If
@@ -395,12 +402,12 @@ Namespace FinniganFileIO
 			Try
 
 				If reFindSAFullMS Is Nothing Then
-					reFindSAFullMS = New System.Text.RegularExpressions.Regex(SA_REGEX, Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+					reFindSAFullMS = New Regex(SA_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 				End If
 				blnSupplementalActivationEnabled = reFindSAFullMS.IsMatch(strFilterText)
 
 				If reFindFullMSx Is Nothing Then
-					reFindFullMSx = New System.Text.RegularExpressions.Regex(MSX_REGEX, Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+					reFindFullMSx = New Regex(MSX_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 				End If
 				blnMultiplexedMSnEnabled = reFindFullMSx.IsMatch(strFilterText)
 
@@ -421,7 +428,7 @@ Namespace FinniganFileIO
 					End If
 
 					If reFindParentIon Is Nothing Then
-						reFindParentIon = New System.Text.RegularExpressions.Regex(PARENTION_REGEX, Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+						reFindParentIon = New Regex(PARENTION_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 					End If
 
 					' Find all of the parent ion m/z's present in strMZText
@@ -507,7 +514,7 @@ Namespace FinniganFileIO
 							Try
 								dblParentIonMZ = Double.Parse(strMZText)
 								blnMatchFound = True
-							Catch ex As System.Exception
+							Catch ex As Exception
 								dblParentIonMZ = 0
 							End Try
 
@@ -527,7 +534,7 @@ Namespace FinniganFileIO
 								Try
 									dblParentIonMZ = Double.Parse(strMZText.Substring(0, intCharIndex + 1))
 									blnMatchFound = True
-								Catch ex As System.Exception
+								Catch ex As Exception
 									dblParentIonMZ = 0
 								End Try
 							End If
@@ -535,10 +542,11 @@ Namespace FinniganFileIO
 					End If
 				End If
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				blnMatchFound = False
 			End Try
 
+			' ReSharper disable once NotAssignedOutParameter (ReSharper thinks lstParentIons is not being properly initialized even though it is)
 			Return blnMatchFound
 
 		End Function
@@ -549,8 +557,8 @@ Namespace FinniganFileIO
 
 			' Populates intMSLevel with the number after "ms" and strMZText with the text after "ms2"
 
-			Static reFindMS As System.Text.RegularExpressions.Regex
-			Dim reMatchMS As System.Text.RegularExpressions.Match
+			Static reFindMS As Regex
+			Dim reMatchMS As Match
 
 			Dim intCharIndex As Integer
 			Dim intMatchTextLength As Integer
@@ -559,14 +567,14 @@ Namespace FinniganFileIO
 			intCharIndex = 0
 
 			If reFindMS Is Nothing Then
-				reFindMS = New System.Text.RegularExpressions.Regex(MS2_REGEX, Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+				reFindMS = New Regex(MS2_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 			End If
 			reMatchMS = reFindMS.Match(strFilterText)
 
 			If Not reMatchMS Is Nothing Then
 				If reMatchMS.Groups.Count >= 3 Then
 					intMSLevel = CInt(reMatchMS.Groups(2).Value)
-					intCharIndex = strFilterText.ToLower.IndexOf(reMatchMS.ToString.ToLower)
+					intCharIndex = strFilterText.IndexOf(reMatchMS.ToString(), StringComparison.CurrentCultureIgnoreCase)
 					intMatchTextLength = reMatchMS.Length
 				Else
 					' Match not found
@@ -598,7 +606,7 @@ Namespace FinniganFileIO
 			Dim intNumTuneData As Integer
 			Dim intTuneMethodCountValid As Integer
 
-			Dim strMethod As String = String.Empty
+			Dim strMethod As String
 
 			Dim strTuneCategory As String
 			Dim strTuneSettingNames() As String
@@ -700,7 +708,7 @@ Namespace FinniganFileIO
 								If Not mCorruptMemoryEncountered Then
 									mXRawFile.GetTuneData(intIndex, objLabels, objValues, intTuneLabelCount)
 								End If
-							Catch ex As System.Exception
+							Catch ex As Exception
 								' Exception getting TuneData
 								strWarningMessage = "Warning: Exception calling mXRawFile.GetTuneData for Index " & intIndex.ToString & ": " & ex.Message
 								RaiseWarningMessage(strWarningMessage)
@@ -798,7 +806,7 @@ Namespace FinniganFileIO
 				End With
 
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				Dim strError As String = "Error: Exception in FillFileInfo: " & ex.Message
 				RaiseErrorMessage(strError)
 				Return False
@@ -808,10 +816,10 @@ Namespace FinniganFileIO
 
 		End Function
 
-		Public Function GetCollisionEnergy(ByVal Scan As Integer) As System.Collections.Generic.List(Of Double)
+		Public Function GetCollisionEnergy(ByVal Scan As Integer) As List(Of Double)
 
 			Dim intNumMSOrders As Integer
-			Dim lstCollisionEnergies As System.Collections.Generic.List(Of Double) = New System.Collections.Generic.List(Of Double)
+			Dim lstCollisionEnergies As List(Of Double) = New List(Of Double)
 			Dim dblCollisionEnergy As Double
 
 			Try
@@ -828,7 +836,7 @@ Namespace FinniganFileIO
 					End If
 				Next
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				Dim strError As String = "Error: Exception in GetCollisionEnergy: " & ex.Message
 				RaiseErrorMessage(strError)
 			End Try
@@ -853,7 +861,7 @@ Namespace FinniganFileIO
 				Else
 					Return -1
 				End If
-			Catch ex As System.Exception
+			Catch ex As Exception
 				Return -1
 			End Try
 
@@ -881,7 +889,10 @@ Namespace FinniganFileIO
 
 			Dim strWarningMessage As String
 
+			udtScanHeaderInfo = New udtScanHeaderInfoType
+
 			Try
+
 				If mXRawFile Is Nothing Then Return False
 
 				If Scan < mFileInfo.ScanStart Then
@@ -893,13 +904,12 @@ Namespace FinniganFileIO
 				' Make sure the MS controller is selected
 				If Not SetMSController() Then Return False
 
-				udtScanHeaderInfo = New udtScanHeaderInfoType
 				With udtScanHeaderInfo
 					' Reset the values
 					.NumPeaks = 0
 					.TotalIonCurrent = 0
 					.SIMScan = False
-					.MRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM
+					.MRMScanType = MRMScanTypeConstants.NotMRM
 					.ZoomScan = False
 					.CollisionMode = String.Empty
 					.FilterText = String.Empty
@@ -924,7 +934,7 @@ Namespace FinniganFileIO
 								' Retrieve the additional parameters for this scan (including Scan Event)
 								mXRawFile.GetTrailerExtraForScanNum(Scan, objLabels, objValues, intArrayCount)
 							End If
-						Catch ex As System.Exception
+						Catch ex As Exception
 							strWarningMessage = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " & Scan & ": " & ex.Message
 							RaiseWarningMessage(strWarningMessage)
 							intArrayCount = 0
@@ -957,7 +967,7 @@ Namespace FinniganFileIO
 								If .ScanEventNames(intIndex).ToLower.StartsWith("scan event") Then
 									Try
 										.EventNumber = CInt(.ScanEventValues(intIndex))
-									Catch ex As System.Exception
+									Catch ex As Exception
 										.EventNumber = 1
 									End Try
 									Exit For
@@ -1050,7 +1060,7 @@ Namespace FinniganFileIO
 
 						.IonMode = DetermineIonizationMode(.FilterText)
 
-						If Not .MRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM Then
+						If Not .MRMScanType = MRMScanTypeConstants.NotMRM Then
 							' Parse out the MRM_QMS or SRM information for this scan
 							InitializeMRMInfo(.MRMInfo, 1)
 							ExtractMRMMasses(.FilterText, .MRMScanType, .MRMInfo)
@@ -1068,7 +1078,7 @@ Namespace FinniganFileIO
 							If Not mCorruptMemoryEncountered Then
 								mXRawFile.GetStatusLogForScanNum(Scan, dblStatusLogRT, objLabels, objValues, intArrayCount)
 							End If
-						Catch ex As System.Exception
+						Catch ex As Exception
 							strWarningMessage = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " & Scan & ": " & ex.Message
 							RaiseWarningMessage(strWarningMessage)
 							intArrayCount = 0
@@ -1089,7 +1099,7 @@ Namespace FinniganFileIO
 					End If
 				End With
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				Dim strError As String = "Error: Exception in GetScanInfo: " & ex.Message
 				RaiseWarningMessage(strError)
 				Return False
@@ -1203,7 +1213,7 @@ Namespace FinniganFileIO
 								strScanTypeName = "MS"
 							End If
 
-							If strFilterText.ToUpper.IndexOf("FTMS") >= 0 Then
+							If strFilterText.IndexOf("FTMS", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
 								' HMS or HMSn scan
 								strScanTypeName = "H" & strScanTypeName
 							End If
@@ -1218,10 +1228,10 @@ Namespace FinniganFileIO
 
 						Select Case eMRMScanType
 							Case MRMScanTypeConstants.MRMQMS
-								If strFilterText.ToLower.IndexOf(MRM_Q1MS_TEXT.ToLower) > 0 Then
+								If strFilterText.IndexOf(MRM_Q1MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
 									strScanTypeName = MRM_Q1MS_TEXT.Trim
 
-								ElseIf strFilterText.ToLower.IndexOf(MRM_Q3MS_TEXT.ToLower) > 0 Then
+								ElseIf strFilterText.IndexOf(MRM_Q3MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
 									strScanTypeName = MRM_Q3MS_TEXT.Trim
 								Else
 									' Unknown QMS mode
@@ -1248,7 +1258,7 @@ Namespace FinniganFileIO
 
 				End If
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 
 			End Try
 
@@ -1286,7 +1296,7 @@ Namespace FinniganFileIO
 			Dim strGenericScanFilterText As String = "MS"
 			Dim intCharIndex As Integer
 
-			Dim reCollisionSpecs As System.Text.RegularExpressions.Regex
+			Dim reCollisionSpecs As Regex
 
 			Try
 				If String.IsNullOrWhiteSpace(strFilterText) Then Exit Try
@@ -1299,7 +1309,7 @@ Namespace FinniganFileIO
 					strGenericScanFilterText = strGenericScanFilterText.Substring(0, intCharIndex).TrimEnd(" "c)
 				End If
 
-				intCharIndex = strGenericScanFilterText.ToLower.IndexOf(MRM_FullNL_TEXT.ToLower)
+				intCharIndex = strGenericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.CurrentCultureIgnoreCase)
 				If intCharIndex > 0 Then
 					' MRM neutral loss
 					' Remove any text after MRM_FullNL_TEXT
@@ -1309,7 +1319,7 @@ Namespace FinniganFileIO
 
 				' Replace any digits before any @ sign with a 0
 				If strGenericScanFilterText.IndexOf("@"c) > 0 Then
-					reCollisionSpecs = New System.Text.RegularExpressions.Regex(COLLISION_SPEC_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
+					reCollisionSpecs = New Regex(COLLISION_SPEC_REGEX, RegexOptions.Compiled)
 
 					strGenericScanFilterText = reCollisionSpecs.Replace(strGenericScanFilterText, "0@")
 
@@ -1345,7 +1355,7 @@ Namespace FinniganFileIO
 					''End If
 				End If
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				' Ignore errors
 			End Try
 
@@ -1393,27 +1403,27 @@ Namespace FinniganFileIO
 			eMRMScanType = MRMScanTypeConstants.NotMRM
 			blnZoomScan = False
 
-			If strFilterText.ToLower.IndexOf(FULL_MS_TEXT.ToLower) > 0 OrElse _
-			 strFilterText.ToLower.IndexOf(MS_ONLY_C_TEXT.ToLower) > 0 OrElse _
-			 strFilterText.ToLower.IndexOf(MS_ONLY_P_TEXT.ToLower) > 0 OrElse _
-			 strFilterText.ToLower.IndexOf(FULL_PR_TEXT.ToLower) > 0 Then
+			If strFilterText.IndexOf(FULL_MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse _
+			   strFilterText.IndexOf(MS_ONLY_C_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse _
+			   strFilterText.IndexOf(MS_ONLY_P_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse _
+			  strFilterText.IndexOf(FULL_PR_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
 				' This is really a Full MS scan
 				intMSLevel = 1
 				blnSIMScan = False
 				blnValidScan = True
 			Else
-				If strFilterText.ToLower.IndexOf(SIM_MS_TEXT.ToLower) > 0 Then
+				If strFilterText.IndexOf(SIM_MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
 					' This is really a SIM MS scan
 					intMSLevel = 1
 					blnSIMScan = True
 					blnValidScan = True
-				ElseIf strFilterText.ToLower.IndexOf(MS_ONLY_Z_TEXT.ToLower) > 0 OrElse _
-				 strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 OrElse _
-				 strFilterText.ToLower.IndexOf(MS_ONLY_DZ_TEXT.ToLower) > 0 Then
+				ElseIf strFilterText.IndexOf(MS_ONLY_Z_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse _
+				  strFilterText.IndexOf(MS_ONLY_PZ_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse _
+				  strFilterText.IndexOf(MS_ONLY_DZ_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
 					intMSLevel = 1
 					blnZoomScan = True
 					blnValidScan = True
-				ElseIf strFilterText.ToLower.IndexOf(MS_ONLY_PZ_MS2_TEXT.ToLower) > 0 Then
+				ElseIf strFilterText.IndexOf(MS_ONLY_PZ_MS2_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
 					' Technically, this should have MSLevel = 2, but that would cause a bunch of problems elsewhere in MASIC
 					' Thus, we'll pretend it's MS1
 					intMSLevel = 1
@@ -1422,10 +1432,10 @@ Namespace FinniganFileIO
 				Else
 					eMRMScanType = DetermineMRMScanType(strFilterText)
 					Select Case eMRMScanType
-						Case FinniganFileReaderBaseClass.MRMScanTypeConstants.MRMQMS
+						Case MRMScanTypeConstants.MRMQMS
 							intMSLevel = 1
 							blnValidScan = True			   ' ToDo: Add support for TSQ MRMQMS data
-						Case FinniganFileReaderBaseClass.MRMScanTypeConstants.SRM
+						Case MRMScanTypeConstants.SRM
 							intMSLevel = 2
 							blnValidScan = True			   ' ToDo: Add support for TSQ SRM data
 						Case MRMScanTypeConstants.FullNL
@@ -1445,9 +1455,57 @@ Namespace FinniganFileIO
 			Return GetScanData(Scan, dblMZList, dblIntensityList, udtScanHeaderInfo, 0)
 		End Function
 
+
+		''' <summary>
+		''' Obtain the mass and intensity for the specified scan
+		''' </summary>
+		''' <param name="Scan"></param>
+		''' <param name="dblMZList"></param>
+		''' <param name="dblIntensityList"></param>
+		''' <param name="udtScanHeaderInfo"></param>
+		''' <param name="intMaxNumberOfPeaks"></param>
+		''' <returns>The number of data points, or -1 if an error</returns>
+		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Overloads Overrides Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
-			' Returns the number of data points, or -1 if an error
-			' If intMaxNumberOfPeaks is <=0, then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned
+
+			Dim dblMassIntensityPairs(,) As Double
+
+			Dim intDataCount As Integer = GetScanData2D(Scan, dblMassIntensityPairs, udtScanHeaderInfo, intMaxNumberOfPeaks)
+
+			Try
+				If intDataCount > 0 Then
+					If dblMassIntensityPairs.GetUpperBound(1) + 1 < intDataCount Then
+						intDataCount = dblMassIntensityPairs.GetUpperBound(1) + 1
+					End If
+
+					ReDim dblMZList(intDataCount - 1)
+					ReDim dblIntensityList(intDataCount - 1)
+
+					For intIndex = 0 To intDataCount - 1
+						dblMZList(intIndex) = dblMassIntensityPairs(0, intIndex)
+						dblIntensityList(intIndex) = dblMassIntensityPairs(1, intIndex)
+					Next intIndex
+
+				End If
+
+			Catch
+				intDataCount = -1
+			End Try
+
+			Return intDataCount
+
+		End Function
+
+		''' <summary>
+		''' Obtain the mass and intensity for the specified scan
+		''' </summary>
+		''' <param name="Scan"></param>
+		''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+		''' <param name="udtScanHeaderInfo"></param>
+		''' <param name="intMaxNumberOfPeaks"></param>
+		''' <returns>The number of data points, or -1 if an error</returns>
+		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+		Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
 
 			Dim intDataCount As Integer
 
@@ -1458,10 +1516,6 @@ Namespace FinniganFileIO
 
 			Dim MassIntensityPairsList As Object = Nothing
 			Dim PeakList As Object = Nothing
-
-			Dim dblData(,) As Double
-
-			Dim intIndex As Integer
 
 			intDataCount = 0
 
@@ -1494,31 +1548,17 @@ Namespace FinniganFileIO
 				   MassIntensityPairsList, PeakList, intDataCount)
 
 				If intDataCount > 0 Then
-					dblData = CType(MassIntensityPairsList, Double(,))
-
-					If dblData.GetUpperBound(1) + 1 < intDataCount Then
-						intDataCount = dblData.GetUpperBound(1) + 1
-					End If
-
-					ReDim dblMZList(intDataCount - 1)
-					ReDim dblIntensityList(intDataCount - 1)
-
-					For intIndex = 0 To intDataCount - 1
-						dblMZList(intIndex) = dblData(0, intIndex)
-						dblIntensityList(intIndex) = dblData(1, intIndex)
-					Next intIndex
-
+					dblMassIntensityPairs = CType(MassIntensityPairsList, Double(,))
+				Else
+					ReDim dblMassIntensityPairs(-1, -1)
 				End If
 
 			Catch
 				intDataCount = -1
+				ReDim dblMassIntensityPairs(-1, -1)
 			End Try
 
-			If intDataCount <= 0 Then
-				ReDim dblMZList(-1)
-				ReDim dblIntensityList(-1)
-			End If
-
+			' ReSharper disable once NotAssignedOutParameter (dblMassIntensityPairs is being properly assigned)
 			Return intDataCount
 
 		End Function
@@ -1546,7 +1586,7 @@ Namespace FinniganFileIO
 				CloseRawFile()
 
 				If mXRawFile Is Nothing Then
-					mXRawFile = CType(New MSFileReaderLib.MSFileReader_XRawfile, MSFileReaderLib.IXRawfile5)
+					mXRawFile = CType(New MSFileReader_XRawfile, IXRawfile5)
 				End If
 
 				mXRawFile.Open(FileName)
@@ -1556,7 +1596,7 @@ Namespace FinniganFileIO
 					mCachedFileName = FileName
 					If FillFileInfo() Then
 						With mFileInfo
-							If .ScanStart = 0 AndAlso .ScanEnd = 0 AndAlso .VersionNumber = 0 AndAlso .MassResolution = 0 AndAlso .InstModel = Nothing Then
+							If .ScanStart = 0 AndAlso .ScanEnd = 0 AndAlso .VersionNumber = 0 AndAlso Math.Abs(.MassResolution - 0) < Double.Epsilon AndAlso .InstModel = Nothing Then
 								' File actually didn't load correctly, since these shouldn't all be blank
 								blnSuccess = False
 							Else
@@ -1570,7 +1610,7 @@ Namespace FinniganFileIO
 					blnSuccess = False
 				End If
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				blnSuccess = False
 			Finally
 				If Not blnSuccess Then

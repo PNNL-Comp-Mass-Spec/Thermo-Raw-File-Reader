@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5025; October 4, 2013
+	- Added function GetScanData2D
+
 Version 1.1.4757; January 9, 2013
 	- Added support for scan filter text with Full msx ms2
 		- Used with multiplexed parent ion selection
