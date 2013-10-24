@@ -1468,7 +1468,7 @@ Namespace FinniganFileIO
 		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Overloads Overrides Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
 
-			Dim dblMassIntensityPairs(,) As Double
+			Dim dblMassIntensityPairs(,) As Double = Nothing
 
 			Dim intDataCount As Integer = GetScanData2D(Scan, dblMassIntensityPairs, udtScanHeaderInfo, intMaxNumberOfPeaks)
 
@@ -1480,11 +1480,21 @@ Namespace FinniganFileIO
 
 					ReDim dblMZList(intDataCount - 1)
 					ReDim dblIntensityList(intDataCount - 1)
+					Dim sortRequired As Boolean = False
 
 					For intIndex = 0 To intDataCount - 1
 						dblMZList(intIndex) = dblMassIntensityPairs(0, intIndex)
 						dblIntensityList(intIndex) = dblMassIntensityPairs(1, intIndex)
+
+						If (intIndex > 0 AndAlso dblMZList(intIndex) < dblMZList(intIndex) - 1) Then
+							sortRequired = True
+						End If
+
 					Next intIndex
+
+					If sortRequired Then
+						Array.Sort(dblMZList, dblIntensityList)
+					End If
 
 				End If
 
