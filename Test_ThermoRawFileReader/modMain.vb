@@ -19,7 +19,20 @@ Module modMain
 			' Uncomment the following to test the GetCollisionEnergy() function
 			'TestReader("..\EDRN_ERG_Spop_ETV1_50fmolHeavy_0p5ugB53A_Frac48_3Oct12_Gandalf_W33A1_16a.raw")
 
-			TestReader("..\CPTAC_10Pep_UndepPlas__Schedule_24Mar13_Gandalf_W22511A1.raw")
+			' TestReader("..\CPTAC_10Pep_UndepPlas__Schedule_24Mar13_Gandalf_W22511A1.raw")
+
+			Dim centroid As Boolean = True
+
+			TestReader("F:\MSData\Orbitrap\QC_05_3-a_27Dec05_Pegasus_05-11-13.RAW", centroid)
+
+			centroid = False
+			TestReader("F:\MSData\Orbitrap\QC_05_3-a_27Dec05_Pegasus_05-11-13.RAW", centroid)
+
+			centroid = True
+			TestReader("\\proto-6\QExact01\2013_4\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01.raw", centroid)
+
+			centroid = False
+			TestReader("\\proto-6\QExact01\2013_4\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01.raw", centroid)
 		End If
 
 		Console.WriteLine("Done")
@@ -135,7 +148,7 @@ Module modMain
 		swOutFile.WriteLine(dblMZ.ToString("0.00000") & "," & dblIntensity.ToString("0.00"))
 	End Sub
 
-	Private Sub TestReader(strRawFilePath As String)
+	Private Sub TestReader(strRawFilePath As String, Optional ByVal blnCentroid As Boolean = False)
 		Try
 			Dim oReader As XRawFileIO
 			oReader = New XRawFileIO()
@@ -165,7 +178,9 @@ Module modMain
 
 			ShowMethod(oReader)
 
-			For iScanNum As Integer = 1 To iNumScans
+			Dim scanStart As Integer = 34000
+
+			For iScanNum As Integer = scanStart To iNumScans Step 21
 
 				bSuccess = oReader.GetScanInfo(iScanNum, udtScanHeaderInfo)
 				If bSuccess Then
@@ -191,7 +206,7 @@ Module modMain
 					End If
 
 					If iScanNum Mod 50 = 0 Then
-						intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, udtScanHeaderInfo)
+						intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, udtScanHeaderInfo, blnCentroid)
 						For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step 50
 							Console.WriteLine("  " & dblMzList(iDataPoint).ToString("0.000") & " mz   " & dblIntensityList(iDataPoint).ToString("0"))
 						Next

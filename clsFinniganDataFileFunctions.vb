@@ -12,7 +12,7 @@ Option Strict On
 '
 ' Switched from XRawFile2.dll to MSFileReader.XRawfile2.dll in March 2012
 
-' Last modified January 9, 2013
+' Last modified October 25, 2013
 
 Imports System.Runtime.InteropServices
 Imports MSFileReaderLib
@@ -1450,11 +1450,20 @@ Namespace FinniganFileIO
 			Return blnValidScan
 		End Function
 
+		''' <summary>
+		''' Obtain the mass and intensity for the specified scan
+		''' </summary>
+		''' <param name="Scan"></param>
+		''' <param name="dblMZList"></param>
+		''' <param name="dblIntensityList"></param>
+		''' <param name="udtScanHeaderInfo"></param>
+		''' <returns>The number of data points, or -1 if an error</returns>
+		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Overloads Overrides Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Integer
-			' Return all data points by passing 0 for intMaxNumberOfPeaks
-			Return GetScanData(Scan, dblMZList, dblIntensityList, udtScanHeaderInfo, 0)
+			Const intMaxNumberOfPeaks As Integer = 0
+			Const blnCentroid As Boolean = False
+			Return GetScanData(Scan, dblMZList, dblIntensityList, udtScanHeaderInfo, intMaxNumberOfPeaks, blnCentroid)
 		End Function
-
 
 		''' <summary>
 		''' Obtain the mass and intensity for the specified scan
@@ -1463,14 +1472,45 @@ Namespace FinniganFileIO
 		''' <param name="dblMZList"></param>
 		''' <param name="dblIntensityList"></param>
 		''' <param name="udtScanHeaderInfo"></param>
-		''' <param name="intMaxNumberOfPeaks"></param>
+		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+		''' <returns>The number of data points, or -1 if an error</returns>
+		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+		Public Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal blnCentroid As Boolean) As Integer
+			Const intMaxNumberOfPeaks As Integer = 0
+			Return GetScanData(Scan, dblMZList, dblIntensityList, udtScanHeaderInfo, intMaxNumberOfPeaks, blnCentroid)
+		End Function
+
+		''' <summary>
+		''' Obtain the mass and intensity for the specified scan
+		''' </summary>
+		''' <param name="Scan"></param>
+		''' <param name="dblMZList"></param>
+		''' <param name="dblIntensityList"></param>
+		''' <param name="udtScanHeaderInfo"></param>
+		''' <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
 		''' <returns>The number of data points, or -1 if an error</returns>
 		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Overloads Overrides Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
+			Const blnCentroid As Boolean = False
+			Return GetScanData(Scan, dblMZList, dblIntensityList, udtScanHeaderInfo, intMaxNumberOfPeaks, blnCentroid)
+		End Function
+
+		''' <summary>
+		''' Obtain the mass and intensity for the specified scan
+		''' </summary>
+		''' <param name="Scan"></param>
+		''' <param name="dblMZList"></param>
+		''' <param name="dblIntensityList"></param>
+		''' <param name="udtScanHeaderInfo"></param>
+		''' <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
+		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+		''' <returns>The number of data points, or -1 if an error</returns>
+		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+		Public Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
 
 			Dim dblMassIntensityPairs(,) As Double = Nothing
 
-			Dim intDataCount As Integer = GetScanData2D(Scan, dblMassIntensityPairs, udtScanHeaderInfo, intMaxNumberOfPeaks)
+			Dim intDataCount As Integer = GetScanData2D(Scan, dblMassIntensityPairs, udtScanHeaderInfo, intMaxNumberOfPeaks, blnCentroid)
 
 			Try
 				If intDataCount > 0 Then
@@ -1486,6 +1526,10 @@ Namespace FinniganFileIO
 						dblMZList(intIndex) = dblMassIntensityPairs(0, intIndex)
 						dblIntensityList(intIndex) = dblMassIntensityPairs(1, intIndex)
 
+						' Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z, 
+						' we have observed a few cases in certain scans of certain datasets that points with 
+						' similar m/z values are swapped and ths slightly out of order
+						' The following if statement checks for this
 						If (intIndex > 0 AndAlso dblMZList(intIndex) < dblMZList(intIndex) - 1) Then
 							sortRequired = True
 						End If
@@ -1516,6 +1560,20 @@ Namespace FinniganFileIO
 		''' <returns>The number of data points, or -1 if an error</returns>
 		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
+			Return GetScanData2D(Scan, dblMassIntensityPairs, udtScanHeaderInfo, intMaxNumberOfPeaks, blnCentroid:=False)
+		End Function
+
+		''' <summary>
+		''' Obtain the mass and intensity for the specified scan
+		''' </summary>
+		''' <param name="Scan"></param>
+		''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+		''' <param name="udtScanHeaderInfo"></param>
+		''' <param name="intMaxNumberOfPeaks"></param>
+		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+		''' <returns>The number of data points, or -1 if an error</returns>
+		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+		Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
 
 			Dim intDataCount As Integer
 
@@ -1551,7 +1609,12 @@ Namespace FinniganFileIO
 				intIntensityCutoffValue = 0
 
 				If intMaxNumberOfPeaks < 0 Then intMaxNumberOfPeaks = 0
-				intCentroidResult = 0			' Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
+
+				If blnCentroid Then
+					intCentroidResult = 1			' Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
+				Else
+					intCentroidResult = 0			' Return the data as-is
+				End If
 
 				mXRawFile.GetMassListFromScanNum(Scan, strFilter, IntensityCutoffTypeConstants.None, _
 				   intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth, _

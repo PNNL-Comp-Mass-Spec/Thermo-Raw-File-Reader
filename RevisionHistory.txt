@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5045; October 25, 2013
+	- Added ability to centroid spectra
+
 Version 1.1.5044; October 23, 2013
 	- Now assuring that the data returned by GetScanData is sorted by m/z
 		- It usually is sorted, but there are some edge cases where a pair of data points are swapped in the 2D array returned by GetMassListFromScanNum
