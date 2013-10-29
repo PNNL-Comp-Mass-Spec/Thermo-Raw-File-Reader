@@ -1472,7 +1472,7 @@ Namespace FinniganFileIO
 		''' <param name="dblMZList"></param>
 		''' <param name="dblIntensityList"></param>
 		''' <param name="udtScanHeaderInfo"></param>
-		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
 		''' <returns>The number of data points, or -1 if an error</returns>
 		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal blnCentroid As Boolean) As Integer
@@ -1503,7 +1503,7 @@ Namespace FinniganFileIO
 		''' <param name="dblIntensityList"></param>
 		''' <param name="udtScanHeaderInfo"></param>
 		''' <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
-		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
 		''' <returns>The number of data points, or -1 if an error</returns>
 		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
@@ -1570,7 +1570,7 @@ Namespace FinniganFileIO
 		''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
 		''' <param name="udtScanHeaderInfo"></param>
 		''' <param name="intMaxNumberOfPeaks"></param>
-		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
 		''' <returns>The number of data points, or -1 if an error</returns>
 		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
@@ -1609,6 +1609,14 @@ Namespace FinniganFileIO
 				intIntensityCutoffValue = 0
 
 				If intMaxNumberOfPeaks < 0 Then intMaxNumberOfPeaks = 0
+
+				' Warning: the masses reported by GetMassListFromScanNum when centroiding are not properly calibrated and thus could be off by 0.3 m/z or more
+				'          For example, in scan 8101 of dataset RAW_Franc_Salm_IMAC_0h_R1A_18Jul13_Frodo_13-04-15, we see these values:
+				'           Profile m/z         Centroid m/z	Delta_PPM
+				'			112.051 			112.077			232
+				'			652.3752			652.4645		137
+				'			1032.56495			1032.6863		118
+				'			1513.7252			1513.9168		127
 
 				If blnCentroid Then
 					intCentroidResult = 1			' Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
