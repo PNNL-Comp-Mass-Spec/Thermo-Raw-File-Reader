@@ -178,7 +178,7 @@ Module modMain
 
 			ShowMethod(oReader)
 
-			Dim scanStart As Integer = 34000
+			Dim scanStart As Integer = 1
 
 			For iScanNum As Integer = scanStart To iNumScans Step 21
 
