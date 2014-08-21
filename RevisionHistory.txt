@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5323; July 29, 2014
+	- Fixed logic bug in GetScanData while validating that data is sorted by m/z
+
 Version 1.1.5045; October 25, 2013
 	- Added ability to centroid spectra
 		- However, the mass calibration of the centroided data may be off by several hundred ppm, so this option should be used with caution

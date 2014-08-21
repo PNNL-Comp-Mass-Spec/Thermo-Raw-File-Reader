@@ -1530,7 +1530,7 @@ Namespace FinniganFileIO
 						' we have observed a few cases in certain scans of certain datasets that points with 
 						' similar m/z values are swapped and ths slightly out of order
 						' The following if statement checks for this
-						If (intIndex > 0 AndAlso dblMZList(intIndex) < dblMZList(intIndex) - 1) Then
+						If (intIndex > 0 AndAlso dblMZList(intIndex) < dblMZList(intIndex - 1)) Then
 							sortRequired = True
 						End If
 

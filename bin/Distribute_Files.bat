@@ -125,8 +125,8 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\GordonSlysz\I
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Release" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\Debug" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\Release" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Debug" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Release" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\lib" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\IDM_Console\bin\Debug" /Y
