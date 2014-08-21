@@ -14,6 +14,7 @@ xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\JoshAldrich\Int
 
 @echo off
 echo Copy the DLL to bin folders
+echo Note that the DLL is compiled as AnyCPU
 @echo on
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\AM_Shared\bin\Debug\" /Y
@@ -70,6 +71,9 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DM
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestAScorePlugIn\bin\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestMagePlugIn\bin\Debug\" /Y
 
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\CodeTestCS\bin" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\CodeTestCS\lib" /Y
+
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\IDPExtractor\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\IDPExtractor\Lib" /Y
 
@@ -81,9 +85,13 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MA
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MASICResultsMerger\Lib" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\" /Y
+
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MSGF_Runner\bin\" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\x64\" /Y
+
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\CreateMSGFDBResultsFileFromPHRP\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PeptideHitResultsProcessor\bin\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PHRPReader\bin\" /Y
