@@ -1,5 +1,9 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5415; October 29, 2014
+	- Removed ByRef parameter udtScanHeaderInfo from GetScanData and GetScanData2D since it wasn't being used (and wasn't being populated)
+		- Left old functions in place for compatibility reasons
+
 Version 1.1.5323; July 29, 2014
 	- Fixed logic bug in GetScanData while validating that data is sorted by m/z
 

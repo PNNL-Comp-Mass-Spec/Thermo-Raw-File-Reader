@@ -12,7 +12,7 @@ Option Strict On
 '
 ' Switched from XRawFile2.dll to MSFileReader.XRawfile2.dll in March 2012
 
-' Last modified October 25, 2013
+' Last modified October 29, 2014
 
 Imports System.Runtime.InteropServices
 Imports MSFileReaderLib
@@ -1456,13 +1456,13 @@ Namespace FinniganFileIO
 		''' <param name="Scan"></param>
 		''' <param name="dblMZList"></param>
 		''' <param name="dblIntensityList"></param>
-		''' <param name="udtScanHeaderInfo"></param>
+        ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
 		''' <returns>The number of data points, or -1 if an error</returns>
 		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Overloads Overrides Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Integer
 			Const intMaxNumberOfPeaks As Integer = 0
 			Const blnCentroid As Boolean = False
-			Return GetScanData(Scan, dblMZList, dblIntensityList, udtScanHeaderInfo, intMaxNumberOfPeaks, blnCentroid)
+            Return GetScanData(Scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
 		End Function
 
 		''' <summary>
@@ -1471,13 +1471,13 @@ Namespace FinniganFileIO
 		''' <param name="Scan"></param>
 		''' <param name="dblMZList"></param>
 		''' <param name="dblIntensityList"></param>
-		''' <param name="udtScanHeaderInfo"></param>
+        ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
 		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
 		''' <returns>The number of data points, or -1 if an error</returns>
 		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal blnCentroid As Boolean) As Integer
 			Const intMaxNumberOfPeaks As Integer = 0
-			Return GetScanData(Scan, dblMZList, dblIntensityList, udtScanHeaderInfo, intMaxNumberOfPeaks, blnCentroid)
+            Return GetScanData(Scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
 		End Function
 
 		''' <summary>
@@ -1486,13 +1486,13 @@ Namespace FinniganFileIO
 		''' <param name="Scan"></param>
 		''' <param name="dblMZList"></param>
 		''' <param name="dblIntensityList"></param>
-		''' <param name="udtScanHeaderInfo"></param>
+        ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
 		''' <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
 		''' <returns>The number of data points, or -1 if an error</returns>
 		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Overloads Overrides Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
 			Const blnCentroid As Boolean = False
-			Return GetScanData(Scan, dblMZList, dblIntensityList, udtScanHeaderInfo, intMaxNumberOfPeaks, blnCentroid)
+            Return GetScanData(Scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
 		End Function
 
 		''' <summary>
@@ -1501,238 +1501,277 @@ Namespace FinniganFileIO
 		''' <param name="Scan"></param>
 		''' <param name="dblMZList"></param>
 		''' <param name="dblIntensityList"></param>
-		''' <param name="udtScanHeaderInfo"></param>
+        ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
 		''' <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
 		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
 		''' <returns>The number of data points, or -1 if an error</returns>
 		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
 		Public Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
+            Return GetScanData(Scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
+        End Function
 
-			Dim dblMassIntensityPairs(,) As Double = Nothing
+        ''' <summary>
+        ''' Obtain the mass and intensity for the specified scan
+        ''' </summary>
+        ''' <param name="Scan"></param>
+        ''' <param name="dblMZList"></param>
+        ''' <param name="dblIntensityList"></param>
+        ''' <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
+        ''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
+        ''' <returns>The number of data points, or -1 if an error</returns>
+        ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        Public Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
 
-			Dim intDataCount As Integer = GetScanData2D(Scan, dblMassIntensityPairs, udtScanHeaderInfo, intMaxNumberOfPeaks, blnCentroid)
+            Dim dblMassIntensityPairs(,) As Double = Nothing
 
-			Try
-				If intDataCount > 0 Then
-					If dblMassIntensityPairs.GetUpperBound(1) + 1 < intDataCount Then
-						intDataCount = dblMassIntensityPairs.GetUpperBound(1) + 1
-					End If
+            Dim intDataCount As Integer = GetScanData2D(Scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid)
 
-					ReDim dblMZList(intDataCount - 1)
-					ReDim dblIntensityList(intDataCount - 1)
-					Dim sortRequired As Boolean = False
+            Try
+                If intDataCount > 0 Then
+                    If dblMassIntensityPairs.GetUpperBound(1) + 1 < intDataCount Then
+                        intDataCount = dblMassIntensityPairs.GetUpperBound(1) + 1
+                    End If
 
-					For intIndex = 0 To intDataCount - 1
-						dblMZList(intIndex) = dblMassIntensityPairs(0, intIndex)
-						dblIntensityList(intIndex) = dblMassIntensityPairs(1, intIndex)
+                    ReDim dblMZList(intDataCount - 1)
+                    ReDim dblIntensityList(intDataCount - 1)
+                    Dim sortRequired As Boolean = False
 
-						' Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z, 
-						' we have observed a few cases in certain scans of certain datasets that points with 
-						' similar m/z values are swapped and ths slightly out of order
-						' The following if statement checks for this
-						If (intIndex > 0 AndAlso dblMZList(intIndex) < dblMZList(intIndex - 1)) Then
-							sortRequired = True
-						End If
+                    For intIndex = 0 To intDataCount - 1
+                        dblMZList(intIndex) = dblMassIntensityPairs(0, intIndex)
+                        dblIntensityList(intIndex) = dblMassIntensityPairs(1, intIndex)
 
-					Next intIndex
+                        ' Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z, 
+                        ' we have observed a few cases in certain scans of certain datasets that points with 
+                        ' similar m/z values are swapped and ths slightly out of order
+                        ' The following if statement checks for this
+                        If (intIndex > 0 AndAlso dblMZList(intIndex) < dblMZList(intIndex - 1)) Then
+                            sortRequired = True
+                        End If
 
-					If sortRequired Then
-						Array.Sort(dblMZList, dblIntensityList)
-					End If
+                    Next intIndex
 
-				End If
+                    If sortRequired Then
+                        Array.Sort(dblMZList, dblIntensityList)
+                    End If
 
-			Catch
-				intDataCount = -1
-			End Try
+                End If
 
-			Return intDataCount
+            Catch
+                intDataCount = -1
+            End Try
 
-		End Function
+            Return intDataCount
 
-		''' <summary>
-		''' Obtain the mass and intensity for the specified scan
-		''' </summary>
-		''' <param name="Scan"></param>
-		''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
-		''' <param name="udtScanHeaderInfo"></param>
-		''' <param name="intMaxNumberOfPeaks"></param>
-		''' <returns>The number of data points, or -1 if an error</returns>
-		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-		Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
-			Return GetScanData2D(Scan, dblMassIntensityPairs, udtScanHeaderInfo, intMaxNumberOfPeaks, blnCentroid:=False)
-		End Function
+        End Function
 
-		''' <summary>
-		''' Obtain the mass and intensity for the specified scan
-		''' </summary>
-		''' <param name="Scan"></param>
-		''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
-		''' <param name="udtScanHeaderInfo"></param>
-		''' <param name="intMaxNumberOfPeaks"></param>
-		''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
-		''' <returns>The number of data points, or -1 if an error</returns>
-		''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-		Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
+        ''' <summary>
+        ''' Obtain the mass and intensity for the specified scan
+        ''' </summary>
+        ''' <param name="Scan"></param>
+        ''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+        ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
+        ''' <param name="intMaxNumberOfPeaks"></param>
+        ''' <returns>The number of data points, or -1 if an error</returns>
+        ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
+            Return GetScanData2D(Scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid:=False)
+        End Function
 
-			Dim intDataCount As Integer
+        ''' <summary>
+        ''' Obtain the mass and intensity for the specified scan
+        ''' </summary>
+        ''' <param name="Scan"></param>
+        ''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+        ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
+        ''' <param name="intMaxNumberOfPeaks"></param>
+        ''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
+        ''' <returns>The number of data points, or -1 if an error</returns>
+        ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
+            Return GetScanData2D(Scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid)
+        End Function
 
-			Dim strFilter As String
-			Dim intIntensityCutoffValue As Integer
-			Dim intCentroidResult As Integer
-			Dim dblCentroidPeakWidth As Double
+        ''' <summary>
+        ''' Obtain the mass and intensity for the specified scan
+        ''' </summary>
+        ''' <param name="Scan"></param>
+        ''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+        ''' <param name="intMaxNumberOfPeaks"></param>
+        ''' <returns>The number of data points, or -1 if an error</returns>
+        ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByVal intMaxNumberOfPeaks As Integer) As Integer
+            Return GetScanData2D(Scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid:=False)
+        End Function
 
-			Dim MassIntensityPairsList As Object = Nothing
-			Dim PeakList As Object = Nothing
+        ''' <summary>
+        ''' Obtain the mass and intensity for the specified scan
+        ''' </summary>
+        ''' <param name="Scan"></param>
+        ''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+        ''' <param name="intMaxNumberOfPeaks"></param>
+        ''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
+        ''' <returns>The number of data points, or -1 if an error</returns>
+        ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
 
-			intDataCount = 0
+            Dim intDataCount As Integer
 
-			Try
-				If mXRawFile Is Nothing Then
-					intDataCount = -1
-					Exit Try
-				End If
+            Dim strFilter As String
+            Dim intIntensityCutoffValue As Integer
+            Dim intCentroidResult As Integer
+            Dim dblCentroidPeakWidth As Double
 
-				' Make sure the MS controller is selected
-				If Not SetMSController() Then
-					intDataCount = -1
-					Exit Try
-				End If
+            Dim MassIntensityPairsList As Object = Nothing
+            Dim PeakList As Object = Nothing
 
-				If Scan < mFileInfo.ScanStart Then
-					Scan = mFileInfo.ScanStart
-				ElseIf Scan > mFileInfo.ScanEnd Then
-					Scan = mFileInfo.ScanEnd
-				End If
+            intDataCount = 0
 
-				strFilter = String.Empty			' Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
-				intIntensityCutoffValue = 0
+            Try
+                If mXRawFile Is Nothing Then
+                    intDataCount = -1
+                    Exit Try
+                End If
 
-				If intMaxNumberOfPeaks < 0 Then intMaxNumberOfPeaks = 0
+                ' Make sure the MS controller is selected
+                If Not SetMSController() Then
+                    intDataCount = -1
+                    Exit Try
+                End If
 
-				' Warning: the masses reported by GetMassListFromScanNum when centroiding are not properly calibrated and thus could be off by 0.3 m/z or more
-				'          For example, in scan 8101 of dataset RAW_Franc_Salm_IMAC_0h_R1A_18Jul13_Frodo_13-04-15, we see these values:
-				'           Profile m/z         Centroid m/z	Delta_PPM
-				'			112.051 			112.077			232
-				'			652.3752			652.4645		137
-				'			1032.56495			1032.6863		118
-				'			1513.7252			1513.9168		127
+                If Scan < mFileInfo.ScanStart Then
+                    Scan = mFileInfo.ScanStart
+                ElseIf Scan > mFileInfo.ScanEnd Then
+                    Scan = mFileInfo.ScanEnd
+                End If
 
-				If blnCentroid Then
-					intCentroidResult = 1			' Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
-				Else
-					intCentroidResult = 0			' Return the data as-is
-				End If
+                strFilter = String.Empty            ' Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
+                intIntensityCutoffValue = 0
 
-				mXRawFile.GetMassListFromScanNum(Scan, strFilter, IntensityCutoffTypeConstants.None, _
-				   intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth, _
-				   MassIntensityPairsList, PeakList, intDataCount)
+                If intMaxNumberOfPeaks < 0 Then intMaxNumberOfPeaks = 0
 
-				If intDataCount > 0 Then
-					dblMassIntensityPairs = CType(MassIntensityPairsList, Double(,))
-				Else
-					ReDim dblMassIntensityPairs(-1, -1)
-				End If
+                ' Warning: the masses reported by GetMassListFromScanNum when centroiding are not properly calibrated and thus could be off by 0.3 m/z or more
+                '          For example, in scan 8101 of dataset RAW_Franc_Salm_IMAC_0h_R1A_18Jul13_Frodo_13-04-15, we see these values:
+                '           Profile m/z         Centroid m/z	Delta_PPM
+                '			112.051 			112.077			232
+                '			652.3752			652.4645		137
+                '			1032.56495			1032.6863		118
+                '			1513.7252			1513.9168		127
 
-			Catch
-				intDataCount = -1
-				ReDim dblMassIntensityPairs(-1, -1)
-			End Try
+                If blnCentroid Then
+                    intCentroidResult = 1           ' Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
+                Else
+                    intCentroidResult = 0           ' Return the data as-is
+                End If
 
-			' ReSharper disable once NotAssignedOutParameter (dblMassIntensityPairs is being properly assigned)
-			Return intDataCount
+                mXRawFile.GetMassListFromScanNum(Scan, strFilter, IntensityCutoffTypeConstants.None, _
+                   intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth, _
+                   MassIntensityPairsList, PeakList, intDataCount)
 
-		End Function
+                If intDataCount > 0 Then
+                    dblMassIntensityPairs = CType(MassIntensityPairsList, Double(,))
+                Else
+                    ReDim dblMassIntensityPairs(-1, -1)
+                End If
 
-		Public Shared Sub InitializeMRMInfo(<Out()> ByRef udtMRMInfo As udtMRMInfoType, ByVal intInitialMassCountCapacity As Integer)
+            Catch
+                intDataCount = -1
+                ReDim dblMassIntensityPairs(-1, -1)
+            End Try
 
-			If intInitialMassCountCapacity < 0 Then
-				intInitialMassCountCapacity = 0
-			End If
+            ' ReSharper disable once NotAssignedOutParameter (dblMassIntensityPairs is being properly assigned)
+            Return intDataCount
 
-			udtMRMInfo = New udtMRMInfoType
-			With udtMRMInfo
-				.MRMMassCount = 0
-				ReDim .MRMMassList(intInitialMassCountCapacity - 1)
-			End With
-		End Sub
+        End Function
 
-		Public Overrides Function OpenRawFile(ByVal FileName As String) As Boolean
-			Dim intResult As Integer
-			Dim blnSuccess As Boolean
+        Public Shared Sub InitializeMRMInfo(<Out()> ByRef udtMRMInfo As udtMRMInfoType, ByVal intInitialMassCountCapacity As Integer)
 
-			Try
+            If intInitialMassCountCapacity < 0 Then
+                intInitialMassCountCapacity = 0
+            End If
 
-				' Make sure any existing open files are closed
-				CloseRawFile()
+            udtMRMInfo = New udtMRMInfoType
+            With udtMRMInfo
+                .MRMMassCount = 0
+                ReDim .MRMMassList(intInitialMassCountCapacity - 1)
+            End With
+        End Sub
 
-				If mXRawFile Is Nothing Then
-					mXRawFile = CType(New MSFileReader_XRawfile, IXRawfile5)
-				End If
+        Public Overrides Function OpenRawFile(ByVal FileName As String) As Boolean
+            Dim intResult As Integer
+            Dim blnSuccess As Boolean
 
-				mXRawFile.Open(FileName)
-				mXRawFile.IsError(intResult)		' Unfortunately, .IsError() always returns 0, even if an error occurred
+            Try
 
-				If intResult = 0 Then
-					mCachedFileName = FileName
-					If FillFileInfo() Then
-						With mFileInfo
-							If .ScanStart = 0 AndAlso .ScanEnd = 0 AndAlso .VersionNumber = 0 AndAlso Math.Abs(.MassResolution - 0) < Double.Epsilon AndAlso .InstModel = Nothing Then
-								' File actually didn't load correctly, since these shouldn't all be blank
-								blnSuccess = False
-							Else
-								blnSuccess = True
-							End If
-						End With
-					Else
-						blnSuccess = False
-					End If
-				Else
-					blnSuccess = False
-				End If
+                ' Make sure any existing open files are closed
+                CloseRawFile()
 
-			Catch ex As Exception
-				blnSuccess = False
-			Finally
-				If Not blnSuccess Then
-					mCachedFileName = String.Empty
-				End If
-			End Try
+                If mXRawFile Is Nothing Then
+                    mXRawFile = CType(New MSFileReader_XRawfile, IXRawfile5)
+                End If
 
-			Return blnSuccess
+                mXRawFile.Open(FileName)
+                mXRawFile.IsError(intResult)        ' Unfortunately, .IsError() always returns 0, even if an error occurred
 
-		End Function
+                If intResult = 0 Then
+                    mCachedFileName = FileName
+                    If FillFileInfo() Then
+                        With mFileInfo
+                            If .ScanStart = 0 AndAlso .ScanEnd = 0 AndAlso .VersionNumber = 0 AndAlso Math.Abs(.MassResolution - 0) < Double.Epsilon AndAlso .InstModel = Nothing Then
+                                ' File actually didn't load correctly, since these shouldn't all be blank
+                                blnSuccess = False
+                            Else
+                                blnSuccess = True
+                            End If
+                        End With
+                    Else
+                        blnSuccess = False
+                    End If
+                Else
+                    blnSuccess = False
+                End If
 
-		Private Function TuneMethodsMatch(ByVal udtMethod1 As udtTuneMethodType, ByVal udtMethod2 As udtTuneMethodType) As Boolean
-			Dim blnMatch As Boolean
-			Dim intIndex As Integer
+            Catch ex As Exception
+                blnSuccess = False
+            Finally
+                If Not blnSuccess Then
+                    mCachedFileName = String.Empty
+                End If
+            End Try
 
-			blnMatch = True
+            Return blnSuccess
 
-			With udtMethod1
-				If .Count <> udtMethod2.Count Then
-					' Different segment number of setting count; the methods don't match
-					blnMatch = False
-				Else
-					For intIndex = 0 To .Count - 1
-						If .SettingCategory(intIndex) <> udtMethod2.SettingCategory(intIndex) OrElse _
-						   .SettingName(intIndex) <> udtMethod2.SettingName(intIndex) OrElse _
-						   .SettingValue(intIndex) <> udtMethod2.SettingValue(intIndex) Then
-							' Different segment data; the methods don't match
-							blnMatch = False
-							Exit For
-						End If
-					Next intIndex
-				End If
-			End With
+        End Function
 
-			Return blnMatch
+        Private Function TuneMethodsMatch(ByVal udtMethod1 As udtTuneMethodType, ByVal udtMethod2 As udtTuneMethodType) As Boolean
+            Dim blnMatch As Boolean
+            Dim intIndex As Integer
 
-		End Function
+            blnMatch = True
 
-		Public Sub New()
-			CloseRawFile()
-		End Sub
+            With udtMethod1
+                If .Count <> udtMethod2.Count Then
+                    ' Different segment number of setting count; the methods don't match
+                    blnMatch = False
+                Else
+                    For intIndex = 0 To .Count - 1
+                        If .SettingCategory(intIndex) <> udtMethod2.SettingCategory(intIndex) OrElse _
+                           .SettingName(intIndex) <> udtMethod2.SettingName(intIndex) OrElse _
+                           .SettingValue(intIndex) <> udtMethod2.SettingValue(intIndex) Then
+                            ' Different segment data; the methods don't match
+                            blnMatch = False
+                            Exit For
+                        End If
+                    Next intIndex
+                End If
+            End With
 
-	End Class
+            Return blnMatch
+
+        End Function
+
+        Public Sub New()
+            CloseRawFile()
+        End Sub
+
+    End Class
 End Namespace
