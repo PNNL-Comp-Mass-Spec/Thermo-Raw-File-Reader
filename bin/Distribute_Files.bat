@@ -74,9 +74,6 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DM
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\CodeTestCS\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\CodeTestCS\lib" /Y
 
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Lipid_Results_Merger\bin" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Lipid_Results_Merger\Lib" /Y
-
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MASIC\bin\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MASICResultsMerger\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MASICResultsMerger\Lib" /Y
