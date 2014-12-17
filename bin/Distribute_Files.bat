@@ -10,6 +10,8 @@ xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\Pept
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\PeptideListToXML\Lib\" /Y
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\Lib\" /Y
 
+rem Does not appear to be used: xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs\" /Y
+
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\DLLLibrary" /Y
 
 @echo off
@@ -83,6 +85,13 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MS
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MSGF_Runner\bin\" /Y
 
+xcopy Release\ThermoRawFileReaderDLL.dll "
+
+
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\lib\" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\DLL\Debug\" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\Exe\Debug" /Y
+
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\x64\" /Y
 
@@ -91,8 +100,11 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Pe
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PHRPReader\bin\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\Test_PHRPReader\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideListToXML\bin\" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\" /Y
+
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\x86\" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\x64\" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x86\" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x64\" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\dll" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\SMAQC\bin\Debug" /Y

@@ -1616,6 +1616,9 @@ Namespace FinniganFileIO
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
         Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
 
+            ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
+            ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
+
             Dim intDataCount As Integer
 
             Dim strFilter As String

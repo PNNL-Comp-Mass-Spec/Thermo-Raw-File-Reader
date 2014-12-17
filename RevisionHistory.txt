@@ -1,6 +1,6 @@
 ThermoRawFileReaderDLL Change Log
 
-Version 1.1.5459; December 14, 2014
+Version 1.1.5459; December 16, 2014
 	- GetScanData2D now has attribute HandleProcessCorruptedStateExceptions, allowing us to catch exceptions raised by MSFileReader.XRawfile2.dll
 
 Version 1.1.5415; October 29, 2014
