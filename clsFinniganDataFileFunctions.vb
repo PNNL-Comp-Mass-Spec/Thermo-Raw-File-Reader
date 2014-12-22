@@ -1682,7 +1682,7 @@ Namespace FinniganFileIO
 
             Catch ex As System.AccessViolationException
                 Dim strError As String = "Unable to load data for scan " & Scan & "; possibly a corrupt .Raw file"
-                RaiseErrorMessage(strError)
+                RaiseWarningMessage(strError)
 
             Catch ex As Exception                
 
