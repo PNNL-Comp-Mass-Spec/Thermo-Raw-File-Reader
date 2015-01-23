@@ -3,6 +3,7 @@ ThermoRawFileReaderDLL Change Log
 Version 1.1.5500; January 22, 2015
 	- Added attribute HandleProcessCorruptedStateExceptions to CloseRawFile, GetScanInfo, and GetTuneData
 	- Added function GetScanDataSumScans
+	- Added support for scan filter text NSI SIM pr
 
 Version 1.1.5459; December 16, 2014
 	- GetScanData2D now has attribute HandleProcessCorruptedStateExceptions, allowing us to catch exceptions raised by MSFileReader.XRawfile2.dll

@@ -62,9 +62,13 @@ Namespace FinniganFileIO
 		End Structure
 
 		Public Structure udtMRMMassRangeType
-			Public StartMass As Double
+            Public StartMass As Double
 			Public EndMass As Double
-			Public CentralMass As Double		' Useful for MRM/SRM experiments
+            Public CentralMass As Double        ' Useful for MRM/SRM experiments
+
+            Public Overrides Function ToString() As String
+                Return StartMass.ToString("0.000") & "-" & EndMass.ToString("0.000")
+            End Function
 		End Structure
 
 		Public Structure udtMRMInfoType
@@ -102,7 +106,15 @@ Namespace FinniganFileIO
 			Public ScanEventValues() As String
 
 			Public StatusLogNames() As String
-			Public StatusLogValues() As String
+            Public StatusLogValues() As String
+
+            Public Overrides Function ToString() As String
+                If String.IsNullOrEmpty(FilterText) Then
+                    Return "Generic udtScanHeaderInfoType"
+                Else
+                    Return FilterText
+                End If
+            End Function
 		End Structure
 
 #End Region

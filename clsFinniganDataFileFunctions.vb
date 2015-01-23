@@ -37,10 +37,12 @@ Namespace FinniganFileIO
         Private Const FULL_MS_TEXT As String = "Full ms "
         Private Const FULL_PR_TEXT As String = "Full pr "               ' TSQ: Full Parent Scan, Product Mass
         Private Const SIM_MS_TEXT As String = "SIM ms "
+
         Private Const MRM_Q1MS_TEXT As String = "Q1MS "
         Private Const MRM_Q3MS_TEXT As String = "Q3MS "
         Private Const MRM_SRM_TEXT As String = "SRM ms2"
         Private Const MRM_FullNL_TEXT As String = "Full cnl "           ' MRM neutral loss
+        Private Const MRM_SIM_PR_TEXT As String = "SIM pr "             ' TSQ: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., Biofilm-1000pg-std-mix_06Dec14_Smeagol-3
 
         ' This RegEx matches Full ms2, Full ms3, ..., Full ms10, Full ms11, ...
         ' It also matches p ms2
@@ -169,8 +171,12 @@ Namespace FinniganFileIO
                     eMRMScanType = MRMScanTypeConstants.MRMQMS
                 ElseIf strFilterText.IndexOf(MRM_SRM_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
                     eMRMScanType = MRMScanTypeConstants.SRM
+                ElseIf strFilterText.IndexOf(MRM_SIM_PR_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
+                    ' This is not technically SRM, but the data looks very similar, so we'll track it like SRM data
+                    eMRMScanType = MRMScanTypeConstants.SRM
                 ElseIf strFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
                     eMRMScanType = MRMScanTypeConstants.FullNL
+                
                 End If
             End If
 
@@ -215,9 +221,10 @@ Namespace FinniganFileIO
 
         End Function
 
-        Public Shared Sub ExtractMRMMasses(ByVal strFilterText As String, _
-          ByVal eMRMScanType As MRMScanTypeConstants, _
-           <Out()> ByRef udtMRMInfo As udtMRMInfoType)
+        Public Shared Sub ExtractMRMMasses(
+          ByVal strFilterText As String,
+          ByVal eMRMScanType As MRMScanTypeConstants,
+          <Out()> ByRef udtMRMInfo As udtMRMInfoType)
 
             ' Parse out the MRM_QMS or SRM mass info from strFilterText
             ' It should be of the form 
@@ -927,6 +934,7 @@ Namespace FinniganFileIO
                             '   FULL_MS_TEXT = "Full ms "
                             '   FULL_PR_TEXT = "Full pr "
                             '   SIM_MS_TEXT = "SIM ms "
+                            '   SIM_PR_TEXT = "SIM pr "
                             '   MRM_Q1MS_TEXT = "Q1MS "
                             '   MRM_SRM_TEXT = "SRM "
 
@@ -1082,6 +1090,7 @@ Namespace FinniganFileIO
                     '   FULL_MS_TEXT = "Full ms "
                     '   FULL_PR_TEXT = "Full pr "
                     '   SIM_MS_TEXT = "SIM ms "
+                    '   SIM_PR_TEXT = "SIM pr "
                     '   MRM_Q1MS_TEXT = "Q1MS "
                     '   MRM_SRM_TEXT = "SRM "
                     If ValidateMSScan(strFilterText, intMSLevel, blnSIMScan, eMRMScanType, blnZoomScan) Then
@@ -1406,10 +1415,10 @@ Namespace FinniganFileIO
         ''' <param name="blnZoomScan"></param>
         ''' <returns>True if strFilterText contains a known MS scan type</returns>
         ''' <remarks></remarks>
-        Public Shared Function ValidateMSScan(ByVal strFilterText As String, _
-           <Out()> ByRef intMSLevel As Integer, _
-           <Out()> ByRef blnSIMScan As Boolean, _
-           <Out()> ByRef eMRMScanType As MRMScanTypeConstants, _
+        Public Shared Function ValidateMSScan(ByVal strFilterText As String,
+           <Out()> ByRef intMSLevel As Integer,
+           <Out()> ByRef blnSIMScan As Boolean,
+           <Out()> ByRef eMRMScanType As MRMScanTypeConstants,
            <Out()> ByRef blnZoomScan As Boolean) As Boolean
 
             Dim blnValidScan As Boolean
@@ -1419,22 +1428,22 @@ Namespace FinniganFileIO
             eMRMScanType = MRMScanTypeConstants.NotMRM
             blnZoomScan = False
 
-            If strFilterText.IndexOf(FULL_MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse _
-               strFilterText.IndexOf(MS_ONLY_C_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse _
-               strFilterText.IndexOf(MS_ONLY_P_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse _
-              strFilterText.IndexOf(FULL_PR_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
+            If strFilterText.IndexOf(FULL_MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
+               strFilterText.IndexOf(MS_ONLY_C_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
+               strFilterText.IndexOf(MS_ONLY_P_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
+               strFilterText.IndexOf(FULL_PR_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
                 ' This is really a Full MS scan
                 intMSLevel = 1
                 blnSIMScan = False
                 blnValidScan = True
             Else
-                If strFilterText.IndexOf(SIM_MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
+                If strFilterText.IndexOf(SIM_MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0Then
                     ' This is really a SIM MS scan
                     intMSLevel = 1
                     blnSIMScan = True
                     blnValidScan = True
-                ElseIf strFilterText.IndexOf(MS_ONLY_Z_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse _
-                  strFilterText.IndexOf(MS_ONLY_PZ_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse _
+                ElseIf strFilterText.IndexOf(MS_ONLY_Z_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
+                  strFilterText.IndexOf(MS_ONLY_PZ_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
                   strFilterText.IndexOf(MS_ONLY_DZ_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
                     intMSLevel = 1
                     blnZoomScan = True
@@ -1890,8 +1899,8 @@ Namespace FinniganFileIO
                     blnMatch = False
                 Else
                     For intIndex = 0 To .Count - 1
-                        If .SettingCategory(intIndex) <> udtMethod2.SettingCategory(intIndex) OrElse _
-                           .SettingName(intIndex) <> udtMethod2.SettingName(intIndex) OrElse _
+                        If .SettingCategory(intIndex) <> udtMethod2.SettingCategory(intIndex) OrElse
+                           .SettingName(intIndex) <> udtMethod2.SettingName(intIndex) OrElse
                            .SettingValue(intIndex) <> udtMethod2.SettingValue(intIndex) Then
                             ' Different segment data; the methods don't match
                             blnMatch = False
