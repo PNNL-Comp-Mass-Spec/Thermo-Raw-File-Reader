@@ -12,7 +12,7 @@ Option Strict On
 '
 ' Switched from XRawFile2.dll to MSFileReader.XRawfile2.dll in March 2012
 
-' Last modified October 29, 2014
+' Last modified January 22, 2015
 
 Imports System.Runtime.InteropServices
 Imports MSFileReaderLib
@@ -139,6 +139,7 @@ Namespace FinniganFileIO
 
         End Function
 
+        <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
         Public Overrides Sub CloseRawFile()
 
             Try
@@ -147,6 +148,8 @@ Namespace FinniganFileIO
                 End If
                 mCorruptMemoryEncountered = False
 
+            Catch ex As AccessViolationException
+                ' Ignore this error
             Catch ex As Exception
                 ' Ignore any errors
             Finally
@@ -601,22 +604,10 @@ Namespace FinniganFileIO
             Dim intResult As Integer
 
             Dim intIndex As Integer
-            Dim intSettingIndex As Integer
 
             Dim intMethodCount As Integer
-            Dim intNumTuneData As Integer
-            Dim intTuneMethodCountValid As Integer
 
             Dim strMethod As String
-
-            Dim strTuneCategory As String
-            Dim strTuneSettingNames() As String
-            Dim strTuneSettingValues() As String
-            Dim intTuneLabelCount As Integer
-
-            Dim objLabels As Object, objValues As Object
-            Dim strWarningMessage As String
-
             Try
                 If mXRawFile Is Nothing Then Return False
 
@@ -684,6 +675,7 @@ Namespace FinniganFileIO
                     .SampleName = Nothing
                     .SampleComment = Nothing
 
+
                     ' Note that the following are typically blank
                     mXRawFile.GetAcquisitionDate(.AcquisitionDate)
                     mXRawFile.GetAcquisitionFileName(.AcquisitionFilename)
@@ -691,121 +683,13 @@ Namespace FinniganFileIO
                     mXRawFile.GetComment2(.Comment2)
                     mXRawFile.GetSeqRowSampleName(.SampleName)
                     mXRawFile.GetSeqRowComment(.SampleComment)
-
-                    If Not mLoadMSTuneInfo Then
-                        ReDim .TuneMethods(-1)
-                    Else
-                        ' Note that intTuneMethodCount is set to 0, but we initially reserve space for intNumTuneData methods
-                        intTuneMethodCountValid = 0
-                        mXRawFile.GetNumTuneData(intNumTuneData)
-                        ReDim .TuneMethods(intNumTuneData - 1)
-
-                        For intIndex = 0 To intNumTuneData - 1
-                            intTuneLabelCount = 0
-                            objLabels = Nothing
-                            objValues = Nothing
-
-                            Try
-                                If Not mCorruptMemoryEncountered Then
-                                    mXRawFile.GetTuneData(intIndex, objLabels, objValues, intTuneLabelCount)
-                                End If
-                            Catch ex As Exception
-                                ' Exception getting TuneData
-                                strWarningMessage = "Warning: Exception calling mXRawFile.GetTuneData for Index " & intIndex.ToString & ": " & ex.Message
-                                RaiseWarningMessage(strWarningMessage)
-                                intTuneLabelCount = 0
-
-                                If ex.Message.ToLower.Contains("memory is corrupt") Then
-                                    intNumTuneData = 0
-                                    mCorruptMemoryEncountered = True
-                                    Exit For
-                                End If
-                            End Try
-
-
-                            If intTuneLabelCount > 0 Then
-                                strWarningMessage = String.Empty
-                                If objLabels Is Nothing Then
-                                    ' .GetTuneData returned a non-zero count, but no parameter names; unable to continue
-                                    strWarningMessage = "Warning: the GetTuneData function returned a positive tune parameter count but no parameter names"
-                                ElseIf objValues Is Nothing Then
-                                    ' .GetTuneData returned parameter names, but objValues is nothing; unable to continue
-                                    strWarningMessage = "Warning: the GetTuneData function returned tune parameter names but no tune values"
-                                End If
-
-                                If strWarningMessage.Length > 0 Then
-                                    strWarningMessage &= " (Tune Method " & (intIndex + 1).ToString & ")"
-                                    RaiseWarningMessage(strWarningMessage)
-                                    intTuneLabelCount = 0
-                                End If
-
-                            End If
-
-                            If intTuneLabelCount > 0 Then
-                                If intTuneMethodCountValid >= .TuneMethods.Length Then
-                                    ReDim Preserve .TuneMethods(.TuneMethods.Length * 2 - 1)
-                                End If
-
-                                With .TuneMethods(intTuneMethodCountValid)
-
-                                    ' Note that .Count is initially 0, but we reserve space for intTuneLabelCount settings
-                                    .Count = 0
-                                    ReDim .SettingCategory(intTuneLabelCount - 1)
-                                    ReDim .SettingName(intTuneLabelCount - 1)
-                                    ReDim .SettingValue(intTuneLabelCount - 1)
-
-                                    If intTuneLabelCount > 0 Then
-
-                                        strTuneSettingNames = CType(objLabels, String())
-                                        strTuneSettingValues = CType(objValues, String())
-
-                                        ' Step through the names and store in the .Setting() arrays
-                                        strTuneCategory = "General"
-                                        For intSettingIndex = 0 To intTuneLabelCount - 1
-                                            If strTuneSettingValues(intSettingIndex).Length = 0 AndAlso _
-                                            Not strTuneSettingNames(intSettingIndex).EndsWith(":") Then
-                                                ' New category
-                                                If strTuneSettingNames(intSettingIndex).Length > 0 Then
-                                                    strTuneCategory = String.Copy(strTuneSettingNames(intSettingIndex))
-                                                Else
-                                                    strTuneCategory = "General"
-                                                End If
-                                            Else
-                                                .SettingCategory(.Count) = String.Copy(strTuneCategory)
-                                                .SettingName(.Count) = strTuneSettingNames(intSettingIndex).TrimEnd(":"c)
-                                                .SettingValue(.Count) = String.Copy(strTuneSettingValues(intSettingIndex))
-
-                                                .Count += 1
-                                            End If
-
-                                        Next intSettingIndex
-
-                                        If .Count < .SettingName.Length Then
-                                            ReDim Preserve .SettingCategory(.Count - 1)
-                                            ReDim Preserve .SettingName(.Count - 1)
-                                            ReDim Preserve .SettingValue(.Count - 1)
-                                        End If
-                                    End If
-                                End With
-                                intTuneMethodCountValid += 1
-
-                                If intTuneMethodCountValid > 1 Then
-                                    ' Compare this tune method to the previous one; if identical, then don't keep it
-                                    If TuneMethodsMatch(.TuneMethods(intTuneMethodCountValid - 2), .TuneMethods(intTuneMethodCountValid - 1)) Then
-                                        intTuneMethodCountValid -= 1
-                                    End If
-                                End If
-                            End If
-
-                        Next intIndex
-
-                        If .TuneMethods.Length <> intTuneMethodCountValid Then
-                            ReDim Preserve .TuneMethods(intTuneMethodCountValid - 1)
-                        End If
-                    End If
-
                 End With
 
+                If Not mLoadMSTuneInfo Then
+                    ReDim mFileInfo.TuneMethods(-1)
+                Else
+                    GetTuneData()
+                End If
 
             Catch ex As Exception
                 Dim strError As String = "Error: Exception in FillFileInfo: " & ex.Message
@@ -868,6 +752,7 @@ Namespace FinniganFileIO
 
         End Function
 
+        <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
         Public Overrides Function GetScanInfo(ByVal Scan As Integer, <Out()> ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
             ' Function returns True if no error, False if an error
 
@@ -935,12 +820,17 @@ Namespace FinniganFileIO
                                 ' Retrieve the additional parameters for this scan (including Scan Event)
                                 mXRawFile.GetTrailerExtraForScanNum(Scan, objLabels, objValues, intArrayCount)
                             End If
+                        Catch ex As AccessViolationException
+                            strWarningMessage = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " & Scan & ": " & ex.Message
+                            RaiseWarningMessage(strWarningMessage)
+                            intArrayCount = 0
+
                         Catch ex As Exception
                             strWarningMessage = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " & Scan & ": " & ex.Message
                             RaiseWarningMessage(strWarningMessage)
                             intArrayCount = 0
 
-                            If ex.Message.ToLower.Contains("memory is corrupt") Then
+                            If ex.Message.ToLower().Contains("memory is corrupt") Then
                                 mCorruptMemoryEncountered = True
                             End If
                         End Try
@@ -1079,12 +969,17 @@ Namespace FinniganFileIO
                             If Not mCorruptMemoryEncountered Then
                                 mXRawFile.GetStatusLogForScanNum(Scan, dblStatusLogRT, objLabels, objValues, intArrayCount)
                             End If
+                        Catch ex As AccessViolationException
+                            strWarningMessage = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " & Scan & ": " & ex.Message
+                            RaiseWarningMessage(strWarningMessage)
+                            intArrayCount = 0
+
                         Catch ex As Exception
                             strWarningMessage = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " & Scan & ": " & ex.Message
                             RaiseWarningMessage(strWarningMessage)
                             intArrayCount = 0
 
-                            If ex.Message.ToLower.Contains("memory is corrupt") Then
+                            If ex.Message.ToLower().Contains("memory is corrupt") Then
                                 mCorruptMemoryEncountered = True
                             End If
                         End Try
@@ -1267,6 +1162,126 @@ Namespace FinniganFileIO
 
         End Function
 
+        <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
+        Protected Sub GetTuneData()
+
+            ' Note that intTuneMethodCount is set to 0, but we initially reserve space for intNumTuneData methods
+            Dim intTuneMethodCountValid = 0
+            Dim strWarningMessage As String
+
+            Dim intNumTuneData As Integer
+            mXRawFile.GetNumTuneData(intNumTuneData)
+            ReDim mFileInfo.TuneMethods(intNumTuneData - 1)
+
+            For intIndex = 0 To intNumTuneData - 1
+                Dim intTuneLabelCount = 0
+                Dim objLabels As Object = Nothing
+                Dim objValues As Object = Nothing
+
+                Try
+                    If Not mCorruptMemoryEncountered Then
+                        mXRawFile.GetTuneData(intIndex, objLabels, objValues, intTuneLabelCount)
+                    End If
+
+                Catch ex As AccessViolationException
+                    strWarningMessage = "Unable to load tune data; possibly a corrupt .Raw file"
+                    RaiseWarningMessage(strWarningMessage)
+                    Exit For
+
+                Catch ex As Exception
+                    ' Exception getting TuneData
+                    strWarningMessage = "Warning: Exception calling mXRawFile.GetTuneData for Index " & intIndex.ToString & ": " & ex.Message
+                    RaiseWarningMessage(strWarningMessage)
+                    intTuneLabelCount = 0
+
+                    If ex.Message.ToLower().Contains("memory is corrupt") Then
+                        mCorruptMemoryEncountered = True
+                        Exit For
+                    End If
+                End Try
+
+
+                If intTuneLabelCount > 0 Then
+                    strWarningMessage = String.Empty
+                    If objLabels Is Nothing Then
+                        ' .GetTuneData returned a non-zero count, but no parameter names; unable to continue
+                        strWarningMessage = "Warning: the GetTuneData function returned a positive tune parameter count but no parameter names"
+                    ElseIf objValues Is Nothing Then
+                        ' .GetTuneData returned parameter names, but objValues is nothing; unable to continue
+                        strWarningMessage = "Warning: the GetTuneData function returned tune parameter names but no tune values"
+                    End If
+
+                    If strWarningMessage.Length > 0 Then
+                        strWarningMessage &= " (Tune Method " & (intIndex + 1).ToString & ")"
+                        RaiseWarningMessage(strWarningMessage)
+                        intTuneLabelCount = 0
+                    End If
+
+                End If
+
+                If intTuneLabelCount > 0 Then
+                    If intTuneMethodCountValid >= mFileInfo.TuneMethods.Length Then
+                        ReDim Preserve mFileInfo.TuneMethods(mFileInfo.TuneMethods.Length * 2 - 1)
+                    End If
+
+                    With mFileInfo.TuneMethods(intTuneMethodCountValid)
+
+                        ' Note that .Count is initially 0, but we reserve space for intTuneLabelCount settings
+                        .Count = 0
+                        ReDim .SettingCategory(intTuneLabelCount - 1)
+                        ReDim .SettingName(intTuneLabelCount - 1)
+                        ReDim .SettingValue(intTuneLabelCount - 1)
+
+                        If intTuneLabelCount > 0 Then
+
+                            Dim strTuneSettingNames = CType(objLabels, String())
+                            Dim strTuneSettingValues = CType(objValues, String())
+
+                            ' Step through the names and store in the .Setting() arrays
+                            Dim strTuneCategory = "General"
+                            For intSettingIndex = 0 To intTuneLabelCount - 1
+                                If strTuneSettingValues(intSettingIndex).Length = 0 AndAlso _
+                                Not strTuneSettingNames(intSettingIndex).EndsWith(":") Then
+                                    ' New category
+                                    If strTuneSettingNames(intSettingIndex).Length > 0 Then
+                                        strTuneCategory = String.Copy(strTuneSettingNames(intSettingIndex))
+                                    Else
+                                        strTuneCategory = "General"
+                                    End If
+                                Else
+                                    .SettingCategory(.Count) = String.Copy(strTuneCategory)
+                                    .SettingName(.Count) = strTuneSettingNames(intSettingIndex).TrimEnd(":"c)
+                                    .SettingValue(.Count) = String.Copy(strTuneSettingValues(intSettingIndex))
+
+                                    .Count += 1
+                                End If
+
+                            Next intSettingIndex
+
+                            If .Count < .SettingName.Length Then
+                                ReDim Preserve .SettingCategory(.Count - 1)
+                                ReDim Preserve .SettingName(.Count - 1)
+                                ReDim Preserve .SettingValue(.Count - 1)
+                            End If
+                        End If
+                    End With
+                    intTuneMethodCountValid += 1
+
+                    If intTuneMethodCountValid > 1 Then
+                        ' Compare this tune method to the previous one; if identical, then don't keep it
+                        If TuneMethodsMatch(mFileInfo.TuneMethods(intTuneMethodCountValid - 2), mFileInfo.TuneMethods(intTuneMethodCountValid - 1)) Then
+                            intTuneMethodCountValid -= 1
+                        End If
+                    End If
+                End If
+
+            Next intIndex
+
+            If mFileInfo.TuneMethods.Length <> intTuneMethodCountValid Then
+                ReDim Preserve mFileInfo.TuneMethods(intTuneMethodCountValid - 1)
+            End If
+
+        End Sub
 
         Public Shared Function MakeGenericFinniganScanFilter(ByVal strFilterText As String) As String
 
@@ -1614,7 +1629,11 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
-        Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
+        Public Function GetScanData2D(
+            ByVal Scan As Integer,
+            <Out()> ByRef dblMassIntensityPairs(,) As Double,
+            ByVal intMaxNumberOfPeaks As Integer,
+            ByVal blnCentroid As Boolean) As Integer
 
             ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
             ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
@@ -1633,13 +1652,11 @@ Namespace FinniganFileIO
 
             Try
                 If mXRawFile Is Nothing Then
-                    intDataCount = -1
                     Exit Try
                 End If
 
                 ' Make sure the MS controller is selected
                 If Not SetMSController() Then
-                    intDataCount = -1
                     Exit Try
                 End If
 
@@ -1668,8 +1685,8 @@ Namespace FinniganFileIO
                     intCentroidResult = 0           ' Return the data as-is
                 End If
 
-                mXRawFile.GetMassListFromScanNum(Scan, strFilter, IntensityCutoffTypeConstants.None, _
-                   intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth, _
+                mXRawFile.GetMassListFromScanNum(Scan, strFilter, IntensityCutoffTypeConstants.None,
+                   intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth,
                    MassIntensityPairsList, PeakList, intDataCount)
 
                 If intDataCount > 0 Then
@@ -1680,13 +1697,119 @@ Namespace FinniganFileIO
 
                 Return intDataCount
 
-            Catch ex As System.AccessViolationException
+            Catch ex As AccessViolationException
                 Dim strError As String = "Unable to load data for scan " & Scan & "; possibly a corrupt .Raw file"
                 RaiseWarningMessage(strError)
 
-            Catch ex As Exception                
+            Catch ex As Exception
 
                 Dim strError As String = "Unable to load data for scan " & Scan & ": " & ex.Message & "; possibly a corrupt .Raw file"
+                RaiseErrorMessage(strError)
+
+            End Try
+
+            ReDim dblMassIntensityPairs(-1, -1)
+            Return -1
+
+        End Function
+
+        <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
+        Public Function GetScanDataSumScans(
+            ByVal scanFirst As Integer,
+            ByVal scanLast As Integer,
+            <Out()> ByRef dblMassIntensityPairs(,) As Double,
+            ByVal intMaxNumberOfPeaks As Integer,
+            ByVal blnCentroid As Boolean) As Integer
+
+            ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
+            ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
+
+            Dim intDataCount As Integer
+
+            Dim strFilter As String
+            Dim intIntensityCutoffValue As Integer
+            Dim intCentroidResult As Integer
+            Dim dblCentroidPeakWidth As Double
+
+            Dim MassIntensityPairsList As Object = Nothing
+            Dim PeakList As Object = Nothing
+
+            intDataCount = 0
+
+            Try
+                If mXRawFile Is Nothing Then
+                    Exit Try
+                End If
+
+                ' Make sure the MS controller is selected
+                If Not SetMSController() Then
+                    Exit Try
+                End If
+
+                If scanFirst < mFileInfo.ScanStart Then
+                    scanFirst = mFileInfo.ScanStart
+                ElseIf scanFirst > mFileInfo.ScanEnd Then
+                    scanFirst = mFileInfo.ScanEnd
+                End If
+
+                If scanLast < scanFirst Then scanLast = scanFirst
+
+                If scanLast < mFileInfo.ScanStart Then
+                    scanLast = mFileInfo.ScanStart
+                ElseIf scanLast > mFileInfo.ScanEnd Then
+                    scanLast = mFileInfo.ScanEnd
+                End If
+
+                strFilter = String.Empty            ' Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
+                intIntensityCutoffValue = 0
+
+                If intMaxNumberOfPeaks < 0 Then intMaxNumberOfPeaks = 0
+
+                ' Warning: the masses reported by GetAverageMassList when centroiding are not properly calibrated and thus could be off by 0.3 m/z or more
+                ' For an example, see function GetScanData2D above
+
+                If blnCentroid Then
+                    intCentroidResult = 1           ' Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
+                Else
+                    intCentroidResult = 0           ' Return the data as-is
+                End If
+
+                Dim backgroundScan1First As Integer = 0
+                Dim backgroundScan1Last As Integer = 0
+                Dim backgroundScan2First As Integer = 0
+                Dim backgroundScan2Last As Integer = 0
+
+                mXRawFile.GetAverageMassList(
+                    scanFirst, scanLast,
+                    backgroundScan1First,
+                    backgroundScan1Last,
+                    backgroundScan2First,
+                    backgroundScan2Last,
+                    strFilter,
+                    IntensityCutoffTypeConstants.None,
+                    intIntensityCutoffValue,
+                    intMaxNumberOfPeaks,
+                    intCentroidResult,
+                    dblCentroidPeakWidth,
+                    MassIntensityPairsList,
+                    PeakList,
+                    intDataCount)
+
+                If intDataCount > 0 Then
+                    dblMassIntensityPairs = CType(MassIntensityPairsList, Double(,))
+                Else
+                    ReDim dblMassIntensityPairs(-1, -1)
+                End If
+
+                Return intDataCount
+
+            Catch ex As AccessViolationException
+                Dim strError As String = "Unable to load data summing scans " & scanFirst & " to " & scanLast & "; possibly a corrupt .Raw file"
+                RaiseWarningMessage(strError)
+
+            Catch ex As Exception
+
+                Dim strError As String = "Unable to load data summing scans " & scanFirst & " to " & scanLast & ": " & ex.Message & "; possibly a corrupt .Raw file"
                 RaiseErrorMessage(strError)
 
             End Try

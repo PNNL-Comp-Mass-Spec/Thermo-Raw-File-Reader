@@ -12,27 +12,29 @@ Module modMain
 
 			ConvertRawFileToCSVForLars(strRawFilePath, intPointsPerSpectrumToKeep)
 
-		Else
-			'TestReader("..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")
-			'TestReader("..\QC_Shew_12_02-250ng-Multiplex_08Jan13_Frodo_12-2-34.raw")
+        Else
+            TestReader("E:\DMS_WorkDir2\20150113FG_MT_F2b.raw")
 
-			' Uncomment the following to test the GetCollisionEnergy() function
-			'TestReader("..\EDRN_ERG_Spop_ETV1_50fmolHeavy_0p5ugB53A_Frac48_3Oct12_Gandalf_W33A1_16a.raw")
+            'TestReader("..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")
+            'TestReader("..\QC_Shew_12_02-250ng-Multiplex_08Jan13_Frodo_12-2-34.raw")
 
-			' TestReader("..\CPTAC_10Pep_UndepPlas__Schedule_24Mar13_Gandalf_W22511A1.raw")
+            ' Uncomment the following to test the GetCollisionEnergy() function
+            'TestReader("..\EDRN_ERG_Spop_ETV1_50fmolHeavy_0p5ugB53A_Frac48_3Oct12_Gandalf_W33A1_16a.raw")
 
-			Dim centroid As Boolean = True
+            ' TestReader("..\CPTAC_10Pep_UndepPlas__Schedule_24Mar13_Gandalf_W22511A1.raw")
 
-			TestReader("F:\MSData\Orbitrap\QC_05_3-a_27Dec05_Pegasus_05-11-13.RAW", centroid)
+            Dim centroid As Boolean = True
 
-			centroid = False
-			TestReader("F:\MSData\Orbitrap\QC_05_3-a_27Dec05_Pegasus_05-11-13.RAW", centroid)
+            TestReader("F:\MSData\Orbitrap\QC_05_3-a_27Dec05_Pegasus_05-11-13.RAW", centroid)
 
-			centroid = True
-			TestReader("\\proto-6\QExact01\2013_4\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01.raw", centroid)
+            centroid = False
+            TestReader("F:\MSData\Orbitrap\QC_05_3-a_27Dec05_Pegasus_05-11-13.RAW", centroid)
 
-			centroid = False
-			TestReader("\\proto-6\QExact01\2013_4\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01.raw", centroid)
+            centroid = True
+            TestReader("\\proto-6\QExact01\2013_4\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01.raw", centroid)
+
+            centroid = False
+            TestReader("\\proto-6\QExact01\2013_4\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01.raw", centroid)
 		End If
 
 		Console.WriteLine("Done")
@@ -167,12 +169,14 @@ Module modMain
 
 			Dim dblMzList() As Double
 			Dim dblIntensityList() As Double
+            Dim dblMassIntensityPairs As Double(,)
 
 			Dim lstCollisionEnergies As System.Collections.Generic.List(Of Double)
 			Dim strCollisionEnergies As String = String.Empty
 
 			ReDim dblMzList(0)
 			ReDim dblIntensityList(0)
+            ReDim dblMassIntensityPairs(0, 0)
 
 			udtScanHeaderInfo = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
 
@@ -205,23 +209,43 @@ Module modMain
 						Console.WriteLine("; CE " & strCollisionEnergies)
 					End If
 
-					If iScanNum Mod 50 = 0 Then
-						intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, udtScanHeaderInfo, blnCentroid)
-						For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step 50
-							Console.WriteLine("  " & dblMzList(iDataPoint).ToString("0.000") & " mz   " & dblIntensityList(iDataPoint).ToString("0"))
-						Next
-						Console.WriteLine()
-					End If
+                    If iScanNum Mod 50 = 0 Then
+                        ' Get the data for scan iScanNum
+
+                        Console.WriteLine()
+                        Console.WriteLine("Spectrum for scan " & iScanNum)
+                        intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, udtScanHeaderInfo, blnCentroid)
+                        For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step 50
+                            Console.WriteLine("  " & dblMzList(iDataPoint).ToString("0.000") & " mz   " & dblIntensityList(iDataPoint).ToString("0"))
+                        Next
+                        Console.WriteLine()
+
+                        Const scansToSum As Integer = 15
+                        If iScanNum + scansToSum < iNumScans Then
+
+                            ' Get the data for scan iScanNum through iScanNum + 15
+                            oReader.GetScanDataSumScans(iScanNum, iScanNum + scansToSum, dblMassIntensityPairs, 0, blnCentroid)
+
+                            Console.WriteLine("Summed spectrum, scans " & iScanNum & " through " & (iScanNum + scansToSum).ToString())
+
+                            For iDataPoint As Integer = 0 To dblMassIntensityPairs.GetLength(1) - 1 Step 50
+                                Console.WriteLine("  " & dblMassIntensityPairs(0, iDataPoint).ToString("0.000") & " mz   " & dblMassIntensityPairs(1, iDataPoint).ToString("0"))
+                            Next
+
+                            Console.WriteLine()
+                        End If
+
+
+                    End If
 
 				End If
 			Next
 
+            oReader.CloseRawFile()
 
-			oReader.CloseRawFile()
-
-		Catch ex As Exception
-			Console.WriteLine("Error in sub TestReader: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            Console.WriteLine("Error in sub TestReader: " & ex.Message)
+        End Try
 	End Sub
 
 	Private Function ShowMethod(ByVal oReader As XRawFileIO) As Boolean
