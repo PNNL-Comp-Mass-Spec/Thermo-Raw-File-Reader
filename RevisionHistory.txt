@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5521; February 12, 2015
+	- Added overloaded versions of GetScanData that return the results using the Out keyword and don't have parameter udtScanHeaderInfo (which is no longer used / needed by GetScanData)
+
 Version 1.1.5500; January 22, 2015
 	- Added attribute HandleProcessCorruptedStateExceptions to CloseRawFile, GetScanInfo, and GetTuneData
 	- Added function GetScanDataSumScans
