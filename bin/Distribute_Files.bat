@@ -10,9 +10,11 @@ xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\Pept
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\PeptideListToXML\Lib\" /Y
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\Lib\" /Y
 
-rem Does not appear to be used: xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs\" /Y
+xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs\" /Y
+xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\lib\" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\DLLLibrary" /Y
+
 
 @echo off
 echo Copy the DLL to bin folders
@@ -137,8 +139,8 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\GordonSlysz\D
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\GordonSlysz\DimethylLabelingIq\Library" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\GordonSlysz\IqTargetCreator\Library" /Y
 
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Release" /Y
+if exist "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug"   xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug" /Y
+if exist "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Release" xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Release" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Release" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\lib" /Y

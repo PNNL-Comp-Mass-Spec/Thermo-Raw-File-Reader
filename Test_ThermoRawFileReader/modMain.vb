@@ -85,7 +85,7 @@ Module modMain
 							Console.WriteLine("Scan " & iScanNum & " at " & udtScanHeaderInfo.RetentionTime.ToString("0.00") & " minutes")
 						End If
 
-						intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, udtScanHeaderInfo)
+                        intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList)
 
 						swOutFile.WriteLine("SPECTRUM - MS,")
 						swOutFile.WriteLine(IO.Path.GetFileName(strRawFilePath) & ",")
@@ -214,7 +214,7 @@ Module modMain
 
                         Console.WriteLine()
                         Console.WriteLine("Spectrum for scan " & iScanNum)
-                        intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, udtScanHeaderInfo, blnCentroid)
+                        intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, 0, blnCentroid)
                         For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step 50
                             Console.WriteLine("  " & dblMzList(iDataPoint).ToString("0.000") & " mz   " & dblIntensityList(iDataPoint).ToString("0"))
                         Next

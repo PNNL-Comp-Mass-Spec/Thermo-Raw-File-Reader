@@ -176,7 +176,7 @@ Namespace FinniganFileIO
                     eMRMScanType = MRMScanTypeConstants.SRM
                 ElseIf strFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
                     eMRMScanType = MRMScanTypeConstants.FullNL
-                
+
                 End If
             End If
 
@@ -708,7 +708,7 @@ Namespace FinniganFileIO
 
         End Function
 
-        Public Function GetCollisionEnergy(ByVal Scan As Integer) As List(Of Double)
+        Public Function GetCollisionEnergy(ByVal scan As Integer) As List(Of Double)
 
             Dim intNumMSOrders As Integer
             Dim lstCollisionEnergies As List(Of Double) = New List(Of Double)
@@ -717,11 +717,11 @@ Namespace FinniganFileIO
             Try
                 If mXRawFile Is Nothing Then Return lstCollisionEnergies
 
-                mXRawFile.GetNumberOfMSOrdersFromScanNum(Scan, intNumMSOrders)
+                mXRawFile.GetNumberOfMSOrdersFromScanNum(scan, intNumMSOrders)
 
                 For intMSOrder As Integer = 1 To intNumMSOrders
                     dblCollisionEnergy = 0
-                    mXRawFile.GetCollisionEnergyForScanNum(Scan, intMSOrder, dblCollisionEnergy)
+                    mXRawFile.GetCollisionEnergyForScanNum(scan, intMSOrder, dblCollisionEnergy)
 
                     If (dblCollisionEnergy > 0) Then
                         lstCollisionEnergies.Add(dblCollisionEnergy)
@@ -760,7 +760,7 @@ Namespace FinniganFileIO
         End Function
 
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
-        Public Overrides Function GetScanInfo(ByVal Scan As Integer, <Out()> ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
+        Public Overrides Function GetScanInfo(ByVal scan As Integer, <Out()> ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
             ' Function returns True if no error, False if an error
 
             Dim intResult As Integer
@@ -788,10 +788,10 @@ Namespace FinniganFileIO
 
                 If mXRawFile Is Nothing Then Return False
 
-                If Scan < mFileInfo.ScanStart Then
-                    Scan = mFileInfo.ScanStart
-                ElseIf Scan > mFileInfo.ScanEnd Then
-                    Scan = mFileInfo.ScanEnd
+                If scan < mFileInfo.ScanStart Then
+                    scan = mFileInfo.ScanStart
+                ElseIf scan > mFileInfo.ScanEnd Then
+                    scan = mFileInfo.ScanEnd
                 End If
 
                 ' Make sure the MS controller is selected
@@ -808,14 +808,14 @@ Namespace FinniganFileIO
                     .FilterText = String.Empty
                     .IonMode = IonModeConstants.Unknown
 
-                    mXRawFile.GetScanHeaderInfoForScanNum(Scan, .NumPeaks, .RetentionTime, .LowMass, .HighMass, .TotalIonCurrent, .BasePeakMZ, .BasePeakIntensity, .NumChannels, intBooleanVal, .Frequency)
+                    mXRawFile.GetScanHeaderInfoForScanNum(scan, .NumPeaks, .RetentionTime, .LowMass, .HighMass, .TotalIonCurrent, .BasePeakMZ, .BasePeakIntensity, .NumChannels, intBooleanVal, .Frequency)
                     mXRawFile.IsError(intResult)        ' Unfortunately, .IsError() always returns 0, even if an error occurred
 
                     If intResult = 0 Then
                         .UniformTime = CBool(intBooleanVal)
 
                         intBooleanVal = 0
-                        mXRawFile.IsCentroidScanForScanNum(Scan, intBooleanVal)
+                        mXRawFile.IsCentroidScanForScanNum(scan, intBooleanVal)
                         .IsCentroidScan = CBool(intBooleanVal)
 
                         intArrayCount = 0
@@ -825,15 +825,15 @@ Namespace FinniganFileIO
                         Try
                             If Not mCorruptMemoryEncountered Then
                                 ' Retrieve the additional parameters for this scan (including Scan Event)
-                                mXRawFile.GetTrailerExtraForScanNum(Scan, objLabels, objValues, intArrayCount)
+                                mXRawFile.GetTrailerExtraForScanNum(scan, objLabels, objValues, intArrayCount)
                             End If
                         Catch ex As AccessViolationException
-                            strWarningMessage = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " & Scan & ": " & ex.Message
+                            strWarningMessage = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " & scan & ": " & ex.Message
                             RaiseWarningMessage(strWarningMessage)
                             intArrayCount = 0
 
                         Catch ex As Exception
-                            strWarningMessage = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " & Scan & ": " & ex.Message
+                            strWarningMessage = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " & scan & ": " & ex.Message
                             RaiseWarningMessage(strWarningMessage)
                             intArrayCount = 0
 
@@ -880,7 +880,7 @@ Namespace FinniganFileIO
                         ' Parse out the parent ion m/z for fragmentation scans
                         ' Must set strFilterText to Nothing prior to calling .GetFilterForScanNum()
                         strFilterText = Nothing
-                        mXRawFile.GetFilterForScanNum(Scan, strFilterText)
+                        mXRawFile.GetFilterForScanNum(scan, strFilterText)
 
                         .FilterText = String.Copy(strFilterText)
                         If String.IsNullOrWhiteSpace(.FilterText) Then .FilterText = String.Empty
@@ -975,15 +975,15 @@ Namespace FinniganFileIO
 
                         Try
                             If Not mCorruptMemoryEncountered Then
-                                mXRawFile.GetStatusLogForScanNum(Scan, dblStatusLogRT, objLabels, objValues, intArrayCount)
+                                mXRawFile.GetStatusLogForScanNum(scan, dblStatusLogRT, objLabels, objValues, intArrayCount)
                             End If
                         Catch ex As AccessViolationException
-                            strWarningMessage = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " & Scan & ": " & ex.Message
+                            strWarningMessage = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " & scan & ": " & ex.Message
                             RaiseWarningMessage(strWarningMessage)
                             intArrayCount = 0
 
                         Catch ex As Exception
-                            strWarningMessage = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " & Scan & ": " & ex.Message
+                            strWarningMessage = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " & scan & ": " & ex.Message
                             RaiseWarningMessage(strWarningMessage)
                             intArrayCount = 0
 
@@ -1437,7 +1437,7 @@ Namespace FinniganFileIO
                 blnSIMScan = False
                 blnValidScan = True
             Else
-                If strFilterText.IndexOf(SIM_MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0Then
+                If strFilterText.IndexOf(SIM_MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
                     ' This is really a SIM MS scan
                     intMSLevel = 1
                     blnSIMScan = True
@@ -1478,23 +1478,23 @@ Namespace FinniganFileIO
         ''' <summary>
         ''' Obtain the mass and intensity for the specified scan
         ''' </summary>
-        ''' <param name="Scan"></param>
+        ''' <param name="scan"></param>
         ''' <param name="dblMZList"></param>
         ''' <param name="dblIntensityList"></param>
         ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Overrides Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Integer
+        Public Overloads Overrides Function GetScanData(ByVal scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Integer
             Const intMaxNumberOfPeaks As Integer = 0
             Const blnCentroid As Boolean = False
-            Return GetScanData(Scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
+            Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
         End Function
 
         ''' <summary>
         ''' Obtain the mass and intensity for the specified scan
         ''' </summary>
-        ''' <param name="Scan"></param>
+        ''' <param name="scan"></param>
         ''' <param name="dblMZList"></param>
         ''' <param name="dblIntensityList"></param>
         ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
@@ -1502,15 +1502,15 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal blnCentroid As Boolean) As Integer
+        Public Overloads Function GetScanData(ByVal scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal blnCentroid As Boolean) As Integer
             Const intMaxNumberOfPeaks As Integer = 0
-            Return GetScanData(Scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
+            Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
         End Function
 
         ''' <summary>
         ''' Obtain the mass and intensity for the specified scan
         ''' </summary>
-        ''' <param name="Scan"></param>
+        ''' <param name="scan"></param>
         ''' <param name="dblMZList"></param>
         ''' <param name="dblIntensityList"></param>
         ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
@@ -1518,15 +1518,15 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Overrides Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
+        Public Overloads Overrides Function GetScanData(ByVal scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
             Const blnCentroid As Boolean = False
-            Return GetScanData(Scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
+            Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
         End Function
 
         ''' <summary>
         ''' Obtain the mass and intensity for the specified scan
         ''' </summary>
-        ''' <param name="Scan"></param>
+        ''' <param name="scan"></param>
         ''' <param name="dblMZList"></param>
         ''' <param name="dblIntensityList"></param>
         ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
@@ -1535,8 +1535,8 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
-            Return GetScanData(Scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
+        Public Overloads Function GetScanData(ByVal scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
+            Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
         End Function
 
         ''' <summary>
@@ -1570,18 +1570,18 @@ Namespace FinniganFileIO
         ''' <summary>
         ''' Obtain the mass and intensity for the specified scan
         ''' </summary>
-        ''' <param name="Scan"></param>
+        ''' <param name="scan"></param>
         ''' <param name="dblMZList"></param>
         ''' <param name="dblIntensityList"></param>
         ''' <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         ''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
+        Public Overloads Function GetScanData(ByVal scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
 
             Dim dblMassIntensityPairs(,) As Double = Nothing
 
-            Dim intDataCount As Integer = GetScanData2D(Scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid)
+            Dim intDataCount As Integer = GetScanData2D(scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid)
 
             Try
                 If intDataCount > 0 Then
@@ -1624,54 +1624,52 @@ Namespace FinniganFileIO
         ''' <summary>
         ''' Obtain the mass and intensity for the specified scan
         ''' </summary>
-        ''' <param name="Scan"></param>
+        ''' <param name="scan"></param>
+        ''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+        ''' <returns>The number of data points, or -1 if an error</returns>
+        ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        Public Function GetScanData2D(ByVal scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double) As Integer
+            Return GetScanData2D(scan, dblMassIntensityPairs, intMaxNumberOfPeaks:=0, blnCentroid:=False)
+        End Function
+
+        ''' <summary>
+        ''' Obtain the mass and intensity for the specified scan
+        ''' </summary>
+        ''' <param name="scan"></param>
         ''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
         ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
-        ''' <param name="intMaxNumberOfPeaks"></param>
+        ''' <param name="intMaxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
-            Return GetScanData2D(Scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid:=False)
+        <Obsolete("This method is deprecated, use GetScanData2D that does not use udtScanHeaderInfo")>
+        Public Function GetScanData2D(ByVal scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
+            Return GetScanData2D(scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid:=False)
         End Function
 
         ''' <summary>
         ''' Obtain the mass and intensity for the specified scan
         ''' </summary>
-        ''' <param name="Scan"></param>
+        ''' <param name="scan"></param>
         ''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
-        ''' <param name="udtScanHeaderInfo">Unused; parameter retained for compatibility reasons</param>
-        ''' <param name="intMaxNumberOfPeaks"></param>
-        ''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
+        ''' <param name="intMaxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
-            Return GetScanData2D(Scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid)
+        Public Function GetScanData2D(ByVal scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByVal intMaxNumberOfPeaks As Integer) As Integer
+            Return GetScanData2D(scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid:=False)
         End Function
 
         ''' <summary>
         ''' Obtain the mass and intensity for the specified scan
         ''' </summary>
-        ''' <param name="Scan"></param>
+        ''' <param name="scan"></param>
         ''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
-        ''' <param name="intMaxNumberOfPeaks"></param>
-        ''' <returns>The number of data points, or -1 if an error</returns>
-        ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Function GetScanData2D(ByVal Scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByVal intMaxNumberOfPeaks As Integer) As Integer
-            Return GetScanData2D(Scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid:=False)
-        End Function
-
-        ''' <summary>
-        ''' Obtain the mass and intensity for the specified scan
-        ''' </summary>
-        ''' <param name="Scan"></param>
-        ''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
-        ''' <param name="intMaxNumberOfPeaks"></param>
+        ''' <param name="intMaxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         ''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired); note that the mass calibration of centroided data may be off by several hundred ppm</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
         Public Function GetScanData2D(
-            ByVal Scan As Integer,
+            ByVal scan As Integer,
             <Out()> ByRef dblMassIntensityPairs(,) As Double,
             ByVal intMaxNumberOfPeaks As Integer,
             ByVal blnCentroid As Boolean) As Integer
@@ -1701,10 +1699,10 @@ Namespace FinniganFileIO
                     Exit Try
                 End If
 
-                If Scan < mFileInfo.ScanStart Then
-                    Scan = mFileInfo.ScanStart
-                ElseIf Scan > mFileInfo.ScanEnd Then
-                    Scan = mFileInfo.ScanEnd
+                If scan < mFileInfo.ScanStart Then
+                    scan = mFileInfo.ScanStart
+                ElseIf scan > mFileInfo.ScanEnd Then
+                    scan = mFileInfo.ScanEnd
                 End If
 
                 strFilter = String.Empty            ' Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
@@ -1726,7 +1724,7 @@ Namespace FinniganFileIO
                     intCentroidResult = 0           ' Return the data as-is
                 End If
 
-                mXRawFile.GetMassListFromScanNum(Scan, strFilter, IntensityCutoffTypeConstants.None,
+                mXRawFile.GetMassListFromScanNum(scan, strFilter, IntensityCutoffTypeConstants.None,
                    intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth,
                    MassIntensityPairsList, PeakList, intDataCount)
 
@@ -1739,12 +1737,12 @@ Namespace FinniganFileIO
                 Return intDataCount
 
             Catch ex As AccessViolationException
-                Dim strError As String = "Unable to load data for scan " & Scan & "; possibly a corrupt .Raw file"
+                Dim strError As String = "Unable to load data for scan " & scan & "; possibly a corrupt .Raw file"
                 RaiseWarningMessage(strError)
 
             Catch ex As Exception
 
-                Dim strError As String = "Unable to load data for scan " & Scan & ": " & ex.Message & "; possibly a corrupt .Raw file"
+                Dim strError As String = "Unable to load data for scan " & scan & ": " & ex.Message & "; possibly a corrupt .Raw file"
                 RaiseErrorMessage(strError)
 
             End Try
