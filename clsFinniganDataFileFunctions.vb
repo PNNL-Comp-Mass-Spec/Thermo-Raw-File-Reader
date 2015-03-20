@@ -1836,7 +1836,7 @@ Namespace FinniganFileIO
 
             Dim scanInfo As clsScanInfo = Nothing
 
-            If Not mCachedScanInfo.TryGetValue(scan, scanInfo) Then
+            If Not GetScanInfo(scan, scanInfo) Then
                 Throw New Exception("Cannot retrieve ScanInfo from cache for scan " & scan & "; cannot retrieve scan data")
             End If
 
