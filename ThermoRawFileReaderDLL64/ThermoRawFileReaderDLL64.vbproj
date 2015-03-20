@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="..\clsFinniganDataFileFunctions.vb" />
     <Compile Include="..\clsFinniganDataFileFunctionsBaseClass.vb" />
+    <Compile Include="clsScanInfo.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
   </ItemGroup>
   <ItemGroup>

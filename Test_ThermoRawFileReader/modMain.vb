@@ -1,5 +1,6 @@
 ﻿Option Strict On
 
+Imports System.IO
 Imports ThermoRawFileReaderDLL.FinniganFileIO
 
 Module modMain
@@ -150,72 +151,93 @@ Module modMain
 		swOutFile.WriteLine(dblMZ.ToString("0.00000") & "," & dblIntensity.ToString("0.00"))
 	End Sub
 
-	Private Sub TestReader(strRawFilePath As String, Optional ByVal blnCentroid As Boolean = False)
-		Try
-			Dim oReader As XRawFileIO
-			oReader = New XRawFileIO()
+    Private Sub TestReader(
+      ByVal strRawFilePath As String,
+      Optional ByVal blnCentroid As Boolean = False,
+      Optional ByVal scanStart As Integer = 0,
+      Optional ByVal scanEnd As Integer = 0)
 
-			oReader.OpenRawFile(strRawFilePath)
+        Try
+            Dim oReader As XRawFileIO
+            oReader = New XRawFileIO()
 
-			For intIndex As Integer = 0 To oReader.FileInfo.InstMethods.Length - 1
-				Console.WriteLine(oReader.FileInfo.InstMethods(intIndex))
-			Next
+            oReader.OpenRawFile(strRawFilePath)
 
-			Dim iNumScans = oReader.GetNumScans()
+            For intIndex As Integer = 0 To oReader.FileInfo.InstMethods.Length - 1
+                Console.WriteLine(oReader.FileInfo.InstMethods(intIndex))
+            Next
 
-			Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType
-			Dim bSuccess As Boolean
-			Dim intDataCount As Integer
+            Dim iNumScans = oReader.GetNumScans()
 
-			Dim dblMzList() As Double
-			Dim dblIntensityList() As Double
+            Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType
+            Dim bSuccess As Boolean
+            Dim intDataCount As Integer
+
+            Dim dblMzList() As Double
+            Dim dblIntensityList() As Double
             Dim dblMassIntensityPairs As Double(,)
 
-			Dim lstCollisionEnergies As System.Collections.Generic.List(Of Double)
-			Dim strCollisionEnergies As String = String.Empty
+            Dim lstCollisionEnergies As System.Collections.Generic.List(Of Double)
+            Dim strCollisionEnergies As String = String.Empty
 
-			ReDim dblMzList(0)
-			ReDim dblIntensityList(0)
+            ReDim dblMzList(0)
+            ReDim dblIntensityList(0)
             ReDim dblMassIntensityPairs(0, 0)
 
-			udtScanHeaderInfo = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
+            udtScanHeaderInfo = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
 
-			ShowMethod(oReader)
+            ShowMethod(oReader)
 
-			Dim scanStart As Integer = 1
+            Dim scanStep = 1
 
-			For iScanNum As Integer = scanStart To iNumScans Step 21
+            If scanStart < 1 Then scanStart = 1
+            If scanEnd < 1 then 
+                scanEnd = iNumScans
+                scanStep = 21
+            Else
+                If scanEnd < scanStart Then
+                    scanEnd = scanStart
+                End If
+            End If
 
-				bSuccess = oReader.GetScanInfo(iScanNum, udtScanHeaderInfo)
-				If bSuccess Then
-					Console.Write("Scan " & iScanNum & " at " & udtScanHeaderInfo.RetentionTime.ToString("0.00") & " minutes: " & udtScanHeaderInfo.FilterText)
-					lstCollisionEnergies = oReader.GetCollisionEnergy(iScanNum)
+            For iScanNum As Integer = scanStart To scanEnd Step scanStep
 
-					If lstCollisionEnergies.Count = 0 Then
-						strCollisionEnergies = String.Empty
-					ElseIf lstCollisionEnergies.Count >= 1 Then
-						strCollisionEnergies = lstCollisionEnergies.Item(0).ToString("0.0")
+                bSuccess = oReader.GetScanInfo(iScanNum, udtScanHeaderInfo)
+                If bSuccess Then
+                    Console.Write("Scan " & iScanNum & " at " & udtScanHeaderInfo.RetentionTime.ToString("0.00") & " minutes: " & udtScanHeaderInfo.FilterText)
+                    lstCollisionEnergies = oReader.GetCollisionEnergy(iScanNum)
 
-						If lstCollisionEnergies.Count > 1 Then
-							For intIndex = 1 To lstCollisionEnergies.Count - 1
-								strCollisionEnergies &= ", " & lstCollisionEnergies.Item(intIndex).ToString("0.0")
-							Next
-						End If
-					End If
+                    If lstCollisionEnergies.Count = 0 Then
+                        strCollisionEnergies = String.Empty
+                    ElseIf lstCollisionEnergies.Count >= 1 Then
+                        strCollisionEnergies = lstCollisionEnergies.Item(0).ToString("0.0")
 
-					If String.IsNullOrEmpty(strCollisionEnergies) Then
-						Console.WriteLine()
-					Else
-						Console.WriteLine("; CE " & strCollisionEnergies)
-					End If
+                        If lstCollisionEnergies.Count > 1 Then
+                            For intIndex = 1 To lstCollisionEnergies.Count - 1
+                                strCollisionEnergies &= ", " & lstCollisionEnergies.Item(intIndex).ToString("0.0")
+                            Next
+                        End If
+                    End If
 
-                    If iScanNum Mod 50 = 0 Then
+                    If String.IsNullOrEmpty(strCollisionEnergies) Then
+                        Console.WriteLine()
+                    Else
+                        Console.WriteLine("; CE " & strCollisionEnergies)
+                    End If
+
+                    If iScanNum Mod 50 = 0 OrElse scanEnd - scanStart <= 50 Then
                         ' Get the data for scan iScanNum
 
                         Console.WriteLine()
                         Console.WriteLine("Spectrum for scan " & iScanNum)
                         intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, 0, blnCentroid)
-                        For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step 50
+
+                        Dim mzDisplayStepSize = 50
+                        If blnCentroid Then
+                            mzDisplayStepSize = 1
+                        End If
+
+                        For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step mzDisplayStepSize
                             Console.WriteLine("  " & dblMzList(iDataPoint).ToString("0.000") & " mz   " & dblIntensityList(iDataPoint).ToString("0"))
                         Next
                         Console.WriteLine()
@@ -238,15 +260,15 @@ Module modMain
 
                     End If
 
-				End If
-			Next
+                End If
+            Next
 
             oReader.CloseRawFile()
 
         Catch ex As Exception
             Console.WriteLine("Error in sub TestReader: " & ex.Message)
         End Try
-	End Sub
+    End Sub
 
 	Private Function ShowMethod(ByVal oReader As XRawFileIO) As Boolean
 		Dim intInstMethodCount As Integer

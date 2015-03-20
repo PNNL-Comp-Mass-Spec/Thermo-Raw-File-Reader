@@ -6,7 +6,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified April 19, 2012
+' Last modified March 19, 2015
 
 Namespace FinniganFileIO
 
@@ -24,7 +24,10 @@ Namespace FinniganFileIO
 			Unknown = 0
 			Positive = 1
 			Negative = 2
-		End Enum
+        End Enum
+
+        Protected MAX_SCANS_TO_CACHE_INFO As Integer = 50000
+
 #End Region
 
 #Region "Structures"
@@ -120,7 +123,10 @@ Namespace FinniganFileIO
 #End Region
 
 #Region "Classwide Variables"
-		Protected mCachedFileName As String
+        Protected mCachedFileName As String
+
+        Protected mCachedScanInfo As Dictionary(Of Integer, clsScanInfo)
+
 		Protected mFileInfo As udtFileInfoType
 
 		Protected mLoadMSMethodInfo As Boolean = True
@@ -161,8 +167,10 @@ Namespace FinniganFileIO
 
 		Public MustOverride Function CheckFunctionality() As Boolean
 		Public MustOverride Sub CloseRawFile()
-		Public MustOverride Function GetNumScans() As Integer
-		Public MustOverride Function GetScanInfo(ByVal Scan As Integer, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
+        Public MustOverride Function GetNumScans() As Integer
+
+        Public MustOverride Function GetScanInfo(ByVal Scan As Integer, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
+        Public MustOverride Function GetScanInfo(ByVal Scan As Integer, ByRef scanInfo As clsScanInfo) As Boolean
 
 		Public MustOverride Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblIonMZ() As Double, ByRef dblIonIntensity() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Integer
 		Public MustOverride Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblIonMZ() As Double, ByRef dblIonIntensity() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
