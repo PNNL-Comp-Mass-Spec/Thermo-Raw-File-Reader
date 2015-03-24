@@ -1,155 +1,86 @@
 ﻿Option Strict On
 
-Imports System.IO
+Imports System.Reflection
 Imports ThermoRawFileReaderDLL.FinniganFileIO
 
 Module modMain
 
+    Private Const DEFAULT_FILE_PATH As String = "..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW"
+
 	Public Sub Main()
 
-		If False Then
-			Dim strRawFilePath As String = "..\60999_MouseIslet_HOM_LC_4Oct12_Samwise_12-05-13.raw"
-			Dim intPointsPerSpectrumToKeep As Integer = 250
+        Dim commandLineParser = New clsParseCommandLine()
+        commandLineParser.ParseCommandLine()
+		
+		 If commandLineParser.NeedToShowHelp Then
+            ShowProgramHelp()
+            Exit Sub
+        End If
 
-			ConvertRawFileToCSVForLars(strRawFilePath, intPointsPerSpectrumToKeep)
+        Dim sourceFilePath = DEFAULT_FILE_PATH
 
-        Else
-            TestReader("E:\DMS_WorkDir2\20150113FG_MT_F2b.raw")
+        If commandLineParser.NonSwitchParameterCount > 0 Then
+            sourceFilePath = commandLineParser.RetrieveNonSwitchParameter(0)
+        End If
 
-            'TestReader("..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")
-            'TestReader("..\QC_Shew_12_02-250ng-Multiplex_08Jan13_Frodo_12-2-34.raw")
+        Dim fiSourceFile = New IO.FileInfo(sourceFilePath)
 
-            ' Uncomment the following to test the GetCollisionEnergy() function
-            'TestReader("..\EDRN_ERG_Spop_ETV1_50fmolHeavy_0p5ugB53A_Frac48_3Oct12_Gandalf_W33A1_16a.raw")
+        If Not fiSourceFile.Exists Then
+            Console.WriteLine("File not found: " + fiSourceFile.FullName)
+            Exit Sub
+        End If
 
-            ' TestReader("..\CPTAC_10Pep_UndepPlas__Schedule_24Mar13_Gandalf_W22511A1.raw")
+        Dim centroid = commandLineParser.IsParameterPresent("centroid")
+        Dim startScan = 0
+        Dim endScan = 0
 
-            Dim centroid As Boolean = True
+        Dim strValue As String = String.Empty
+        Dim intValue As Integer
 
-            TestReader("F:\MSData\Orbitrap\QC_05_3-a_27Dec05_Pegasus_05-11-13.RAW", centroid)
+        If commandLineParser.RetrieveValueForParameter("Start", strValue) Then
+            If Integer.TryParse(strValue, intValue) Then
+                startScan = intValue
+            End If
+        End If
 
-            centroid = False
-            TestReader("F:\MSData\Orbitrap\QC_05_3-a_27Dec05_Pegasus_05-11-13.RAW", centroid)
+        If commandLineParser.RetrieveValueForParameter("End", strValue) Then
+            If Integer.TryParse(strValue, intValue) Then
+                endScan = intValue
+            End If
+        End If
 
-            centroid = True
-            TestReader("\\proto-6\QExact01\2013_4\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01.raw", centroid)
+        TestReader(fiSourceFile.FullName, centroid, startScan, endScan)
 
-            centroid = False
-            TestReader("\\proto-6\QExact01\2013_4\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01\QC_Shew_13_04_500ng_B1S9_Rogue_13-10-01.raw", centroid)
-		End If
+        If centroid Then
+            ' Also process the file with centroiding off
+            TestReader(fiSourceFile.FullName, False, startScan, endScan)
+        End If
 
-		Console.WriteLine("Done")
+        ' Uncomment the following to test the GetCollisionEnergy() function
+        'TestReader("..\EDRN_ERG_Spop_ETV1_50fmolHeavy_0p5ugB53A_Frac48_3Oct12_Gandalf_W33A1_16a.raw")
 
-	End Sub
+        Console.WriteLine("Done")
 
-	Private Sub ConvertRawFileToCSVForLars(ByVal strRawFilePath As String, ByVal intPointsPerSpectrumToKeep As Integer)
+    End Sub
 
-		Try
-			Dim fiOutputFile As System.IO.FileInfo
-			Dim strOutputFilePath As String
-			strOutputFilePath = IO.Path.ChangeExtension(strRawFilePath, ".csv")
-			fiOutputFile = New System.IO.FileInfo(strOutputFilePath)
 
-			If intPointsPerSpectrumToKeep > 0 Then
-				strOutputFilePath = IO.Path.Combine(fiOutputFile.Directory.FullName, IO.Path.GetFileNameWithoutExtension(fiOutputFile.Name) & "_Top" & intPointsPerSpectrumToKeep & IO.Path.GetExtension(fiOutputFile.Name))
-			End If
+    Private Sub ShowProgramHelp()
 
-			Dim oReader As XRawFileIO
-			oReader = New XRawFileIO()
+        Dim assemblyNameLocation = Assembly.GetExecutingAssembly().Location
 
-			oReader.OpenRawFile(strRawFilePath)
+        Console.WriteLine("Program syntax:" & Environment.NewLine & IO.Path.GetFileName(assemblyNameLocation))
+        Console.WriteLine(" InputFilePath.raw [/Centroid] [/Start:Scan] [/End:Scan]")
 
-			Dim iNumScans = oReader.GetNumScans()
+        Console.WriteLine("Running this program without any parameters it will process file " + DEFAULT_FILE_PATH)
+        Console.WriteLine()
+        Console.WriteLine("The first parameter specifies the file to read")
+        Console.WriteLine()
+        Console.WriteLine("Use /Centroid to centroid the data when reading")
+        Console.WriteLine()
+        Console.WriteLine("Use /Start and /End to limit the scan range to process")
+        Console.WriteLine("If /Start and /End are not provided, then will read every 21 scans")
 
-			Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType
-			Dim bSuccess As Boolean
-			Dim intDataCount As Integer
-			Dim intDataCountToWrite As Integer
-
-			Dim intStartIndex As Integer
-			Dim dblMzList() As Double
-			Dim dblIntensityList() As Double
-
-			ReDim dblMzList(0)
-			ReDim dblIntensityList(0)
-
-			udtScanHeaderInfo = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
-
-			Using swOutFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strOutputFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
-
-				For iScanNum As Integer = 1 To iNumScans
-
-					bSuccess = oReader.GetScanInfo(iScanNum, udtScanHeaderInfo)
-					If bSuccess Then
-
-						If iScanNum Mod 500 = 0 Then
-							Console.WriteLine("Scan " & iScanNum & " at " & udtScanHeaderInfo.RetentionTime.ToString("0.00") & " minutes")
-						End If
-
-                        intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList)
-
-						swOutFile.WriteLine("SPECTRUM - MS,")
-						swOutFile.WriteLine(IO.Path.GetFileName(strRawFilePath) & ",")
-						swOutFile.WriteLine(udtScanHeaderInfo.FilterText & ",")
-
-						If intPointsPerSpectrumToKeep = 0 OrElse intDataCount <= intPointsPerSpectrumToKeep Then
-							intDataCountToWrite = intDataCount
-						Else
-							intDataCountToWrite = intPointsPerSpectrumToKeep
-						End If
-
-						swOutFile.WriteLine("Scan #: " & iScanNum.ToString() & ",")
-						swOutFile.WriteLine("RT: " & udtScanHeaderInfo.RetentionTime.ToString("0.00") & ",")
-						swOutFile.WriteLine("Data points: " & intDataCountToWrite.ToString() & ",")
-						swOutFile.WriteLine("Mass,Intensity")
-
-						If intDataCount <= intDataCountToWrite Then
-
-							For iDataPoint As Integer = 0 To dblMzList.Length - 1
-								ConvertRawFileToCSVForLarsWriteValue(swOutFile, dblMzList(iDataPoint), dblIntensityList(iDataPoint))
-							Next
-
-						Else
-
-							Dim lstDataToKeep As Generic.List(Of Generic.KeyValuePair(Of Double, Double))
-							lstDataToKeep = New Generic.List(Of Generic.KeyValuePair(Of Double, Double))
-
-							' Filter the data by intensity
-							Array.Sort(dblIntensityList, dblMzList)
-
-							' Determine the start index of the data to keep
-							intStartIndex = intDataCount - intPointsPerSpectrumToKeep
-							If intStartIndex < 0 Then intStartIndex = 0
-
-							' Populate lstDataToKeep with the data we want to keep
-							For intIndex As Integer = intStartIndex To dblMzList.Length - 1
-								lstDataToKeep.Add(New Generic.KeyValuePair(Of Double, Double)(dblMzList(intIndex), dblIntensityList(intIndex)))
-							Next
-
-							lstDataToKeep.Sort(New clsMzListComparer)
-
-							For iDataPoint As Integer = 0 To lstDataToKeep.Count - 1
-								ConvertRawFileToCSVForLarsWriteValue(swOutFile, lstDataToKeep(iDataPoint).Key, lstDataToKeep(iDataPoint).Value)
-							Next
-
-						End If
-
-					End If
-				Next
-
-			End Using
-
-			oReader.CloseRawFile()
-
-		Catch ex As Exception
-			Console.WriteLine("Error in sub ConvertRawFileToCSVForLars: " & ex.Message)
-		End Try
-
-	End Sub
-
-	Private Sub ConvertRawFileToCSVForLarsWriteValue(ByRef swOutFile As System.IO.StreamWriter, ByVal dblMZ As Double, dblIntensity As Double)
-		swOutFile.WriteLine(dblMZ.ToString("0.00000") & "," & dblIntensity.ToString("0.00"))
-	End Sub
+    End Sub
 
     Private Sub TestReader(
       ByVal strRawFilePath As String,
@@ -158,8 +89,12 @@ Module modMain
       Optional ByVal scanEnd As Integer = 0)
 
         Try
-            Dim oReader As XRawFileIO
-            oReader = New XRawFileIO()
+            If Not IO.File.Exists(strRawFilePath) Then
+                Console.WriteLine("File not found, skipping: " & strRawFilePath)
+                Exit Sub
+            End If
+
+            Dim oReader = New XRawFileIO()
 
             oReader.OpenRawFile(strRawFilePath)
 
@@ -177,7 +112,7 @@ Module modMain
             Dim dblIntensityList() As Double
             Dim dblMassIntensityPairs As Double(,)
 
-            Dim lstCollisionEnergies As System.Collections.Generic.List(Of Double)
+            Dim lstCollisionEnergies As List(Of Double)
             Dim strCollisionEnergies As String = String.Empty
 
             ReDim dblMzList(0)
@@ -191,7 +126,7 @@ Module modMain
             Dim scanStep = 1
 
             If scanStart < 1 Then scanStart = 1
-            If scanEnd < 1 then 
+            If scanEnd < 1 Then
                 scanEnd = iNumScans
                 scanStep = 21
             Else
@@ -308,10 +243,11 @@ Module modMain
 
 		Return True
 	End Function
+	
 	Private Class clsMzListComparer
 		Inherits Generic.Comparer(Of KeyValuePair(Of Double, Double))
 
-		Public Overrides Function Compare(x As System.Collections.Generic.KeyValuePair(Of Double, Double), y As System.Collections.Generic.KeyValuePair(Of Double, Double)) As Integer
+		Public Overrides Function Compare(x As Collections.Generic.KeyValuePair(Of Double, Double), y As Collections.Generic.KeyValuePair(Of Double, Double)) As Integer
 			If x.Key < y.Key Then
 				Return -1
 			ElseIf x.Key > y.Key Then

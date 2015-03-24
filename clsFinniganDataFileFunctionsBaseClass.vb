@@ -1,4 +1,7 @@
 Option Strict On
+
+Imports System.Runtime.InteropServices
+
 <Assembly: CLSCompliant(True)> 
 
 ' Base class for derived classes that can read Finnigan .Raw files (LCQ, LTQ, etc.)
@@ -172,8 +175,8 @@ Namespace FinniganFileIO
         Public MustOverride Function GetScanInfo(ByVal Scan As Integer, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
         Public MustOverride Function GetScanInfo(ByVal Scan As Integer, ByRef scanInfo As clsScanInfo) As Boolean
 
-		Public MustOverride Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblIonMZ() As Double, ByRef dblIonIntensity() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Integer
-		Public MustOverride Overloads Function GetScanData(ByVal Scan As Integer, ByRef dblIonMZ() As Double, ByRef dblIonIntensity() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
+        Public MustOverride Overloads Function GetScanData(ByVal Scan As Integer, <Out()> ByRef dblIonMZ() As Double, <Out()> ByRef dblIonIntensity() As Double) As Integer
+        Public MustOverride Overloads Function GetScanData(ByVal Scan As Integer, <Out()> ByRef dblIonMZ() As Double, <Out()> ByRef dblIonIntensity() As Double, ByVal intMaxNumberOfPeaks As Integer) As Integer
 
 		Public MustOverride Function OpenRawFile(ByVal FileName As String) As Boolean
 

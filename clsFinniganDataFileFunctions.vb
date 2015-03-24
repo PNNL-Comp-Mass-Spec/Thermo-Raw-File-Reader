@@ -1626,7 +1626,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Overrides Function GetScanData(ByVal scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Integer
+        Public Overloads Function GetScanData(ByVal scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Integer
             Const intMaxNumberOfPeaks As Integer = 0
             Const blnCentroid As Boolean = False
             Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
@@ -1643,7 +1643,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Function GetScanData(ByVal scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal blnCentroid As Boolean) As Integer
+        Public Overloads Function GetScanData(ByVal scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal blnCentroid As Boolean) As Integer
             Const intMaxNumberOfPeaks As Integer = 0
             Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
         End Function
@@ -1659,7 +1659,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Overrides Function GetScanData(ByVal scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
+        Public Overloads Function GetScanData(ByVal scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
             Const blnCentroid As Boolean = False
             Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
         End Function
@@ -1676,7 +1676,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Function GetScanData(ByVal scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
+        Public Overloads Function GetScanData(ByVal scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
             Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
         End Function
 
@@ -1688,7 +1688,7 @@ Namespace FinniganFileIO
         ''' <param name="intensityList"></param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Overloads Function GetScanData(ByVal scanNumber As Integer, <Out()> ByRef mzList() As Double, <Out()> ByRef intensityList() As Double) As Integer
+        Public Overloads Overrides Function GetScanData(ByVal scanNumber As Integer, <Out()> ByRef mzList() As Double, <Out()> ByRef intensityList() As Double) As Integer
             Const intMaxNumberOfPeaks As Integer = 0
             Const blnCentroid As Boolean = False
             Return GetScanData(scanNumber, mzList, intensityList, intMaxNumberOfPeaks, blnCentroid)
@@ -1703,7 +1703,7 @@ Namespace FinniganFileIO
         ''' <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Overloads Function GetScanData(ByVal scanNumber As Integer, <Out()> ByRef mzList() As Double, <Out()> ByRef intensityList() As Double, ByVal maxNumberOfPeaks As Integer) As Integer
+        Public Overloads Overrides Function GetScanData(ByVal scanNumber As Integer, <Out()> ByRef mzList() As Double, <Out()> ByRef intensityList() As Double, ByVal maxNumberOfPeaks As Integer) As Integer
             Const centroid As Boolean = False
             Return GetScanData(scanNumber, mzList, intensityList, maxNumberOfPeaks, centroid)
         End Function
@@ -1718,43 +1718,48 @@ Namespace FinniganFileIO
         ''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Overloads Function GetScanData(ByVal scan As Integer, ByRef dblMZList() As Double, ByRef dblIntensityList() As Double, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
+        Public Overloads Function GetScanData(ByVal scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
 
             Dim dblMassIntensityPairs(,) As Double = Nothing
 
             Dim intDataCount As Integer = GetScanData2D(scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid)
 
             Try
-                If intDataCount > 0 Then
-                    If dblMassIntensityPairs.GetUpperBound(1) + 1 < intDataCount Then
-                        intDataCount = dblMassIntensityPairs.GetUpperBound(1) + 1
+                If intDataCount <= 0 Then
+                    ReDim dblMZList(-1)
+                    ReDim dblIntensityList(-1)
+                    Return 0
+                End If
+
+                If dblMassIntensityPairs.GetUpperBound(1) + 1 < intDataCount Then
+                    intDataCount = dblMassIntensityPairs.GetUpperBound(1) + 1
+                End If
+
+                ReDim dblMZList(intDataCount - 1)
+                ReDim dblIntensityList(intDataCount - 1)
+                Dim sortRequired As Boolean = False
+
+                For intIndex = 0 To intDataCount - 1
+                    dblMZList(intIndex) = dblMassIntensityPairs(0, intIndex)
+                    dblIntensityList(intIndex) = dblMassIntensityPairs(1, intIndex)
+
+                    ' Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z, 
+                    ' we have observed a few cases in certain scans of certain datasets that points with 
+                    ' similar m/z values are swapped and ths slightly out of order
+                    ' The following if statement checks for this
+                    If (intIndex > 0 AndAlso dblMZList(intIndex) < dblMZList(intIndex - 1)) Then
+                        sortRequired = True
                     End If
 
-                    ReDim dblMZList(intDataCount - 1)
-                    ReDim dblIntensityList(intDataCount - 1)
-                    Dim sortRequired As Boolean = False
+                Next intIndex
 
-                    For intIndex = 0 To intDataCount - 1
-                        dblMZList(intIndex) = dblMassIntensityPairs(0, intIndex)
-                        dblIntensityList(intIndex) = dblMassIntensityPairs(1, intIndex)
-
-                        ' Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z, 
-                        ' we have observed a few cases in certain scans of certain datasets that points with 
-                        ' similar m/z values are swapped and ths slightly out of order
-                        ' The following if statement checks for this
-                        If (intIndex > 0 AndAlso dblMZList(intIndex) < dblMZList(intIndex - 1)) Then
-                            sortRequired = True
-                        End If
-
-                    Next intIndex
-
-                    If sortRequired Then
-                        Array.Sort(dblMZList, dblIntensityList)
-                    End If
-
+                If sortRequired Then
+                    Array.Sort(dblMZList, dblIntensityList)
                 End If
 
             Catch
+                ReDim dblMZList(-1)
+                ReDim dblIntensityList(-1)
                 intDataCount = -1
             End Try
 
