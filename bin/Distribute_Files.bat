@@ -3,7 +3,11 @@ echo Copy the DLL, PDF, and XML to Lib folders
 @echo on
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /Y
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\" /Y
+
+xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\" /Y
+
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\MASIC\Lib\" /Y
+
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\" /Y
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\MSGF_Runner\Lib\" /Y
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PHRPReader\Lib\" /Y
@@ -75,10 +79,15 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DM
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestAScorePlugIn\bin\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestMagePlugIn\bin\Debug\" /Y
 
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\CaptureTaskManager\CaptureTaskManager\bin\Debug\" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\CaptureTaskManager\CaptureTaskManager\bin\Debug_NoDartFTP\" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\DeployedFiles" /Y
+
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\CodeTestCS\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\CodeTestCS\lib" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MASIC\bin\" /Y
+
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MASICResultsMerger\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MASICResultsMerger\Lib" /Y
 
@@ -86,9 +95,6 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MS
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\MSGF_Runner\bin\" /Y
-
-xcopy Release\ThermoRawFileReaderDLL.dll "
-
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\lib\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\DLL\Debug\" /Y
