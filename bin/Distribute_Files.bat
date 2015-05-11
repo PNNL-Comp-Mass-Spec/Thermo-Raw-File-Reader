@@ -32,7 +32,6 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DM
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_AScore_PlugIn\bin\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Cyclops_PlugIn\bin\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_DataImport_Plugin\bin" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Decon2ls_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Decon2ls_PlugIn_Decon2LSV2\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_DTA_Import_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_DTA_Split_PlugIn\bin" /Y
@@ -52,7 +51,6 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DM
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSAlign_Histone_Plugin\bin\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSAlign_Plugin\bin\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSAlign_Quant_Plugin\bin" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSClusterDTAtoDAT_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSDeconv_Plugin\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\Bin\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\MSGF_Results_Summarizer\bin\" /Y
@@ -61,7 +59,7 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DM
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSMSSpectrumFilter_PlugIn\bin\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSXML_Bruker_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSXML_Gen_PlugIn\bin\" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MultiAlign_Aggregator_PlugIn\bin\Debug\" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MultiAlign_Aggregator_PlugIn\bin\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MultiAlign_Plugin\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_OMSSA_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Phospho_FDR_Aggregator_PlugIn\bin\" /Y
@@ -73,7 +71,6 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DM
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Sequest_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_SMAQC_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_XTandem_PlugIn\bin" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_XTandemHPC_PlugIn\bin" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestApePlugIn\bin\Debug\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestAScorePlugIn\bin\Debug" /Y
@@ -152,7 +149,6 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\A
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\lib" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\IDM_Console\bin\Debug" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\IDM_Console\bin\Release" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\bin\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\bin\Release" /Y
 
