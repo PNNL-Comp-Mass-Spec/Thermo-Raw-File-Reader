@@ -1,5 +1,11 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5665; July 6, 2015
+	- Added property ActivationType for ScanInfo
+		- Data value comes from a RawFileReader call, in contrast with CollisionMode, which is parsed from the scan filter string
+		- Uses enum ActivationTypeConstants
+	- Added function TryGetScanEvent to clsScanInfo
+
 Version 1.1.5556; March 19, 2015
 	- Now using GetLabelData() to obtained centroided data from high resolution instruments
 	- Overloaded GetScanInfo() to an output parameter of type ScanInfo (a class) instead of type udtScanHeaderInfoType (a struct)

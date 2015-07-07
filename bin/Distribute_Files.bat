@@ -19,6 +19,7 @@ xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\BrianLaMarche\M
 
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\DLLLibrary" /Y
 
+xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\SangtaeKim\InformedProteomics\lib" /Y
 
 @echo off
 echo Copy the DLL to bin folders
@@ -151,6 +152,8 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\A
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\IDM_Console\bin\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\bin\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\bin\Release" /Y
+
+rem xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\SangtaeKim\InformedProteomics\" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\KevinCrowell\LipidTools\lib" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\KevinCrowell\LipidTools\LipidTools\bin\x86\Debug" /Y

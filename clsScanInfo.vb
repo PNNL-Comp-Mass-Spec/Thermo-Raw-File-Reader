@@ -1,4 +1,6 @@
-﻿Imports ThermoRawFileReaderDLL.FinniganFileIO
+﻿Imports System.Linq
+Imports System.Runtime.InteropServices
+Imports ThermoRawFileReaderDLL.FinniganFileIO
 
 Public Class clsScanInfo
 
@@ -152,7 +154,15 @@ Public Class clsScanInfo
     Public Property ParentIonMZ As Double
 
     ''' <summary>
-    ''' Collision mode
+    ''' Activation type (aka activation method) as reported by the reader
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ActivationType As FinniganFileReaderBaseClass.ActivationTypeConstants
+
+    ''' <summary>
+    ''' Collision mode, determined from the filter string
     ''' </summary>
     ''' <value></value>
     ''' <returns></returns>
@@ -253,6 +263,7 @@ Public Class clsScanInfo
 
         mFilterString = String.Empty
         CollisionMode = String.Empty
+        ActivationType = FinniganFileReaderBaseClass.ActivationTypeConstants.Unknown
 
         mScanEvents = New List(Of KeyValuePair(Of String, String))
         mStatusLog = New List(Of KeyValuePair(Of String, String))
@@ -289,6 +300,36 @@ Public Class clsScanInfo
         StoreParallelStrings(mStatusLog, logNames, logValues)
     End Sub
 
+    ''' <summary>
+    ''' Get the event value associated with the given scan event name
+    ''' </summary>
+    ''' <param name="eventName">Event name to find</param>
+    ''' <param name="eventValue">Event value</param>
+    ''' <param name="partialMatchToStart">Set to true to match the start of an event name, and not require a full match</param>
+    ''' <returns>True if found a match for the event name, otherwise false</returns>
+    ''' <remarks>Event names nearly always end in a colon, e.g. "Monoisotopic M/Z:" or "Charge State:"</remarks>
+    Public Function TryGetScanEvent(ByVal eventName As String, <Out()> ByRef eventValue As String, Optional partialMatchToStart As Boolean = False) As Boolean
+
+        Dim lstResults As IEnumerable(Of KeyValuePair(Of String, String))
+
+        If partialMatchToStart Then
+            ' Partial match
+            lstResults = From item In mScanEvents Where item.Key.ToLower().StartsWith(eventName.ToLower()) Select item
+        Else
+            lstResults = From item In mScanEvents Where String.Equals(item.Key, eventName, StringComparison.CurrentCultureIgnoreCase) Select item
+        End If
+
+        For Each item In lstResults
+            eventValue = item.Value
+            Return True
+        Next
+
+        eventValue = String.Empty
+        Return False
+
+    End Function
+
+
     Public Overrides Function ToString() As String
         If String.IsNullOrEmpty(FilterText) Then
             Return "Scan " & ScanNumber & ": Generic ScanHeaderInfo"
@@ -321,6 +362,8 @@ Public Class clsScanInfo
             FilterText = .FilterText
             ParentIonMZ = .ParentIonMZ
             CollisionMode = .CollisionMode
+            ActivationType = .ActivationType
+
             IonMode = .IonMode
             MRMInfo = .MRMInfo
 
@@ -336,18 +379,16 @@ Public Class clsScanInfo
     End Sub
 
     Private Sub StoreParallelStrings(
-       ByVal targetList As List(Of KeyValuePair(Of String, String)),
-       ByVal names As String(),
-       ByVal values As String())
+       ByVal targetList As ICollection(Of KeyValuePair(Of String, String)),
+       ByVal names As IList(Of String),
+       ByVal values As IList(Of String))
 
         targetList.Clear()
 
-        For i As Integer = 0 To names.Length - 1
+        For i = 0 To names.Count - 1
             targetList.Add(New KeyValuePair(Of String, String)(names(i), values(i)))
         Next
 
     End Sub
 #End Region
-
-
 End Class

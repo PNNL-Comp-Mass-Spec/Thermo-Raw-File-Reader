@@ -4,15 +4,17 @@ Option Strict On
 ' raw mass spectrum info from Finnigan LCQ, LTQ, and LTQ-FT files
 ' 
 ' Required Dlls: fileio.dll, fregistry.dll, and MSFileReader.XRawfile2.dll
-' DLLs obtained from: Thermo software named "MS File Reader 2.2"
+' DLLs obtained from: Thermo software named "MSFileReader2.2"
 ' Download link: http://sjsupport.thermofinnigan.com/public/detail.asp?id=703
-' 
+'
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Switched from XRawFile2.dll to MSFileReader.XRawfile2.dll in March 2012
-
-' Last modified March 19, 2015
+' Switched from XRawFile2.dll to MSFileReader.XRawfile2.dll in March 2012 (that DLL comes with ProteoWizard)
+'
+' If having troubles reading files, install MS File Reader 3.0 SP3
+' Download link: https://thermo.flexnetoperations.com/control/thmo/login
+' Last modified July 6, 2015
 
 Imports System.Runtime.InteropServices
 Imports System.Linq
@@ -109,11 +111,13 @@ Namespace FinniganFileIO
             Public ParentIonMZ As Double
             Public CollisionEnergy As Single
             Public CollisionMode As String
+            Public ActivationType As ActivationTypeConstants
             Public Sub Clear()
                 MSLevel = 1
                 ParentIonMZ = 0
                 CollisionEnergy = 0
                 CollisionMode = String.Empty
+                ActivationType = ActivationTypeConstants.Unknown
             End Sub
         End Structure
 #End Region
@@ -738,6 +742,30 @@ Namespace FinniganFileIO
 
         End Function
 
+        Private Function GetActivationType(scan As Integer, msLevel As Integer) As ActivationTypeConstants
+
+            Try
+
+                Dim activationTypeCode As Integer = 0
+
+                mXRawFile.GetActivationTypeForScanNum(scan, msLevel, activationTypeCode)
+
+                Dim activationType As ActivationTypeConstants
+
+                If Not [Enum].TryParse(Of ActivationTypeConstants)(activationTypeCode.ToString(), activationType) Then
+                    activationType = ActivationTypeConstants.Unknown
+                End If
+
+                Return activationType
+
+            Catch ex As Exception
+                Dim strError As String = "Error: Exception in GetActivationType: " & ex.Message
+                RaiseWarningMessage(strError)
+                Return ActivationTypeConstants.Unknown
+            End Try
+
+        End Function
+
         Public Function GetCollisionEnergy(ByVal scan As Integer) As List(Of Double)
 
             Dim intNumMSOrders As Integer
@@ -968,6 +996,9 @@ Namespace FinniganFileIO
                         ' We'll set the Parent Ion to 0 m/z and the collision mode to CID
                         scanInfo.ParentIonMZ = 0
                         scanInfo.CollisionMode = "cid"
+                        If scanInfo.ActivationType = ActivationTypeConstants.Unknown Then
+                            scanInfo.ActivationType = ActivationTypeConstants.CID
+                        End If
                         scanInfo.MRMScanType = MRMScanTypeConstants.NotMRM
                     Else
                         Dim dblParentIonMZ As Double
@@ -1027,6 +1058,9 @@ Namespace FinniganFileIO
                 End If
 
                 scanInfo.IonMode = DetermineIonizationMode(scanInfo.FilterText)
+
+                ' Now that we know MSLevel we can lookup the activation type (aka activation method)
+                scanInfo.ActivationType = GetActivationType(scan, scanInfo.MSLevel)
 
                 If Not scanInfo.MRMScanType = MRMScanTypeConstants.NotMRM Then
                     ' Parse out the MRM_QMS or SRM information for this scan
@@ -1495,6 +1529,7 @@ Namespace FinniganFileIO
 
                 .FilterText = scanInfo.FilterText
                 .ParentIonMZ = scanInfo.ParentIonMZ
+                .ActivationType = scanInfo.ActivationType
                 .CollisionMode = scanInfo.CollisionMode
                 .IonMode = scanInfo.IonMode
                 .MRMInfo = scanInfo.MRMInfo
