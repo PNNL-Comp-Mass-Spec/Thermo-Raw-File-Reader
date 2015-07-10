@@ -1,18 +1,19 @@
 ﻿Option Strict On
 
 Imports System.Reflection
+Imports ThermoRawFileReaderDLL
 Imports ThermoRawFileReaderDLL.FinniganFileIO
 
 Module modMain
 
     Private Const DEFAULT_FILE_PATH As String = "..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW"
 
-	Public Sub Main()
+    Public Sub Main()
 
         Dim commandLineParser = New clsParseCommandLine()
         commandLineParser.ParseCommandLine()
-		
-		 If commandLineParser.NeedToShowHelp Then
+
+        If commandLineParser.NeedToShowHelp Then
             ShowProgramHelp()
             Exit Sub
         End If
@@ -31,6 +32,8 @@ Module modMain
         End If
 
         Dim centroid = commandLineParser.IsParameterPresent("centroid")
+        Dim testSumming = commandLineParser.IsParameterPresent("sum")
+
         Dim startScan = 0
         Dim endScan = 0
 
@@ -49,11 +52,11 @@ Module modMain
             End If
         End If
 
-        TestReader(fiSourceFile.FullName, centroid, startScan, endScan)
+        TestReader(fiSourceFile.FullName, centroid, testSumming, startScan, endScan)
 
         If centroid Then
             ' Also process the file with centroiding off
-            TestReader(fiSourceFile.FullName, False, startScan, endScan)
+            TestReader(fiSourceFile.FullName, False, testSumming, startScan, endScan)
         End If
 
         ' Uncomment the following to test the GetCollisionEnergy() function
@@ -69,13 +72,14 @@ Module modMain
         Dim assemblyNameLocation = Assembly.GetExecutingAssembly().Location
 
         Console.WriteLine("Program syntax:" & Environment.NewLine & IO.Path.GetFileName(assemblyNameLocation))
-        Console.WriteLine(" InputFilePath.raw [/Centroid] [/Start:Scan] [/End:Scan]")
+        Console.WriteLine(" InputFilePath.raw [/Centroid] [/Sum] [/Start:Scan] [/End:Scan]")
 
         Console.WriteLine("Running this program without any parameters it will process file " + DEFAULT_FILE_PATH)
         Console.WriteLine()
         Console.WriteLine("The first parameter specifies the file to read")
         Console.WriteLine()
         Console.WriteLine("Use /Centroid to centroid the data when reading")
+        Console.WriteLine("Use /Sum to test summing the data across 15 scans (each spectrum will be shown twice; once with summing and once without)")
         Console.WriteLine()
         Console.WriteLine("Use /Start and /End to limit the scan range to process")
         Console.WriteLine("If /Start and /End are not provided, then will read every 21 scans")
@@ -83,20 +87,21 @@ Module modMain
     End Sub
 
     Private Sub TestReader(
-      ByVal strRawFilePath As String,
-      Optional ByVal blnCentroid As Boolean = False,
+      ByVal rawFilePath As String,
+      Optional ByVal centroid As Boolean = False,
+      Optional ByVal testSumming As Boolean = False,
       Optional ByVal scanStart As Integer = 0,
       Optional ByVal scanEnd As Integer = 0)
 
         Try
-            If Not IO.File.Exists(strRawFilePath) Then
-                Console.WriteLine("File not found, skipping: " & strRawFilePath)
+            If Not IO.File.Exists(rawFilePath) Then
+                Console.WriteLine("File not found, skipping: " & rawFilePath)
                 Exit Sub
             End If
 
             Dim oReader = New XRawFileIO()
 
-            oReader.OpenRawFile(strRawFilePath)
+            oReader.OpenRawFile(rawFilePath)
 
             For intIndex As Integer = 0 To oReader.FileInfo.InstMethods.Length - 1
                 Console.WriteLine(oReader.FileInfo.InstMethods(intIndex))
@@ -106,7 +111,6 @@ Module modMain
 
             Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType
             Dim bSuccess As Boolean
-            Dim intDataCount As Integer
 
             Dim dblMzList() As Double
             Dim dblIntensityList() As Double
@@ -118,8 +122,6 @@ Module modMain
             ReDim dblMzList(0)
             ReDim dblIntensityList(0)
             ReDim dblMassIntensityPairs(0, 0)
-
-            udtScanHeaderInfo = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
 
             ShowMethod(oReader)
 
@@ -137,7 +139,9 @@ Module modMain
 
             For iScanNum As Integer = scanStart To scanEnd Step scanStep
 
-                bSuccess = oReader.GetScanInfo(iScanNum, udtScanHeaderInfo)
+                Dim oScanInfo As clsScanInfo
+
+                bSuccess = oReader.GetScanInfo(iScanNum, oScanInfo)
                 If bSuccess Then
                     Console.Write("Scan " & iScanNum & " at " & udtScanHeaderInfo.RetentionTime.ToString("0.00") & " minutes: " & udtScanHeaderInfo.FilterText)
                     lstCollisionEnergies = oReader.GetCollisionEnergy(iScanNum)
@@ -160,15 +164,31 @@ Module modMain
                         Console.WriteLine("; CE " & strCollisionEnergies)
                     End If
 
+                    Dim monoMZ As String
+                    Dim chargeState As String
+                    Dim isolationWidth As String
+
+                    If oScanInfo.TryGetScanEvent("Monoisotopic M/Z:", monoMZ, False) Then
+                        Console.WriteLine("Monoisotopic M/Z: " + monoMZ)
+                    End If
+
+                    If oScanInfo.TryGetScanEvent("Charge State", chargeState, True) Then
+                        Console.WriteLine("Charge State: " + chargeState)
+                    End If
+
+                    If oScanInfo.TryGetScanEvent("MS2 Isolation Width", isolationWidth, True) Then
+                        Console.WriteLine("MS2 Isolation Width: " + isolationWidth)
+                    End If
+
                     If iScanNum Mod 50 = 0 OrElse scanEnd - scanStart <= 50 Then
                         ' Get the data for scan iScanNum
 
                         Console.WriteLine()
                         Console.WriteLine("Spectrum for scan " & iScanNum)
-                        intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, 0, blnCentroid)
+                        Dim intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, 0, centroid)
 
                         Dim mzDisplayStepSize = 50
-                        If blnCentroid Then
+                        If centroid Then
                             mzDisplayStepSize = 1
                         End If
 
@@ -178,10 +198,10 @@ Module modMain
                         Console.WriteLine()
 
                         Const scansToSum As Integer = 15
-                        If iScanNum + scansToSum < iNumScans Then
+                        If iScanNum + scansToSum < iNumScans And testSumming Then
 
                             ' Get the data for scan iScanNum through iScanNum + 15
-                            oReader.GetScanDataSumScans(iScanNum, iScanNum + scansToSum, dblMassIntensityPairs, 0, blnCentroid)
+                            oReader.GetScanDataSumScans(iScanNum, iScanNum + scansToSum, dblMassIntensityPairs, 0, centroid)
 
                             Console.WriteLine("Summed spectrum, scans " & iScanNum & " through " & (iScanNum + scansToSum).ToString())
 
@@ -205,57 +225,57 @@ Module modMain
         End Try
     End Sub
 
-	Private Function ShowMethod(ByVal oReader As XRawFileIO) As Boolean
-		Dim intInstMethodCount As Integer
-		Dim strMethodNum As String
+    Private Function ShowMethod(ByVal oReader As XRawFileIO) As Boolean
+        Dim intInstMethodCount As Integer
+        Dim strMethodNum As String
 
-		Try
-			intInstMethodCount = oReader.FileInfo.InstMethods.Length
-		Catch ex As Exception
-			Return False
-		End Try
+        Try
+            intInstMethodCount = oReader.FileInfo.InstMethods.Length
+        Catch ex As Exception
+            Return False
+        End Try
 
-		Try
-			For intIndex = 0 To intInstMethodCount - 1
-				If intIndex = 0 And oReader.FileInfo.InstMethods.Length = 1 Then
-					strMethodNum = String.Empty
-				Else
-					strMethodNum = (intIndex + 1).ToString.Trim
-				End If
+        Try
+            For intIndex = 0 To intInstMethodCount - 1
+                If intIndex = 0 And oReader.FileInfo.InstMethods.Length = 1 Then
+                    strMethodNum = String.Empty
+                Else
+                    strMethodNum = (intIndex + 1).ToString.Trim
+                End If
 
-				With oReader.FileInfo
-					Console.WriteLine("Instrument model: " & .InstModel)
-					Console.WriteLine("Instrument name: " & .InstName)
-					Console.WriteLine("Instrument description: " & .InstrumentDescription)
-					Console.WriteLine("Instrument serial number: " & .InstSerialNumber)
-					Console.WriteLine()
+                With oReader.FileInfo
+                    Console.WriteLine("Instrument model: " & .InstModel)
+                    Console.WriteLine("Instrument name: " & .InstName)
+                    Console.WriteLine("Instrument description: " & .InstrumentDescription)
+                    Console.WriteLine("Instrument serial number: " & .InstSerialNumber)
+                    Console.WriteLine()
 
-					Console.WriteLine(oReader.FileInfo.InstMethods(intIndex))
-				End With
+                    Console.WriteLine(oReader.FileInfo.InstMethods(intIndex))
+                End With
 
 
-			Next intIndex
+            Next intIndex
 
-		Catch ex As Exception
-			Console.WriteLine("Error loading the MS Method: " & ex.Message)
-			Return False
-		End Try
+        Catch ex As Exception
+            Console.WriteLine("Error loading the MS Method: " & ex.Message)
+            Return False
+        End Try
 
-		Return True
-	End Function
-	
-	Private Class clsMzListComparer
-		Inherits Generic.Comparer(Of KeyValuePair(Of Double, Double))
+        Return True
+    End Function
 
-		Public Overrides Function Compare(x As Collections.Generic.KeyValuePair(Of Double, Double), y As Collections.Generic.KeyValuePair(Of Double, Double)) As Integer
-			If x.Key < y.Key Then
-				Return -1
-			ElseIf x.Key > y.Key Then
-				Return 1
-			Else
-				Return 0
-			End If
-		End Function
-	End Class
+    Private Class clsMzListComparer
+        Inherits Generic.Comparer(Of KeyValuePair(Of Double, Double))
+
+        Public Overrides Function Compare(x As Collections.Generic.KeyValuePair(Of Double, Double), y As Collections.Generic.KeyValuePair(Of Double, Double)) As Integer
+            If x.Key < y.Key Then
+                Return -1
+            ElseIf x.Key > y.Key Then
+                Return 1
+            Else
+                Return 0
+            End If
+        End Function
+    End Class
 
 End Module
