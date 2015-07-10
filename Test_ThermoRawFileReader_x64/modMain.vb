@@ -109,7 +109,6 @@ Module modMain
 
             Dim iNumScans = oReader.GetNumScans()
 
-            Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType
             Dim bSuccess As Boolean
 
             Dim dblMzList() As Double
@@ -139,11 +138,11 @@ Module modMain
 
             For iScanNum As Integer = scanStart To scanEnd Step scanStep
 
-                Dim oScanInfo As clsScanInfo
+                Dim oScanInfo As clsScanInfo = Nothing
 
                 bSuccess = oReader.GetScanInfo(iScanNum, oScanInfo)
                 If bSuccess Then
-                    Console.Write("Scan " & iScanNum & " at " & udtScanHeaderInfo.RetentionTime.ToString("0.00") & " minutes: " & udtScanHeaderInfo.FilterText)
+                    Console.Write("Scan " & iScanNum & " at " & oScanInfo.RetentionTime.ToString("0.00") & " minutes: " & oScanInfo.FilterText)
                     lstCollisionEnergies = oReader.GetCollisionEnergy(iScanNum)
 
                     If lstCollisionEnergies.Count = 0 Then
@@ -164,9 +163,9 @@ Module modMain
                         Console.WriteLine("; CE " & strCollisionEnergies)
                     End If
 
-                    Dim monoMZ As String
-                    Dim chargeState As String
-                    Dim isolationWidth As String
+                    Dim monoMZ As String = String.Empty
+                    Dim chargeState As String = String.Empty
+                    Dim isolationWidth As String = String.Empty
 
                     If oScanInfo.TryGetScanEvent("Monoisotopic M/Z:", monoMZ, False) Then
                         Console.WriteLine("Monoisotopic M/Z: " + monoMZ)
