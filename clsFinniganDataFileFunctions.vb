@@ -14,7 +14,7 @@ Option Strict On
 '
 ' If having troubles reading files, install MS File Reader 3.0 SP3
 ' Download link: https://thermo.flexnetoperations.com/control/thmo/login
-' Last modified July 6, 2015
+' Last modified October 13, 2015
 
 Imports System.Runtime.InteropServices
 Imports System.Linq
@@ -41,6 +41,7 @@ Namespace FinniganFileIO
         Private Const FULL_MS_TEXT As String = "Full ms "
         Private Const FULL_PR_TEXT As String = "Full pr "               ' TSQ: Full Parent Scan, Product Mass
         Private Const SIM_MS_TEXT As String = "SIM ms "
+        Private Const FULL_LOCK_MS_TEXT As String = "Full lock ms "     ' Lock mass scan
 
         Private Const MRM_Q1MS_TEXT As String = "Q1MS "
         Private Const MRM_Q3MS_TEXT As String = "Q3MS "
@@ -195,23 +196,47 @@ Namespace FinniganFileIO
 
         End Sub
 
-        Public Shared Function DetermineMRMScanType(ByVal strFilterText As String) As MRMScanTypeConstants
-            Dim eMRMScanType As MRMScanTypeConstants
+        Private Shared Function ContainsAny(stringToSearch As String, itemsToFind As List(Of String), Optional indexSearchStart As Integer = 0, Optional matchCase As Boolean = False) As Boolean
 
-            eMRMScanType = MRMScanTypeConstants.NotMRM
-            If Not String.IsNullOrWhiteSpace(strFilterText) Then
-                If strFilterText.IndexOf(MRM_Q1MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
-                   strFilterText.IndexOf(MRM_Q3MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
-                    eMRMScanType = MRMScanTypeConstants.MRMQMS
-                ElseIf strFilterText.IndexOf(MRM_SRM_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
-                    eMRMScanType = MRMScanTypeConstants.SRM
-                ElseIf strFilterText.IndexOf(MRM_SIM_PR_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
-                    ' This is not technically SRM, but the data looks very similar, so we'll track it like SRM data
-                    eMRMScanType = MRMScanTypeConstants.SRM
-                ElseIf strFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
-                    eMRMScanType = MRMScanTypeConstants.FullNL
+            Return itemsToFind.Any(Function(item) ContainsText(stringToSearch, item, indexSearchStart, matchCase))
 
+        End Function
+
+        Private Shared Function ContainsText(stringToSearch As String, textToFind As String, Optional indexSearchStart As Integer = 0, Optional matchCase As Boolean = False) As Boolean
+
+            If matchCase Then
+                If stringToSearch.IndexOf(textToFind, StringComparison.CurrentCulture) >= indexSearchStart Then
+                    Return True
                 End If
+            Else
+                If stringToSearch.IndexOf(textToFind, StringComparison.CurrentCultureIgnoreCase) >= indexSearchStart Then
+                    Return True
+                End If
+            End If
+
+            Return False
+
+        End Function
+
+        Public Shared Function DetermineMRMScanType(ByVal strFilterText As String) As MRMScanTypeConstants
+            Dim eMRMScanType = MRMScanTypeConstants.NotMRM
+
+            If String.IsNullOrWhiteSpace(strFilterText) Then
+                Return eMRMScanType
+            End If
+
+            Dim mrmQMSTags = New List(Of String) From {MRM_Q1MS_TEXT, MRM_Q3MS_TEXT}
+
+            If ContainsAny(strFilterText, mrmQMSTags, 1) Then
+                eMRMScanType = MRMScanTypeConstants.MRMQMS
+            ElseIf ContainsText(strFilterText, MRM_SRM_TEXT, 1) Then
+                eMRMScanType = MRMScanTypeConstants.SRM
+            ElseIf ContainsText(strFilterText, MRM_SIM_PR_TEXT, 1) Then
+                ' This is not technically SRM, but the data looks very similar, so we'll track it like SRM data
+                eMRMScanType = MRMScanTypeConstants.SRM
+            ElseIf ContainsText(strFilterText, MRM_FullNL_TEXT, 1) Then
+                eMRMScanType = MRMScanTypeConstants.FullNL
+
             End If
 
             Return eMRMScanType
@@ -1032,6 +1057,7 @@ Namespace FinniganFileIO
                     ' MS data
                     ' Make sure .FilterText contains one of the following:
                     '   FULL_MS_TEXT = "Full ms "
+                    '   FULL_LOCK_MS_TEXT = "Full lock ms "
                     '   FULL_PR_TEXT = "Full pr "
                     '   SIM_MS_TEXT = "SIM ms "
                     '   SIM_PR_TEXT = "SIM pr "
@@ -1197,6 +1223,7 @@ Namespace FinniganFileIO
                 Else
                     ' Make sure strFilterText contains one of the following:
                     '   FULL_MS_TEXT = "Full ms "
+                    '   FULL_LOCK_MS_TEXT = "Full lock ms "
                     '   FULL_PR_TEXT = "Full pr "
                     '   SIM_MS_TEXT = "SIM ms "
                     '   SIM_PR_TEXT = "SIM pr "
@@ -1242,10 +1269,10 @@ Namespace FinniganFileIO
 
                         Select Case eMRMScanType
                             Case MRMScanTypeConstants.MRMQMS
-                                If strFilterText.IndexOf(MRM_Q1MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
+                                If ContainsText(strFilterText, MRM_Q1MS_TEXT, 1) Then
                                     strScanTypeName = MRM_Q1MS_TEXT.Trim
 
-                                ElseIf strFilterText.IndexOf(MRM_Q3MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
+                                ElseIf ContainsText(strFilterText, MRM_Q3MS_TEXT, 1) Then
                                     strScanTypeName = MRM_Q3MS_TEXT.Trim
                                 Else
                                     ' Unknown QMS mode
@@ -1497,13 +1524,9 @@ Namespace FinniganFileIO
 
         End Function
 
-        Private Shared Function ScanIsFTMS(ByVal strfilterText As String) As Boolean
+        Private Shared Function ScanIsFTMS(ByVal strFilterText As String) As Boolean
 
-            If strfilterText.IndexOf("FTMS", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
-                Return True
-            End If
-
-            Return False
+            Return ContainsText(strFilterText, "FTMS", 0)
 
         End Function
 
@@ -1604,27 +1627,26 @@ Namespace FinniganFileIO
             eMRMScanType = MRMScanTypeConstants.NotMRM
             blnZoomScan = False
 
-            If strFilterText.IndexOf(FULL_MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
-               strFilterText.IndexOf(MS_ONLY_C_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
-               strFilterText.IndexOf(MS_ONLY_P_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
-               strFilterText.IndexOf(FULL_PR_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
+            Dim ms1Tags = New List(Of String) From {FULL_MS_TEXT, MS_ONLY_C_TEXT, MS_ONLY_P_TEXT, FULL_PR_TEXT, FULL_LOCK_MS_TEXT}
+
+            Dim zoomTags = New List(Of String) From {MS_ONLY_Z_TEXT, MS_ONLY_PZ_TEXT, MS_ONLY_DZ_TEXT}
+
+            If ContainsAny(strFilterText, ms1Tags, 1) Then
                 ' This is really a Full MS scan
                 intMSLevel = 1
                 blnSIMScan = False
                 blnValidScan = True
             Else
-                If strFilterText.IndexOf(SIM_MS_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
+                If ContainsText(strFilterText, SIM_MS_TEXT, 1) Then
                     ' This is really a SIM MS scan
                     intMSLevel = 1
                     blnSIMScan = True
                     blnValidScan = True
-                ElseIf strFilterText.IndexOf(MS_ONLY_Z_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
-                  strFilterText.IndexOf(MS_ONLY_PZ_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 OrElse
-                  strFilterText.IndexOf(MS_ONLY_DZ_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
+                ElseIf ContainsAny(strFilterText, zoomTags, 1) Then
                     intMSLevel = 1
                     blnZoomScan = True
                     blnValidScan = True
-                ElseIf strFilterText.IndexOf(MS_ONLY_PZ_MS2_TEXT, StringComparison.CurrentCultureIgnoreCase) > 0 Then
+                ElseIf ContainsText(strFilterText, MS_ONLY_PZ_MS2_TEXT, 1) Then
                     ' Technically, this should have MSLevel = 2, but that would cause a bunch of problems elsewhere in MASIC
                     ' Thus, we'll pretend it's MS1
                     intMSLevel = 1
