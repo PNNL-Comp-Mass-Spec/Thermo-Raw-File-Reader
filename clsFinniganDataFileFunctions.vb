@@ -121,6 +121,30 @@ Namespace FinniganFileIO
                 ActivationType = ActivationTypeConstants.Unknown
             End Sub
         End Structure
+
+        Public Structure udtMassPrecisionInfoType
+            Public Intensity As Double
+            Public Mass As Double
+            Public AccuracyMMU As Double
+            Public AccuracyPPM As Double
+            Public Resolution As Double
+        End Structure
+
+        Public Structure udtFTLabelInfoType
+            Public Mass As Double
+            Public Intensity As Double
+            Public Resolution As Single
+            Public Baseline As Single
+            Public Noise As Single
+            Public Charge As Integer
+        End Structure
+
+        '' Only used by GetNoiseData(), which is commented out.
+        'Public Structure udtNoisePackets
+        '    Public Mass As Double
+        '    Public Noise As Single
+        '    Public Baseline As Single
+        'End Structure
 #End Region
 
 #Region "Classwide Variables"
@@ -1999,6 +2023,247 @@ Namespace FinniganFileIO
             Return -1
 
         End Function
+
+        ''' <summary>
+        ''' Gets the scan label data for FTMS-tagged scans; includes resolution and noise data for each peak
+        ''' </summary>
+        ''' <param name="scan"></param>
+        ''' <param name="ftLabelData"></param>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
+        Public Function GetScanLabelData(ByVal scan As Integer, <Out()> ByRef ftLabelData() As udtFTLabelInfoType) As Integer
+
+            ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
+            ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
+
+            Dim intDataCount As Integer
+
+            If scan < mFileInfo.ScanStart Then
+                scan = mFileInfo.ScanStart
+            ElseIf scan > mFileInfo.ScanEnd Then
+                scan = mFileInfo.ScanEnd
+            End If
+
+            Dim scanInfo As clsScanInfo = Nothing
+
+            If Not GetScanInfo(scan, scanInfo) Then
+                Throw New Exception("Cannot retrieve ScanInfo from cache for scan " & scan & "; cannot retrieve scan data")
+            End If
+
+            Try
+                If mXRawFile Is Nothing Then
+                    Exit Try
+                End If
+
+                If Not scanInfo.IsFTMS Then
+                    Exit Try
+                End If
+
+                Dim labelData As Object = Nothing
+                Dim labelFlags As Object = Nothing
+
+                mXRawFile.GetLabelData(labelData, labelFlags, scan)
+
+                Dim labelDataArray As Double(,)
+                labelDataArray = CType(labelData, Double(,))
+                intDataCount = labelDataArray.GetLength(1)
+
+                If intDataCount > 0 Then
+                    ReDim ftLabelData(intDataCount - 1)
+
+                    For i = 0 To intDataCount - 1
+                        Dim labelInfo As New udtFTLabelInfoType
+
+                        With labelInfo
+                            .Mass = labelDataArray(0, i)
+                            .Intensity = labelDataArray(1, i)
+                            .Resolution = CType(labelDataArray(2, i), Single)
+                            .Baseline = CType(labelDataArray(3, i), Single)
+                            .Noise = CType(labelDataArray(4, i), Single)
+                            .Charge = CType(labelDataArray(5, i), Integer)
+                        End With
+
+                        ftLabelData(i) = labelInfo
+                    Next
+
+                Else
+                    ReDim ftLabelData(-1)
+                End If
+
+                Return intDataCount
+
+            Catch ex As AccessViolationException
+                Dim strError As String = "Unable to load data for scan " & scan & "; possibly a corrupt .Raw file"
+                RaiseWarningMessage(strError)
+
+            Catch ex As Exception
+
+                Dim strError As String = "Unable to load data for scan " & scan & ": " & ex.Message & "; possibly a corrupt .Raw file"
+                RaiseErrorMessage(strError)
+
+            End Try
+
+            ReDim ftLabelData(-1)
+            Return -1
+        End Function
+
+        ''' <summary>
+        ''' Gets scan precision data for FTMS data
+        ''' </summary>
+        ''' <param name="scan"></param>
+        ''' <param name="massResolutionData"></param>
+        ''' <returns></returns>
+        ''' <remarks>This returns a subset of the data thatGetScanLabelData does, with 2 additional fields.</remarks>
+        <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
+        Public Function GetScanPrecisionData(ByVal scan As Integer, <Out()> ByRef massResolutionData() As udtMassPrecisionInfoType) As Integer
+
+            ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
+            ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
+
+            Dim intDataCount As Integer
+
+            If scan < mFileInfo.ScanStart Then
+                scan = mFileInfo.ScanStart
+            ElseIf scan > mFileInfo.ScanEnd Then
+                scan = mFileInfo.ScanEnd
+            End If
+
+            Dim scanInfo As clsScanInfo = Nothing
+
+            If Not GetScanInfo(scan, scanInfo) Then
+                Throw New Exception("Cannot retrieve ScanInfo from cache for scan " & scan & "; cannot retrieve scan data")
+            End If
+
+            Try
+                If mXRawFile Is Nothing Then
+                    Exit Try
+                End If
+
+                If Not scanInfo.IsFTMS Then
+                    Exit Try
+                End If
+
+                Dim MassResolutionDataList As Object = Nothing
+
+                mXRawFile.GetMassPrecisionEstimate(scan, MassResolutionDataList, intDataCount)
+
+                Dim massPrecisionArray As Double(,)
+                massPrecisionArray = CType(MassResolutionDataList, Double(,))
+                intDataCount = massPrecisionArray.GetLength(1)
+
+                If intDataCount > 0 Then
+                    ReDim massResolutionData(intDataCount - 1)
+
+                    For i = 0 To intDataCount - 1
+                        Dim massPrecisionInfo As New udtMassPrecisionInfoType
+
+                        With massPrecisionInfo
+                            .Intensity = massPrecisionArray(0, i)
+                            .Mass = massPrecisionArray(1, i)
+                            .AccuracyMMU = massPrecisionArray(2, i)
+                            .AccuracyPPM = massPrecisionArray(3, i)
+                            .Resolution = massPrecisionArray(4, i)
+                        End With
+
+                        massResolutionData(i) = massPrecisionInfo
+                    Next
+
+                Else
+                    ReDim massResolutionData(-1)
+                End If
+
+                Return intDataCount
+
+            Catch ex As AccessViolationException
+                Dim strError As String = "Unable to load data for scan " & scan & "; possibly a corrupt .Raw file"
+                RaiseWarningMessage(strError)
+
+            Catch ex As Exception
+
+                Dim strError As String = "Unable to load data for scan " & scan & ": " & ex.Message & "; possibly a corrupt .Raw file"
+                RaiseErrorMessage(strError)
+
+            End Try
+
+            ReDim massResolutionData(-1)
+            Return -1
+        End Function
+
+        '' GetNoiseData() returns data that isn't directly mappable to scan masses...
+        '<System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
+        'Public Function GetScanNoiseData(ByVal scan As Integer, <Out()> ByRef noiseData() As udtNoisePackets) As Integer
+
+        '    ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
+        '    ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
+
+        '    Dim intDataCount As Integer
+
+        '    If scan < mFileInfo.ScanStart Then
+        '        scan = mFileInfo.ScanStart
+        '    ElseIf scan > mFileInfo.ScanEnd Then
+        '        scan = mFileInfo.ScanEnd
+        '    End If
+
+        '    Dim scanInfo As clsScanInfo = Nothing
+
+        '    If Not GetScanInfo(scan, scanInfo) Then
+        '        Throw New Exception("Cannot retrieve ScanInfo from cache for scan " & scan & "; cannot retrieve scan data")
+        '    End If
+
+        '    Try
+        '        If mXRawFile Is Nothing Then
+        '            Exit Try
+        '        End If
+
+        '    If Not scanInfo.IsFTMS Then
+        '        Exit Try
+        '    End If
+
+        '        Dim NoiseDataList As Object = Nothing
+
+        '        ' Returns double, float, float (mass, noise, baseline)
+        '        mXRawFile.GetNoiseData(NoiseDataList, scan)
+
+        '        Dim noiseDataArray As Double(,)
+        '        noiseDataArray = CType(NoiseDataList, Double(,))
+        '        intDataCount = noiseDataArray.GetLength(1)
+
+        '        If intDataCount > 0 Then
+        '            ReDim noiseData(intDataCount - 1)
+
+        '            For i = 0 To intDataCount - 1
+        '                Dim noisePacket As New udtNoisePackets
+
+        '                With noisePacket
+        '                    .Mass = noiseDataArray(0, i)
+        '                    .Noise = CType(noiseDataArray(1, i), Single)
+        '                    .Baseline = CType(noiseDataArray(2, i), Single)
+        '                End With
+
+        '                noiseData(i) = noisePacket
+        '            Next
+
+        '        Else
+        '            ReDim noiseData(-1)
+        '        End If
+
+        '        Return intDataCount
+
+        '    Catch ex As AccessViolationException
+        '        Dim strError As String = "Unable to load data for scan " & scan & "; possibly a corrupt .Raw file"
+        '        RaiseWarningMessage(strError)
+
+        '    Catch ex As Exception
+
+        '        Dim strError As String = "Unable to load data for scan " & scan & ": " & ex.Message & "; possibly a corrupt .Raw file"
+        '        RaiseErrorMessage(strError)
+
+        '    End Try
+
+        '    ReDim noiseData(-1)
+        '    Return -1
+        'End Function
 
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
         Public Function GetScanDataSumScans(
