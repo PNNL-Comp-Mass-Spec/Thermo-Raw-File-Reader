@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5767; October 16, 2015
+	- Add functions GetScanLabelData and GetScanPrecisionData
+
 Version 1.1.5764; October 13, 2015
 	- Add support for scan filter "Full lock ms"
 

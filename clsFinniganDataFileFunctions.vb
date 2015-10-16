@@ -1698,7 +1698,7 @@ Namespace FinniganFileIO
         End Function
 
         ''' <summary>
-        ''' Obtain the mass and intensity for the specified scan
+        ''' Obtain the mass and intensity list for the specified scan
         ''' </summary>
         ''' <param name="scan"></param>
         ''' <param name="dblMZList"></param>
@@ -1714,7 +1714,7 @@ Namespace FinniganFileIO
         End Function
 
         ''' <summary>
-        ''' Obtain the mass and intensity for the specified scan
+        ''' Obtain the mass and intensity list for the specified scan
         ''' </summary>
         ''' <param name="scan"></param>
         ''' <param name="dblMZList"></param>
@@ -1730,7 +1730,7 @@ Namespace FinniganFileIO
         End Function
 
         ''' <summary>
-        ''' Obtain the mass and intensity for the specified scan
+        ''' Obtain the mass and intensity list for the specified scan
         ''' </summary>
         ''' <param name="scan"></param>
         ''' <param name="dblMZList"></param>
@@ -1746,7 +1746,7 @@ Namespace FinniganFileIO
         End Function
 
         ''' <summary>
-        ''' Obtain the mass and intensity for the specified scan
+        ''' Obtain the mass and intensity list for the specified scan
         ''' </summary>
         ''' <param name="scan"></param>
         ''' <param name="dblMZList"></param>
@@ -1762,11 +1762,11 @@ Namespace FinniganFileIO
         End Function
 
         ''' <summary>
-        ''' Obtain the mass and intensity for the specified scan
+        ''' Obtain the mass and intensity list for the specified scan
         ''' </summary>
-        ''' <param name="scanNumber"></param>
-        ''' <param name="mzList"></param>
-        ''' <param name="intensityList"></param>
+        ''' <param name="scanNumber">Scan number</param>
+        ''' <param name="mzList">Output array of mass values</param>
+        ''' <param name="intensityList">Output array of intensity values (parallel to mzList)</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         Public Overloads Overrides Function GetScanData(ByVal scanNumber As Integer, <Out()> ByRef mzList() As Double, <Out()> ByRef intensityList() As Double) As Integer
@@ -1776,11 +1776,11 @@ Namespace FinniganFileIO
         End Function
 
         ''' <summary>
-        ''' Obtain the mass and intensity for the specified scan
+        ''' Obtain the mass and intensity list for the specified scan
         ''' </summary>
-        ''' <param name="scanNumber"></param>
-        ''' <param name="mzList"></param>
-        ''' <param name="intensityList"></param>
+        ''' <param name="scanNumber">Scan number</param>
+        ''' <param name="mzList">Output array of mass values</param>
+        ''' <param name="intensityList">Output array of intensity values (parallel to mzList)</param>
         ''' <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
@@ -1792,9 +1792,9 @@ Namespace FinniganFileIO
         ''' <summary>
         ''' Obtain the mass and intensity for the specified scan
         ''' </summary>
-        ''' <param name="scan"></param>
-        ''' <param name="dblMZList"></param>
-        ''' <param name="dblIntensityList"></param>
+        ''' <param name="scan">Scan number</param>
+        ''' <param name="dblMZList">Output array of mass values</param>
+        ''' <param name="dblIntensityList">Output array of intensity values (parallel to mzList)</param>
         ''' <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         ''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
@@ -1803,24 +1803,24 @@ Namespace FinniganFileIO
 
             Dim dblMassIntensityPairs(,) As Double = Nothing
 
-            Dim intDataCount As Integer = GetScanData2D(scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid)
+            Dim dataCount As Integer = GetScanData2D(scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid)
 
             Try
-                If intDataCount <= 0 Then
+                If dataCount <= 0 Then
                     ReDim dblMZList(-1)
                     ReDim dblIntensityList(-1)
                     Return 0
                 End If
 
-                If dblMassIntensityPairs.GetUpperBound(1) + 1 < intDataCount Then
-                    intDataCount = dblMassIntensityPairs.GetUpperBound(1) + 1
+                If dblMassIntensityPairs.GetUpperBound(1) + 1 < dataCount Then
+                    dataCount = dblMassIntensityPairs.GetUpperBound(1) + 1
                 End If
 
-                ReDim dblMZList(intDataCount - 1)
-                ReDim dblIntensityList(intDataCount - 1)
+                ReDim dblMZList(dataCount - 1)
+                ReDim dblIntensityList(dataCount - 1)
                 Dim sortRequired As Boolean = False
 
-                For intIndex = 0 To intDataCount - 1
+                For intIndex = 0 To dataCount - 1
                     dblMZList(intIndex) = dblMassIntensityPairs(0, intIndex)
                     dblIntensityList(intIndex) = dblMassIntensityPairs(1, intIndex)
 
@@ -1841,10 +1841,10 @@ Namespace FinniganFileIO
             Catch
                 ReDim dblMZList(-1)
                 ReDim dblIntensityList(-1)
-                intDataCount = -1
+                dataCount = -1
             End Try
 
-            Return intDataCount
+            Return dataCount
 
         End Function
 
@@ -1904,7 +1904,7 @@ Namespace FinniganFileIO
             ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
             ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
-            Dim intDataCount As Integer
+            Dim dataCount As Integer
 
             Dim strFilter As String
             Dim intIntensityCutoffValue As Integer
@@ -1912,7 +1912,7 @@ Namespace FinniganFileIO
             Dim MassIntensityPairsList As Object = Nothing
             Dim PeakList As Object = Nothing
 
-            intDataCount = 0
+            dataCount = 0
 
             If scan < mFileInfo.ScanStart Then
                 scan = mFileInfo.ScanStart
@@ -1957,12 +1957,12 @@ Namespace FinniganFileIO
                     Dim dblMassIntensityLabels As Double(,)
 
                     dblMassIntensityLabels = CType(massIntensityLabels, Double(,))
-                    intDataCount = dblMassIntensityLabels.GetLength(1)
+                    dataCount = dblMassIntensityLabels.GetLength(1)
 
-                    If intDataCount > 0 Then
-                        ReDim dblMassIntensityPairs(1, intDataCount - 1)
+                    If dataCount > 0 Then
+                        ReDim dblMassIntensityPairs(1, dataCount - 1)
 
-                        For i = 0 To intDataCount - 1
+                        For i = 0 To dataCount - 1
                             dblMassIntensityPairs(0, i) = dblMassIntensityLabels(0, i)  ' m/z
                             dblMassIntensityPairs(1, i) = dblMassIntensityLabels(1, i)  ' Intensity
                         Next
@@ -1996,9 +1996,9 @@ Namespace FinniganFileIO
 
                     mXRawFile.GetMassListFromScanNum(scan, strFilter, IntensityCutoffTypeConstants.None,
                        intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth,
-                       MassIntensityPairsList, PeakList, intDataCount)
+                       MassIntensityPairsList, PeakList, dataCount)
 
-                    If intDataCount > 0 Then
+                    If dataCount > 0 Then
                         dblMassIntensityPairs = CType(MassIntensityPairsList, Double(,))
                     Else
                         ReDim dblMassIntensityPairs(-1, -1)
@@ -2006,7 +2006,7 @@ Namespace FinniganFileIO
 
                 End If
 
-                Return intDataCount
+                Return dataCount
 
             Catch ex As AccessViolationException
                 Dim strError As String = "Unable to load data for scan " & scan & "; possibly a corrupt .Raw file"
@@ -2025,19 +2025,17 @@ Namespace FinniganFileIO
         End Function
 
         ''' <summary>
-        ''' Gets the scan label data for FTMS-tagged scans; includes resolution and noise data for each peak
+        ''' Gets the scan label data for an FTMS-tagged scan
         ''' </summary>
-        ''' <param name="scan"></param>
-        ''' <param name="ftLabelData"></param>
-        ''' <returns></returns>
+        ''' <param name="scan">Scan number</param>
+        ''' <param name="ftLabelData">List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point</param>
+        ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks></remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
         Public Function GetScanLabelData(ByVal scan As Integer, <Out()> ByRef ftLabelData() As udtFTLabelInfoType) As Integer
 
             ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
             ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
-
-            Dim intDataCount As Integer
 
             If scan < mFileInfo.ScanStart Then
                 scan = mFileInfo.ScanStart
@@ -2057,6 +2055,8 @@ Namespace FinniganFileIO
                 End If
 
                 If Not scanInfo.IsFTMS Then
+                    Dim strWarningMessage = "Scan " & scan & " is not an FTMS scan; function GetScanLabelData cannot be used with this scan"
+                    RaiseWarningMessage(strWarningMessage)
                     Exit Try
                 End If
 
@@ -2067,22 +2067,34 @@ Namespace FinniganFileIO
 
                 Dim labelDataArray As Double(,)
                 labelDataArray = CType(labelData, Double(,))
-                intDataCount = labelDataArray.GetLength(1)
 
-                If intDataCount > 0 Then
-                    ReDim ftLabelData(intDataCount - 1)
+                Dim dataCount = labelDataArray.GetLength(1)
+                Dim maxColIndex = labelDataArray.GetLength(0) - 1
 
-                    For i = 0 To intDataCount - 1
+                If dataCount > 0 Then
+                    ReDim ftLabelData(dataCount - 1)
+
+                    For i = 0 To dataCount - 1
                         Dim labelInfo As New udtFTLabelInfoType
 
-                        With labelInfo
-                            .Mass = labelDataArray(0, i)
-                            .Intensity = labelDataArray(1, i)
-                            .Resolution = CType(labelDataArray(2, i), Single)
-                            .Baseline = CType(labelDataArray(3, i), Single)
-                            .Noise = CType(labelDataArray(4, i), Single)
-                            .Charge = CType(labelDataArray(5, i), Integer)
-                        End With
+                        labelInfo.Mass = labelDataArray(0, i)
+                        labelInfo.Intensity = labelDataArray(1, i)
+
+                        If maxColIndex >= 2 Then
+                            labelInfo.Resolution = CType(labelDataArray(2, i), Single)
+                        End If
+
+                        If maxColIndex >= 3 Then
+                            labelInfo.Baseline = CType(labelDataArray(3, i), Single)
+                        End If
+
+                        If maxColIndex >= 4 Then
+                            labelInfo.Noise = CType(labelDataArray(4, i), Single)
+                        End If
+
+                        If maxColIndex >= 5 Then
+                            labelInfo.Charge = CType(labelDataArray(5, i), Integer)
+                        End If
 
                         ftLabelData(i) = labelInfo
                     Next
@@ -2091,7 +2103,7 @@ Namespace FinniganFileIO
                     ReDim ftLabelData(-1)
                 End If
 
-                Return intDataCount
+                Return dataCount
 
             Catch ex As AccessViolationException
                 Dim strError As String = "Unable to load data for scan " & scan & "; possibly a corrupt .Raw file"
@@ -2106,22 +2118,23 @@ Namespace FinniganFileIO
 
             ReDim ftLabelData(-1)
             Return -1
+
         End Function
 
         ''' <summary>
-        ''' Gets scan precision data for FTMS data
+        ''' Gets scan precision data for FTMS data (resolution of each data point)
         ''' </summary>
         ''' <param name="scan"></param>
-        ''' <param name="massResolutionData"></param>
-        ''' <returns></returns>
-        ''' <remarks>This returns a subset of the data thatGetScanLabelData does, with 2 additional fields.</remarks>
+        ''' <param name="massResolutionData">List of Intensity, Mass, AccuracyMMU, AccuracyPPM, and Resolution for each data point</param>
+        ''' <returns>The number of data points, or -1 if an error</returns>
+        ''' <remarks>This returns a subset of the data thatGetScanLabelData does, but with 2 additional fields.</remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
         Public Function GetScanPrecisionData(ByVal scan As Integer, <Out()> ByRef massResolutionData() As udtMassPrecisionInfoType) As Integer
 
             ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
             ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
-            Dim intDataCount As Integer
+            Dim dataCount As Integer
 
             If scan < mFileInfo.ScanStart Then
                 scan = mFileInfo.ScanStart
@@ -2141,21 +2154,23 @@ Namespace FinniganFileIO
                 End If
 
                 If Not scanInfo.IsFTMS Then
+                    Dim strWarningMessage = "Scan " & scan & " is not an FTMS scan; function GetScanLabelData cannot be used with this scan"
+                    RaiseWarningMessage(strWarningMessage)
                     Exit Try
                 End If
 
-                Dim MassResolutionDataList As Object = Nothing
+                Dim massResolutionDataList As Object = Nothing
 
-                mXRawFile.GetMassPrecisionEstimate(scan, MassResolutionDataList, intDataCount)
+                mXRawFile.GetMassPrecisionEstimate(scan, massResolutionDataList, dataCount)
 
                 Dim massPrecisionArray As Double(,)
-                massPrecisionArray = CType(MassResolutionDataList, Double(,))
-                intDataCount = massPrecisionArray.GetLength(1)
+                massPrecisionArray = CType(massResolutionDataList, Double(,))
+                dataCount = massPrecisionArray.GetLength(1)
 
-                If intDataCount > 0 Then
-                    ReDim massResolutionData(intDataCount - 1)
+                If dataCount > 0 Then
+                    ReDim massResolutionData(dataCount - 1)
 
-                    For i = 0 To intDataCount - 1
+                    For i = 0 To dataCount - 1
                         Dim massPrecisionInfo As New udtMassPrecisionInfoType
 
                         With massPrecisionInfo
@@ -2173,7 +2188,7 @@ Namespace FinniganFileIO
                     ReDim massResolutionData(-1)
                 End If
 
-                Return intDataCount
+                Return dataCount
 
             Catch ex As AccessViolationException
                 Dim strError As String = "Unable to load data for scan " & scan & "; possibly a corrupt .Raw file"
@@ -2188,6 +2203,7 @@ Namespace FinniganFileIO
 
             ReDim massResolutionData(-1)
             Return -1
+
         End Function
 
         '' GetNoiseData() returns data that isn't directly mappable to scan masses...
@@ -2197,7 +2213,7 @@ Namespace FinniganFileIO
         '    ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
         '    ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
-        '    Dim intDataCount As Integer
+        '    Dim dataCount As Integer
 
         '    If scan < mFileInfo.ScanStart Then
         '        scan = mFileInfo.ScanStart
@@ -2227,12 +2243,12 @@ Namespace FinniganFileIO
 
         '        Dim noiseDataArray As Double(,)
         '        noiseDataArray = CType(NoiseDataList, Double(,))
-        '        intDataCount = noiseDataArray.GetLength(1)
+        '        dataCount = noiseDataArray.GetLength(1)
 
-        '        If intDataCount > 0 Then
-        '            ReDim noiseData(intDataCount - 1)
+        '        If dataCount > 0 Then
+        '            ReDim noiseData(dataCount - 1)
 
-        '            For i = 0 To intDataCount - 1
+        '            For i = 0 To dataCount - 1
         '                Dim noisePacket As New udtNoisePackets
 
         '                With noisePacket
@@ -2248,7 +2264,7 @@ Namespace FinniganFileIO
         '            ReDim noiseData(-1)
         '        End If
 
-        '        Return intDataCount
+        '        Return dataCount
 
         '    Catch ex As AccessViolationException
         '        Dim strError As String = "Unable to load data for scan " & scan & "; possibly a corrupt .Raw file"
@@ -2265,6 +2281,17 @@ Namespace FinniganFileIO
         '    Return -1
         'End Function
 
+
+        ''' <summary>
+        ''' 
+        ''' </summary>
+        ''' <param name="scanFirst"></param>
+        ''' <param name="scanLast"></param>
+        ''' <param name="dblMassIntensityPairs"></param>
+        ''' <param name="intMaxNumberOfPeaks"></param>
+        ''' <param name="blnCentroid"></param>
+        ''' <returns>The number of data points</returns>
+        ''' <remarks></remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
         Public Function GetScanDataSumScans(
             ByVal scanFirst As Integer,
@@ -2276,7 +2303,7 @@ Namespace FinniganFileIO
             ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
             ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
-            Dim intDataCount As Integer
+            Dim dataCount As Integer
 
             Dim strFilter As String
             Dim intIntensityCutoffValue As Integer
@@ -2286,7 +2313,7 @@ Namespace FinniganFileIO
             Dim MassIntensityPairsList As Object = Nothing
             Dim PeakList As Object = Nothing
 
-            intDataCount = 0
+            dataCount = 0
 
             Try
                 If mXRawFile Is Nothing Then
@@ -2345,15 +2372,15 @@ Namespace FinniganFileIO
                     dblCentroidPeakWidth,
                     MassIntensityPairsList,
                     PeakList,
-                    intDataCount)
+                    dataCount)
 
-                If intDataCount > 0 Then
+                If dataCount > 0 Then
                     dblMassIntensityPairs = CType(MassIntensityPairsList, Double(,))
                 Else
                     ReDim dblMassIntensityPairs(-1, -1)
                 End If
 
-                Return intDataCount
+                Return dataCount
 
             Catch ex As AccessViolationException
                 Dim strError As String = "Unable to load data summing scans " & scanFirst & " to " & scanLast & "; possibly a corrupt .Raw file"
@@ -2378,10 +2405,10 @@ Namespace FinniganFileIO
             End If
 
             udtMRMInfo = New udtMRMInfoType
-            With udtMRMInfo
-                .MRMMassCount = 0
-                ReDim .MRMMassList(intInitialMassCountCapacity - 1)
-            End With
+
+            udtMRMInfo.MRMMassCount = 0
+            ReDim udtMRMInfo.MRMMassList(intInitialMassCountCapacity - 1)
+
         End Sub
 
         Public Overrides Function OpenRawFile(ByVal FileName As String) As Boolean
@@ -2406,7 +2433,12 @@ Namespace FinniganFileIO
                     mCachedFileName = FileName
                     If FillFileInfo() Then
                         With mFileInfo
-                            If .ScanStart = 0 AndAlso .ScanEnd = 0 AndAlso .VersionNumber = 0 AndAlso Math.Abs(.MassResolution - 0) < Double.Epsilon AndAlso .InstModel = Nothing Then
+                            If .ScanStart = 0 AndAlso
+                               .ScanEnd = 0 AndAlso
+                               .VersionNumber = 0 AndAlso
+                               Math.Abs(.MassResolution - 0) < Double.Epsilon AndAlso
+                               .InstModel = Nothing Then
+
                                 ' File actually didn't load correctly, since these shouldn't all be blank
                                 blnSuccess = False
                             Else
@@ -2438,22 +2470,22 @@ Namespace FinniganFileIO
 
             blnMatch = True
 
-            With udtMethod1
-                If .Count <> udtMethod2.Count Then
-                    ' Different segment number of setting count; the methods don't match
-                    blnMatch = False
-                Else
-                    For intIndex = 0 To .Count - 1
-                        If .SettingCategory(intIndex) <> udtMethod2.SettingCategory(intIndex) OrElse
-                           .SettingName(intIndex) <> udtMethod2.SettingName(intIndex) OrElse
-                           .SettingValue(intIndex) <> udtMethod2.SettingValue(intIndex) Then
-                            ' Different segment data; the methods don't match
-                            blnMatch = False
-                            Exit For
-                        End If
-                    Next intIndex
-                End If
-            End With
+
+            If udtMethod1.Count <> udtMethod2.Count Then
+                ' Different segment number of setting count; the methods don't match
+                blnMatch = False
+            Else
+                For intIndex = 0 To udtMethod1.Count - 1
+                    If udtMethod1.SettingCategory(intIndex) <> udtMethod2.SettingCategory(intIndex) OrElse
+                       udtMethod1.SettingName(intIndex) <> udtMethod2.SettingName(intIndex) OrElse
+                       udtMethod1.SettingValue(intIndex) <> udtMethod2.SettingValue(intIndex) Then
+                        ' Different segment data; the methods don't match
+                        blnMatch = False
+                        Exit For
+                    End If
+                Next intIndex
+            End If
+
 
             Return blnMatch
 

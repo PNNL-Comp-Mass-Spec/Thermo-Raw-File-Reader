@@ -15,6 +15,8 @@ xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\Pept
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\Lib\" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs\" /Y
+xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\dll" /Y
+
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\lib\" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\DLLLibrary" /Y
@@ -72,7 +74,6 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DM
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Sequest_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_SMAQC_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_XTandem_PlugIn\bin" /Y
-
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestApePlugIn\bin\Debug\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestAScorePlugIn\bin\Debug" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestMagePlugIn\bin\Debug\" /Y
@@ -112,8 +113,8 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Pr
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x86\" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x64\" /Y
 
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\dll" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\SMAQC\bin\Debug" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\SMAQC\bin\release" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\ThermoRawFileReaderDLL\Test_ThermoRawFileReader\bin\Debug\" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\GordonSlysz\DeconTools_IQ\DeconConsole\bin\x86\Debug" /Y

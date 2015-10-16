@@ -200,7 +200,7 @@ Module modMain
                         If iScanNum + scansToSum < iNumScans And testSumming Then
 
                             ' Get the data for scan iScanNum through iScanNum + 15
-                            oReader.GetScanDataSumScans(iScanNum, iScanNum + scansToSum, dblMassIntensityPairs, 0, centroid)
+                            Dim dataCount = oReader.GetScanDataSumScans(iScanNum, iScanNum + scansToSum, dblMassIntensityPairs, 0, centroid)
 
                             Console.WriteLine("Summed spectrum, scans " & iScanNum & " through " & (iScanNum + scansToSum).ToString())
 
@@ -211,6 +211,44 @@ Module modMain
                             Console.WriteLine()
                         End If
 
+                        If oScanInfo.IsFTMS Then
+                            Dim ftLabelData As XRawFileIO.udtFTLabelInfoType() = Nothing
+
+                            Dim dataCount = oReader.GetScanLabelData(iScanNum, ftLabelData)
+
+                            Console.WriteLine()
+                            Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", "Mass", "Intensity", "Resolution", "Baseline", "Noise", "Charge")
+
+                            For iDataPoint = 0 To dataCount - 1 Step 50
+
+                                Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}",
+                                                  ftLabelData(iDataPoint).Mass.ToString("0.000"),
+                                                  ftLabelData(iDataPoint).Intensity.ToString("0"),
+                                                  ftLabelData(iDataPoint).Resolution.ToString("0"),
+                                                  ftLabelData(iDataPoint).Baseline.ToString("0.0"),
+                                                  ftLabelData(iDataPoint).Noise.ToString("0"),
+                                                  ftLabelData(iDataPoint).Charge.ToString("0")
+                                                  )
+                            Next
+
+                            Dim ftPrecisionData As XRawFileIO.udtMassPrecisionInfoType() = Nothing
+
+                            dataCount = oReader.GetScanPrecisionData(iScanNum, ftPrecisionData)
+
+                            Console.WriteLine()
+                            Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}", "Mass", "Intensity", "AccuracyMMU", "AccuracyPPM", "Resolution")
+
+                            For iDataPoint = 0 To dataCount - 1 Step 50
+
+                                Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}",
+                                                  ftPrecisionData(iDataPoint).Mass.ToString("0.000"),
+                                                  ftPrecisionData(iDataPoint).Intensity.ToString("0"),
+                                                  ftPrecisionData(iDataPoint).AccuracyMMU.ToString("0.000"),
+                                                  ftPrecisionData(iDataPoint).AccuracyPPM.ToString("0.000"),
+                                                  ftPrecisionData(iDataPoint).Resolution.ToString("0")
+                                                  )
+                            Next
+                        End If
 
                     End If
 
