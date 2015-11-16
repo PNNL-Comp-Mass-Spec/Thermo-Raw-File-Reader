@@ -25,7 +25,7 @@ Option Strict On
 ' this computer software.
 
 '
-' Last modified May 22, 2014
+' Last modified October 29, 2015
 
 Imports System.Collections.Generic
 Imports System.Runtime.InteropServices
@@ -37,11 +37,11 @@ Public Class clsParseCommandLine
 
     Public Const DEFAULT_SWITCH_PARAM_CHAR As Char = ":"c
 
-    Protected ReadOnly mSwitches As New Dictionary(Of String, String)
-    Protected ReadOnly mNonSwitchParameters As New List(Of String)
+    Private ReadOnly mSwitches As New Dictionary(Of String, String)
+    Private ReadOnly mNonSwitchParameters As New List(Of String)
 
-    Protected mShowHelp As Boolean = False
-    Protected mDebugMode As Boolean = False
+    Private mShowHelp As Boolean = False
+    Private mDebugMode As Boolean = False
 
     Public ReadOnly Property NeedToShowHelp() As Boolean
         Get
@@ -471,7 +471,7 @@ Public Class clsParseCommandLine
 
     End Function
 
-    Protected Function SplitCommandLineParams(strCmdLine As String) As String()
+    Private Function SplitCommandLineParams(strCmdLine As String) As String()
         Dim strParameters As New List(Of String)
         Dim strParameter As String
 
