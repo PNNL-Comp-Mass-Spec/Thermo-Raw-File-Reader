@@ -133,7 +133,7 @@ Public Class clsParseCommandLine
                 If blnCaseSensitive Then
                     intMatchCount = (From validItem In lstValidParameters Where validItem = itemKey).Count
                 Else
-                    intMatchCount = (From validItem In lstValidParameters Where String.Equals(validItem, itemKey, StringComparison.CurrentCultureIgnoreCase)).Count
+                    intMatchCount = (From validItem In lstValidParameters Where String.Equals(validItem, itemKey, StringComparison.InvariantCultureIgnoreCase)).Count
                 End If
 
                 If intMatchCount = 0 Then
@@ -455,7 +455,7 @@ Public Class clsParseCommandLine
                     Return False
                 End If
             Else
-                Dim query = (From item In mSwitches Where String.Equals(item.Key, strKey, StringComparison.CurrentCultureIgnoreCase) Select item).ToList()
+                Dim query = (From item In mSwitches Where String.Equals(item.Key, strKey, StringComparison.InvariantCultureIgnoreCase) Select item).ToList()
 
                 If query.Count = 0 Then
                     Return False

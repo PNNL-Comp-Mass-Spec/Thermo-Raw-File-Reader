@@ -166,7 +166,7 @@ Public Class clsScanInfo
     ''' </summary>
     ''' <value></value>
     ''' <returns></returns>
-    ''' <remarks></remarks>
+    ''' <remarks>Typically CID, ETD, HCD, EThcD, or ETciD</remarks>
     Public Property CollisionMode As String
 
     ''' <summary>
@@ -316,7 +316,7 @@ Public Class clsScanInfo
             ' Partial match
             lstResults = From item In mScanEvents Where item.Key.ToLower().StartsWith(eventName.ToLower()) Select item
         Else
-            lstResults = From item In mScanEvents Where String.Equals(item.Key, eventName, StringComparison.CurrentCultureIgnoreCase) Select item
+            lstResults = From item In mScanEvents Where String.Equals(item.Key, eventName, StringComparison.InvariantCultureIgnoreCase) Select item
         End If
 
         For Each item In lstResults

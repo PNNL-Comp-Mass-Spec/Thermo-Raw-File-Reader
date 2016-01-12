@@ -35,7 +35,7 @@ Namespace FinniganFileIO
 
         Private Const MS_ONLY_PZ_TEXT As String = " p Z ms "            ' Likely a zoom scan
         Private Const MS_ONLY_DZ_TEXT As String = " d Z ms "            ' Dependent zoom scan
-        Private Const MS_ONLY_PZ_MS2_TEXT As String = " d Z ms2 "           ' Dependent MS2 zoom scan
+        Private Const MS_ONLY_PZ_MS2_TEXT As String = " d Z ms2 "       ' Dependent MS2 zoom scan
         Private Const MS_ONLY_Z_TEXT As String = " NSI Z ms "           ' Likely a zoom scan
 
         Private Const FULL_MS_TEXT As String = "Full ms "
@@ -110,14 +110,18 @@ Namespace FinniganFileIO
         Public Structure udtParentIonInfoType
             Public MSLevel As Integer
             Public ParentIonMZ As Double
-            Public CollisionEnergy As Single
             Public CollisionMode As String
+            Public CollisionMode2 As String
+            Public CollisionEnergy As Single
+            Public CollisionEnergy2 As Single
             Public ActivationType As ActivationTypeConstants
             Public Sub Clear()
                 MSLevel = 1
                 ParentIonMZ = 0
-                CollisionEnergy = 0
                 CollisionMode = String.Empty
+                CollisionMode2 = String.Empty
+                CollisionEnergy = 0
+                CollisionEnergy2 = 0
                 ActivationType = ActivationTypeConstants.Unknown
             End Sub
         End Structure
@@ -184,6 +188,19 @@ Namespace FinniganFileIO
 
         End Sub
 
+        Private Shared Function CapitalizeCollisionMode(strCollisionMode As String) As String
+
+            If (String.Equals(strCollisionMode, "EThcD", StringComparison.InvariantCultureIgnoreCase)) Then
+                Return "EThcD"
+            End If
+
+            If (String.Equals(strCollisionMode, "ETciD", StringComparison.InvariantCultureIgnoreCase)) Then
+                Return "ETciD"
+            End If
+
+            Return strCollisionMode.ToUpper()
+
+        End Function
 
         Public Overrides Function CheckFunctionality() As Boolean
             ' I have a feeling this doesn't actually work, and will always return True
@@ -229,11 +246,11 @@ Namespace FinniganFileIO
         Private Shared Function ContainsText(stringToSearch As String, textToFind As String, Optional indexSearchStart As Integer = 0, Optional matchCase As Boolean = False) As Boolean
 
             If matchCase Then
-                If stringToSearch.IndexOf(textToFind, StringComparison.CurrentCulture) >= indexSearchStart Then
+                If stringToSearch.IndexOf(textToFind, StringComparison.InvariantCulture) >= indexSearchStart Then
                     Return True
                 End If
             Else
-                If stringToSearch.IndexOf(textToFind, StringComparison.CurrentCultureIgnoreCase) >= indexSearchStart Then
+                If stringToSearch.IndexOf(textToFind, StringComparison.InvariantCultureIgnoreCase) >= indexSearchStart Then
                     Return True
                 End If
             End If
@@ -411,7 +428,12 @@ Namespace FinniganFileIO
         ''' <param name="strCollisionMode">Collision mode (output)</param>
         ''' <returns>True if success</returns>
         ''' <remarks>If multiple parent ion m/z values are listed then dblParentIonMZ will have the last one.  However, if the filter text contains "Full msx" then dblParentIonMZ will have the first parent ion listed</remarks>
-        Public Shared Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, <Out()> ByRef dblParentIonMZ As Double, <Out()> ByRef intMSLevel As Integer, <Out()> ByRef strCollisionMode As String) As Boolean
+        Public Shared Function ExtractParentIonMZFromFilterText(
+          ByVal strFilterText As String,
+          <Out()> ByRef dblParentIonMZ As Double,
+          <Out()> ByRef intMSLevel As Integer,
+          <Out()> ByRef strCollisionMode As String) As Boolean
+
             Dim lstParentIons As List(Of udtParentIonInfoType) = Nothing
 
             Return ExtractParentIonMZFromFilterText(strFilterText, dblParentIonMZ, intMSLevel, strCollisionMode, lstParentIons)
@@ -434,7 +456,6 @@ Namespace FinniganFileIO
            <Out()> ByRef strCollisionMode As String,
            <Out()> ByRef lstParentIons As List(Of udtParentIonInfoType)) As Boolean
 
-
             ' strFilterText should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
             ' or "+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]"
             ' or "ITMS + c NSI d Full ms10 421.76@35.00"
@@ -449,9 +470,10 @@ Namespace FinniganFileIO
             ' or "+ p ms2 777.00@cid30.00 [210.00-1200.00]
             ' or "+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]
             ' or "FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]"
+            ' or "ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]"
 
-            ' This RegEx matches text like 1312.95@45.00 or 756.98@cid35.00
-            Const PARENTION_REGEX As String = "([0-9.]+)@([a-z]*)([0-9.]+)"
+            ' This RegEx matches text like 1312.95@45.00 or 756.98@cid35.00 or 902.5721@etd120.55@cid20.00
+            Const PARENTION_REGEX As String = "(?<ParentMZ>[0-9.]+)@(?<CollisionMode1>[a-z]*)(?<CollisionEnergy1>[0-9.]+)(@(?<CollisionMode2>[a-z]+)(?<CollisionEnergy2>[0-9.]+))?"
 
             ' This RegEx looks for "sa" prior to Full ms"
             Const SA_REGEX As String = " sa Full ms"
@@ -532,7 +554,9 @@ Namespace FinniganFileIO
 
                         If Not reMatchParentIon Is Nothing Then
                             If reMatchParentIon.Groups.Count >= 2 Then
-                                dblParentIonMZ = Double.Parse(reMatchParentIon.Groups(1).Value)
+                                ' Match found
+
+                                dblParentIonMZ = Double.Parse(reMatchParentIon.Groups("ParentMZ").Value)
                                 strCollisionMode = String.Empty
                                 sngCollisionEngergy = 0
 
@@ -540,22 +564,35 @@ Namespace FinniganFileIO
 
                                 intStartIndex = reMatchParentIon.Index + reMatchParentIon.Length
 
-                                If reMatchParentIon.Groups.Count >= 3 Then
-                                    strCollisionMode = reMatchParentIon.Groups(2).Value
-                                    If strCollisionMode Is Nothing Then
-                                        strCollisionMode = String.Empty
-                                    Else
-                                        If blnSupplementalActivationEnabled Then
-                                            strCollisionMode = "sa_" & strCollisionMode
-                                        End If
-                                    End If
+                                strCollisionMode = GetCapturedValue(reMatchParentIon, "CollisionMode1")
 
+                                strCollisionEnergy = GetCapturedValue(reMatchParentIon, "CollisionEnergy1")
+                                If Not String.IsNullOrEmpty(strCollisionEnergy) Then                                    
+                                    Single.TryParse(strCollisionEnergy, sngCollisionEngergy)
                                 End If
 
-                                If reMatchParentIon.Groups.Count >= 4 Then
-                                    strCollisionEnergy = reMatchParentIon.Groups(3).Value
-                                    If Not strCollisionEnergy Is Nothing Then
-                                        Single.TryParse(strCollisionEnergy, sngCollisionEngergy)
+                                Dim sngCollisionEngergy2 As Single
+                                Dim strCollisionMode2 = GetCapturedValue(reMatchParentIon, "CollisionMode2")
+
+                                If Not String.IsNullOrEmpty(strCollisionMode2) Then
+                                    Dim strCollisionEnergy2 = GetCapturedValue(reMatchParentIon, "CollisionEnergy2")
+                                    Single.TryParse(strCollisionEnergy2, sngCollisionEngergy2)
+                                End If
+
+                                Dim allowSecondaryActivation = True
+                                If String.Equals(strCollisionMode, "ETD", StringComparison.InvariantCultureIgnoreCase) And Not String.IsNullOrEmpty(strCollisionMode2) Then
+                                    If String.Equals(strCollisionMode2, "CID", StringComparison.InvariantCultureIgnoreCase) Then
+                                        strCollisionMode = "ETciD"
+                                        allowSecondaryActivation = False
+                                    ElseIf String.Equals(strCollisionMode2, "HCD", StringComparison.InvariantCultureIgnoreCase) Then
+                                        strCollisionMode = "EThcD"
+                                        allowSecondaryActivation = False
+                                    End If
+                                End If
+
+                                If allowSecondaryActivation AndAlso Not String.IsNullOrEmpty(strCollisionMode) Then
+                                    If blnSupplementalActivationEnabled Then
+                                        strCollisionMode = "sa_" & strCollisionMode
                                     End If
                                 End If
 
@@ -563,8 +600,10 @@ Namespace FinniganFileIO
                                 With udtParentIonInfo
                                     .MSLevel = intMSLevel
                                     .ParentIonMZ = dblParentIonMZ
-                                    .CollisionEnergy = sngCollisionEngergy
                                     .CollisionMode = String.Copy(strCollisionMode)
+                                    .CollisionMode2 = String.Copy(strCollisionMode2)
+                                    .CollisionEnergy = sngCollisionEngergy
+                                    .CollisionEnergy2 = sngCollisionEngergy2
                                 End With
                                 lstParentIons.Add(udtParentIonInfo)
 
@@ -668,7 +707,7 @@ Namespace FinniganFileIO
             If Not reMatchMS Is Nothing Then
                 If reMatchMS.Groups.Count >= 3 Then
                     intMSLevel = CInt(reMatchMS.Groups(2).Value)
-                    intCharIndex = strFilterText.IndexOf(reMatchMS.ToString(), StringComparison.CurrentCultureIgnoreCase)
+                    intCharIndex = strFilterText.IndexOf(reMatchMS.ToString(), StringComparison.InvariantCultureIgnoreCase)
                     intMatchTextLength = reMatchMS.Length
                 Else
                     ' Match not found
@@ -812,6 +851,19 @@ Namespace FinniganFileIO
                 RaiseWarningMessage(strError)
                 Return ActivationTypeConstants.Unknown
             End Try
+
+        End Function
+
+        Private Shared Function GetCapturedValue(reMatch As Match, captureGroupName As String) As String
+            Dim capturedValue = reMatch.Groups(captureGroupName)
+
+            If Not capturedValue Is Nothing Then
+                If Not String.IsNullOrEmpty(capturedValue.Value) Then
+                    Return capturedValue.Value
+                End If
+            End If
+
+            Return String.Empty
 
         End Function
 
@@ -1198,6 +1250,20 @@ Namespace FinniganFileIO
             ' + p NSI Q3MS [150.070-1500.000]                                      Q3MS
             ' c NSI Full cnl 162.053 [300.000-1200.000]                            MRM_Full_NL
 
+            ' Lumos scan filter examples
+            ' FTMS + p NSI Full ms                                                 HMS
+            ' ITMS + c NSI r d Full ms2 916.3716@cid30.00 [247.0000-2000.0000]     CID-MSn
+            ' ITMS + c NSI r d Full ms2 916.3716@hcd30.00 [100.0000-2000.0000]     HCD-MSn
+
+            ' ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]    ETciD-MSn  (ETD fragmentation, then further fragmented by CID in the ion trap; detected with the ion trap)
+            ' ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]    EThcD-MSn  (ETD fragmentation, then further fragmented by HCD in the ion routing multipole; detected with the ion trap)
+
+            ' FTMS + c NSI r d Full ms2 744.0129@cid30.00 [199.0000-2000.0000]     CID-HMSn
+            ' FTMS + p NSI r d Full ms2 944.4316@hcd30.00 [100.0000-2000.0000]     HCD-HMSn
+
+            ' FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]    ETciD-MSn  (ETD fragmentation, then further fragmented by CID in the ion trap; detected with orbitrap)
+            ' FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]    EThcD-MSn  (ETD fragmentation, then further fragmented by HCD in the ion routing multipole; detected with orbitrap)
+
             Dim strScanTypeName As String = "MS"
             Dim intMSLevel As Integer
             Dim dblParentIonMZ As Double
@@ -1284,7 +1350,7 @@ Namespace FinniganFileIO
                             End If
 
                             If intMSLevel > 1 AndAlso strCollisionMode.Length > 0 Then
-                                strScanTypeName = strCollisionMode.ToUpper() & "-" & strScanTypeName
+                                strScanTypeName = CapitalizeCollisionMode(strCollisionMode) & "-" & strScanTypeName
                             End If
 
                         End If
@@ -1494,7 +1560,7 @@ Namespace FinniganFileIO
                     strGenericScanFilterText = strGenericScanFilterText.Substring(0, intCharIndex).TrimEnd(" "c)
                 End If
 
-                intCharIndex = strGenericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.CurrentCultureIgnoreCase)
+                intCharIndex = strGenericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.InvariantCultureIgnoreCase)
                 If intCharIndex > 0 Then
                     ' MRM neutral loss
                     ' Remove any text after MRM_FullNL_TEXT

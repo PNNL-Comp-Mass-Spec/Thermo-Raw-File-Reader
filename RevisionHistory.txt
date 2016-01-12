@@ -1,5 +1,10 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5854; January 11, 2016
+	- Add support for Thermo Lumos scan filters of the form 902.5721@etd120.55@cid20.00
+		- etd followed by cid is labeled ETciD
+		- etd followed by hcd is labeled EThcD
+
 Version 1.1.5767; October 16, 2015
 	- Add functions GetScanLabelData and GetScanPrecisionData
 
