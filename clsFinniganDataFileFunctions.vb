@@ -54,7 +54,7 @@ Namespace FinniganFileIO
         ' It also matches SRM ms2
         ' It also matches CRM ms3
         ' It also matches Full msx ms2 (multiplexed parent ion selection, introduced with the Q-Exactive)
-        Private Const MS2_REGEX As String = "( p|Full|SRM|CRM|Full msx) ms([2-9]|[1-9][0-9]) "
+        Private Const MS2_REGEX As String = "(?<ScanMode> p|Full|SRM|CRM|Full msx) ms(?<MSLevel>[2-9]|[1-9][0-9]) "
 
         ' Used with .GetSeqRowSampleType()
         Public Enum SampleTypeConstants
@@ -310,10 +310,16 @@ Namespace FinniganFileIO
             eIonMode = IonModeConstants.Unknown
 
             If Not String.IsNullOrWhiteSpace(strFiltertext) Then
-                ' Parse out the text between the square brackets
-                reMatch = reIonMode.Match(strFiltertext)
 
-                If Not reMatch Is Nothing AndAlso reMatch.Success Then
+                ' For safety, remove any text after a square bracket
+                Dim intCharIndex = strFiltertext.IndexOf("["c)
+                If intCharIndex > 0 Then
+                    reMatch = reIonMode.Match(strFiltertext.Substring(0, intCharIndex))
+                Else
+                    reMatch = reIonMode.Match(strFiltertext)
+                End If
+
+                If reMatch.Success Then
                     Select Case reMatch.Value
                         Case "+"
                             eIonMode = IonModeConstants.Positive
@@ -347,7 +353,7 @@ Namespace FinniganFileIO
             ' MRM_FullNL_TEXT: c NSI Full cnl 162.053 [300.000-1200.000]
 
             Const MASSLIST_REGEX = "\[[0-9.]+-[0-9.]+.*\]"
-            Const MASSRANGES_REGEX = "([0-9.]+)-([0-9.]+)"
+            Const MASSRANGES_REGEX = "(?<StartMass>[0-9.]+)-(?<EndMass>[0-9.]+)"
 
             Static reMassList As Regex
             Static reMassRanges As Regex
@@ -395,8 +401,8 @@ Namespace FinniganFileIO
                                     End If
 
                                     With udtMRMInfo.MRMMassList(udtMRMInfo.MRMMassCount)
-                                        .StartMass = Double.Parse(reMatch.Groups(1).Value)
-                                        .EndMass = Double.Parse(reMatch.Groups(2).Value)
+                                        .StartMass = Double.Parse(reMatch.Groups("StartMass").Value)
+                                        .EndMass = Double.Parse(reMatch.Groups("EndMass").Value)
                                         .CentralMass = Math.Round(.StartMass + (.EndMass - .StartMass) / 2, 6)
                                     End With
                                     udtMRMInfo.MRMMassCount += 1
@@ -668,6 +674,16 @@ Namespace FinniganFileIO
                                 Try
                                     dblParentIonMZ = Double.Parse(strMZText.Substring(0, intCharIndex + 1))
                                     blnMatchFound = True
+
+                                    Dim udtParentIonMzOnly = New udtParentIonInfoType()
+                                    With udtParentIonMzOnly
+                                        .Clear()
+                                        .MSLevel = intMSLevel
+                                        .ParentIonMZ = dblParentIonMZ
+                                    End With
+
+                                    lstParentIons.Add(udtParentIonMzOnly)
+
                                 Catch ex As Exception
                                     dblParentIonMZ = 0
                                 End Try
@@ -706,7 +722,7 @@ Namespace FinniganFileIO
             Dim reMatchMS = reFindMS.Match(strFilterText)
 
             If reMatchMS.Success Then
-                intMSLevel = CInt(reMatchMS.Groups(2).Value)
+                intMSLevel = CInt(reMatchMS.Groups("MSLevel").Value)
                 intCharIndex = strFilterText.IndexOf(reMatchMS.ToString(), StringComparison.InvariantCultureIgnoreCase)
                 intMatchTextLength = reMatchMS.Length
             End If
@@ -1246,7 +1262,7 @@ Namespace FinniganFileIO
             ' + p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]                     Q1MS
             ' + p NSI Q3MS [150.070-1500.000]                                                      Q3MS
             ' c NSI Full cnl 162.053 [300.000-1200.000]                                            MRM_Full_NL
-            
+
             ' Lumos scan filter examples
             ' FTMS + p NSI Full ms                                                                 HMS
             ' ITMS + c NSI r d Full ms2 916.3716@cid30.00 [247.0000-2000.0000]                     CID-MSn
@@ -1541,11 +1557,18 @@ Namespace FinniganFileIO
 
             Const COLLISION_SPEC_REGEX = "(?<MzValue> [0-9.]+)@"
 
+            Const MZ_WITHOUT_COLLISION_ENERGY = "ms[2-9](?<MzValue> [0-9.]+)$"
 
             Dim strGenericScanFilterText = "MS"
             Dim intCharIndex As Integer
 
-            Dim reCollisionSpecs As Regex
+            Static reCollisionSpecs As Regex
+            Static reMzWithoutCE As Regex
+
+            If reCollisionSpecs Is Nothing Then
+                reCollisionSpecs = New Regex(COLLISION_SPEC_REGEX, RegexOptions.Compiled)
+                reMzWithoutCE = New Regex(MZ_WITHOUT_COLLISION_ENERGY, RegexOptions.Compiled)
+            End If
 
             Try
                 If String.IsNullOrWhiteSpace(strFilterText) Then Exit Try
@@ -1570,9 +1593,13 @@ Namespace FinniganFileIO
 
                 ' Replace any digits before any @ sign with a 0
                 If strGenericScanFilterText.IndexOf("@"c) > 0 Then
-                    reCollisionSpecs = New Regex(COLLISION_SPEC_REGEX, RegexOptions.Compiled)
-
                     strGenericScanFilterText = reCollisionSpecs.Replace(strGenericScanFilterText, " 0@")
+                Else
+                    ' No @ sign; look for text of the form "ms2 748.371"
+                    Dim reMatch = reMzWithoutCE.Match(strGenericScanFilterText)
+                    If reMatch.Success Then
+                        strGenericScanFilterText = strGenericScanFilterText.Substring(0, reMatch.Groups("MzValue").Index)
+                    End If
                 End If
 
             Catch ex As Exception

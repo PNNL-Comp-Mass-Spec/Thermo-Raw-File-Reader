@@ -2,6 +2,9 @@ ThermoRawFileReaderDLL Change Log
 
 Version 1.1.5856; January 13, 2016
 	- Added unit tests
+	- MakeGenericFinniganScanFilter no longer reports the parent ion m/z for SRM spectra
+	- DetermineIonizationMode now reports Unknown for "c NSI Full cnl 162.053 [300.000-1200.000]" instead of Negative
+	- ExtractParentIonMZFromFilterText now reports 748.371 for "+ c NSI SRM ms2 748.371 [701.368-701.370]"
 
 Version 1.1.5854; January 11, 2016
 	- Add support for Thermo Lumos scan filters of the form 902.5721@etd120.55@cid20.00
