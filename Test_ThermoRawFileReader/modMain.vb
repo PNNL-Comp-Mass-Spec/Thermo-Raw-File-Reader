@@ -52,6 +52,8 @@ Module modMain
             End If
         End If
 
+        TestScanFilterParsing()
+
         TestReader(fiSourceFile.FullName, centroid, testSumming, startScan, endScan)
 
         If centroid Then
@@ -65,7 +67,6 @@ Module modMain
         Console.WriteLine("Done")
 
     End Sub
-
 
     Private Sub ShowProgramHelp()
 
@@ -196,7 +197,7 @@ Module modMain
                         Next
                         Console.WriteLine()
 
-                        Const scansToSum As Integer = 15
+                        Const scansToSum = 15
                         If iScanNum + scansToSum < iNumScans And testSumming Then
 
                             ' Get the data for scan iScanNum through iScanNum + 15
@@ -262,6 +263,50 @@ Module modMain
         End Try
     End Sub
 
+    Private Sub TestScanFilterParsing()
+
+        ' Note: See also class ThermoReaderUnitTests in the RawFileReaderTests project
+
+        Dim filterList = New List(Of String)
+
+        filterList.Add("ITMS + c ESI Full ms [300.00-2000.00]")
+        filterList.Add("FTMS + p NSI Full ms [400.00-2000.00]")
+        filterList.Add("ITMS + p ESI d Z ms [579.00-589.00]")
+        filterList.Add("ITMS + c ESI d Full ms2 583.26@cid35.00 [150.00-1180.00]")
+        filterList.Add("ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]")
+        filterList.Add("FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]")
+        filterList.Add("ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]")
+        filterList.Add("+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]")
+        filterList.Add("+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]")
+        filterList.Add("ITMS + c NSI d Full ms10 421.76@35.00")
+        filterList.Add("+ p ms2 777.00@cid30.00 [210.00-1200.00]")
+        filterList.Add("+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]")
+        filterList.Add("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]")
+        filterList.Add("+ p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]")
+        filterList.Add("+ p NSI Q3MS [150.070-1500.000]")
+        filterList.Add("c NSI Full cnl 162.053 [300.000-1200.000]")
+        filterList.Add("- p NSI Full ms2 168.070 [300.000-1500.00]")
+        filterList.Add("+ c NSI Full ms2 1083.000 [300.000-1500.00]")
+        filterList.Add("- p NSI Full ms2 247.060 [300.000-1500.00]")
+        filterList.Add("- c NSI d Full ms2 921.597 [300.000-1500.00]")
+        filterList.Add("+ c NSI SRM ms2 965.958 [300.000-1500.00]")
+        filterList.Add("+ p NSI SRM ms2 1025.250 [300.000-1500.00]")
+        filterList.Add("+ c EI SRM ms2 247.000 [300.000-1500.00]")
+
+        For Each filterItem In filterList
+            Dim genericFilter = XRawFileIO.MakeGenericFinniganScanFilter(filterItem)
+            Dim scanType = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(filterItem)
+
+            Console.WriteLine(filterItem)
+            Console.WriteLine("  {0,-12} {1}", scanType, genericFilter)
+            Console.WriteLine()
+        Next
+
+        Console.WriteLine()
+
+    End Sub
+
+
     Private Function ShowMethod(ByVal oReader As XRawFileIO) As Boolean
         Dim intInstMethodCount As Integer
         Dim strMethodNum As String
@@ -300,19 +345,5 @@ Module modMain
 
         Return True
     End Function
-
-    Private Class clsMzListComparer
-        Inherits Generic.Comparer(Of KeyValuePair(Of Double, Double))
-
-        Public Overrides Function Compare(x As Collections.Generic.KeyValuePair(Of Double, Double), y As Collections.Generic.KeyValuePair(Of Double, Double)) As Integer
-            If x.Key < y.Key Then
-                Return -1
-            ElseIf x.Key > y.Key Then
-                Return 1
-            Else
-                Return 0
-            End If
-        End Function
-    End Class
 
 End Module

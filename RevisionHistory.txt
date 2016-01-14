@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5856; January 13, 2016
+	- Added unit tests
+
 Version 1.1.5854; January 11, 2016
 	- Add support for Thermo Lumos scan filters of the form 902.5721@etd120.55@cid20.00
 		- etd followed by cid is labeled ETciD
