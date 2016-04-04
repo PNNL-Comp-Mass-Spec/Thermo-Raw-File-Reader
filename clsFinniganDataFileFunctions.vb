@@ -26,6 +26,7 @@ Namespace FinniganFileIO
 
     Public Class XRawFileIO
         Inherits FinniganFileReaderBaseClass
+        Implements IDisposable
 
 #Region "Constants and Enums"
 
@@ -2558,10 +2559,26 @@ Namespace FinniganFileIO
         ''' </summary>
         ''' <remarks></remarks>
         Public Sub New()
-            CloseRawFile()
-
-            mCachedScanInfo = New Dictionary(Of Integer, clsScanInfo)
+            Me.New(String.Empty)
         End Sub
 
+        ''' <summary>
+        ''' Constructor
+        ''' </summary>
+        ''' <remarks></remarks>
+        Public Sub New(rawFilePath As String)
+            mCachedScanInfo = New Dictionary(Of Integer, clsScanInfo)
+            If Not (String.IsNullOrWhiteSpace(rawFilePath)) Then
+                OpenRawFile(rawFilePath)
+            End If
+        End Sub
+
+        ''' <summary>
+        ''' Dispose the reader
+        ''' </summary>
+        ''' <remarks></remarks>
+        Public Sub Dispose() Implements IDisposable.Dispose
+            CloseRawFile()
+        End Sub
     End Class
 End Namespace

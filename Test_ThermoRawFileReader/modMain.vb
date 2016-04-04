@@ -100,163 +100,165 @@ Module modMain
                 Exit Sub
             End If
 
-            Dim oReader = New XRawFileIO()
+            Using oReader = New XRawFileIO(rawFilePath)
 
-            oReader.OpenRawFile(rawFilePath)
+                ' ReSharper disable once UseImplicitlyTypedVariableEvident
+                For intIndex As Integer = 0 To oReader.FileInfo.InstMethods.Length - 1
+                    Console.WriteLine(oReader.FileInfo.InstMethods(intIndex))
+                Next
 
-            For intIndex As Integer = 0 To oReader.FileInfo.InstMethods.Length - 1
-                Console.WriteLine(oReader.FileInfo.InstMethods(intIndex))
-            Next
+                Dim iNumScans = oReader.GetNumScans()
 
-            Dim iNumScans = oReader.GetNumScans()
+                Dim bSuccess As Boolean
 
-            Dim bSuccess As Boolean
+                Dim dblMzList() As Double
+                Dim dblIntensityList() As Double
+                Dim dblMassIntensityPairs As Double(,)
 
-            Dim dblMzList() As Double
-            Dim dblIntensityList() As Double
-            Dim dblMassIntensityPairs As Double(,)
+                Dim lstCollisionEnergies As List(Of Double)
+                Dim strCollisionEnergies As String = String.Empty
 
-            Dim lstCollisionEnergies As List(Of Double)
-            Dim strCollisionEnergies As String = String.Empty
+                ReDim dblMzList(0)
+                ReDim dblIntensityList(0)
+                ReDim dblMassIntensityPairs(0, 0)
 
-            ReDim dblMzList(0)
-            ReDim dblIntensityList(0)
-            ReDim dblMassIntensityPairs(0, 0)
+                ShowMethod(oReader)
 
-            ShowMethod(oReader)
+                Dim scanStep = 1
 
-            Dim scanStep = 1
-
-            If scanStart < 1 Then scanStart = 1
-            If scanEnd < 1 Then
-                scanEnd = iNumScans
-                scanStep = 21
-            Else
-                If scanEnd < scanStart Then
-                    scanEnd = scanStart
+                If scanStart < 1 Then scanStart = 1
+                If scanEnd < 1 Then
+                    scanEnd = iNumScans
+                    scanStep = 21
+                Else
+                    If scanEnd < scanStart Then
+                        scanEnd = scanStart
+                    End If
                 End If
-            End If
 
-            For iScanNum As Integer = scanStart To scanEnd Step scanStep
+                For iScanNum As Integer = scanStart To scanEnd Step scanStep
 
-                Dim oScanInfo As clsScanInfo = Nothing
+                    Dim oScanInfo As clsScanInfo = Nothing
 
-                bSuccess = oReader.GetScanInfo(iScanNum, oScanInfo)
-                If bSuccess Then
-                    Console.Write("Scan " & iScanNum & " at " & oScanInfo.RetentionTime.ToString("0.00") & " minutes: " & oScanInfo.FilterText)
-                    lstCollisionEnergies = oReader.GetCollisionEnergy(iScanNum)
+                    bSuccess = oReader.GetScanInfo(iScanNum, oScanInfo)
+                    If bSuccess Then
+                        Console.Write("Scan " & iScanNum & " at " & oScanInfo.RetentionTime.ToString("0.00") & " minutes: " & oScanInfo.FilterText)
+                        lstCollisionEnergies = oReader.GetCollisionEnergy(iScanNum)
 
-                    If lstCollisionEnergies.Count = 0 Then
-                        strCollisionEnergies = String.Empty
-                    ElseIf lstCollisionEnergies.Count >= 1 Then
-                        strCollisionEnergies = lstCollisionEnergies.Item(0).ToString("0.0")
+                        If lstCollisionEnergies.Count = 0 Then
+                            strCollisionEnergies = String.Empty
+                        ElseIf lstCollisionEnergies.Count >= 1 Then
+                            strCollisionEnergies = lstCollisionEnergies.Item(0).ToString("0.0")
 
-                        If lstCollisionEnergies.Count > 1 Then
-                            For intIndex = 1 To lstCollisionEnergies.Count - 1
-                                strCollisionEnergies &= ", " & lstCollisionEnergies.Item(intIndex).ToString("0.0")
-                            Next
-                        End If
-                    End If
-
-                    If String.IsNullOrEmpty(strCollisionEnergies) Then
-                        Console.WriteLine()
-                    Else
-                        Console.WriteLine("; CE " & strCollisionEnergies)
-                    End If
-
-                    Dim monoMZ As String = String.Empty
-                    Dim chargeState As String = String.Empty
-                    Dim isolationWidth As String = String.Empty
-
-                    If oScanInfo.TryGetScanEvent("Monoisotopic M/Z:", monoMZ, False) Then
-                        Console.WriteLine("Monoisotopic M/Z: " + monoMZ)
-                    End If
-
-                    If oScanInfo.TryGetScanEvent("Charge State", chargeState, True) Then
-                        Console.WriteLine("Charge State: " + chargeState)
-                    End If
-
-                    If oScanInfo.TryGetScanEvent("MS2 Isolation Width", isolationWidth, True) Then
-                        Console.WriteLine("MS2 Isolation Width: " + isolationWidth)
-                    End If
-
-                    If iScanNum Mod 50 = 0 OrElse scanEnd - scanStart <= 50 Then
-                        ' Get the data for scan iScanNum
-
-                        Console.WriteLine()
-                        Console.WriteLine("Spectrum for scan " & iScanNum)
-                        Dim intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, 0, centroid)
-
-                        Dim mzDisplayStepSize = 50
-                        If centroid Then
-                            mzDisplayStepSize = 1
+                            If lstCollisionEnergies.Count > 1 Then
+                                For intIndex = 1 To lstCollisionEnergies.Count - 1
+                                    strCollisionEnergies &= ", " & lstCollisionEnergies.Item(intIndex).ToString("0.0")
+                                Next
+                            End If
                         End If
 
-                        For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step mzDisplayStepSize
-                            Console.WriteLine("  " & dblMzList(iDataPoint).ToString("0.000") & " mz   " & dblIntensityList(iDataPoint).ToString("0"))
-                        Next
-                        Console.WriteLine()
+                        If String.IsNullOrEmpty(strCollisionEnergies) Then
+                            Console.WriteLine()
+                        Else
+                            Console.WriteLine("; CE " & strCollisionEnergies)
+                        End If
 
-                        Const scansToSum = 15
-                        If iScanNum + scansToSum < iNumScans And testSumming Then
+                        Dim monoMZ As String = String.Empty
+                        Dim chargeState As String = String.Empty
+                        Dim isolationWidth As String = String.Empty
 
-                            ' Get the data for scan iScanNum through iScanNum + 15
-                            Dim dataCount = oReader.GetScanDataSumScans(iScanNum, iScanNum + scansToSum, dblMassIntensityPairs, 0, centroid)
+                        If oScanInfo.TryGetScanEvent("Monoisotopic M/Z:", monoMZ, False) Then
+                            Console.WriteLine("Monoisotopic M/Z: " + monoMZ)
+                        End If
 
-                            Console.WriteLine("Summed spectrum, scans " & iScanNum & " through " & (iScanNum + scansToSum).ToString())
+                        If oScanInfo.TryGetScanEvent("Charge State", chargeState, True) Then
+                            Console.WriteLine("Charge State: " + chargeState)
+                        End If
 
-                            For iDataPoint As Integer = 0 To dblMassIntensityPairs.GetLength(1) - 1 Step 50
-                                Console.WriteLine("  " & dblMassIntensityPairs(0, iDataPoint).ToString("0.000") & " mz   " & dblMassIntensityPairs(1, iDataPoint).ToString("0"))
-                            Next
+                        If oScanInfo.TryGetScanEvent("MS2 Isolation Width", isolationWidth, True) Then
+                            Console.WriteLine("MS2 Isolation Width: " + isolationWidth)
+                        End If
+
+                        If iScanNum Mod 50 = 0 OrElse scanEnd - scanStart <= 50 Then
+                            ' Get the data for scan iScanNum
 
                             Console.WriteLine()
-                        End If
+                            Console.WriteLine("Spectrum for scan " & iScanNum)
+                            Dim intDataCount = oReader.GetScanData(iScanNum, dblMzList, dblIntensityList, 0, centroid)
 
-                        If oScanInfo.IsFTMS Then
-                            Dim ftLabelData As XRawFileIO.udtFTLabelInfoType() = Nothing
+                            Dim mzDisplayStepSize = 50
+                            If centroid Then
+                                mzDisplayStepSize = 1
+                            End If
 
-                            Dim dataCount = oReader.GetScanLabelData(iScanNum, ftLabelData)
-
-                            Console.WriteLine()
-                            Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", "Mass", "Intensity", "Resolution", "Baseline", "Noise", "Charge")
-
-                            For iDataPoint = 0 To dataCount - 1 Step 50
-
-                                Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}",
-                                                  ftLabelData(iDataPoint).Mass.ToString("0.000"),
-                                                  ftLabelData(iDataPoint).Intensity.ToString("0"),
-                                                  ftLabelData(iDataPoint).Resolution.ToString("0"),
-                                                  ftLabelData(iDataPoint).Baseline.ToString("0.0"),
-                                                  ftLabelData(iDataPoint).Noise.ToString("0"),
-                                                  ftLabelData(iDataPoint).Charge.ToString("0")
-                                                  )
+                            ' ReSharper disable once UseImplicitlyTypedVariableEvident
+                            For iDataPoint As Integer = 0 To dblMzList.Length - 1 Step mzDisplayStepSize
+                                Console.WriteLine("  " & dblMzList(iDataPoint).ToString("0.000") & " mz   " & dblIntensityList(iDataPoint).ToString("0"))
                             Next
-
-                            Dim ftPrecisionData As XRawFileIO.udtMassPrecisionInfoType() = Nothing
-
-                            dataCount = oReader.GetScanPrecisionData(iScanNum, ftPrecisionData)
-
                             Console.WriteLine()
-                            Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}", "Mass", "Intensity", "AccuracyMMU", "AccuracyPPM", "Resolution")
 
-                            For iDataPoint = 0 To dataCount - 1 Step 50
+                            Const scansToSum = 15
+                            If iScanNum + scansToSum < iNumScans And testSumming Then
 
-                                Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}",
-                                                  ftPrecisionData(iDataPoint).Mass.ToString("0.000"),
-                                                  ftPrecisionData(iDataPoint).Intensity.ToString("0"),
-                                                  ftPrecisionData(iDataPoint).AccuracyMMU.ToString("0.000"),
-                                                  ftPrecisionData(iDataPoint).AccuracyPPM.ToString("0.000"),
-                                                  ftPrecisionData(iDataPoint).Resolution.ToString("0")
-                                                  )
-                            Next
+                                ' Get the data for scan iScanNum through iScanNum + 15
+                                Dim dataCount = oReader.GetScanDataSumScans(iScanNum, iScanNum + scansToSum, dblMassIntensityPairs, 0, centroid)
+
+                                Console.WriteLine("Summed spectrum, scans " & iScanNum & " through " & (iScanNum + scansToSum).ToString())
+
+                                ' ReSharper disable once UseImplicitlyTypedVariableEvident
+                                For iDataPoint As Integer = 0 To dblMassIntensityPairs.GetLength(1) - 1 Step 50
+                                    Console.WriteLine("  " & dblMassIntensityPairs(0, iDataPoint).ToString("0.000") & " mz   " & dblMassIntensityPairs(1, iDataPoint).ToString("0"))
+                                Next
+
+                                Console.WriteLine()
+                            End If
+
+                            If oScanInfo.IsFTMS Then
+                                Dim ftLabelData As XRawFileIO.udtFTLabelInfoType() = Nothing
+
+                                Dim dataCount = oReader.GetScanLabelData(iScanNum, ftLabelData)
+
+                                Console.WriteLine()
+                                Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", "Mass", "Intensity", "Resolution", "Baseline", "Noise", "Charge")
+
+                                For iDataPoint = 0 To dataCount - 1 Step 50
+
+                                    Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}",
+                                                      ftLabelData(iDataPoint).Mass.ToString("0.000"),
+                                                      ftLabelData(iDataPoint).Intensity.ToString("0"),
+                                                      ftLabelData(iDataPoint).Resolution.ToString("0"),
+                                                      ftLabelData(iDataPoint).Baseline.ToString("0.0"),
+                                                      ftLabelData(iDataPoint).Noise.ToString("0"),
+                                                      ftLabelData(iDataPoint).Charge.ToString("0")
+                                                      )
+                                Next
+
+                                Dim ftPrecisionData As XRawFileIO.udtMassPrecisionInfoType() = Nothing
+
+                                dataCount = oReader.GetScanPrecisionData(iScanNum, ftPrecisionData)
+
+                                Console.WriteLine()
+                                Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}", "Mass", "Intensity", "AccuracyMMU", "AccuracyPPM", "Resolution")
+
+                                For iDataPoint = 0 To dataCount - 1 Step 50
+
+                                    Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}",
+                                                      ftPrecisionData(iDataPoint).Mass.ToString("0.000"),
+                                                      ftPrecisionData(iDataPoint).Intensity.ToString("0"),
+                                                      ftPrecisionData(iDataPoint).AccuracyMMU.ToString("0.000"),
+                                                      ftPrecisionData(iDataPoint).AccuracyPPM.ToString("0.000"),
+                                                      ftPrecisionData(iDataPoint).Resolution.ToString("0")
+                                                      )
+                                Next
+                            End If
+
                         End If
 
                     End If
+                Next
 
-                End If
-            Next
+            End Using
 
-            oReader.CloseRawFile()
 
         Catch ex As Exception
             Console.WriteLine("Error in sub TestReader: " & ex.Message)

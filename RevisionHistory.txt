@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5938; April 4, 2016
+	- XRawFileIO now implements IDisposable
+
 Version 1.1.5856; January 13, 2016
 	- Added unit tests
 	- MakeGenericFinniganScanFilter no longer reports the parent ion m/z for SRM spectra
