@@ -99,7 +99,6 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PE
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\Exe\Debug" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\x64\" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\CreateMSGFDBResultsFileFromPHRP\bin" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PeptideHitResultsProcessor\bin\" /Y
