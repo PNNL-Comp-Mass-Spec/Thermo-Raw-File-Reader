@@ -23,6 +23,8 @@ xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\JoshAldrich\Int
 
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\SangtaeKim\InformedProteomics\lib" /Y
 
+xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\KevinCrowell\IMSDemultiplexer\IMSDemultiplexer\lib" /Y
+
 @echo off
 echo Copy the DLL to bin folders
 echo Note that the DLL is compiled as AnyCPU
