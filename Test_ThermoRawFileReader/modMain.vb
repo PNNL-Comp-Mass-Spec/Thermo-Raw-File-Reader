@@ -296,6 +296,10 @@ Module modMain
         filterList.Add("+ c EI SRM ms2 247.000 [300.000-1500.00]")
         filterList.Add("+ p NSI Full ms2 589.840 [300.070-1200.000]")
         filterList.Add("+ p NSI ms [0.316-316.000]")
+        filterList.Add("ITMS + p NSI SIM ms")
+        filterList.Add("ITMS + c NSI d SIM ms")
+        filterList.Add("FTMS + p NSI SIM ms")
+        filterList.Add("FTMS + p NSI d SIM ms")
 
         For Each filterItem In filterList
             Dim genericFilter = XRawFileIO.MakeGenericFinniganScanFilter(filterItem)
@@ -303,6 +307,33 @@ Module modMain
 
             Console.WriteLine(filterItem)
             Console.WriteLine("  {0,-12} {1}", scanType, genericFilter)
+
+            Dim intMSLevel As Integer
+            Dim blnSIMScan, blnZoomScan As Boolean
+            Dim eMRMScanType As FinniganFileReaderBaseClass.MRMScanTypeConstants
+
+            Dim validMS1Scan = XRawFileIO.ValidateMSScan(filterItem, intMSLevel, blnSIMScan, eMRMScanType, blnZoomScan)
+
+            If validMS1Scan Then
+                If eMRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM Then
+                    Console.Write("  MSLevel={0}", intMSLevel)
+                Else
+                    Console.Write("  MSLevel={0}, MRMScanType={1}", intMSLevel, eMRMScanType)
+                End If
+
+                If blnSIMScan Then
+                    Console.Write(", SIM Scan")
+                End If
+
+                If blnZoomScan Then
+                    Console.Write(", Zoom Scan")
+                End If
+
+                Console.WriteLine()
+            Else
+                Console.WriteLine("  Not an MS1, SRM, MRM, or SIM scan")
+            End If
+
             Console.WriteLine()
         Next
 

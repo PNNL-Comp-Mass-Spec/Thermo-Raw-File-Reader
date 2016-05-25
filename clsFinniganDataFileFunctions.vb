@@ -280,24 +280,24 @@ Namespace FinniganFileIO
 
         End Sub
 
-        Private Shared Function ContainsAny(stringToSearch As String, itemsToFind As List(Of String), Optional indexSearchStart As Integer = 0, Optional matchCase As Boolean = False) As Boolean
+        Private Shared Function ContainsAny(
+           stringToSearch As String, itemsToFind As IEnumerable(Of String),
+           Optional indexSearchStart As Integer = 0) As Boolean
 
-            Return itemsToFind.Any(Function(item) ContainsText(stringToSearch, item, indexSearchStart, matchCase))
+            Return itemsToFind.Any(Function(item) ContainsText(stringToSearch, item, indexSearchStart))
 
         End Function
 
-        Private Shared Function ContainsText(stringToSearch As String, textToFind As String, Optional indexSearchStart As Integer = 0, Optional matchCase As Boolean = False) As Boolean
+        Private Shared Function ContainsText(
+           stringToSearch As String,
+           textToFind As String,
+           Optional indexSearchStart As Integer = 0) As Boolean
 
-            If matchCase Then
-                If stringToSearch.IndexOf(textToFind, StringComparison.InvariantCulture) >= indexSearchStart Then
-                    Return True
-                End If
-            Else
-                If stringToSearch.IndexOf(textToFind, StringComparison.InvariantCultureIgnoreCase) >= indexSearchStart Then
-                    Return True
-                End If
+            ' Note: need to append a space since many of the search keywords end in a space
+            If (stringToSearch & " ").IndexOf(textToFind, StringComparison.InvariantCultureIgnoreCase) >= indexSearchStart Then
+                Return True
             End If
-
+         
             Return False
 
         End Function
@@ -1123,15 +1123,8 @@ Namespace FinniganFileIO
                         End If
                     End If
                 Else
-                    ' MS data
-                    ' Make sure .FilterText contains one of the following:
-                    '   FULL_MS_TEXT = "Full ms "
-                    '   FULL_LOCK_MS_TEXT = "Full lock ms "
-                    '   FULL_PR_TEXT = "Full pr "
-                    '   SIM_MS_TEXT = "SIM ms "
-                    '   SIM_PR_TEXT = "SIM pr "
-                    '   MRM_Q1MS_TEXT = "Q1MS "
-                    '   MRM_SRM_TEXT = "SRM "
+                    ' MS1 data
+                    ' Make sure .FilterText contains one of the known MS1, SIM or MRM tags
 
                     If scanInfo.FilterText = String.Empty Then
                         ' FilterText is empty; this indicates a problem with the .Raw file
@@ -1305,14 +1298,8 @@ Namespace FinniganFileIO
                     End If
 
                 Else
-                    ' Make sure strFilterText contains one of the following:
-                    '   FULL_MS_TEXT = "Full ms "
-                    '   FULL_LOCK_MS_TEXT = "Full lock ms "
-                    '   FULL_PR_TEXT = "Full pr "
-                    '   SIM_MS_TEXT = "SIM ms "
-                    '   SIM_PR_TEXT = "SIM pr "
-                    '   MRM_Q1MS_TEXT = "Q1MS "
-                    '   MRM_SRM_TEXT = "SRM "
+                    ' MSLevel is 1
+                    ' Make sure .FilterText contains one of the known MS1, SIM or MRM tags
                     If ValidateMSScan(strFilterText, intMSLevel, blnSIMScan, eMRMScanType, blnZoomScan) Then
                         ' Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                     Else
@@ -1675,8 +1662,6 @@ Namespace FinniganFileIO
            <Out()> ByRef eMRMScanType As MRMScanTypeConstants,
            <Out()> ByRef blnZoomScan As Boolean) As Boolean
 
-            Dim blnValidScan As Boolean
-
             intMSLevel = 0
             blnSIMScan = False
             eMRMScanType = MRMScanTypeConstants.NotMRM
@@ -1690,42 +1675,45 @@ Namespace FinniganFileIO
                 ' This is really a Full MS scan
                 intMSLevel = 1
                 blnSIMScan = False
-                blnValidScan = True
-            Else
-                If ContainsText(strFilterText, SIM_MS_TEXT, 1) Then
-                    ' This is really a SIM MS scan
-                    intMSLevel = 1
-                    blnSIMScan = True
-                    blnValidScan = True
-                ElseIf ContainsAny(strFilterText, zoomTags, 1) Then
-                    intMSLevel = 1
-                    blnZoomScan = True
-                    blnValidScan = True
-                ElseIf ContainsText(strFilterText, MS_ONLY_PZ_MS2_TEXT, 1) Then
-                    ' Technically, this should have MSLevel = 2, but that would cause a bunch of problems elsewhere in MASIC
-                    ' Thus, we'll pretend it's MS1
-                    intMSLevel = 1
-                    blnZoomScan = True
-                    blnValidScan = True
-                Else
-                    eMRMScanType = DetermineMRMScanType(strFilterText)
-                    Select Case eMRMScanType
-                        Case MRMScanTypeConstants.MRMQMS
-                            intMSLevel = 1
-                            blnValidScan = True            ' ToDo: Add support for TSQ MRMQMS data
-                        Case MRMScanTypeConstants.SRM
-                            intMSLevel = 2
-                            blnValidScan = True            ' ToDo: Add support for TSQ SRM data
-                        Case MRMScanTypeConstants.FullNL
-                            intMSLevel = 2
-                            blnValidScan = True            ' ToDo: Add support for TSQ Full NL data
-                        Case Else
-                            blnValidScan = False
-                    End Select
-                End If
+                Return True
             End If
 
-            Return blnValidScan
+            If ContainsText(strFilterText, SIM_MS_TEXT, 1) Then
+                ' This is really a SIM MS scan
+                intMSLevel = 1
+                blnSIMScan = True
+                Return True
+            End If
+
+            If ContainsAny(strFilterText, zoomTags, 1) Then
+                intMSLevel = 1
+                blnZoomScan = True
+                Return True
+            End If
+
+            If ContainsText(strFilterText, MS_ONLY_PZ_MS2_TEXT, 1) Then
+                ' Technically, this should have MSLevel = 2, but that would cause a bunch of problems elsewhere in MASIC
+                ' Thus, we'll pretend it's MS1
+                intMSLevel = 1
+                blnZoomScan = True
+                Return True
+            End If
+
+            eMRMScanType = DetermineMRMScanType(strFilterText)
+            Select Case eMRMScanType
+                Case MRMScanTypeConstants.MRMQMS
+                    intMSLevel = 1
+                    Return True            ' ToDo: Add support for TSQ MRMQMS data
+                Case MRMScanTypeConstants.SRM
+                    intMSLevel = 2
+                    Return True            ' ToDo: Add support for TSQ SRM data
+                Case MRMScanTypeConstants.FullNL
+                    intMSLevel = 2
+                    Return True            ' ToDo: Add support for TSQ Full NL data
+                Case Else
+                    Return False
+            End Select
+
         End Function
 
         ''' <summary>

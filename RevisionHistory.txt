@@ -1,5 +1,9 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 1.1.5989; May 25, 2016
+	- Add support for scan filter "p NSI ms"
+	- Fix bug validating that an MS1 scan has a known scan filter
+
 Version 1.1.5938; April 4, 2016
 	- XRawFileIO now implements IDisposable
 

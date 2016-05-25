@@ -312,7 +312,7 @@ namespace RawFileReaderTests
         [TestCase("FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]    ", false, 0, false, FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM, false)]
         public void ValidateMSScan(
             string filterText, 
-            bool expectedIsValid, 
+            bool expectedIsValidMS1orSIM, 
             int expectedMSLevel, 
             bool expectedIsSIMScan,
             FinniganFileReaderBaseClass.MRMScanTypeConstants expectedMRMScanType, bool expectedIsZoomScan)
@@ -326,7 +326,7 @@ namespace RawFileReaderTests
 
             Console.WriteLine(filterText + "  -- ms" + intMSLevel + "; SIM=" + isSIMScan + "; MRMScanType=" + mrmScanType);
 
-            Assert.AreEqual(expectedIsValid, isValid, "Validation mismatch");
+            Assert.AreEqual(expectedIsValidMS1orSIM, isValid, "Validation mismatch");
             Assert.AreEqual(expectedMSLevel, intMSLevel, "MSLevel mismatch");
             Assert.AreEqual(expectedIsSIMScan, isSIMScan, "SIMScan mismatch");
             Assert.AreEqual(expectedMRMScanType, mrmScanType, "MRMScanType mismatch");
