@@ -33,6 +33,7 @@ Namespace FinniganFileIO
         ' Note that each of these strings has a space at the end; this is important to avoid matching inappropriate text in the filter string
         Private Const MS_ONLY_C_TEXT As String = " c ms "
         Private Const MS_ONLY_P_TEXT As String = " p ms "
+        Private Const MS_ONLY_P_NSI_TEXT As String = " p NSI ms "
 
         Private Const MS_ONLY_PZ_TEXT As String = " p Z ms "            ' Likely a zoom scan
         Private Const MS_ONLY_DZ_TEXT As String = " d Z ms "            ' Dependent zoom scan
@@ -167,6 +168,8 @@ Namespace FinniganFileIO
         Private mXRawFile As IXRawfile5
 
         Private mCorruptMemoryEncountered As Boolean
+
+        Private Shared ReadOnly mFindMS As Regex = New Regex(MS2_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
 #End Region
 
@@ -708,19 +711,13 @@ Namespace FinniganFileIO
 
             ' Populates intMSLevel with the number after "ms" and strMZText with the text after "ms2"
 
-            Static reFindMS As Regex
-
             Dim intCharIndex As Integer
             Dim intMatchTextLength As Integer
 
             intMSLevel = 1
             intCharIndex = 0
 
-            If reFindMS Is Nothing Then
-                reFindMS = New Regex(MS2_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
-            End If
-
-            Dim reMatchMS = reFindMS.Match(strFilterText)
+            Dim reMatchMS = mFindMS.Match(strFilterText)
 
             If reMatchMS.Success Then
                 intMSLevel = CInt(reMatchMS.Groups("MSLevel").Value)
@@ -1714,7 +1711,7 @@ Namespace FinniganFileIO
             eMRMScanType = MRMScanTypeConstants.NotMRM
             blnZoomScan = False
 
-            Dim ms1Tags = New List(Of String) From {FULL_MS_TEXT, MS_ONLY_C_TEXT, MS_ONLY_P_TEXT, FULL_PR_TEXT, FULL_LOCK_MS_TEXT}
+            Dim ms1Tags = New List(Of String) From {FULL_MS_TEXT, MS_ONLY_C_TEXT, MS_ONLY_P_TEXT, MS_ONLY_P_NSI_TEXT, FULL_PR_TEXT, FULL_LOCK_MS_TEXT}
 
             Dim zoomTags = New List(Of String) From {MS_ONLY_Z_TEXT, MS_ONLY_PZ_TEXT, MS_ONLY_DZ_TEXT}
 
@@ -2568,6 +2565,7 @@ Namespace FinniganFileIO
         ''' <remarks></remarks>
         Public Sub New(rawFilePath As String)
             mCachedScanInfo = New Dictionary(Of Integer, clsScanInfo)
+
             If Not (String.IsNullOrWhiteSpace(rawFilePath)) Then
                 OpenRawFile(rawFilePath)
             End If
