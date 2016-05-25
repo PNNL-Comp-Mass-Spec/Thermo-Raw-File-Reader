@@ -256,7 +256,7 @@ Public Class clsScanInfo
     ''' Constructor with only scan number
     ''' </summary>
     ''' <remarks></remarks>
-    Public Sub New(ByVal scan As Integer)
+    Public Sub New(scan As Integer)
         NumPeaks = -1
         mScanNumber = scan
         mCacheDateUTC = DateTime.UtcNow
@@ -274,7 +274,7 @@ Public Class clsScanInfo
     ''' Constructor with scan number and data in a udtScanHeaderInfoType struct
     ''' </summary>
     ''' <remarks></remarks>
-    Public Sub New(ByVal scan As Integer, udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType)
+    Public Sub New(scan As Integer, udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType)
         Me.New(scan)
 
         CopyFromStruct(udtScanHeaderInfo)
@@ -286,7 +286,7 @@ Public Class clsScanInfo
     ''' <param name="eventNames"></param>
     ''' <param name="eventValues"></param>
     ''' <remarks></remarks>
-    Public Sub StoreScanEvents(ByVal eventNames() As String, ByVal eventValues() As String)
+    Public Sub StoreScanEvents(eventNames() As String, eventValues() As String)
         StoreParallelStrings(mScanEvents, eventNames, eventValues)
     End Sub
 
@@ -296,7 +296,7 @@ Public Class clsScanInfo
     ''' <param name="logNames"></param>
     ''' <param name="logValues"></param>
     ''' <remarks></remarks>
-    Public Sub StoreStatusLog(ByVal logNames() As String, ByVal logValues() As String)
+    Public Sub StoreStatusLog(logNames() As String, logValues() As String)
         StoreParallelStrings(mStatusLog, logNames, logValues)
     End Sub
 
@@ -308,7 +308,7 @@ Public Class clsScanInfo
     ''' <param name="partialMatchToStart">Set to true to match the start of an event name, and not require a full match</param>
     ''' <returns>True if found a match for the event name, otherwise false</returns>
     ''' <remarks>Event names nearly always end in a colon, e.g. "Monoisotopic M/Z:" or "Charge State:"</remarks>
-    Public Function TryGetScanEvent(ByVal eventName As String, <Out()> ByRef eventValue As String, Optional partialMatchToStart As Boolean = False) As Boolean
+    Public Function TryGetScanEvent(eventName As String, <Out()> ByRef eventValue As String, Optional partialMatchToStart As Boolean = False) As Boolean
 
         Dim lstResults As IEnumerable(Of KeyValuePair(Of String, String))
 
@@ -342,7 +342,7 @@ Public Class clsScanInfo
 
 #Region "Private methods"
 
-    Private Sub CopyFromStruct(ByVal udtScanHeaderInfoType As FinniganFileReaderBaseClass.udtScanHeaderInfoType)
+    Private Sub CopyFromStruct(udtScanHeaderInfoType As FinniganFileReaderBaseClass.udtScanHeaderInfoType)
 
         With udtScanHeaderInfoType
             MSLevel = .MSLevel
@@ -379,9 +379,9 @@ Public Class clsScanInfo
     End Sub
 
     Private Sub StoreParallelStrings(
-       ByVal targetList As ICollection(Of KeyValuePair(Of String, String)),
-       ByVal names As IList(Of String),
-       ByVal values As IList(Of String))
+       targetList As ICollection(Of KeyValuePair(Of String, String)),
+       names As IList(Of String),
+       values As IList(Of String))
 
         targetList.Clear()
 

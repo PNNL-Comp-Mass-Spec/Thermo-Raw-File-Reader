@@ -267,7 +267,7 @@ Module modMain
 
     Private Sub TestScanFilterParsing()
 
-        ' Note: See also class ThermoReaderUnitTests in the RawFileReaderTests project
+        ' Note: See also class ThermoReaderUnitTests in the RawFileReaderUnitTests project
 
         Dim filterList = New List(Of String)
 
@@ -294,6 +294,8 @@ Module modMain
         filterList.Add("+ c NSI SRM ms2 965.958 [300.000-1500.00]")
         filterList.Add("+ p NSI SRM ms2 1025.250 [300.000-1500.00]")
         filterList.Add("+ c EI SRM ms2 247.000 [300.000-1500.00]")
+        filterList.Add("+ p NSI Full ms2 589.840 [300.070-1200.000]")
+        filterList.Add("+ p NSI ms [0.316-316.000]")
 
         For Each filterItem In filterList
             Dim genericFilter = XRawFileIO.MakeGenericFinniganScanFilter(filterItem)

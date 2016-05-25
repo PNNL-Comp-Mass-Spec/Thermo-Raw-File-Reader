@@ -14,13 +14,11 @@ Option Strict On
 '
 ' If having troubles reading files, install MS File Reader 3.0 SP3
 ' Download link: https://thermo.flexnetoperations.com/control/thmo/login
-' Last modified October 13, 2015
 
 Imports System.Runtime.InteropServices
 Imports System.Linq
 Imports MSFileReaderLib
 Imports System.Text.RegularExpressions
-
 
 Namespace FinniganFileIO
 
@@ -57,6 +55,24 @@ Namespace FinniganFileIO
         ' It also matches CRM ms3
         ' It also matches Full msx ms2 (multiplexed parent ion selection, introduced with the Q-Exactive)
         Private Const MS2_REGEX As String = "(?<ScanMode> p|Full|SRM|CRM|Full msx) ms(?<MSLevel>[2-9]|[1-9][0-9]) "
+
+        Private Const IONMODE_REGEX = "[+-]"
+
+        Private Const MASSLIST_REGEX = "\[[0-9.]+-[0-9.]+.*\]"
+
+        Private Const MASSRANGES_REGEX = "(?<StartMass>[0-9.]+)-(?<EndMass>[0-9.]+)"
+
+        ' This RegEx matches text like 1312.95@45.00 or 756.98@cid35.00 or 902.5721@etd120.55@cid20.00
+        Private Const PARENTION_REGEX = "(?<ParentMZ>[0-9.]+)@(?<CollisionMode1>[a-z]*)(?<CollisionEnergy1>[0-9.]+)(@(?<CollisionMode2>[a-z]+)(?<CollisionEnergy2>[0-9.]+))?"
+
+        ' This RegEx looks for "sa" prior to Full ms"
+        Private Const SA_REGEX = " sa Full ms"
+
+        Private Const MSX_REGEX = " Full msx "
+        
+        Private Const COLLISION_SPEC_REGEX = "(?<MzValue> [0-9.]+)@"
+
+        Private Const MZ_WITHOUT_COLLISION_ENERGY = "ms[2-9](?<MzValue> [0-9.]+)$"
 
         ' Used with .GetSeqRowSampleType()
         Public Enum SampleTypeConstants
@@ -171,9 +187,23 @@ Namespace FinniganFileIO
 
         Private Shared ReadOnly mFindMS As Regex = New Regex(MS2_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
+        Private Shared ReadOnly mIonMode As Regex = New Regex(IONMODE_REGEX, RegexOptions.Compiled)
+
+        Private Shared ReadOnly mMassList As Regex = New Regex(MASSLIST_REGEX, RegexOptions.Compiled)
+
+        Private Shared ReadOnly mMassRanges As Regex = New Regex(MASSRANGES_REGEX, RegexOptions.Compiled)
+
+        Private Shared ReadOnly mFindParentIon As Regex = New Regex(PARENTION_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
+        Private Shared ReadOnly mFindSAFullMS As Regex = New Regex(SA_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
+        Private Shared ReadOnly mFindFullMSx As Regex = New Regex(MSX_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
+
+        Private Shared ReadOnly mCollisionSpecs As Regex = New Regex(COLLISION_SPEC_REGEX, RegexOptions.Compiled)
+
+        Private Shared ReadOnly mMzWithoutCE As Regex = New Regex(MZ_WITHOUT_COLLISION_ENERGY, RegexOptions.Compiled)
+
 #End Region
 
-        Private Sub CacheScanInfo(ByVal scan As Integer, ByVal scanInfo As clsScanInfo)
+        Private Sub CacheScanInfo(scan As Integer, scanInfo As clsScanInfo)
 
             If mCachedScanInfo.Count > MAX_SCANS_TO_CACHE_INFO Then
                 ' Remove the oldest entry in mCachedScanInfo
@@ -272,7 +302,7 @@ Namespace FinniganFileIO
 
         End Function
 
-        Public Shared Function DetermineMRMScanType(ByVal strFilterText As String) As MRMScanTypeConstants
+        Public Shared Function DetermineMRMScanType(strFilterText As String) As MRMScanTypeConstants
             Dim eMRMScanType = MRMScanTypeConstants.NotMRM
 
             If String.IsNullOrWhiteSpace(strFilterText) Then
@@ -296,20 +326,12 @@ Namespace FinniganFileIO
             Return eMRMScanType
         End Function
 
-        Public Shared Function DetermineIonizationMode(ByVal strFiltertext As String) As IonModeConstants
+        Public Shared Function DetermineIonizationMode(strFiltertext As String) As IonModeConstants
 
             ' Determine the ion mode by simply looking for the first + or - sign
 
-            Const IONMODE_REGEX = "[+-]"
-
-            Static reIonMode As Regex
-
             Dim eIonMode As IonModeConstants
             Dim reMatch As Match
-
-            If reIonMode Is Nothing Then
-                reIonMode = New Regex(IONMODE_REGEX, RegexOptions.Compiled)
-            End If
 
             eIonMode = IonModeConstants.Unknown
 
@@ -318,9 +340,9 @@ Namespace FinniganFileIO
                 ' For safety, remove any text after a square bracket
                 Dim intCharIndex = strFiltertext.IndexOf("["c)
                 If intCharIndex > 0 Then
-                    reMatch = reIonMode.Match(strFiltertext.Substring(0, intCharIndex))
+                    reMatch = mIonMode.Match(strFiltertext.Substring(0, intCharIndex))
                 Else
-                    reMatch = reIonMode.Match(strFiltertext)
+                    reMatch = mIonMode.Match(strFiltertext)
                 End If
 
                 If reMatch.Success Then
@@ -341,8 +363,8 @@ Namespace FinniganFileIO
         End Function
 
         Public Shared Sub ExtractMRMMasses(
-          ByVal strFilterText As String,
-          ByVal eMRMScanType As MRMScanTypeConstants,
+          strFilterText As String,
+          eMRMScanType As MRMScanTypeConstants,
           <Out()> ByRef udtMRMInfo As udtMRMInfoType)
 
             ' Parse out the MRM_QMS or SRM mass info from strFilterText
@@ -355,22 +377,6 @@ Namespace FinniganFileIO
 
             ' Note: we do not parse mass information out for Full Neutral Loss scans
             ' MRM_FullNL_TEXT: c NSI Full cnl 162.053 [300.000-1200.000]
-
-            Const MASSLIST_REGEX = "\[[0-9.]+-[0-9.]+.*\]"
-            Const MASSRANGES_REGEX = "(?<StartMass>[0-9.]+)-(?<EndMass>[0-9.]+)"
-
-            Static reMassList As Regex
-            Static reMassRanges As Regex
-
-            Dim reMatch As Match
-
-            If reMassList Is Nothing Then
-                reMassList = New Regex(MASSLIST_REGEX, RegexOptions.Compiled)
-            End If
-
-            If reMassRanges Is Nothing Then
-                reMassRanges = New Regex(MASSRANGES_REGEX, RegexOptions.Compiled)
-            End If
 
             udtMRMInfo = New udtMRMInfoType
             If udtMRMInfo.MRMMassList Is Nothing Then
@@ -385,10 +391,10 @@ Namespace FinniganFileIO
                    eMRMScanType = MRMScanTypeConstants.SRM Then
 
                     ' Parse out the text between the square brackets
-                    reMatch = reMassList.Match(strFilterText)
+                    Dim reMatch = mMassList.Match(strFilterText)
 
                     If reMatch.Success Then
-                        reMatch = reMassRanges.Match(reMatch.Value)
+                        reMatch = mMassRanges.Match(reMatch.Value)
                         If Not reMatch Is Nothing Then
 
                             InitializeMRMInfo(udtMRMInfo, 2)
@@ -445,7 +451,7 @@ Namespace FinniganFileIO
         ''' <returns>True if success</returns>
         ''' <remarks>If multiple parent ion m/z values are listed then dblParentIonMZ will have the last one.  However, if the filter text contains "Full msx" then dblParentIonMZ will have the first parent ion listed</remarks>
         Public Shared Function ExtractParentIonMZFromFilterText(
-          ByVal strFilterText As String,
+          strFilterText As String,
           <Out()> ByRef dblParentIonMZ As Double,
           <Out()> ByRef intMSLevel As Integer,
           <Out()> ByRef strCollisionMode As String) As Boolean
@@ -466,7 +472,7 @@ Namespace FinniganFileIO
         ''' <returns>True if success</returns>
         ''' <remarks>If multiple parent ion m/z values are listed then dblParentIonMZ will have the last one.  However, if the filter text contains "Full msx" then dblParentIonMZ will have the first parent ion listed</remarks>
         Public Shared Function ExtractParentIonMZFromFilterText(
-           ByVal strFilterText As String,
+           strFilterText As String,
            <Out()> ByRef dblParentIonMZ As Double,
            <Out()> ByRef intMSLevel As Integer,
            <Out()> ByRef strCollisionMode As String,
@@ -489,14 +495,6 @@ Namespace FinniganFileIO
             ' or "ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]"
             ' or "+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515"
 
-            ' This RegEx matches text like 1312.95@45.00 or 756.98@cid35.00 or 902.5721@etd120.55@cid20.00
-            Const PARENTION_REGEX = "(?<ParentMZ>[0-9.]+)@(?<CollisionMode1>[a-z]*)(?<CollisionEnergy1>[0-9.]+)(@(?<CollisionMode2>[a-z]+)(?<CollisionEnergy2>[0-9.]+))?"
-
-            ' This RegEx looks for "sa" prior to Full ms"
-            Const SA_REGEX = " sa Full ms"
-
-            Const MSX_REGEX = " Full msx "
-
             Dim intCharIndex As Integer
             Dim intStartIndex As Integer
 
@@ -507,10 +505,6 @@ Namespace FinniganFileIO
 
             Dim blnSupplementalActivationEnabled As Boolean
             Dim blnMultiplexedMSnEnabled As Boolean
-
-            Static reFindParentIon As Regex
-            Static reFindSAFullMS As Regex
-            Static reFindFullMSx As Regex
 
             Dim reMatchParentIon As Match
 
@@ -526,173 +520,163 @@ Namespace FinniganFileIO
             strMZText = String.Empty
             blnMatchFound = False
 
-            If lstParentIons Is Nothing Then
-                lstParentIons = New List(Of udtParentIonInfoType)
-            Else
-                lstParentIons.Clear()
-            End If
+            lstParentIons = New List(Of udtParentIonInfoType)
 
             Try
 
-                If reFindSAFullMS Is Nothing Then
-                    reFindSAFullMS = New Regex(SA_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
-                End If
-                blnSupplementalActivationEnabled = reFindSAFullMS.IsMatch(strFilterText)
+                blnSupplementalActivationEnabled = mFindSAFullMS.IsMatch(strFilterText)
 
-                If reFindFullMSx Is Nothing Then
-                    reFindFullMSx = New Regex(MSX_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
-                End If
-                blnMultiplexedMSnEnabled = reFindFullMSx.IsMatch(strFilterText)
+                blnMultiplexedMSnEnabled = mFindFullMSx.IsMatch(strFilterText)
 
                 blnSuccess = ExtractMSLevel(strFilterText, intMSLevel, strMZText)
 
-                If blnSuccess Then
-                    ' Use a RegEx to extract out the last parent ion mass listed
-                    ' For example, grab 1312.95 out of "1312.95@45.00 [ 350.00-2000.00]"
-                    ' or, grab 873.85 out of "1312.95@45.00 873.85@45.00 [ 350.00-2000.00]"
-                    ' or, grab 756.98 out of "756.98@etd100.00 [50.00-2000.00]"
-                    ' or, grab 748.371 out of "748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515"
-                    '
-                    ' However, if using multiplex ms/ms (msx) then we return the first parent ion listed
+                If Not blnSuccess Then
+                    Return False
+                End If
 
-                    ' For safety, remove any text after a square bracket
-                    intCharIndex = strMZText.IndexOf("["c)
+                ' Use a RegEx to extract out the last parent ion mass listed
+                ' For example, grab 1312.95 out of "1312.95@45.00 [ 350.00-2000.00]"
+                ' or, grab 873.85 out of "1312.95@45.00 873.85@45.00 [ 350.00-2000.00]"
+                ' or, grab 756.98 out of "756.98@etd100.00 [50.00-2000.00]"
+                ' or, grab 748.371 out of "748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515"
+                '
+                ' However, if using multiplex ms/ms (msx) then we return the first parent ion listed
+
+                ' For safety, remove any text after a square bracket
+                intCharIndex = strMZText.IndexOf("["c)
+                If intCharIndex > 0 Then
+                    strMZText = strMZText.Substring(0, intCharIndex)
+                End If
+
+                ' Find all of the parent ion m/z's present in strMZText
+                intStartIndex = 0
+                Do
+                    reMatchParentIon = mFindParentIon.Match(strMZText, intStartIndex)
+
+                    If Not reMatchParentIon.Success Then
+                        ' Match not found
+                        ' If strMZText only contains a number, we will parse it out later in this function
+                        Exit Do
+                    End If
+
+                    ' Match found
+
+                    dblParentIonMZ = Double.Parse(reMatchParentIon.Groups("ParentMZ").Value)
+                    strCollisionMode = String.Empty
+                    sngCollisionEngergy = 0
+
+                    blnMatchFound = True
+
+                    intStartIndex = reMatchParentIon.Index + reMatchParentIon.Length
+
+                    strCollisionMode = GetCapturedValue(reMatchParentIon, "CollisionMode1")
+
+                    strCollisionEnergy = GetCapturedValue(reMatchParentIon, "CollisionEnergy1")
+                    If Not String.IsNullOrEmpty(strCollisionEnergy) Then
+                        Single.TryParse(strCollisionEnergy, sngCollisionEngergy)
+                    End If
+
+                    Dim sngCollisionEngergy2 As Single
+                    Dim strCollisionMode2 = GetCapturedValue(reMatchParentIon, "CollisionMode2")
+
+                    If Not String.IsNullOrEmpty(strCollisionMode2) Then
+                        Dim strCollisionEnergy2 = GetCapturedValue(reMatchParentIon, "CollisionEnergy2")
+                        Single.TryParse(strCollisionEnergy2, sngCollisionEngergy2)
+                    End If
+
+                    Dim allowSecondaryActivation = True
+                    If String.Equals(strCollisionMode, "ETD", StringComparison.InvariantCultureIgnoreCase) And Not String.IsNullOrEmpty(strCollisionMode2) Then
+                        If String.Equals(strCollisionMode2, "CID", StringComparison.InvariantCultureIgnoreCase) Then
+                            strCollisionMode = "ETciD"
+                            allowSecondaryActivation = False
+                        ElseIf String.Equals(strCollisionMode2, "HCD", StringComparison.InvariantCultureIgnoreCase) Then
+                            strCollisionMode = "EThcD"
+                            allowSecondaryActivation = False
+                        End If
+                    End If
+
+                    If allowSecondaryActivation AndAlso Not String.IsNullOrEmpty(strCollisionMode) Then
+                        If blnSupplementalActivationEnabled Then
+                            strCollisionMode = "sa_" & strCollisionMode
+                        End If
+                    End If
+
+                    Dim udtParentIonInfo As udtParentIonInfoType
+                    With udtParentIonInfo
+                        .MSLevel = intMSLevel
+                        .ParentIonMZ = dblParentIonMZ
+                        .CollisionMode = String.Copy(strCollisionMode)
+                        .CollisionMode2 = String.Copy(strCollisionMode2)
+                        .CollisionEnergy = sngCollisionEngergy
+                        .CollisionEnergy2 = sngCollisionEngergy2
+                    End With
+
+                    lstParentIons.Add(udtParentIonInfo)
+
+                    If Not blnMultiplexedMSnEnabled OrElse (lstParentIons.Count = 1 AndAlso blnMultiplexedMSnEnabled) Then
+                        udtBestParentIon = udtParentIonInfo
+                    End If
+
+                Loop While intStartIndex < strMZText.Length - 1
+
+                If blnMatchFound Then
+                    ' Update the output values using udtBestParentIon
+                    With udtBestParentIon
+                        intMSLevel = .MSLevel
+                        dblParentIonMZ = .ParentIonMZ
+                        strCollisionMode = .CollisionMode
+                    End With
+
+                    Return True
+                End If
+
+                ' Match not found using RegEx
+                ' Use manual text parsing instead
+
+                intCharIndex = strMZText.LastIndexOf("@"c)
+                If intCharIndex > 0 Then
+                    strMZText = strMZText.Substring(0, intCharIndex)
+                    intCharIndex = strMZText.LastIndexOf(" "c)
                     If intCharIndex > 0 Then
-                        strMZText = strMZText.Substring(0, intCharIndex)
+                        strMZText = strMZText.Substring(intCharIndex + 1)
                     End If
 
-                    If reFindParentIon Is Nothing Then
-                        reFindParentIon = New Regex(PARENTION_REGEX, RegexOptions.IgnoreCase Or RegexOptions.Compiled)
-                    End If
+                    Try
+                        dblParentIonMZ = Double.Parse(strMZText)
+                        blnMatchFound = True
+                    Catch ex As Exception
+                        dblParentIonMZ = 0
+                    End Try
 
-                    ' Find all of the parent ion m/z's present in strMZText
-                    intStartIndex = 0
-                    Do
-                        reMatchParentIon = reFindParentIon.Match(strMZText, intStartIndex)
+                ElseIf strMZText.Length > 0 Then
+                    ' Find the longest contiguous number that strMZText starts with
 
-                        If Not reMatchParentIon.Success Then
-                            ' Match not found
-                            ' If strMZText only contains a number, we will parse it out later in this function
+                    intCharIndex = -1
+                    Do While intCharIndex < strMZText.Length - 1
+                        If Char.IsNumber(strMZText.Chars(intCharIndex + 1)) OrElse strMZText.Chars(intCharIndex + 1) = "."c Then
+                            intCharIndex += 1
+                        Else
                             Exit Do
                         End If
+                    Loop
 
-                        ' Match found
+                    If intCharIndex >= 0 Then
+                        Try
+                            dblParentIonMZ = Double.Parse(strMZText.Substring(0, intCharIndex + 1))
+                            blnMatchFound = True
 
-                        dblParentIonMZ = Double.Parse(reMatchParentIon.Groups("ParentMZ").Value)
-                        strCollisionMode = String.Empty
-                        sngCollisionEngergy = 0
+                            Dim udtParentIonMzOnly = New udtParentIonInfoType()
+                            With udtParentIonMzOnly
+                                .Clear()
+                                .MSLevel = intMSLevel
+                                .ParentIonMZ = dblParentIonMZ
+                            End With
 
-                        blnMatchFound = True
+                            lstParentIons.Add(udtParentIonMzOnly)
 
-                        intStartIndex = reMatchParentIon.Index + reMatchParentIon.Length
-
-                        strCollisionMode = GetCapturedValue(reMatchParentIon, "CollisionMode1")
-
-                        strCollisionEnergy = GetCapturedValue(reMatchParentIon, "CollisionEnergy1")
-                        If Not String.IsNullOrEmpty(strCollisionEnergy) Then
-                            Single.TryParse(strCollisionEnergy, sngCollisionEngergy)
-                        End If
-
-                        Dim sngCollisionEngergy2 As Single
-                        Dim strCollisionMode2 = GetCapturedValue(reMatchParentIon, "CollisionMode2")
-
-                        If Not String.IsNullOrEmpty(strCollisionMode2) Then
-                            Dim strCollisionEnergy2 = GetCapturedValue(reMatchParentIon, "CollisionEnergy2")
-                            Single.TryParse(strCollisionEnergy2, sngCollisionEngergy2)
-                        End If
-
-                        Dim allowSecondaryActivation = True
-                        If String.Equals(strCollisionMode, "ETD", StringComparison.InvariantCultureIgnoreCase) And Not String.IsNullOrEmpty(strCollisionMode2) Then
-                            If String.Equals(strCollisionMode2, "CID", StringComparison.InvariantCultureIgnoreCase) Then
-                                strCollisionMode = "ETciD"
-                                allowSecondaryActivation = False
-                            ElseIf String.Equals(strCollisionMode2, "HCD", StringComparison.InvariantCultureIgnoreCase) Then
-                                strCollisionMode = "EThcD"
-                                allowSecondaryActivation = False
-                            End If
-                        End If
-
-                        If allowSecondaryActivation AndAlso Not String.IsNullOrEmpty(strCollisionMode) Then
-                            If blnSupplementalActivationEnabled Then
-                                strCollisionMode = "sa_" & strCollisionMode
-                            End If
-                        End If
-
-                        Dim udtParentIonInfo As udtParentIonInfoType
-                        With udtParentIonInfo
-                            .MSLevel = intMSLevel
-                            .ParentIonMZ = dblParentIonMZ
-                            .CollisionMode = String.Copy(strCollisionMode)
-                            .CollisionMode2 = String.Copy(strCollisionMode2)
-                            .CollisionEnergy = sngCollisionEngergy
-                            .CollisionEnergy2 = sngCollisionEngergy2
-                        End With
-
-                        lstParentIons.Add(udtParentIonInfo)
-
-                        If Not blnMultiplexedMSnEnabled OrElse (lstParentIons.Count = 1 AndAlso blnMultiplexedMSnEnabled) Then
-                            udtBestParentIon = udtParentIonInfo
-                        End If
-
-                    Loop While intStartIndex < strMZText.Length - 1
-
-                    If blnMatchFound Then
-                        ' Update the output values using udtBestParentIon
-                        With udtBestParentIon
-                            intMSLevel = .MSLevel
-                            dblParentIonMZ = .ParentIonMZ
-                            strCollisionMode = .CollisionMode
-                        End With
-                    Else
-                        ' Match not found using RegEx
-                        ' Use manual text parsing instead
-
-                        intCharIndex = strMZText.LastIndexOf("@"c)
-                        If intCharIndex > 0 Then
-                            strMZText = strMZText.Substring(0, intCharIndex)
-                            intCharIndex = strMZText.LastIndexOf(" "c)
-                            If intCharIndex > 0 Then
-                                strMZText = strMZText.Substring(intCharIndex + 1)
-                            End If
-
-                            Try
-                                dblParentIonMZ = Double.Parse(strMZText)
-                                blnMatchFound = True
-                            Catch ex As Exception
-                                dblParentIonMZ = 0
-                            End Try
-
-                        ElseIf strMZText.Length > 0 Then
-                            ' Find the longest contiguous number that strMZText starts with
-
-                            intCharIndex = -1
-                            Do While intCharIndex < strMZText.Length - 1
-                                If Char.IsNumber(strMZText.Chars(intCharIndex + 1)) OrElse strMZText.Chars(intCharIndex + 1) = "."c Then
-                                    intCharIndex += 1
-                                Else
-                                    Exit Do
-                                End If
-                            Loop
-
-                            If intCharIndex >= 0 Then
-                                Try
-                                    dblParentIonMZ = Double.Parse(strMZText.Substring(0, intCharIndex + 1))
-                                    blnMatchFound = True
-
-                                    Dim udtParentIonMzOnly = New udtParentIonInfoType()
-                                    With udtParentIonMzOnly
-                                        .Clear()
-                                        .MSLevel = intMSLevel
-                                        .ParentIonMZ = dblParentIonMZ
-                                    End With
-
-                                    lstParentIons.Add(udtParentIonMzOnly)
-
-                                Catch ex As Exception
-                                    dblParentIonMZ = 0
-                                End Try
-                            End If
-                        End If
+                        Catch ex As Exception
+                            dblParentIonMZ = 0
+                        End Try
                     End If
                 End If
 
@@ -700,12 +684,11 @@ Namespace FinniganFileIO
                 blnMatchFound = False
             End Try
 
-            ' ReSharper disable once NotAssignedOutParameter (ReSharper thinks lstParentIons is not being properly initialized even though it is)
             Return blnMatchFound
 
         End Function
 
-        Public Shared Function ExtractMSLevel(ByVal strFilterText As String, <Out()> ByRef intMSLevel As Integer, <Out()> ByRef strMZText As String) As Boolean
+        Public Shared Function ExtractMSLevel(strFilterText As String, <Out()> ByRef intMSLevel As Integer, <Out()> ByRef strMZText As String) As Boolean
             ' Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in strFilterText
             ' Returns True if found and False if no match
 
@@ -877,7 +860,7 @@ Namespace FinniganFileIO
 
         End Function
 
-        Public Function GetCollisionEnergy(ByVal scan As Integer) As List(Of Double)
+        Public Function GetCollisionEnergy(scan As Integer) As List(Of Double)
 
             Dim intNumMSOrders As Integer
             Dim lstCollisionEnergies = New List(Of Double)
@@ -936,7 +919,7 @@ Namespace FinniganFileIO
         ''' <returns>True if no error, False if an error</returns>
         ''' <remarks></remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
-        Public Overrides Function GetScanInfo(ByVal scan As Integer, <Out()> ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
+        Public Overrides Function GetScanInfo(scan As Integer, <Out()> ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
 
             Dim scanInfo As clsScanInfo = Nothing
             Dim success = GetScanInfo(scan, scanInfo)
@@ -958,7 +941,7 @@ Namespace FinniganFileIO
         ''' <returns>True if no error, False if an error</returns>
         ''' <remarks></remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
-        Public Overrides Function GetScanInfo(ByVal scan As Integer, <Out()> ByRef scanInfo As clsScanInfo) As Boolean
+        Public Overrides Function GetScanInfo(scan As Integer, <Out()> ByRef scanInfo As clsScanInfo) As Boolean
 
             ' Check for the scan in the cache
             If mCachedScanInfo.TryGetValue(scan, scanInfo) Then
@@ -1234,7 +1217,7 @@ Namespace FinniganFileIO
 
         End Function
 
-        Public Shared Function GetScanTypeNameFromFinniganScanFilterText(ByVal strFilterText As String) As String
+        Public Shared Function GetScanTypeNameFromFinniganScanFilterText(strFilterText As String) As String
 
             ' Examines strFilterText to determine what the scan type is
             ' Examples:
@@ -1529,7 +1512,7 @@ Namespace FinniganFileIO
 
         End Sub
 
-        Public Shared Function MakeGenericFinniganScanFilter(ByVal strFilterText As String) As String
+        Public Shared Function MakeGenericFinniganScanFilter(strFilterText As String) As String
 
             ' Will make a generic version of the FilterText in strFilterText
             ' Examples:
@@ -1553,20 +1536,8 @@ Namespace FinniganFileIO
             ' + p NSI Q3MS [150.070-1500.000]                                      + p NSI Q3MS
             ' c NSI Full cnl 162.053 [300.000-1200.000]                            c NSI Full cnl
 
-            Const COLLISION_SPEC_REGEX = "(?<MzValue> [0-9.]+)@"
-
-            Const MZ_WITHOUT_COLLISION_ENERGY = "ms[2-9](?<MzValue> [0-9.]+)$"
-
             Dim strGenericScanFilterText = "MS"
             Dim intCharIndex As Integer
-
-            Static reCollisionSpecs As Regex
-            Static reMzWithoutCE As Regex
-
-            If reCollisionSpecs Is Nothing Then
-                reCollisionSpecs = New Regex(COLLISION_SPEC_REGEX, RegexOptions.Compiled)
-                reMzWithoutCE = New Regex(MZ_WITHOUT_COLLISION_ENERGY, RegexOptions.Compiled)
-            End If
 
             Try
                 If String.IsNullOrWhiteSpace(strFilterText) Then Exit Try
@@ -1591,10 +1562,10 @@ Namespace FinniganFileIO
 
                 ' Replace any digits before any @ sign with a 0
                 If strGenericScanFilterText.IndexOf("@"c) > 0 Then
-                    strGenericScanFilterText = reCollisionSpecs.Replace(strGenericScanFilterText, " 0@")
+                    strGenericScanFilterText = mCollisionSpecs.Replace(strGenericScanFilterText, " 0@")
                 Else
                     ' No @ sign; look for text of the form "ms2 748.371"
-                    Dim reMatch = reMzWithoutCE.Match(strGenericScanFilterText)
+                    Dim reMatch = mMzWithoutCE.Match(strGenericScanFilterText)
                     If reMatch.Success Then
                         strGenericScanFilterText = strGenericScanFilterText.Substring(0, reMatch.Groups("MzValue").Index)
                     End If
@@ -1608,13 +1579,13 @@ Namespace FinniganFileIO
 
         End Function
 
-        Private Shared Function ScanIsFTMS(ByVal strFilterText As String) As Boolean
+        Private Shared Function ScanIsFTMS(strFilterText As String) As Boolean
 
             Return ContainsText(strFilterText, "FTMS", 0)
 
         End Function
 
-        Private Function ScanInfoClassToStruct(ByVal scanInfo As clsScanInfo) As udtScanHeaderInfoType
+        Private Function ScanInfoClassToStruct(scanInfo As clsScanInfo) As udtScanHeaderInfoType
 
             Dim udtScanHeaderInfo = New udtScanHeaderInfoType()
 
@@ -1698,7 +1669,7 @@ Namespace FinniganFileIO
         ''' <param name="blnZoomScan"></param>
         ''' <returns>True if strFilterText contains a known MS scan type</returns>
         ''' <remarks>Returns false for MSn scans (like ms2 or ms3)</remarks>
-        Public Shared Function ValidateMSScan(ByVal strFilterText As String,
+        Public Shared Function ValidateMSScan(strFilterText As String,
            <Out()> ByRef intMSLevel As Integer,
            <Out()> ByRef blnSIMScan As Boolean,
            <Out()> ByRef eMRMScanType As MRMScanTypeConstants,
@@ -1767,7 +1738,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Function GetScanData(ByVal scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Integer
+        Public Overloads Function GetScanData(scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Integer
             Const intMaxNumberOfPeaks = 0
             Const blnCentroid = False
             Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
@@ -1784,7 +1755,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Function GetScanData(ByVal scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal blnCentroid As Boolean) As Integer
+        Public Overloads Function GetScanData(scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, blnCentroid As Boolean) As Integer
             Const intMaxNumberOfPeaks = 0
             Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
         End Function
@@ -1800,7 +1771,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Function GetScanData(ByVal scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
+        Public Overloads Function GetScanData(scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, intMaxNumberOfPeaks As Integer) As Integer
             Const blnCentroid = False
             Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
         End Function
@@ -1817,7 +1788,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")>
-        Public Overloads Function GetScanData(ByVal scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
+        Public Overloads Function GetScanData(scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, intMaxNumberOfPeaks As Integer, blnCentroid As Boolean) As Integer
             Return GetScanData(scan, dblMZList, dblIntensityList, intMaxNumberOfPeaks, blnCentroid)
         End Function
 
@@ -1829,7 +1800,7 @@ Namespace FinniganFileIO
         ''' <param name="intensityList">Output array of intensity values (parallel to mzList)</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Overloads Overrides Function GetScanData(ByVal scanNumber As Integer, <Out()> ByRef mzList() As Double, <Out()> ByRef intensityList() As Double) As Integer
+        Public Overloads Overrides Function GetScanData(scanNumber As Integer, <Out()> ByRef mzList() As Double, <Out()> ByRef intensityList() As Double) As Integer
             Const intMaxNumberOfPeaks = 0
             Const blnCentroid = False
             Return GetScanData(scanNumber, mzList, intensityList, intMaxNumberOfPeaks, blnCentroid)
@@ -1844,7 +1815,7 @@ Namespace FinniganFileIO
         ''' <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Overloads Overrides Function GetScanData(ByVal scanNumber As Integer, <Out()> ByRef mzList() As Double, <Out()> ByRef intensityList() As Double, ByVal maxNumberOfPeaks As Integer) As Integer
+        Public Overloads Overrides Function GetScanData(scanNumber As Integer, <Out()> ByRef mzList() As Double, <Out()> ByRef intensityList() As Double, maxNumberOfPeaks As Integer) As Integer
             Const centroid = False
             Return GetScanData(scanNumber, mzList, intensityList, maxNumberOfPeaks, centroid)
         End Function
@@ -1859,7 +1830,7 @@ Namespace FinniganFileIO
         ''' <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Overloads Function GetScanData(ByVal scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, ByVal intMaxNumberOfPeaks As Integer, ByVal blnCentroid As Boolean) As Integer
+        Public Overloads Function GetScanData(scan As Integer, <Out()> ByRef dblMZList() As Double, <Out()> ByRef dblIntensityList() As Double, intMaxNumberOfPeaks As Integer, blnCentroid As Boolean) As Integer
 
             Dim dblMassIntensityPairs(,) As Double = Nothing
 
@@ -1915,7 +1886,7 @@ Namespace FinniganFileIO
         ''' <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Function GetScanData2D(ByVal scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double) As Integer
+        Public Function GetScanData2D(scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double) As Integer
             Return GetScanData2D(scan, dblMassIntensityPairs, intMaxNumberOfPeaks:=0, blnCentroid:=False)
         End Function
 
@@ -1929,7 +1900,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <Obsolete("This method is deprecated, use GetScanData2D that does not use udtScanHeaderInfo")>
-        Public Function GetScanData2D(ByVal scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, ByVal intMaxNumberOfPeaks As Integer) As Integer
+        Public Function GetScanData2D(scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByRef udtScanHeaderInfo As udtScanHeaderInfoType, intMaxNumberOfPeaks As Integer) As Integer
             Return GetScanData2D(scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid:=False)
         End Function
 
@@ -1941,7 +1912,7 @@ Namespace FinniganFileIO
         ''' <param name="intMaxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        Public Function GetScanData2D(ByVal scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, ByVal intMaxNumberOfPeaks As Integer) As Integer
+        Public Function GetScanData2D(scan As Integer, <Out()> ByRef dblMassIntensityPairs(,) As Double, intMaxNumberOfPeaks As Integer) As Integer
             Return GetScanData2D(scan, dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid:=False)
         End Function
 
@@ -1956,10 +1927,10 @@ Namespace FinniganFileIO
         ''' <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
         Public Function GetScanData2D(
-            ByVal scan As Integer,
+            scan As Integer,
             <Out()> ByRef dblMassIntensityPairs(,) As Double,
-            ByVal intMaxNumberOfPeaks As Integer,
-            ByVal blnCentroid As Boolean) As Integer
+            intMaxNumberOfPeaks As Integer,
+            blnCentroid As Boolean) As Integer
 
             ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
             ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
@@ -2092,7 +2063,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks></remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
-        Public Function GetScanLabelData(ByVal scan As Integer, <Out()> ByRef ftLabelData() As udtFTLabelInfoType) As Integer
+        Public Function GetScanLabelData(scan As Integer, <Out()> ByRef ftLabelData() As udtFTLabelInfoType) As Integer
 
             ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
             ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
@@ -2189,7 +2160,7 @@ Namespace FinniganFileIO
         ''' <returns>The number of data points, or -1 if an error</returns>
         ''' <remarks>This returns a subset of the data thatGetScanLabelData does, but with 2 additional fields.</remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
-        Public Function GetScanPrecisionData(ByVal scan As Integer, <Out()> ByRef massResolutionData() As udtMassPrecisionInfoType) As Integer
+        Public Function GetScanPrecisionData(scan As Integer, <Out()> ByRef massResolutionData() As udtMassPrecisionInfoType) As Integer
 
             ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
             ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
@@ -2354,11 +2325,11 @@ Namespace FinniganFileIO
         ''' <remarks></remarks>
         <System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()>
         Public Function GetScanDataSumScans(
-            ByVal scanFirst As Integer,
-            ByVal scanLast As Integer,
+            scanFirst As Integer,
+            scanLast As Integer,
             <Out()> ByRef dblMassIntensityPairs(,) As Double,
-            ByVal intMaxNumberOfPeaks As Integer,
-            ByVal blnCentroid As Boolean) As Integer
+            intMaxNumberOfPeaks As Integer,
+            blnCentroid As Boolean) As Integer
 
             ' Note that we're using function attribute HandleProcessCorruptedStateExceptions
             ' to force .NET to properly catch critical errors thrown by the XRawfile DLL
@@ -2458,7 +2429,7 @@ Namespace FinniganFileIO
 
         End Function
 
-        Public Shared Sub InitializeMRMInfo(<Out()> ByRef udtMRMInfo As udtMRMInfoType, ByVal intInitialMassCountCapacity As Integer)
+        Public Shared Sub InitializeMRMInfo(<Out()> ByRef udtMRMInfo As udtMRMInfoType, intInitialMassCountCapacity As Integer)
 
             If intInitialMassCountCapacity < 0 Then
                 intInitialMassCountCapacity = 0
@@ -2471,7 +2442,7 @@ Namespace FinniganFileIO
 
         End Sub
 
-        Public Overrides Function OpenRawFile(ByVal FileName As String) As Boolean
+        Public Overrides Function OpenRawFile(FileName As String) As Boolean
             Dim intResult As Integer
             Dim blnSuccess As Boolean
 
@@ -2524,7 +2495,7 @@ Namespace FinniganFileIO
 
         End Function
 
-        Private Function TuneMethodsMatch(ByVal udtMethod1 As udtTuneMethodType, ByVal udtMethod2 As udtTuneMethodType) As Boolean
+        Private Function TuneMethodsMatch(udtMethod1 As udtTuneMethodType, udtMethod2 As udtTuneMethodType) As Boolean
             Dim blnMatch As Boolean
             Dim intIndex As Integer
 

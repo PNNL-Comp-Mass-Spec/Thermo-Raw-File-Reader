@@ -8,8 +8,6 @@ Imports System.Runtime.InteropServices
 ' 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
-'
-' Last modified July 6, 2015
 
 Namespace FinniganFileIO
 
@@ -169,7 +167,7 @@ Namespace FinniganFileIO
             Get
                 Return mLoadMSMethodInfo
             End Get
-            Set(ByVal value As Boolean)
+            Set(value As Boolean)
                 mLoadMSMethodInfo = value
             End Set
         End Property
@@ -178,7 +176,7 @@ Namespace FinniganFileIO
             Get
                 Return mLoadMSTuneInfo
             End Get
-            Set(ByVal value As Boolean)
+            Set(value As Boolean)
                 mLoadMSTuneInfo = value
             End Set
         End Property
@@ -187,8 +185,8 @@ Namespace FinniganFileIO
 
 #Region "Events"
 
-        Public Event ReportError(ByVal strMessage As String)
-        Public Event ReportWarning(ByVal strMessage As String)
+        Public Event ReportError(strMessage As String)
+        Public Event ReportWarning(strMessage As String)
 
 #End Region
 
@@ -196,13 +194,13 @@ Namespace FinniganFileIO
         Public MustOverride Sub CloseRawFile()
         Public MustOverride Function GetNumScans() As Integer
 
-        Public MustOverride Function GetScanInfo(ByVal Scan As Integer, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
-        Public MustOverride Function GetScanInfo(ByVal Scan As Integer, ByRef scanInfo As clsScanInfo) As Boolean
+        Public MustOverride Function GetScanInfo(Scan As Integer, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
+        Public MustOverride Function GetScanInfo(Scan As Integer, ByRef scanInfo As clsScanInfo) As Boolean
 
-        Public MustOverride Overloads Function GetScanData(ByVal Scan As Integer, <Out()> ByRef dblIonMZ() As Double, <Out()> ByRef dblIonIntensity() As Double) As Integer
-        Public MustOverride Overloads Function GetScanData(ByVal Scan As Integer, <Out()> ByRef dblIonMZ() As Double, <Out()> ByRef dblIonIntensity() As Double, ByVal intMaxNumberOfPeaks As Integer) As Integer
+        Public MustOverride Overloads Function GetScanData(Scan As Integer, <Out()> ByRef dblIonMZ() As Double, <Out()> ByRef dblIonIntensity() As Double) As Integer
+        Public MustOverride Overloads Function GetScanData(Scan As Integer, <Out()> ByRef dblIonMZ() As Double, <Out()> ByRef dblIonIntensity() As Double, intMaxNumberOfPeaks As Integer) As Integer
 
-        Public MustOverride Function OpenRawFile(ByVal FileName As String) As Boolean
+        Public MustOverride Function OpenRawFile(FileName As String) As Boolean
 
         Protected MustOverride Function FillFileInfo() As Boolean
 
@@ -219,11 +217,11 @@ Namespace FinniganFileIO
             End With
         End Sub
 
-        Protected Sub RaiseErrorMessage(ByVal strMessage As String)
+        Protected Sub RaiseErrorMessage(strMessage As String)
             RaiseEvent ReportError(strMessage)
         End Sub
 
-        Protected Sub RaiseWarningMessage(ByVal strMessage As String)
+        Protected Sub RaiseWarningMessage(strMessage As String)
             RaiseEvent ReportWarning(strMessage)
         End Sub
     End Class

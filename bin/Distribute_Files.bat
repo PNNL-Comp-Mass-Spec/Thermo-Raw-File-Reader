@@ -19,7 +19,7 @@ xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\DataMining\SMAQ
 
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\lib\" /Y
 
-xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\DLLLibrary" /Y
+xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\DLLLibrary" /Y
 
 xcopy Release\ThermoRawFileReaderDLL.* "F:\My Documents\Projects\SangtaeKim\InformedProteomics\lib" /Y
 
@@ -150,9 +150,9 @@ xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\A
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Release" /Y
 xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\lib" /Y
 
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\IDM_Console\bin\Debug" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\bin\Debug" /Y
-xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterDetect\InterDetect\bin\Release" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterferenceDetection\IDM_Console\bin\Debug" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\bin\Debug" /Y
+xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\bin\Release" /Y
 
 rem xcopy Release\ThermoRawFileReaderDLL.dll "F:\My Documents\Projects\SangtaeKim\InformedProteomics\" /Y
 
