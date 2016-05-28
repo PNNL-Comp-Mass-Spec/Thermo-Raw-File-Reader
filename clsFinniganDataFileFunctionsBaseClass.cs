@@ -1,228 +1,248 @@
-Option Strict On
+using System;
+using System.Collections.Generic;
 
-Imports System.Runtime.InteropServices
+// Base class for derived classes that can read Finnigan .Raw files (LCQ, LTQ, etc.)
+// 
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
+// Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 
-<Assembly: CLSCompliant(True)> 
+namespace FinniganFileIO
+{
 
-' Base class for derived classes that can read Finnigan .Raw files (LCQ, LTQ, etc.)
-' 
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
-' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
+	public abstract class FinniganFileReaderBaseClass
+	{
 
-Namespace FinniganFileIO
+		#region "Constants and Enums"
 
-    Public MustInherit Class FinniganFileReaderBaseClass
+		public enum ActivationTypeConstants
+		{
+			Unknown = -1,
+			CID = 0,
+			MPD = 1,
+			ECD = 2,
+			PQD = 3,
+			ETD = 4,
+			HCD = 5,
+			AnyType = 6,
+			SA = 7,
+			PTR = 8,
+			NETD = 9,
+			NPTR = 10
+		}
 
-#Region "Constants and Enums"
+		public enum MRMScanTypeConstants
+		{
+			NotMRM = 0,
+			MRMQMS = 1,
+			// Multiple SIM ranges in a single scan
+			SRM = 2,
+			// Monitoring a parent ion and one or more daughter ions
+			FullNL = 3
+			// Full neutral loss scan
+		}
 
-        Public Enum ActivationTypeConstants
-            Unknown = -1
-            CID = 0
-            MPD = 1
-            ECD = 2
-            PQD = 3
-            ETD = 4
-            HCD = 5
-            AnyType = 6
-            SA = 7
-            PTR = 8
-            NETD = 9
-            NPTR = 10
-        End Enum
+		public enum IonModeConstants
+		{
+			Unknown = 0,
+			Positive = 1,
+			Negative = 2
+		}
 
-        Public Enum MRMScanTypeConstants
-            NotMRM = 0
-            MRMQMS = 1              ' Multiple SIM ranges in a single scan
-            SRM = 2                 ' Monitoring a parent ion and one or more daughter ions
-            FullNL = 3              ' Full neutral loss scan
-        End Enum
 
-        Public Enum IonModeConstants
-            Unknown = 0
-            Positive = 1
-            Negative = 2
-        End Enum
+		protected int MAX_SCANS_TO_CACHE_INFO = 50000;
+		#endregion
 
-        Protected MAX_SCANS_TO_CACHE_INFO As Integer = 50000
+		#region "Structures"
 
-#End Region
+		public struct udtTuneMethodType
+		{
+		    public List<udtTuneMethodSetting> Settings;
 
-#Region "Structures"
+            public void Clear()
+            {
+                Settings = new List<udtTuneMethodSetting>();
+            }
+		}
 
-        Public Structure udtTuneMethodType
-            Public Count As Integer
-            Public SettingCategory() As String
-            Public SettingName() As String
-            Public SettingValue() As String
-        End Structure
+	    public struct udtTuneMethodSetting
+	    {
+            public string Category;
+            public string Name;
+            public string Value;
+	    }
 
-        Public Structure udtFileInfoType
-            Public AcquisitionDate As String        ' Will often be blank
-            Public AcquisitionFilename As String    ' Will often be blank
-            Public Comment1 As String               ' Will often be blank
-            Public Comment2 As String               ' Will often be blank
-            Public SampleName As String             ' Will often be blank
-            Public SampleComment As String          ' Will often be blank
+	    public struct udtFileInfoType
+		{
 
-            Public CreationDate As DateTime
-            Public CreatorID As String              ' Logon name of the user when the file was created
-            Public InstFlags As String              ' Values should be one of the constants in InstFlags
-            Public InstHardwareVersion As String
-            Public InstSoftwareVersion As String
-            Public InstMethods() As String          ' Typically only have one instrument method; the length of this array defines the number of instrument methods
-            Public InstModel As String
-            Public InstName As String
-            Public InstrumentDescription As String  ' Typically only defined for instruments converted from other formats
-            Public InstSerialNumber As String
-            Public TuneMethods() As udtTuneMethodType   ' Typically have one or two tune methods; the length of this array defines the number of tune methods defined
-            Public VersionNumber As Integer         ' File format Version Number
-            Public MassResolution As Double
-            Public ScanStart As Integer
-            Public ScanEnd As Integer
-        End Structure
+            public string AcquisitionDate;      // Will often be blank
+            public string AcquisitionFilename;  // Will often be blank
+            public string Comment1;             // Will often be blank
+            public string Comment2;             // Will often be blank
+            public string SampleName;           // Will often be blank
+            public string SampleComment;        // Will often be blank
+			public DateTime CreationDate;
 
-        Public Structure udtMRMMassRangeType
-            Public StartMass As Double
-            Public EndMass As Double
-            Public CentralMass As Double        ' Useful for MRM/SRM experiments
+            public string CreatorID;                // Logon name of the user when the file was created
+            public string InstFlags;                // Values should be one of the constants in InstFlags
+			public string InstHardwareVersion;
+			public string InstSoftwareVersion;
+            public List<string> InstMethods;            // Typically only have one instrument method; the length of this array defines the number of instrument methods
+			public string InstModel;
+			public string InstName;
+            public string InstrumentDescription;        // Typically only defined for instruments converted from other formats
+			public string InstSerialNumber;
+            public List<udtTuneMethodType> TuneMethods; // Typically have one or two tune methods; the length of this array defines the number of tune methods defined
+            public int VersionNumber;                   // File format Version Number
+			public double MassResolution;
+			public int ScanStart;
+			public int ScanEnd;
+		}
 
-            Public Overrides Function ToString() As String
-                Return StartMass.ToString("0.000") & "-" & EndMass.ToString("0.000")
-            End Function
-        End Structure
+		public struct udtMRMMassRangeType
+		{
+			public double StartMass;
+			public double EndMass;
+            public double CentralMass;      // Useful for MRM/SRM experiments
 
-        Public Structure udtMRMInfoType
-            Public MRMMassCount As Integer                  ' List of mass ranges monitored by the first quadrupole
-            Public MRMMassList() As udtMRMMassRangeType
-        End Structure
+			public override string ToString()
+			{
+				return StartMass.ToString("0.000") + "-" + EndMass.ToString("0.000");
+			}
+		}
 
-        Public Structure udtScanHeaderInfoType
-            Public MSLevel As Integer                   ' 1 means MS, 2 means MS/MS, 3 means MS^3 aka MS/MS/MS
-            Public EventNumber As Integer               ' 1 for parent-ion scan; 2 for 1st frag scan, 3 for 2nd frag scan, etc.
-            Public SIMScan As Boolean                   ' True if this is a selected ion monitoring (SIM) scan (i.e. a small mass range is being examined); if multiple selected ion ranges are examined simultaneously, then this will be false but MRMScanType will be .MRMQMS
-            Public MRMScanType As MRMScanTypeConstants  ' 1 or 2 if this is a multiple reaction monitoring scan (MRMQMS or SRM)
-            Public ZoomScan As Boolean                  ' True when the given scan is a zoomed in mass region; these spectra are typically skipped when creating SICs
+		public struct udtMRMInfoType
+		{
+			// List of mass ranges monitored by the first quadrupole
+			public List<udtMRMMassRangeType> MRMMassList;
 
-            Public NumPeaks As Integer                  ' Number of mass intensity value pairs in the specified scan (may not be defined until .GetScanData() is called; -1 if unknown)
-            Public RetentionTime As Double              ' Retention time (in minutes)
-            Public LowMass As Double
-            Public HighMass As Double
-            Public TotalIonCurrent As Double
-            Public BasePeakMZ As Double
-            Public BasePeakIntensity As Double
+		    public void Clear()
+		    {
+		        MRMMassList = new List<udtMRMMassRangeType>();
+		    }
+		}
 
-            Public FilterText As String
-            Public ParentIonMZ As Double
+		public struct udtScanHeaderInfoType
+		{
 
-            Public ActivationType As ActivationTypeConstants    ' Activation type (aka activation method) as reported by the reader
-            Public CollisionMode As String                      ' Activation type, determined from the filter string
+            public int MSLevel;         // 1 means MS, 2 means MS/MS, 3 means MS^3 aka MS/MS/MS
+            public int EventNumber;     // 1 for parent-ion scan; 2 for 1st frag scan, 3 for 2nd frag scan, etc.				
+            public bool SIMScan;        // True if this is a selected ion monitoring (SIM) scan (i.e. a small mass range is being examined); if multiple selected ion ranges are examined simultaneously, then this will be false but MRMScanType will be .MRMQMS				
+            public MRMScanTypeConstants MRMScanType;        // 1 or 2 if this is a multiple reaction monitoring scan (MRMQMS or SRM)				
+            public bool ZoomScan;       // True when the given scan is a zoomed in mass region; these spectra are typically skipped when creating SICs
 
-            Public IonMode As IonModeConstants
-            Public MRMInfo As udtMRMInfoType
+            public int NumPeaks;        // Number of mass intensity value pairs in the specified scan (may not be defined until .GetScanData() is called; -1 if unknown)				
+            public double RetentionTime;    // Retention time (in minutes)
+			public double LowMass;
+			public double HighMass;
+			public double TotalIonCurrent;
+			public double BasePeakMZ;
 
-            Public NumChannels As Integer
-            Public UniformTime As Boolean               ' Indicates whether the sampling time increment for the controller is constant
-            Public Frequency As Double                  ' Sampling frequency for the current controller
-            Public IsCentroidScan As Boolean            ' True if centroid (sticks) scan; False if profile (continuum) scan
+			public double BasePeakIntensity;
+			public string FilterText;
 
-            Public ScanEventNames() As String
-            Public ScanEventValues() As String
+			public double ParentIonMZ;
+            public ActivationTypeConstants ActivationType;      // Activation type (aka activation method) as reported by the reader
+            public string CollisionMode;                        // Activation type, determined from the filter string
 
-            Public StatusLogNames() As String
-            Public StatusLogValues() As String
+			public IonModeConstants IonMode;
 
-            Public Overrides Function ToString() As String
-                If String.IsNullOrEmpty(FilterText) Then
-                    Return "Generic udtScanHeaderInfoType"
-                Else
-                    Return FilterText
-                End If
-            End Function
-        End Structure
+			public udtMRMInfoType MRMInfo;
+			public int NumChannels;
+			public bool UniformTime;            // Indicates whether the sampling time increment for the controller is constant
+            public double Frequency;            // Sampling frequency for the current controller
+            public bool IsCentroidScan;         // True if centroid (sticks) scan; False if profile (continuum) scan
 
-#End Region
+            public List<KeyValuePair<string, string>> ScanEvents;
+            public List<KeyValuePair<string, string>> StatusLog;
 
-#Region "Classwide Variables"
+			public override string ToString()
+			{
+				if (string.IsNullOrEmpty(FilterText)) {
+					return "Generic udtScanHeaderInfoType";
+				} else {
+					return FilterText;
+				}
+			}
+		}
 
-        Protected mCachedFileName As String
+		#endregion
 
-        Protected mCachedScanInfo As Dictionary(Of Integer, clsScanInfo)
+		#region "Classwide Variables"
 
-        Protected mFileInfo As udtFileInfoType
+		protected string mCachedFileName;
 
-        Protected mLoadMSMethodInfo As Boolean = True
-        Protected mLoadMSTuneInfo As Boolean = True
+		protected Dictionary<int, clsScanInfo> mCachedScanInfo;
 
-#End Region
+		protected udtFileInfoType mFileInfo;
+		protected bool mLoadMSMethodInfo = true;
 
-#Region "Interface Functions"
+		protected bool mLoadMSTuneInfo = true;
+		#endregion
 
-        Public ReadOnly Property FileInfo() As udtFileInfoType
-            Get
-                Return mFileInfo
-            End Get
-        End Property
+		#region "Interface Functions"
 
-        Public Property LoadMSMethodInfo() As Boolean
-            Get
-                Return mLoadMSMethodInfo
-            End Get
-            Set(value As Boolean)
-                mLoadMSMethodInfo = value
-            End Set
-        End Property
+		public udtFileInfoType FileInfo {
+			get { return mFileInfo; }
+		}
 
-        Public Property LoadMSTuneInfo() As Boolean
-            Get
-                Return mLoadMSTuneInfo
-            End Get
-            Set(value As Boolean)
-                mLoadMSTuneInfo = value
-            End Set
-        End Property
+		public bool LoadMSMethodInfo {
+			get { return mLoadMSMethodInfo; }
+			set { mLoadMSMethodInfo = value; }
+		}
 
-#End Region
+		public bool LoadMSTuneInfo {
+			get { return mLoadMSTuneInfo; }
+			set { mLoadMSTuneInfo = value; }
+		}
 
-#Region "Events"
+		#endregion
 
-        Public Event ReportError(strMessage As String)
-        Public Event ReportWarning(strMessage As String)
+		#region "Events"
 
-#End Region
+		public event ReportErrorEventHandler ReportError;
+		public delegate void ReportErrorEventHandler(string strMessage);
+		public event ReportWarningEventHandler ReportWarning;
+		public delegate void ReportWarningEventHandler(string strMessage);
 
-        Public MustOverride Function CheckFunctionality() As Boolean
-        Public MustOverride Sub CloseRawFile()
-        Public MustOverride Function GetNumScans() As Integer
+		#endregion
 
-        Public MustOverride Function GetScanInfo(Scan As Integer, ByRef udtScanHeaderInfo As udtScanHeaderInfoType) As Boolean
-        Public MustOverride Function GetScanInfo(Scan As Integer, ByRef scanInfo As clsScanInfo) As Boolean
+		public abstract bool CheckFunctionality();
+		public abstract void CloseRawFile();
+		public abstract int GetNumScans();
 
-        Public MustOverride Overloads Function GetScanData(Scan As Integer, <Out()> ByRef dblIonMZ() As Double, <Out()> ByRef dblIonIntensity() As Double) As Integer
-        Public MustOverride Overloads Function GetScanData(Scan As Integer, <Out()> ByRef dblIonMZ() As Double, <Out()> ByRef dblIonIntensity() As Double, intMaxNumberOfPeaks As Integer) As Integer
+		public abstract bool GetScanInfo(int scan, out udtScanHeaderInfoType udtScanHeaderInfo);
+        public abstract bool GetScanInfo(int scan, out clsScanInfo scanInfo);
 
-        Public MustOverride Function OpenRawFile(FileName As String) As Boolean
+		public abstract int GetScanData(int scan, out double[] dblIonMZ, out double[] dblIonIntensity);
+		public abstract int GetScanData(int scan, out double[] dblIonMZ, out double[] dblIonIntensity, int intMaxNumberOfPeaks);
 
-        Protected MustOverride Function FillFileInfo() As Boolean
+		public abstract bool OpenRawFile(string filePath);
 
-        Public Shared Sub DuplicateMRMInfo(ByRef udtSource As udtMRMInfoType, ByRef udtTarget As udtMRMInfoType)
-            With udtSource
-                udtTarget.MRMMassCount = .MRMMassCount
+		protected abstract bool FillFileInfo();
 
-                If .MRMMassList Is Nothing Then
-                    ReDim udtTarget.MRMMassList(-1)
-                Else
-                    ReDim udtTarget.MRMMassList(.MRMMassList.Length - 1)
-                    Array.Copy(.MRMMassList, udtTarget.MRMMassList, .MRMMassList.Length)
-                End If
-            End With
-        End Sub
+		public static void DuplicateMRMInfo(udtMRMInfoType udtSource, out udtMRMInfoType udtTarget)
+		{
+		    udtTarget = new udtMRMInfoType();
+		    udtTarget.Clear();
 
-        Protected Sub RaiseErrorMessage(strMessage As String)
-            RaiseEvent ReportError(strMessage)
-        End Sub
+		    foreach (var item in udtSource.MRMMassList)
+		    {
+		        udtTarget.MRMMassList.Add(item);
+		    }
+		}
 
-        Protected Sub RaiseWarningMessage(strMessage As String)
-            RaiseEvent ReportWarning(strMessage)
-        End Sub
-    End Class
-End Namespace
+		protected void RaiseErrorMessage(string strMessage)
+		{
+			if (ReportError != null) {
+				ReportError(strMessage);
+			}
+		}
+
+		protected void RaiseWarningMessage(string strMessage)
+		{
+			if (ReportWarning != null) {
+				ReportWarning(strMessage);
+			}
+		}
+	}
+}
