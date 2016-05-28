@@ -96,6 +96,33 @@ namespace FinniganFileIO
 			public double MassResolution;
 			public int ScanStart;
 			public int ScanEnd;
+
+	        public void Clear()
+	        {
+                AcquisitionDate = string.Empty;
+                AcquisitionFilename = string.Empty;
+                Comment1 = string.Empty;
+                Comment2 = string.Empty;
+                SampleName = string.Empty;
+                SampleComment = string.Empty;
+	            CreationDate = DateTime.MinValue;
+
+                CreatorID = string.Empty;
+                InstFlags = string.Empty;
+                InstHardwareVersion = string.Empty;
+                InstSoftwareVersion = string.Empty;
+	            InstMethods = new List<string>();
+                InstModel = string.Empty;
+                InstName = string.Empty;
+                InstrumentDescription = string.Empty;
+                InstSerialNumber = string.Empty;
+                TuneMethods = new List<udtTuneMethodType>();
+
+	            VersionNumber = 0;
+                MassResolution = 0;
+                ScanStart = 0;
+                ScanEnd = 0;
+	        }
 		}
 
 		public struct udtMRMMassRangeType
@@ -152,8 +179,11 @@ namespace FinniganFileIO
             public double Frequency;            // Sampling frequency for the current controller
             public bool IsCentroidScan;         // True if centroid (sticks) scan; False if profile (continuum) scan
 
-            public List<KeyValuePair<string, string>> ScanEvents;
-            public List<KeyValuePair<string, string>> StatusLog;
+            public string[] ScanEventNames;
+		    public string[] ScanEventValues;
+
+		    public string[] StatusLogNames;
+		    public string[] StatusLogValues;
 
 			public override string ToString()
 			{

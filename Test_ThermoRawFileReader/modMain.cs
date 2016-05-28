@@ -81,7 +81,7 @@ namespace Test_ThermoRawFileReader
         {
             var assemblyNameLocation = Assembly.GetExecutingAssembly().Location;
 
-            Console.WriteLine("Program syntax:" + Environment.NewLine + IO.Path.GetFileName(assemblyNameLocation));
+            Console.WriteLine("Program syntax:" + Environment.NewLine + Path.GetFileName(assemblyNameLocation));
             Console.WriteLine(" InputFilePath.raw [/Centroid] [/Sum] [/Start:Scan] [/End:Scan]");
 
             Console.WriteLine("Running this program without any parameters it will process file " + DEFAULT_FILE_PATH);
@@ -205,7 +205,7 @@ namespace Test_ThermoRawFileReader
                                 }
                                 Console.WriteLine();
 
-                                const var scansToSum = 15;
+                                const int scansToSum = 15;
 
                                 if (iScanNum + scansToSum < iNumScans & testSumming) {
                                     // Get the data for scan iScanNum through iScanNum + 15
