@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FinniganFileIO
+namespace ThermoRawFileReader
 {
     public class clsScanInfo
     {
@@ -309,7 +309,7 @@ namespace FinniganFileIO
         public bool TryGetScanEvent(string eventName, out string eventValue, bool partialMatchToStart = false)
         {
 
-            IEnumerable<KeyValuePair<string, string>> lstResults = default(IEnumerable<KeyValuePair<string, string>>);
+            IEnumerable<KeyValuePair<string, string>> lstResults;
 
             if (partialMatchToStart) {
                 // Partial match

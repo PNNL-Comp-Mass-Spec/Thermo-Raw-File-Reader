@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using MSFileReaderLib;
 using System.Text.RegularExpressions;
+using MSFileReaderLib;
 
 // These functions utilize MSFileReader.XRawfile2.dll to extract scan header info and
 // raw mass spectrum info from Finnigan LCQ, LTQ, and LTQ-FT files
@@ -20,7 +20,7 @@ using System.Text.RegularExpressions;
 // If having troubles reading files, install MS File Reader 3.0 SP3
 // Download link: https://thermo.flexnetoperations.com/control/thmo/login
 
-namespace FinniganFileIO
+namespace ThermoRawFileReader
 {
 
     public class XRawFileIO : FinniganFileReaderBaseClass, IDisposable
@@ -201,7 +201,7 @@ namespace FinniganFileIO
             if (mCachedScanInfo.Count > MAX_SCANS_TO_CACHE_INFO)
             {
                 // Remove the oldest entry in mCachedScanInfo
-                int minimumScanNumber = -1;
+                var minimumScanNumber = -1;
                 var dtMinimumCacheDate = DateTime.UtcNow;
 
                 foreach (var cachedInfo in mCachedScanInfo.Values)
@@ -247,12 +247,12 @@ namespace FinniganFileIO
 
         static T[,] Cast2D<T>(object[,] input)
         {
-            int rows = input.GetLength(0);
-            int columns = input.GetLength(1);
-            T[,] ret = new T[rows, columns];
-            for (int i = 0; i < rows; i++)
+            var rows = input.GetLength(0);
+            var columns = input.GetLength(1);
+            var ret = new T[rows, columns];
+            for (var i = 0; i < rows; i++)
             {
-                for (int j = 0; j < columns; j++)
+                for (var j = 0; j < columns; j++)
                 {
                     ret[i, j] = (T)input[i, j];
                 }
@@ -265,13 +265,13 @@ namespace FinniganFileIO
             // I have a feeling this doesn't actually work, and will always return True
             try
             {
+                // ReSharper disable once UnusedVariable
                 var objXRawFile = new MSFileReader_XRawfile();
-                objXRawFile = null;
 
-                // If we get here, then all is fine
+                // If we get here, all is fine
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -291,11 +291,11 @@ namespace FinniganFileIO
                 mCorruptMemoryEncountered = false;
 
             }
-            catch (AccessViolationException ex)
+            catch (AccessViolationException)
             {
                 // Ignore this error
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Ignore any errors
             }
@@ -461,7 +461,7 @@ namespace FinniganFileIO
                         udtMRMInfo.MRMMassList.Add(mrmMassRange);
 
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // Error parsing out the mass values; skip this group
                     }
@@ -487,7 +487,7 @@ namespace FinniganFileIO
         public static bool ExtractParentIonMZFromFilterText(string strFilterText, out double dblParentIonMZ, out int intMSLevel, out string strCollisionMode)
         {
 
-            List<udtParentIonInfoType> lstParentIons = null;
+            List<udtParentIonInfoType> lstParentIons;
 
             return ExtractParentIonMZFromFilterText(strFilterText, out dblParentIonMZ, out intMSLevel, out strCollisionMode, out lstParentIons);
 
@@ -500,9 +500,15 @@ namespace FinniganFileIO
         /// <param name="dblParentIonMZ">Parent ion m/z (output)</param>
         /// <param name="intMSLevel">MSLevel (output)</param>
         /// <param name="strCollisionMode">Collision mode (output)</param>
+        /// <param name="lstParentIons">Output: parent ion list</param>
         /// <returns>True if success</returns>
         /// <remarks>If multiple parent ion m/z values are listed then dblParentIonMZ will have the last one.  However, if the filter text contains "Full msx" then dblParentIonMZ will have the first parent ion listed</remarks>
-        public static bool ExtractParentIonMZFromFilterText(string strFilterText, out double dblParentIonMZ, out int intMSLevel, out string strCollisionMode, out List<udtParentIonInfoType> lstParentIons)
+        public static bool ExtractParentIonMZFromFilterText(
+            string strFilterText, 
+            out double dblParentIonMZ, 
+            out int intMSLevel, 
+            out string strCollisionMode, 
+            out List<udtParentIonInfoType> lstParentIons)
         {
 
             // strFilterText should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
@@ -522,41 +528,24 @@ namespace FinniganFileIO
             // or "ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]"
             // or "+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515"
 
-            int intCharIndex = 0;
-            int intStartIndex = 0;
-
-            string strMZText = null;
-
-            bool blnMatchFound = false;
-            bool blnSuccess = false;
-
-            bool blnSupplementalActivationEnabled = false;
-            bool blnMultiplexedMSnEnabled = false;
-
-            Match reMatchParentIon = default(Match);
-
-            string strCollisionEnergy = null;
-            float sngCollisionEngergy = 0;
-
             var udtBestParentIon = new udtParentIonInfoType();
             udtBestParentIon.Clear();
 
             intMSLevel = 1;
             dblParentIonMZ = 0;
             strCollisionMode = string.Empty;
-            strMZText = string.Empty;
-            blnMatchFound = false;
+            var blnMatchFound = false;
 
             lstParentIons = new List<udtParentIonInfoType>();
 
-
             try
             {
-                blnSupplementalActivationEnabled = mFindSAFullMS.IsMatch(strFilterText);
+                var blnSupplementalActivationEnabled = mFindSAFullMS.IsMatch(strFilterText);
 
-                blnMultiplexedMSnEnabled = mFindFullMSx.IsMatch(strFilterText);
+                var blnMultiplexedMSnEnabled = mFindFullMSx.IsMatch(strFilterText);
 
-                blnSuccess = ExtractMSLevel(strFilterText, out intMSLevel, out strMZText);
+                string strMZText;
+                var blnSuccess = ExtractMSLevel(strFilterText, out intMSLevel, out strMZText);
 
                 if (!blnSuccess)
                 {
@@ -572,17 +561,17 @@ namespace FinniganFileIO
                 // However, if using multiplex ms/ms (msx) then we return the first parent ion listed
 
                 // For safety, remove any text after a square bracket
-                intCharIndex = strMZText.IndexOf('[');
+                var intCharIndex = strMZText.IndexOf('[');
                 if (intCharIndex > 0)
                 {
                     strMZText = strMZText.Substring(0, intCharIndex);
                 }
 
                 // Find all of the parent ion m/z's present in strMZText
-                intStartIndex = 0;
+                var intStartIndex = 0;
                 do
                 {
-                    reMatchParentIon = mFindParentIon.Match(strMZText, intStartIndex);
+                    var reMatchParentIon = mFindParentIon.Match(strMZText, intStartIndex);
 
                     if (!reMatchParentIon.Success)
                     {
@@ -595,7 +584,7 @@ namespace FinniganFileIO
 
                     dblParentIonMZ = double.Parse(reMatchParentIon.Groups["ParentMZ"].Value);
                     strCollisionMode = string.Empty;
-                    sngCollisionEngergy = 0;
+                    float sngCollisionEngergy = 0;
 
                     blnMatchFound = true;
 
@@ -603,7 +592,7 @@ namespace FinniganFileIO
 
                     strCollisionMode = GetCapturedValue(reMatchParentIon, "CollisionMode1");
 
-                    strCollisionEnergy = GetCapturedValue(reMatchParentIon, "CollisionEnergy1");
+                    var strCollisionEnergy = GetCapturedValue(reMatchParentIon, "CollisionEnergy1");
                     if (!string.IsNullOrEmpty(strCollisionEnergy))
                     {
                         float.TryParse(strCollisionEnergy, out sngCollisionEngergy);
@@ -641,17 +630,23 @@ namespace FinniganFileIO
                         }
                     }
 
-                    var udtParentIonInfo = new udtParentIonInfoType();
-                    udtParentIonInfo.MSLevel = intMSLevel;
-                    udtParentIonInfo.ParentIonMZ = dblParentIonMZ;
-                    udtParentIonInfo.CollisionMode = string.Copy(strCollisionMode);
-                    udtParentIonInfo.CollisionMode2 = string.Copy(strCollisionMode2);
-                    udtParentIonInfo.CollisionEnergy = sngCollisionEngergy;
-                    udtParentIonInfo.CollisionEnergy2 = sngCollisionEngergy2;
+                    var udtParentIonInfo = new udtParentIonInfoType
+                    {
+                        MSLevel = intMSLevel,
+                        ParentIonMZ = dblParentIonMZ,
+                        CollisionEnergy = sngCollisionEngergy,
+                        CollisionEnergy2 = sngCollisionEngergy2
+                    };
+
+                    if (strCollisionMode != null)
+                        udtParentIonInfo.CollisionMode = string.Copy(strCollisionMode);
+
+                    if (strCollisionMode2 != null)
+                        udtParentIonInfo.CollisionMode2 = string.Copy(strCollisionMode2);
 
                     lstParentIons.Add(udtParentIonInfo);
 
-                    if (!blnMultiplexedMSnEnabled || (lstParentIons.Count == 1 && blnMultiplexedMSnEnabled))
+                    if (!blnMultiplexedMSnEnabled || (lstParentIons.Count == 1))
                     {
                         udtBestParentIon = udtParentIonInfo;
                     }
@@ -686,7 +681,7 @@ namespace FinniganFileIO
                         dblParentIonMZ = double.Parse(strMZText);
                         blnMatchFound = true;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         dblParentIonMZ = 0;
                     }
@@ -724,7 +719,7 @@ namespace FinniganFileIO
                             lstParentIons.Add(udtParentIonMzOnly);
 
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             dblParentIonMZ = 0;
                         }
@@ -732,7 +727,7 @@ namespace FinniganFileIO
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 blnMatchFound = false;
             }
@@ -748,11 +743,10 @@ namespace FinniganFileIO
 
             // Populates intMSLevel with the number after "ms" and strMZText with the text after "ms2"
 
-            int intCharIndex = 0;
-            int intMatchTextLength = 0;
+            var intMatchTextLength = 0;
 
             intMSLevel = 1;
-            intCharIndex = 0;
+            var intCharIndex = 0;
 
             var reMatchMS = mFindMS.Match(strFilterText);
 
@@ -769,12 +763,9 @@ namespace FinniganFileIO
                 strMZText = strFilterText.Substring(intCharIndex + intMatchTextLength).Trim();
                 return true;
             }
-            else
-            {
-                strMZText = string.Empty;
-                return false;
-            }
 
+            strMZText = string.Empty;
+            return false;
         }
 
         protected override bool FillFileInfo()
@@ -782,13 +773,10 @@ namespace FinniganFileIO
             // Populates the mFileInfo structure
             // Function returns True if no error, False if an error
 
-            int intResult = 0;
+            var intResult = 0;
 
-            int intIndex = 0;
+            var intMethodCount = 0;
 
-            int intMethodCount = 0;
-
-            string strMethod = null;
             try
             {
                 if (mXRawFile == null)
@@ -827,9 +815,9 @@ namespace FinniganFileIO
 
                     mXRawFile.GetNumInstMethods(ref intMethodCount);
 
-                    for (intIndex = 0; intIndex < intMethodCount; intIndex++)
+                    for (var intIndex = 0; intIndex < intMethodCount; intIndex++)
                     {
-                        strMethod = null;
+                        string strMethod = null;
                         mXRawFile.GetInstMethod(intIndex, ref strMethod);
                         if (!string.IsNullOrWhiteSpace(strMethod))
                         {
@@ -880,7 +868,7 @@ namespace FinniganFileIO
             }
             catch (Exception ex)
             {
-                string strError = "Error: Exception in FillFileInfo: " + ex.Message;
+                var strError = "Error: Exception in FillFileInfo: " + ex.Message;
                 RaiseErrorMessage(strError);
                 return false;
             }
@@ -911,7 +899,7 @@ namespace FinniganFileIO
             }
             catch (Exception ex)
             {
-                string strError = "Error: Exception in GetActivationType: " + ex.Message;
+                var strError = "Error: Exception in GetActivationType: " + ex.Message;
                 RaiseWarningMessage(strError);
                 return ActivationTypeConstants.Unknown;
             }
@@ -937,9 +925,8 @@ namespace FinniganFileIO
         public List<double> GetCollisionEnergy(int scan)
         {
 
-            int intNumMSOrders = 0;
+            var intNumMSOrders = 0;
             var lstCollisionEnergies = new List<double>();
-            double dblCollisionEnergy = 0;
 
             try
             {
@@ -950,7 +937,7 @@ namespace FinniganFileIO
 
                 for (var intMSOrder = 1; intMSOrder <= intNumMSOrders; intMSOrder++)
                 {
-                    dblCollisionEnergy = 0;
+                    double dblCollisionEnergy = 0;
                     mXRawFile.GetCollisionEnergyForScanNum(scan, intMSOrder, ref dblCollisionEnergy);
 
                     if ((dblCollisionEnergy > 0))
@@ -962,7 +949,7 @@ namespace FinniganFileIO
             }
             catch (Exception ex)
             {
-                string strError = "Error: Exception in GetCollisionEnergy: " + ex.Message;
+                var strError = "Error: Exception in GetCollisionEnergy: " + ex.Message;
                 RaiseErrorMessage(strError);
             }
 
@@ -974,8 +961,8 @@ namespace FinniganFileIO
         {
             // Returns the number of scans, or -1 if an error
 
-            int intResult = 0;
-            int intScanCount = 0;
+            var intResult = 0;
+            var intScanCount = 0;
 
             try
             {
@@ -989,12 +976,10 @@ namespace FinniganFileIO
                 {
                     return intScanCount;
                 }
-                else
-                {
-                    return -1;
-                }
+                
+                return -1;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return -1;
             }
@@ -1012,7 +997,7 @@ namespace FinniganFileIO
         public override bool GetScanInfo(int scan, out udtScanHeaderInfoType udtScanInfo)
         {
 
-            clsScanInfo scanInfo = null;
+            clsScanInfo scanInfo;
             var success = GetScanInfo(scan, out scanInfo);
 
             if (success)
@@ -1075,14 +1060,14 @@ namespace FinniganFileIO
                 scanInfo.FilterText = string.Empty;
                 scanInfo.IonMode = IonModeConstants.Unknown;
 
-                int numPeaks = 0;
+                var numPeaks = 0;
                 double retentionTime = 0;
                 double lowMass = 0;
                 double highMass = 0;
                 double totalIonCurrent = 0;
                 double basePeakMZ = 0;
                 double basePeakIntensity = 0;
-                int numChannels = 0;
+                var numChannels = 0;
                 double frequency = 0;
 
                 var intBooleanVal = 0;
@@ -1150,15 +1135,15 @@ namespace FinniganFileIO
                 }
 
                 scanInfo.EventNumber = 1;
-                if (intArrayCount > 0)
+                if (intArrayCount > 0 && objLabels != null && objValues != null)
                 {
 
-                    string[] scanEventNames =
+                    var scanEventNames =
                         ((IEnumerable)objLabels).Cast<object>()
                             .Select(x => x.ToString())
                             .ToArray();
 
-                    string[] scanEventValues =
+                    var scanEventValues =
                          ((IEnumerable)objValues).Cast<object>()
                             .Select(x => x.ToString())
                             .ToArray();
@@ -1185,7 +1170,7 @@ namespace FinniganFileIO
                         {
                             scanInfo.EventNumber = Convert.ToInt32(scanEvent.Value);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             // Ignore errors here
                         }
@@ -1209,7 +1194,7 @@ namespace FinniganFileIO
 
                 if (scanInfo.EventNumber <= 1)
                 {
-                    int intMSLevel = 0;
+                    int intMSLevel;
 
                     // XRaw periodically mislabels a scan as .EventNumber = 1 when it's really an MS/MS scan; check for this
                     string strMZText;
@@ -1239,9 +1224,9 @@ namespace FinniganFileIO
                     }
                     else
                     {
-                        double dblParentIonMZ = 0;
-                        int intMSLevel = 0;
-                        string strCollisionMode = string.Empty;
+                        double dblParentIonMZ;
+                        int intMSLevel;
+                        string strCollisionMode;
 
                         // Parse out the parent ion and collision energy from .FilterText
                         if (ExtractParentIonMZFromFilterText(scanInfo.FilterText, out dblParentIonMZ, out intMSLevel, out strCollisionMode))
@@ -1329,7 +1314,7 @@ namespace FinniganFileIO
                 // Now that we know MSLevel we can lookup the activation type (aka activation method)
                 scanInfo.ActivationType = GetActivationType(scan, scanInfo.MSLevel);
 
-                FinniganFileReaderBaseClass.udtMRMInfoType newMRMInfo;
+                udtMRMInfoType newMRMInfo;
 
                 if (scanInfo.MRMScanType != MRMScanTypeConstants.NotMRM)
                 {
@@ -1379,12 +1364,12 @@ namespace FinniganFileIO
 
                 if (intArrayCount > 0)
                 {
-                    string[] logNames =
+                    var logNames =
                         ((IEnumerable)objLabels).Cast<object>()
                             .Select(x => x.ToString())
                             .ToArray();
 
-                    string[] logValues =
+                    var logValues =
                          ((IEnumerable)objValues).Cast<object>()
                             .Select(x => x.ToString())
                             .ToArray();
@@ -1452,24 +1437,15 @@ namespace FinniganFileIO
             // FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]       EThcD-HMSn  (ETD fragmentation, then further fragmented by HCD in the ion routing multipole; detected with orbitrap)
 
             var strScanTypeName = "MS";
-            int intMSLevel = 0;
-            double dblParentIonMZ = 0;
-            string strCollisionMode = null;
-            MRMScanTypeConstants eMRMScanType = default(MRMScanTypeConstants);
-
-            bool blnSIMScan = false;
-            bool blnZoomScan = false;
-
-            bool blnValidScanFilter = false;
 
             try
             {
-                blnValidScanFilter = true;
-                intMSLevel = 1;
-                strCollisionMode = "";
-                eMRMScanType = MRMScanTypeConstants.NotMRM;
-                blnSIMScan = false;
-                blnZoomScan = false;
+                var blnValidScanFilter = true;
+                int intMSLevel;
+                var strCollisionMode = string.Empty;
+                MRMScanTypeConstants eMRMScanType;
+                var blnSIMScan = false;
+                var blnZoomScan = false;
 
                 if (strFilterText.Length == 0)
                 {
@@ -1489,6 +1465,7 @@ namespace FinniganFileIO
                 {
                     // Parse out the parent ion and collision energy from strFilterText
 
+                    double dblParentIonMZ;
                     if (ExtractParentIonMZFromFilterText(strFilterText, out dblParentIonMZ, out intMSLevel, out strCollisionMode))
                     {
                         // Check whether this is an SRM MS2 scan
@@ -1508,7 +1485,6 @@ namespace FinniganFileIO
                             blnValidScanFilter = false;
                         }
                     }
-
                 }
                 else
                 {
@@ -1616,7 +1592,7 @@ namespace FinniganFileIO
 
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Ignore errors here
             }
@@ -1628,9 +1604,7 @@ namespace FinniganFileIO
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         private void GetTuneData()
         {
-            string strWarningMessage = null;
-
-            int intNumTuneData = 0;
+            var intNumTuneData = 0;
             mXRawFile.GetNumTuneData(ref intNumTuneData);
 
             for (var intIndex = 0; intIndex <= intNumTuneData - 1; intIndex++)
@@ -1639,6 +1613,7 @@ namespace FinniganFileIO
                 object objLabels = null;
                 object objValues = null;
 
+                string strWarningMessage;
                 try
                 {
                     if (!mCorruptMemoryEncountered)
@@ -1647,7 +1622,7 @@ namespace FinniganFileIO
                     }
 
                 }
-                catch (AccessViolationException ex)
+                catch (AccessViolationException)
                 {
                     strWarningMessage = "Unable to load tune data; possibly a corrupt .Raw file";
                     RaiseWarningMessage(strWarningMessage);
@@ -1692,71 +1667,65 @@ namespace FinniganFileIO
 
                 }
 
-                if (intTuneLabelCount > 0)
+                if (intTuneLabelCount <= 0 || objLabels == null || objValues == null)
                 {
+                    continue;
+                }
 
-                    var newTuneMethod = new udtTuneMethodType();
-                    newTuneMethod.Clear();
+                var newTuneMethod = new udtTuneMethodType();
+                newTuneMethod.Clear();
 
-                    if (intTuneLabelCount > 0)
+
+                var strTuneSettingNames =
+                    ((IEnumerable)objLabels).Cast<object>()
+                        .Select(x => x.ToString())
+                        .ToArray();
+
+                var strTuneSettingValues =
+                    ((IEnumerable)objValues).Cast<object>()
+                        .Select(x => x.ToString())
+                        .ToArray();
+
+                // Step through the names and store in the .Setting() arrays
+                var strTuneCategory = "General";
+                for (var intSettingIndex = 0; intSettingIndex <= intTuneLabelCount - 1; intSettingIndex++)
+                {
+                    if (strTuneSettingValues[intSettingIndex].Length == 0 && !strTuneSettingNames[intSettingIndex].EndsWith(":"))
                     {
-
-                        string[] strTuneSettingNames =
-                            ((IEnumerable)objLabels).Cast<object>()
-                                .Select(x => x.ToString())
-                                .ToArray();
-
-                        string[] strTuneSettingValues =
-                             ((IEnumerable)objValues).Cast<object>()
-                                .Select(x => x.ToString())
-                                .ToArray();
-
-                        // Step through the names and store in the .Setting() arrays
-                        var strTuneCategory = "General";
-                        for (var intSettingIndex = 0; intSettingIndex <= intTuneLabelCount - 1; intSettingIndex++)
+                        // New category
+                        if (strTuneSettingNames[intSettingIndex].Length > 0)
                         {
-                            if (strTuneSettingValues[intSettingIndex].Length == 0 && !strTuneSettingNames[intSettingIndex].EndsWith(":"))
-                            {
-                                // New category
-                                if (strTuneSettingNames[intSettingIndex].Length > 0)
-                                {
-                                    strTuneCategory = string.Copy(strTuneSettingNames[intSettingIndex]);
-                                }
-                                else
-                                {
-                                    strTuneCategory = "General";
-                                }
-                            }
-                            else
-                            {
-                                var tuneMethodSetting = new udtTuneMethodSetting()
-                                {
-                                    Category = string.Copy(strTuneCategory),
-                                    Name = strTuneSettingNames[intSettingIndex].TrimEnd(':'),
-                                    Value = string.Copy(strTuneSettingValues[intSettingIndex])
-                                };
-
-                                newTuneMethod.Settings.Add(tuneMethodSetting);
-                            }
-
+                            strTuneCategory = string.Copy(strTuneSettingNames[intSettingIndex]);
                         }
-
+                        else
+                        {
+                            strTuneCategory = "General";
+                        }
                     }
-
-                    if (mFileInfo.TuneMethods.Count == 0)
-                        mFileInfo.TuneMethods.Add(newTuneMethod);
                     else
                     {
-                        // Compare this tune method to the previous one; if identical, then don't keep it
-                        if (!TuneMethodsMatch(mFileInfo.TuneMethods.Last(), newTuneMethod))
+                        var tuneMethodSetting = new udtTuneMethodSetting()
                         {
-                            mFileInfo.TuneMethods.Add(newTuneMethod);
-                        }
-                    }
+                            Category = string.Copy(strTuneCategory),
+                            Name = strTuneSettingNames[intSettingIndex].TrimEnd(':'),
+                            Value = string.Copy(strTuneSettingValues[intSettingIndex])
+                        };
 
+                        newTuneMethod.Settings.Add(tuneMethodSetting);
+                    }
 
                 }
 
+                if (mFileInfo.TuneMethods.Count == 0)
+                    mFileInfo.TuneMethods.Add(newTuneMethod);
+                else
+                {
+                    // Compare this tune method to the previous one; if identical, then don't keep it
+                    if (!TuneMethodsMatch(mFileInfo.TuneMethods.Last(), newTuneMethod))
+                    {
+                        mFileInfo.TuneMethods.Add(newTuneMethod);
+                    }
+                }
             }
 
         }
@@ -1787,7 +1756,6 @@ namespace FinniganFileIO
             // c NSI Full cnl 162.053 [300.000-1200.000]                            c NSI Full cnl
 
             var strGenericScanFilterText = "MS";
-            int intCharIndex = 0;
 
             try
             {
@@ -1797,7 +1765,7 @@ namespace FinniganFileIO
                     strGenericScanFilterText = string.Copy(strFilterText);
 
                     // First look for and remove numbers between square brackets
-                    intCharIndex = strGenericScanFilterText.IndexOf('[');
+                    var intCharIndex = strGenericScanFilterText.IndexOf('[');
                     if (intCharIndex > 0)
                     {
                         strGenericScanFilterText = strGenericScanFilterText.Substring(0, intCharIndex).TrimEnd(' ');
@@ -1833,7 +1801,7 @@ namespace FinniganFileIO
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Ignore errors
             }
@@ -1845,14 +1813,14 @@ namespace FinniganFileIO
         private static bool ScanIsFTMS(string strFilterText)
         {
 
-            return ContainsText(strFilterText, "FTMS", 0);
+            return ContainsText(strFilterText, "FTMS");
 
         }
 
         private udtScanHeaderInfoType ScanInfoClassToStruct(clsScanInfo scanInfo)
         {
 
-            var udtScanInfo = new udtScanHeaderInfoType()
+            var udtScanInfo = new udtScanHeaderInfoType
             {
                 MSLevel = scanInfo.MSLevel,
                 EventNumber = scanInfo.EventNumber,
@@ -1875,11 +1843,10 @@ namespace FinniganFileIO
                 NumChannels = scanInfo.NumChannels,
                 UniformTime = scanInfo.UniformTime,
                 Frequency = scanInfo.Frequency,
-                IsCentroidScan = scanInfo.IsCentroided
+                IsCentroidScan = scanInfo.IsCentroided,
+                ScanEventNames = new string[scanInfo.ScanEvents.Count],
+                ScanEventValues = new string[scanInfo.ScanEvents.Count]
             };
-
-            udtScanInfo.ScanEventNames = new string[scanInfo.ScanEvents.Count];
-            udtScanInfo.ScanEventValues = new string[scanInfo.ScanEvents.Count];
 
             for (var i = 0; i < scanInfo.ScanEvents.Count; i++)
             {
@@ -1905,7 +1872,7 @@ namespace FinniganFileIO
             // A controller is typically the MS, UV, analog, etc.
             // See ControllerTypeConstants
 
-            int intResult = 0;
+            var intResult = 0;
 
             mXRawFile.SetCurrentController((int)ControllerTypeConstants.MS, 1);
             mXRawFile.IsError(ref intResult);
@@ -2121,7 +2088,7 @@ namespace FinniganFileIO
         public int GetScanData(int scan, out double[] dblMZList, out double[] dblIntensityList, int intMaxNumberOfPeaks, bool blnCentroid)
         {
 
-            double[,] dblMassIntensityPairs = null;
+            double[,] dblMassIntensityPairs;
 
             var dataCount = GetScanData2D(scan, out dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid);
 
@@ -2232,12 +2199,7 @@ namespace FinniganFileIO
             // Note that we're using function attribute HandleProcessCorruptedStateExceptions
             // to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
-            int dataCount = 0;
-
-            string strFilter = null;
-            int intIntensityCutoffValue = 0;
-
-            dataCount = 0;
+            var dataCount = 0;
 
             if (scan < mFileInfo.ScanStart)
             {
@@ -2248,7 +2210,7 @@ namespace FinniganFileIO
                 scan = mFileInfo.ScanEnd;
             }
 
-            clsScanInfo scanInfo = null;
+            clsScanInfo scanInfo;
 
             if (!GetScanInfo(scan, out scanInfo))
             {
@@ -2270,9 +2232,9 @@ namespace FinniganFileIO
                     return -1;
                 }
 
-                strFilter = string.Empty;
+                var strFilter = string.Empty;
                 // Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
-                intIntensityCutoffValue = 0;
+                var intIntensityCutoffValue = 0;
 
                 if (intMaxNumberOfPeaks < 0)
                     intMaxNumberOfPeaks = 0;
@@ -2332,7 +2294,7 @@ namespace FinniganFileIO
                     //			1032.56495			1032.6863		118
                     //			1513.7252			1513.9168		127
 
-                    int intCentroidResult = 0;
+                    int intCentroidResult;
                     double dblCentroidPeakWidth = 0;
 
                     if (blnCentroid)
@@ -2363,16 +2325,16 @@ namespace FinniganFileIO
                 return dataCount;
 
             }
-            catch (AccessViolationException ex)
+            catch (AccessViolationException)
             {
-                string strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
+                var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
                 RaiseWarningMessage(strError);
 
 
             }
             catch (Exception ex)
             {
-                string strError = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                var strError = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
                 RaiseErrorMessage(strError);
 
             }
@@ -2405,7 +2367,7 @@ namespace FinniganFileIO
                 scan = mFileInfo.ScanEnd;
             }
 
-            clsScanInfo scanInfo = null;
+            clsScanInfo scanInfo;
 
             if (!GetScanInfo(scan, out scanInfo))
             {
@@ -2446,10 +2408,11 @@ namespace FinniganFileIO
 
                     for (var i = 0; i <= dataCount - 1; i++)
                     {
-                        udtFTLabelInfoType labelInfo = new udtFTLabelInfoType();
-
-                        labelInfo.Mass = labelDataArray[0, i];
-                        labelInfo.Intensity = labelDataArray[1, i];
+                        var labelInfo = new udtFTLabelInfoType
+                        {
+                            Mass = labelDataArray[0, i],
+                            Intensity = labelDataArray[1, i]
+                        };
 
                         if (maxColIndex >= 2)
                         {
@@ -2483,16 +2446,16 @@ namespace FinniganFileIO
                 return dataCount;
 
             }
-            catch (AccessViolationException ex)
+            catch (AccessViolationException)
             {
-                string strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
+                var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
                 RaiseWarningMessage(strError);
 
 
             }
             catch (Exception ex)
             {
-                string strError = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                var strError = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
                 RaiseErrorMessage(strError);
 
             }
@@ -2516,7 +2479,7 @@ namespace FinniganFileIO
             // Note that we're using function attribute HandleProcessCorruptedStateExceptions
             // to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
-            int dataCount = 0;
+            var dataCount = 0;
 
             if (scan < mFileInfo.ScanStart)
             {
@@ -2527,7 +2490,7 @@ namespace FinniganFileIO
                 scan = mFileInfo.ScanEnd;
             }
 
-            clsScanInfo scanInfo = null;
+            clsScanInfo scanInfo;
 
             if (!GetScanInfo(scan, out scanInfo))
             {
@@ -2587,16 +2550,16 @@ namespace FinniganFileIO
                 return dataCount;
 
             }
-            catch (AccessViolationException ex)
+            catch (AccessViolationException)
             {
-                string strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
+                var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
                 RaiseWarningMessage(strError);
 
 
             }
             catch (Exception ex)
             {
-                string strError = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                var strError = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
                 RaiseErrorMessage(strError);
 
             }
@@ -2623,14 +2586,8 @@ namespace FinniganFileIO
             // Note that we're using function attribute HandleProcessCorruptedStateExceptions
             // to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
-            int dataCount = 0;
-
-            string strFilter = null;
-            int intIntensityCutoffValue = 0;
-            int intCentroidResult = 0;
             double dblCentroidPeakWidth = 0;
-
-            dataCount = 0;
+            var dataCount = 0;
 
             try
             {
@@ -2668,9 +2625,9 @@ namespace FinniganFileIO
                     scanLast = mFileInfo.ScanEnd;
                 }
 
-                strFilter = string.Empty;
+                var strFilter = string.Empty;
                 // Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
-                intIntensityCutoffValue = 0;
+                var intIntensityCutoffValue = 0;
 
                 if (intMaxNumberOfPeaks < 0)
                     intMaxNumberOfPeaks = 0;
@@ -2678,6 +2635,7 @@ namespace FinniganFileIO
                 // Warning: the masses reported by GetAverageMassList when centroiding are not properly calibrated and thus could be off by 0.3 m/z or more
                 // For an example, see function GetScanData2D above
 
+                int intCentroidResult;
                 if (blnCentroid)
                 {
                     intCentroidResult = 1;
@@ -2713,16 +2671,16 @@ namespace FinniganFileIO
                 return dataCount;
 
             }
-            catch (AccessViolationException ex)
+            catch (AccessViolationException)
             {
-                string strError = "Unable to load data summing scans " + scanFirst + " to " + scanLast + "; possibly a corrupt .Raw file";
+                var strError = "Unable to load data summing scans " + scanFirst + " to " + scanLast + "; possibly a corrupt .Raw file";
                 RaiseWarningMessage(strError);
 
 
             }
             catch (Exception ex)
             {
-                string strError = "Unable to load data summing scans " + scanFirst + " to " + scanLast + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                var strError = "Unable to load data summing scans " + scanFirst + " to " + scanLast + ": " + ex.Message + "; possibly a corrupt .Raw file";
                 RaiseErrorMessage(strError);
 
             }
@@ -2746,10 +2704,10 @@ namespace FinniganFileIO
             udtMRMInfo = InitializeMRMInfo();
         }
 
-        public override bool OpenRawFile(string FileName)
+        public sealed override bool OpenRawFile(string FileName)
         {
-            int intResult = 0;
-            bool blnSuccess = false;
+            var intResult = 0;
+            var blnSuccess = false;
 
 
             try
@@ -2795,7 +2753,7 @@ namespace FinniganFileIO
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 blnSuccess = false;
             }

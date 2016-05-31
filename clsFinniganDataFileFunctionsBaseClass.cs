@@ -6,7 +6,7 @@ using System.Collections.Generic;
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 // Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 
-namespace FinniganFileIO
+namespace ThermoRawFileReader
 {
 
 	public abstract class FinniganFileReaderBaseClass
