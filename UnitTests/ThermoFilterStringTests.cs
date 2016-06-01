@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using ThermoRawFileReaderDLL.FinniganFileIO;
+using ThermoRawFileReader;
 
 namespace RawFileReaderTests
 {
@@ -60,16 +60,16 @@ namespace RawFileReaderTests
             var mrmScanType = XRawFileIO.DetermineMRMScanType(filterText);
             XRawFileIO.ExtractMRMMasses(filterText, mrmScanType, out udtMRMInfo);
 
-            Console.WriteLine(filterText + " -- " + udtMRMInfo.MRMMassCount + " mass ranges");
+            Console.WriteLine(filterText + " -- " + udtMRMInfo.MRMMassList.Count + " mass ranges");
 
             if (string.IsNullOrWhiteSpace(expectedMassList))
             {
-                Assert.AreEqual(0, udtMRMInfo.MRMMassCount, "Mass range count mismatch");
+                Assert.AreEqual(0, udtMRMInfo.MRMMassList.Count, "Mass range count mismatch");
                 return;
             }
 
             var expectedMassRanges = expectedMassList.Split(';');
-            Assert.AreEqual(expectedMassRanges.Length, udtMRMInfo.MRMMassCount, "Mass range count mismatch");
+            Assert.AreEqual(expectedMassRanges.Length, udtMRMInfo.MRMMassList.Count, "Mass range count mismatch");
 
             for (var i = 0; i < expectedMassRanges.Length; i++)
             {

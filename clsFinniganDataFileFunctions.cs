@@ -2288,7 +2288,7 @@ namespace ThermoRawFileReader
                     //          That is why we use mXRawFile.GetLabelData() when centroiding profile-mode FTMS data (see ~25 lines above this comment)
                     //
                     //          For example, in scan 8101 of dataset RAW_Franc_Salm_IMAC_0h_R1A_18Jul13_Frodo_13-04-15, we see these values:
-                    //           Profile m/z         Centroid m/z	Delta_PPM
+                    //          Profile m/z         Centroid m/z	Delta_PPM
                     //			112.051 			112.077			232
                     //			652.3752			652.4645		137
                     //			1032.56495			1032.6863		118
@@ -2570,7 +2570,7 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// 
+        /// Sums data across scans
         /// </summary>
         /// <param name="scanFirst"></param>
         /// <param name="scanLast"></param>
@@ -2626,6 +2626,7 @@ namespace ThermoRawFileReader
                 }
 
                 var strFilter = string.Empty;
+
                 // Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
                 var intIntensityCutoffValue = 0;
 
@@ -2655,13 +2656,14 @@ namespace ThermoRawFileReader
                 object massIntensityPairsList = null;
                 object peakList = null;
 
-                mXRawFile.GetAverageMassList(ref scanFirst, ref scanLast, ref  backgroundScan1First, ref backgroundScan1Last, ref backgroundScan2First, ref backgroundScan2Last, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, intMaxNumberOfPeaks,
-                intCentroidResult, ref dblCentroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
+                mXRawFile.GetAverageMassList(ref scanFirst, ref scanLast, ref backgroundScan1First, ref backgroundScan1Last, ref backgroundScan2First, ref backgroundScan2Last, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, intMaxNumberOfPeaks,
+                        intCentroidResult, ref dblCentroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
 
                 if (dataCount > 0)
                 {
-                    var massIntensityPairs2D = (object[,])massIntensityPairsList;
-                    dblMassIntensityPairs = Cast2D<double>(massIntensityPairs2D);
+                    //var massIntensityPairs2D = (object[,])massIntensityPairsList;
+                    //dblMassIntensityPairs = Cast2D<double>(massIntensityPairs2D);
+                    dblMassIntensityPairs = (double[,])massIntensityPairsList;
                 }
                 else
                 {
