@@ -1099,7 +1099,7 @@ namespace ThermoRawFileReader
                 scanInfo.UniformTime = Convert.ToBoolean(intBooleanVal);
 
                 intBooleanVal = 0;
-                mXRawFile.IsCentroidScanForScanNum(scan, intBooleanVal);
+                mXRawFile.IsCentroidScanForScanNum(scan, ref intBooleanVal);
 
                 scanInfo.IsCentroided = Convert.ToBoolean(intBooleanVal);
 
