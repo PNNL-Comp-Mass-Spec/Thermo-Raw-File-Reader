@@ -245,21 +245,6 @@ namespace ThermoRawFileReader
 
         }
 
-        static T[,] Cast2D<T>(object[,] input)
-        {
-            var rows = input.GetLength(0);
-            var columns = input.GetLength(1);
-            var ret = new T[rows, columns];
-            for (var i = 0; i < rows; i++)
-            {
-                for (var j = 0; j < columns; j++)
-                {
-                    ret[i, j] = (T)input[i, j];
-                }
-            }
-            return ret;
-        }
-
         public override bool CheckFunctionality()
         {
             // I have a feeling this doesn't actually work, and will always return True
@@ -994,6 +979,7 @@ namespace ThermoRawFileReader
         /// <returns>True if no error, False if an error</returns>
         /// <remarks></remarks>
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
+        [Obsolete("Use GetScanInfo that returns a class")]
         public override bool GetScanInfo(int scan, out udtScanHeaderInfoType udtScanInfo)
         {
 
@@ -2254,8 +2240,6 @@ namespace ThermoRawFileReader
 
                     mXRawFile.GetLabelData(ref massIntensityLabels, ref labelFlags, scan);
 
-                    //var massIntensityLabels2D = (object[,])massIntensityLabels;
-                    //double[,] dblMassIntensityLabels = Cast2D<double>(massIntensityLabels2D);
                     var dblMassIntensityLabels = (double[,])massIntensityLabels;
 
                     dataCount = dblMassIntensityLabels.GetLength(1);
@@ -2395,8 +2379,6 @@ namespace ThermoRawFileReader
 
                 mXRawFile.GetLabelData(ref labelData, ref labelFlags, ref scan);
 
-                //var labelData2D = (object[,])labelData;
-                //double[,] labelDataArray = Cast2D<double>(labelData2D);
                 var labelDataArray = (double[,])labelData;
 
                 var dataCount = labelDataArray.GetLength(1);
@@ -2517,8 +2499,6 @@ namespace ThermoRawFileReader
 
                 mXRawFile.GetMassPrecisionEstimate(scan, ref massResolutionDataList, ref dataCount);
 
-                //var massResolutionDataList2D = (object[,])massResolutionDataList;
-                //double[,] massPrecisionArray = Cast2D<double>(massResolutionDataList2D);
                 var massPrecisionArray = (double[,])massResolutionDataList;
 
                 dataCount = massPrecisionArray.GetLength(1);
@@ -2661,8 +2641,6 @@ namespace ThermoRawFileReader
 
                 if (dataCount > 0)
                 {
-                    //var massIntensityPairs2D = (object[,])massIntensityPairsList;
-                    //dblMassIntensityPairs = Cast2D<double>(massIntensityPairs2D);
                     dblMassIntensityPairs = (double[,])massIntensityPairsList;
                 }
                 else
