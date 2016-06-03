@@ -243,8 +243,8 @@ namespace ThermoRawFileReader
 		public abstract bool GetScanInfo(int scan, out udtScanHeaderInfoType udtScanHeaderInfo);
         public abstract bool GetScanInfo(int scan, out clsScanInfo scanInfo);
 
-		public abstract int GetScanData(int scan, out double[] dblIonMZ, out double[] dblIonIntensity);
-		public abstract int GetScanData(int scan, out double[] dblIonMZ, out double[] dblIonIntensity, int intMaxNumberOfPeaks);
+		public abstract int GetScanData(int scan, out double[] ionMZ, out double[] ionIntensity);
+		public abstract int GetScanData(int scan, out double[] ionMZ, out double[] ionIntensity, int maxNumberOfPeaks);
 
 		public abstract bool OpenRawFile(string filePath);
 
@@ -261,17 +261,17 @@ namespace ThermoRawFileReader
 		    }
 		}
 
-		protected void RaiseErrorMessage(string strMessage)
+		protected void RaiseErrorMessage(string message)
 		{
 			if (ReportError != null) {
-				ReportError(strMessage);
+				ReportError(message);
 			}
 		}
 
-		protected void RaiseWarningMessage(string strMessage)
+		protected void RaiseWarningMessage(string message)
 		{
 			if (ReportWarning != null) {
-				ReportWarning(strMessage);
+				ReportWarning(message);
 			}
 		}
 	}

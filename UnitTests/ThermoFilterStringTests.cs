@@ -105,11 +105,11 @@ namespace RawFileReaderTests
         {
 
             string parentIonMZ;
-            int intMSLevel;
+            int msLevel;
 
-            var success = XRawFileIO.ExtractMSLevel(filterText, out intMSLevel, out parentIonMZ);
+            var success = XRawFileIO.ExtractMSLevel(filterText, out msLevel, out parentIonMZ);
 
-            Console.WriteLine(filterText + " -- ms" + intMSLevel + ", " + parentIonMZ);
+            Console.WriteLine(filterText + " -- ms" + msLevel + ", " + parentIonMZ);
 
             if (string.IsNullOrEmpty(expectedMzText))
             {
@@ -119,7 +119,7 @@ namespace RawFileReaderTests
 
             Assert.AreEqual(true, success, "ExtractMSLevel returned false");
 
-            Assert.AreEqual(expectedMSLevel, intMSLevel, "MS level mismatch");
+            Assert.AreEqual(expectedMSLevel, msLevel, "MS level mismatch");
             Assert.AreEqual(expectedMzText, parentIonMZ, "mzText mismatch");
 
         }
@@ -151,14 +151,14 @@ namespace RawFileReaderTests
         public void ExtractParentIonMZFromFilterText(string filterText, string expectedParentIons, int expectedMSLevel, string expectedCollisionMode)
         {
 
-            double dblParentIonMZ;
-            int intMSLevel;
+            double parentIonMZ;
+            int msLevel;
             string collisionMode;
-            List<XRawFileIO.udtParentIonInfoType> lstParentIons;
+            List<XRawFileIO.udtParentIonInfoType> actualParentIons;
 
-            var success = XRawFileIO.ExtractParentIonMZFromFilterText(filterText, out dblParentIonMZ, out intMSLevel, out collisionMode, out lstParentIons);
+            var success = XRawFileIO.ExtractParentIonMZFromFilterText(filterText, out parentIonMZ, out msLevel, out collisionMode, out actualParentIons);
 
-            Console.WriteLine(filterText + " -- ms" + intMSLevel + ", " + dblParentIonMZ.ToString("0.00") + " " + collisionMode);
+            Console.WriteLine(filterText + " -- ms" + msLevel + ", " + parentIonMZ.ToString("0.00") + " " + collisionMode);
 
             if (expectedMSLevel == 1)
             {
@@ -168,30 +168,30 @@ namespace RawFileReaderTests
 
             Assert.AreEqual(true, success, "ExtractParentIonMZFromFilterText returned false");
 
-            var parentIons = expectedParentIons.Split(',');
-            var expectedParenIonMZ = double.Parse(parentIons[0].Replace("!", ""));
-            foreach (var parentIon in parentIons)
+            var expectedParentIonList = expectedParentIons.Split(',');
+            var expectedParenIonMZ = double.Parse(expectedParentIonList[0].Replace("!", ""));
+            foreach (var parentIon in expectedParentIonList)
             {
                 if (parentIon.Contains('!'))
                     expectedParenIonMZ = double.Parse(parentIon.Replace("!", ""));
             }
 
-            Assert.AreEqual(expectedMSLevel, intMSLevel, "MS level mismatch");
-            Assert.AreEqual(parentIons.Length, lstParentIons.Count, "Parent ion count mismatch");
+            Assert.AreEqual(expectedMSLevel, msLevel, "MS level mismatch");
+            Assert.AreEqual(expectedParentIonList.Length, actualParentIons.Count, "Parent ion count mismatch");
 
-            Assert.AreEqual(expectedParenIonMZ, dblParentIonMZ, 0.001, "Parent ion m/z mismatch");
+            Assert.AreEqual(expectedParenIonMZ, parentIonMZ, 0.001, "Parent ion m/z mismatch");
 
             Assert.AreEqual(expectedCollisionMode, collisionMode, "Collision mode mismatch");
 
-            if (parentIons.Length > 0)
+            if (expectedParentIonList.Length > 0)
             {
-                for (var i = 0; i < parentIons.Length; i++)
+                for (var i = 0; i < expectedParentIonList.Length; i++)
                 {
-                    var expectedParentIonMZ = double.Parse(parentIons[i].Replace("!", ""));
-                    var actualParentIon = lstParentIons[i].ParentIonMZ;
+                    var expectedParentIonMz = double.Parse(expectedParentIonList[i].Replace("!", ""));
+                    var actualParentIonMz = actualParentIons[i].ParentIonMZ;
 
-                    Assert.AreEqual(expectedParentIonMZ, actualParentIon, .001,
-                                    "Parent ion mismatch, ion " + (i + 1).ToString());
+                    Assert.AreEqual(expectedParentIonMz, actualParentIonMz, .001,
+                                    "Parent ion mismatch, ion " + (i + 1));
                 }
             }
         }
@@ -317,17 +317,17 @@ namespace RawFileReaderTests
             bool expectedIsSIMScan,
             FinniganFileReaderBaseClass.MRMScanTypeConstants expectedMRMScanType, bool expectedIsZoomScan)
         {
-            int intMSLevel;
+            int msLevel;
             bool isSIMScan;
             FinniganFileReaderBaseClass.MRMScanTypeConstants mrmScanType;
             bool zoomScan;
 
-            var isValid = XRawFileIO.ValidateMSScan(filterText, out intMSLevel, out isSIMScan, out mrmScanType, out zoomScan);
+            var isValid = XRawFileIO.ValidateMSScan(filterText, out msLevel, out isSIMScan, out mrmScanType, out zoomScan);
 
-            Console.WriteLine(filterText + "  -- ms" + intMSLevel + "; SIM=" + isSIMScan + "; MRMScanType=" + mrmScanType);
+            Console.WriteLine(filterText + "  -- ms" + msLevel + "; SIM=" + isSIMScan + "; MRMScanType=" + mrmScanType);
 
             Assert.AreEqual(expectedIsValidMS1orSIM, isValid, "Validation mismatch");
-            Assert.AreEqual(expectedMSLevel, intMSLevel, "MSLevel mismatch");
+            Assert.AreEqual(expectedMSLevel, msLevel, "MSLevel mismatch");
             Assert.AreEqual(expectedIsSIMScan, isSIMScan, "SIMScan mismatch");
             Assert.AreEqual(expectedMRMScanType, mrmScanType, "MRMScanType mismatch");
             Assert.AreEqual(expectedIsZoomScan, zoomScan, "ZoomScan mismatch");

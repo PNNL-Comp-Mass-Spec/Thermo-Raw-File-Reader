@@ -816,9 +816,9 @@ namespace RawFileReaderTests
                     for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                     {
 
-                        double[,] dblMassIntensityPairs;
+                        double[,] massIntensityPairs;
 
-                        var dataPointsRead = reader.GetScanData2D(scanNumber, out dblMassIntensityPairs, maxNumberOfPeaks, centroidData);
+                        var dataPointsRead = reader.GetScanData2D(scanNumber, out massIntensityPairs, maxNumberOfPeaks, centroidData);
 
                         Assert.IsTrue(dataPointsRead > 0, "GetScanData2D returned 0 for scan " + scanNumber);
 
@@ -827,7 +827,7 @@ namespace RawFileReaderTests
 
                         Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
 
-                        var lastIndex = dblMassIntensityPairs.GetUpperBound(1);
+                        var lastIndex = massIntensityPairs.GetUpperBound(1);
 
                         int dataCount;
 
@@ -841,7 +841,7 @@ namespace RawFileReaderTests
 
                                 var pointToCheck = maxNumberOfPeaks + (int)((lastIndex - maxNumberOfPeaks) / 2f);
 
-                                Assert.IsTrue(dblMassIntensityPairs[0, pointToCheck] > 50, "m/z value in 2D array is unexpectedly less than 50");
+                                Assert.IsTrue(massIntensityPairs[0, pointToCheck] > 50, "m/z value in 2D array is unexpectedly less than 50");
                             }
                             else
                             {
@@ -850,16 +850,16 @@ namespace RawFileReaderTests
                                 // Make sure the 2D array has values of 0 for mass and intensity beyond index maxNumberOfPeaks
                                 for (var dataIndex = maxNumberOfPeaks; dataIndex < lastIndex; dataIndex++)
                                 {
-                                    if (dblMassIntensityPairs[0, dataIndex] > 0)
+                                    if (massIntensityPairs[0, dataIndex] > 0)
                                     {
                                         Console.WriteLine("Non-zero m/z value found at index " + dataIndex + " for scan " + scanNumber);
-                                        Assert.AreEqual(0, dblMassIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
+                                        Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
                                     }
 
-                                    if (dblMassIntensityPairs[1, dataIndex] > 0)
+                                    if (massIntensityPairs[1, dataIndex] > 0)
                                     {
                                         Console.WriteLine("Non-zero intensity value found at index " + dataIndex + " for scan " + scanNumber);
-                                        Assert.AreEqual(0, dblMassIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
+                                        Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
                                     }
                                 }
                             }
@@ -878,8 +878,8 @@ namespace RawFileReaderTests
                                 "{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8} {7,8}  {8}",
                                 scanNumber, maxNumberOfPeaks, centroidData,
                                 dataCount,
-                                dblMassIntensityPairs[0, 0].ToString("0.000"), dblMassIntensityPairs[1,0].ToString("0.0E+0"),
-                                dblMassIntensityPairs[0, midPoint].ToString("0.000"), dblMassIntensityPairs[1, midPoint].ToString("0.0E+0"),
+                                massIntensityPairs[0, 0].ToString("0.000"), massIntensityPairs[1,0].ToString("0.0E+0"),
+                                massIntensityPairs[0, midPoint].ToString("0.000"), massIntensityPairs[1, midPoint].ToString("0.0E+0"),
                                 scanInfo.FilterText);
 
 
@@ -976,9 +976,9 @@ namespace RawFileReaderTests
                             break;
                     }
 
-                    double[,] dblMassIntensityPairs;
+                    double[,] massIntensityPairs;
 
-                    var dataPointsRead = reader.GetScanDataSumScans(scanStart, scanEnd, out dblMassIntensityPairs, maxNumberOfPeaks, centroidData);
+                    var dataPointsRead = reader.GetScanDataSumScans(scanStart, scanEnd, out massIntensityPairs, maxNumberOfPeaks, centroidData);
 
                     Assert.IsTrue(dataPointsRead > 0, string.Format("GetScanDataSumScans returned 0 summing scans {0} to {1}", scanStart, scanEnd));
 
@@ -987,7 +987,7 @@ namespace RawFileReaderTests
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanStart);
 
-                    var lastIndex = dblMassIntensityPairs.GetUpperBound(1);
+                    var lastIndex = massIntensityPairs.GetUpperBound(1);
                     int dataCount;
 
                     if (maxNumberOfPeaks > 0)
@@ -997,16 +997,16 @@ namespace RawFileReaderTests
                         // Make sure the 2D array has values of 0 for mass and intensity beyond index maxNumberOfPeaks
                         for (var dataIndex = maxNumberOfPeaks; dataIndex < lastIndex; dataIndex++)
                         {
-                            if (dblMassIntensityPairs[0, dataIndex] > 0)
+                            if (massIntensityPairs[0, dataIndex] > 0)
                             {
                                 Console.WriteLine("Non-zero m/z value found at index " + dataIndex + " for scan " + scanStart);
-                                Assert.AreEqual(0, dblMassIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
+                                Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
                             }
 
-                            if (dblMassIntensityPairs[1, dataIndex] > 0)
+                            if (massIntensityPairs[1, dataIndex] > 0)
                             {
                                 Console.WriteLine("Non-zero intensity value found at index " + dataIndex + " for scan " + scanStart);
-                                Assert.AreEqual(0, dblMassIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
+                                Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
                             }
                         }
                     }
@@ -1024,8 +1024,8 @@ namespace RawFileReaderTests
                             "{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8} {7,8}  {8}",
                             scanStart, maxNumberOfPeaks, centroidData,
                             dataCount,
-                            dblMassIntensityPairs[0, 0].ToString("0.000"), dblMassIntensityPairs[1, 0].ToString("0.0E+0"),
-                            dblMassIntensityPairs[0, midPoint].ToString("0.000"), dblMassIntensityPairs[1, midPoint].ToString("0.0E+0"),
+                            massIntensityPairs[0, 0].ToString("0.000"), massIntensityPairs[1, 0].ToString("0.0E+0"),
+                            massIntensityPairs[0, midPoint].ToString("0.000"), massIntensityPairs[1, midPoint].ToString("0.0E+0"),
                             scanInfo.FilterText);
 
 

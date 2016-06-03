@@ -46,7 +46,7 @@ namespace ThermoRawFileReader
         private const string MRM_Q1MS_TEXT = "Q1MS ";
         private const string MRM_Q3MS_TEXT = "Q3MS ";
         private const string MRM_SRM_TEXT = "SRM ms2";
-        private const string MRM_FullNL_TEXT = "Full cnl ";			// MRM neutral loss			
+        private const string MRM_FullNL_TEXT = "Full cnl ";			// MRM neutral loss; yes, cnl starts with a c		
         private const string MRM_SIM_PR_TEXT = "SIM pr ";			// TSQ: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., Biofilm-1000pg-std-mix_06Dec14_Smeagol-3
 
         // This RegEx matches Full ms2, Full ms3, ..., Full ms10, Full ms11, ...
@@ -228,20 +228,20 @@ namespace ThermoRawFileReader
 
         }
 
-        private static string CapitalizeCollisionMode(string strCollisionMode)
+        private static string CapitalizeCollisionMode(string collisionMode)
         {
 
-            if ((string.Equals(strCollisionMode, "EThcD", StringComparison.InvariantCultureIgnoreCase)))
+            if ((string.Equals(collisionMode, "EThcD", StringComparison.InvariantCultureIgnoreCase)))
             {
                 return "EThcD";
             }
 
-            if ((string.Equals(strCollisionMode, "ETciD", StringComparison.InvariantCultureIgnoreCase)))
+            if ((string.Equals(collisionMode, "ETciD", StringComparison.InvariantCultureIgnoreCase)))
             {
                 return "ETciD";
             }
 
-            return strCollisionMode.ToUpper();
+            return collisionMode.ToUpper();
 
         }
 
@@ -312,11 +312,11 @@ namespace ThermoRawFileReader
 
         }
 
-        public static MRMScanTypeConstants DetermineMRMScanType(string strFilterText)
+        public static MRMScanTypeConstants DetermineMRMScanType(string filterText)
         {
             var eMRMScanType = MRMScanTypeConstants.NotMRM;
 
-            if (string.IsNullOrWhiteSpace(strFilterText))
+            if (string.IsNullOrWhiteSpace(filterText))
             {
                 return eMRMScanType;
             }
@@ -326,20 +326,20 @@ namespace ThermoRawFileReader
 				MRM_Q3MS_TEXT
 			};
 
-            if (ContainsAny(strFilterText, mrmQMSTags, 1))
+            if (ContainsAny(filterText, mrmQMSTags, 1))
             {
                 eMRMScanType = MRMScanTypeConstants.MRMQMS;
             }
-            else if (ContainsText(strFilterText, MRM_SRM_TEXT, 1))
+            else if (ContainsText(filterText, MRM_SRM_TEXT, 1))
             {
                 eMRMScanType = MRMScanTypeConstants.SRM;
             }
-            else if (ContainsText(strFilterText, MRM_SIM_PR_TEXT, 1))
+            else if (ContainsText(filterText, MRM_SIM_PR_TEXT, 1))
             {
                 // This is not technically SRM, but the data looks very similar, so we'll track it like SRM data
                 eMRMScanType = MRMScanTypeConstants.SRM;
             }
-            else if (ContainsText(strFilterText, MRM_FullNL_TEXT, 1))
+            else if (ContainsText(filterText, MRM_FullNL_TEXT, 1))
             {
                 eMRMScanType = MRMScanTypeConstants.FullNL;
 
@@ -348,53 +348,54 @@ namespace ThermoRawFileReader
             return eMRMScanType;
         }
 
-        public static IonModeConstants DetermineIonizationMode(string strFiltertext)
+        public static IonModeConstants DetermineIonizationMode(string filterText)
         {
 
             // Determine the ion mode by simply looking for the first + or - sign
-            var eIonMode = IonModeConstants.Unknown;
+            var ionMode = IonModeConstants.Unknown;
 
 
-            if (!string.IsNullOrWhiteSpace(strFiltertext))
+            if (string.IsNullOrWhiteSpace(filterText))
             {
-                // For safety, remove any text after a square bracket
-                var intCharIndex = strFiltertext.IndexOf('[');
-
-                Match reMatch;
-                if (intCharIndex > 0)
-                {
-                    reMatch = mIonMode.Match(strFiltertext.Substring(0, intCharIndex));
-                }
-                else
-                {
-                    reMatch = mIonMode.Match(strFiltertext);
-                }
-
-                if (reMatch.Success)
-                {
-                    switch (reMatch.Value)
-                    {
-                        case "+":
-                            eIonMode = IonModeConstants.Positive;
-                            break;
-                        case "-":
-                            eIonMode = IonModeConstants.Negative;
-                            break;
-                        default:
-                            eIonMode = IonModeConstants.Unknown;
-                            break;
-                    }
-                }
-
+                return ionMode;
             }
 
-            return eIonMode;
+            // For safety, remove any text after a square bracket
+            var charIndex = filterText.IndexOf('[');
+
+            Match reMatch;
+            if (charIndex > 0)
+            {
+                reMatch = mIonMode.Match(filterText.Substring(0, charIndex));
+            }
+            else
+            {
+                reMatch = mIonMode.Match(filterText);
+            }
+
+            if (reMatch.Success)
+            {
+                switch (reMatch.Value)
+                {
+                    case "+":
+                        ionMode = IonModeConstants.Positive;
+                        break;
+                    case "-":
+                        ionMode = IonModeConstants.Negative;
+                        break;
+                    default:
+                        ionMode = IonModeConstants.Unknown;
+                        break;
+                }
+            }
+
+            return ionMode;
 
         }
 
-        public static void ExtractMRMMasses(string strFilterText, MRMScanTypeConstants eMRMScanType, out udtMRMInfoType udtMRMInfo)
+        public static void ExtractMRMMasses(string filterText, MRMScanTypeConstants mrmScanType, out udtMRMInfoType mrmInfo)
         {
-            // Parse out the MRM_QMS or SRM mass info from strFilterText
+            // Parse out the MRM_QMS or SRM mass info from filterText
             // It should be of the form 
             // MRM_Q1MS_TEXT:    p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]
             // or
@@ -405,17 +406,17 @@ namespace ThermoRawFileReader
             // Note: we do not parse mass information out for Full Neutral Loss scans
             // MRM_FullNL_TEXT: c NSI Full cnl 162.053 [300.000-1200.000]
 
-            udtMRMInfo = InitializeMRMInfo();
+            mrmInfo = InitializeMRMInfo();
 
-            if (string.IsNullOrWhiteSpace(strFilterText))
+            if (string.IsNullOrWhiteSpace(filterText))
             {
                 return;
             }
 
-            if (eMRMScanType == MRMScanTypeConstants.MRMQMS | eMRMScanType == MRMScanTypeConstants.SRM)
+            if (mrmScanType == MRMScanTypeConstants.MRMQMS | mrmScanType == MRMScanTypeConstants.SRM)
             {
                 // Parse out the text between the square brackets
-                var reMatch = mMassList.Match(strFilterText);
+                var reMatch = mMassList.Match(filterText);
 
                 if (!reMatch.Success)
                 {
@@ -424,7 +425,7 @@ namespace ThermoRawFileReader
 
                 reMatch = mMassRanges.Match(reMatch.Value);
 
-                udtMRMInfo = InitializeMRMInfo();
+                mrmInfo = InitializeMRMInfo();
 
                 while (reMatch.Success)
                 {
@@ -443,7 +444,7 @@ namespace ThermoRawFileReader
                         var centralMass = mrmMassRange.StartMass + (mrmMassRange.EndMass - mrmMassRange.StartMass) / 2;
                         mrmMassRange.CentralMass = Math.Round(centralMass, 6);
 
-                        udtMRMInfo.MRMMassList.Add(mrmMassRange);
+                        mrmInfo.MRMMassList.Add(mrmMassRange);
 
                     }
                     catch (Exception)
@@ -461,42 +462,39 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Parse out the parent ion and collision energy from strFilterText
+        /// Parse out the parent ion and collision energy from filterText
         /// </summary>
-        /// <param name="strFilterText"></param>
-        /// <param name="dblParentIonMZ">Parent ion m/z (output)</param>
-        /// <param name="intMSLevel">MSLevel (output)</param>
-        /// <param name="strCollisionMode">Collision mode (output)</param>
+        /// <param name="filterText"></param>
+        /// <param name="parentIonMz">Parent ion m/z (output)</param>
+        /// <param name="msLevel">MSLevel (output)</param>
+        /// <param name="collisionMode">Collision mode (output)</param>
         /// <returns>True if success</returns>
-        /// <remarks>If multiple parent ion m/z values are listed then dblParentIonMZ will have the last one.  However, if the filter text contains "Full msx" then dblParentIonMZ will have the first parent ion listed</remarks>
-        public static bool ExtractParentIonMZFromFilterText(string strFilterText, out double dblParentIonMZ, out int intMSLevel, out string strCollisionMode)
+        /// <remarks>If multiple parent ion m/z values are listed then parentIonMz will have the last one.  However, if the filter text contains "Full msx" then parentIonMz will have the first parent ion listed</remarks>
+        public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz, out int msLevel, out string collisionMode)
         {
-
-            List<udtParentIonInfoType> lstParentIons;
-
-            return ExtractParentIonMZFromFilterText(strFilterText, out dblParentIonMZ, out intMSLevel, out strCollisionMode, out lstParentIons);
-
+            List<udtParentIonInfoType> parentIons;
+            return ExtractParentIonMZFromFilterText(filterText, out parentIonMz, out msLevel, out collisionMode, out parentIons);
         }
 
         /// <summary>
-        /// Parse out the parent ion and collision energy from strFilterText
+        /// Parse out the parent ion and collision energy from filterText
         /// </summary>
-        /// <param name="strFilterText"></param>
-        /// <param name="dblParentIonMZ">Parent ion m/z (output)</param>
-        /// <param name="intMSLevel">MSLevel (output)</param>
-        /// <param name="strCollisionMode">Collision mode (output)</param>
-        /// <param name="lstParentIons">Output: parent ion list</param>
+        /// <param name="filterText"></param>
+        /// <param name="parentIonMz">Parent ion m/z (output)</param>
+        /// <param name="msLevel">MSLevel (output)</param>
+        /// <param name="collisionMode">Collision mode (output)</param>
+        /// <param name="parentIons">Output: parent ion list</param>
         /// <returns>True if success</returns>
-        /// <remarks>If multiple parent ion m/z values are listed then dblParentIonMZ will have the last one.  However, if the filter text contains "Full msx" then dblParentIonMZ will have the first parent ion listed</remarks>
+        /// <remarks>If multiple parent ion m/z values are listed then parentIonMz will have the last one.  However, if the filter text contains "Full msx" then parentIonMz will have the first parent ion listed</remarks>
         public static bool ExtractParentIonMZFromFilterText(
-            string strFilterText, 
-            out double dblParentIonMZ, 
-            out int intMSLevel, 
-            out string strCollisionMode, 
-            out List<udtParentIonInfoType> lstParentIons)
+            string filterText, 
+            out double parentIonMz, 
+            out int msLevel, 
+            out string collisionMode,
+            out List<udtParentIonInfoType> parentIons)
         {
 
-            // strFilterText should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
+            // filterText should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
             // or "+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]"
             // or "ITMS + c NSI d Full ms10 421.76@35.00"
             // or "ITMS + c NSI d sa Full ms2 467.16@etd100.00 [50.00-1880.00]"              ' Note: sa stands for "supplemental activation"
@@ -513,26 +511,26 @@ namespace ThermoRawFileReader
             // or "ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]"
             // or "+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515"
 
-            var udtBestParentIon = new udtParentIonInfoType();
-            udtBestParentIon.Clear();
+            var bestParentIon = new udtParentIonInfoType();
+            bestParentIon.Clear();
 
-            intMSLevel = 1;
-            dblParentIonMZ = 0;
-            strCollisionMode = string.Empty;
-            var blnMatchFound = false;
+            msLevel = 1;
+            parentIonMz = 0;
+            collisionMode = string.Empty;
+            var matchFound = false;
 
-            lstParentIons = new List<udtParentIonInfoType>();
+            parentIons = new List<udtParentIonInfoType>();
 
             try
             {
-                var blnSupplementalActivationEnabled = mFindSAFullMS.IsMatch(strFilterText);
+                var supplementalActivationEnabled = mFindSAFullMS.IsMatch(filterText);
 
-                var blnMultiplexedMSnEnabled = mFindFullMSx.IsMatch(strFilterText);
+                var multiplexedMSnEnabled = mFindFullMSx.IsMatch(filterText);
 
-                string strMZText;
-                var blnSuccess = ExtractMSLevel(strFilterText, out intMSLevel, out strMZText);
+                string mzText;
+                var success = ExtractMSLevel(filterText, out msLevel, out mzText);
 
-                if (!blnSuccess)
+                if (!success)
                 {
                     return false;
                 }
@@ -546,104 +544,104 @@ namespace ThermoRawFileReader
                 // However, if using multiplex ms/ms (msx) then we return the first parent ion listed
 
                 // For safety, remove any text after a square bracket
-                var intCharIndex = strMZText.IndexOf('[');
-                if (intCharIndex > 0)
+                var bracketIndex = mzText.IndexOf('[');
+                if (bracketIndex > 0)
                 {
-                    strMZText = strMZText.Substring(0, intCharIndex);
+                    mzText = mzText.Substring(0, bracketIndex);
                 }
 
-                // Find all of the parent ion m/z's present in strMZText
-                var intStartIndex = 0;
+                // Find all of the parent ion m/z's present in mzText
+                var startIndex = 0;
                 do
                 {
-                    var reMatchParentIon = mFindParentIon.Match(strMZText, intStartIndex);
+                    var reMatchParentIon = mFindParentIon.Match(mzText, startIndex);
 
                     if (!reMatchParentIon.Success)
                     {
                         // Match not found
-                        // If strMZText only contains a number, we will parse it out later in this function
+                        // If mzText only contains a number, we will parse it out later in this function
                         break;
                     }
 
                     // Match found
 
-                    dblParentIonMZ = double.Parse(reMatchParentIon.Groups["ParentMZ"].Value);
-                    strCollisionMode = string.Empty;
-                    float sngCollisionEngergy = 0;
+                    parentIonMz = double.Parse(reMatchParentIon.Groups["ParentMZ"].Value);
+                    collisionMode = string.Empty;
+                    float collisionEnergyValue = 0;
 
-                    blnMatchFound = true;
+                    matchFound = true;
 
-                    intStartIndex = reMatchParentIon.Index + reMatchParentIon.Length;
+                    startIndex = reMatchParentIon.Index + reMatchParentIon.Length;
 
-                    strCollisionMode = GetCapturedValue(reMatchParentIon, "CollisionMode1");
+                    collisionMode = GetCapturedValue(reMatchParentIon, "CollisionMode1");
 
-                    var strCollisionEnergy = GetCapturedValue(reMatchParentIon, "CollisionEnergy1");
-                    if (!string.IsNullOrEmpty(strCollisionEnergy))
+                    var collisionEnergy = GetCapturedValue(reMatchParentIon, "CollisionEnergy1");
+                    if (!string.IsNullOrEmpty(collisionEnergy))
                     {
-                        float.TryParse(strCollisionEnergy, out sngCollisionEngergy);
+                        float.TryParse(collisionEnergy, out collisionEnergyValue);
                     }
 
-                    float sngCollisionEngergy2 = 0;
-                    var strCollisionMode2 = GetCapturedValue(reMatchParentIon, "CollisionMode2");
+                    float collisionEnergy2Value = 0;
+                    var collisionMode2 = GetCapturedValue(reMatchParentIon, "CollisionMode2");
 
-                    if (!string.IsNullOrEmpty(strCollisionMode2))
+                    if (!string.IsNullOrEmpty(collisionMode2))
                     {
-                        var strCollisionEnergy2 = GetCapturedValue(reMatchParentIon, "CollisionEnergy2");
-                        float.TryParse(strCollisionEnergy2, out sngCollisionEngergy2);
+                        var collisionEnergy2 = GetCapturedValue(reMatchParentIon, "CollisionEnergy2");
+                        float.TryParse(collisionEnergy2, out collisionEnergy2Value);
                     }
 
                     var allowSecondaryActivation = true;
-                    if (string.Equals(strCollisionMode, "ETD", StringComparison.InvariantCultureIgnoreCase) & !string.IsNullOrEmpty(strCollisionMode2))
+                    if (string.Equals(collisionMode, "ETD", StringComparison.InvariantCultureIgnoreCase) & !string.IsNullOrEmpty(collisionMode2))
                     {
-                        if (string.Equals(strCollisionMode2, "CID", StringComparison.InvariantCultureIgnoreCase))
+                        if (string.Equals(collisionMode2, "CID", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            strCollisionMode = "ETciD";
+                            collisionMode = "ETciD";
                             allowSecondaryActivation = false;
                         }
-                        else if (string.Equals(strCollisionMode2, "HCD", StringComparison.InvariantCultureIgnoreCase))
+                        else if (string.Equals(collisionMode2, "HCD", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            strCollisionMode = "EThcD";
+                            collisionMode = "EThcD";
                             allowSecondaryActivation = false;
                         }
                     }
 
-                    if (allowSecondaryActivation && !string.IsNullOrEmpty(strCollisionMode))
+                    if (allowSecondaryActivation && !string.IsNullOrEmpty(collisionMode))
                     {
-                        if (blnSupplementalActivationEnabled)
+                        if (supplementalActivationEnabled)
                         {
-                            strCollisionMode = "sa_" + strCollisionMode;
+                            collisionMode = "sa_" + collisionMode;
                         }
                     }
 
-                    var udtParentIonInfo = new udtParentIonInfoType
+                    var parentIonInfo = new udtParentIonInfoType
                     {
-                        MSLevel = intMSLevel,
-                        ParentIonMZ = dblParentIonMZ,
-                        CollisionEnergy = sngCollisionEngergy,
-                        CollisionEnergy2 = sngCollisionEngergy2
+                        MSLevel = msLevel,
+                        ParentIonMZ = parentIonMz,
+                        CollisionEnergy = collisionEnergyValue,
+                        CollisionEnergy2 = collisionEnergy2Value
                     };
 
-                    if (strCollisionMode != null)
-                        udtParentIonInfo.CollisionMode = string.Copy(strCollisionMode);
+                    if (collisionMode != null)
+                        parentIonInfo.CollisionMode = string.Copy(collisionMode);
 
-                    if (strCollisionMode2 != null)
-                        udtParentIonInfo.CollisionMode2 = string.Copy(strCollisionMode2);
+                    if (collisionMode2 != null)
+                        parentIonInfo.CollisionMode2 = string.Copy(collisionMode2);
 
-                    lstParentIons.Add(udtParentIonInfo);
+                    parentIons.Add(parentIonInfo);
 
-                    if (!blnMultiplexedMSnEnabled || (lstParentIons.Count == 1))
+                    if (!multiplexedMSnEnabled || (parentIons.Count == 1))
                     {
-                        udtBestParentIon = udtParentIonInfo;
+                        bestParentIon = parentIonInfo;
                     }
 
-                } while (intStartIndex < strMZText.Length - 1);
+                } while (startIndex < mzText.Length - 1);
 
-                if (blnMatchFound)
+                if (matchFound)
                 {
                     // Update the output values using udtBestParentIon
-                    intMSLevel = udtBestParentIon.MSLevel;
-                    dblParentIonMZ = udtBestParentIon.ParentIonMZ;
-                    strCollisionMode = udtBestParentIon.CollisionMode;
+                    msLevel = bestParentIon.MSLevel;
+                    parentIonMz = bestParentIon.ParentIonMZ;
+                    collisionMode = bestParentIon.CollisionMode;
 
                     return true;
                 }
@@ -651,37 +649,37 @@ namespace ThermoRawFileReader
                 // Match not found using RegEx
                 // Use manual text parsing instead
 
-                intCharIndex = strMZText.LastIndexOf('@');
-                if (intCharIndex > 0)
+                var atIndex = mzText.LastIndexOf('@');
+                if (atIndex > 0)
                 {
-                    strMZText = strMZText.Substring(0, intCharIndex);
-                    intCharIndex = strMZText.LastIndexOf(' ');
-                    if (intCharIndex > 0)
+                    mzText = mzText.Substring(0, atIndex);
+                    var spaceIndex = mzText.LastIndexOf(' ');
+                    if (spaceIndex > 0)
                     {
-                        strMZText = strMZText.Substring(intCharIndex + 1);
+                        mzText = mzText.Substring(spaceIndex + 1);
                     }
 
                     try
                     {
-                        dblParentIonMZ = double.Parse(strMZText);
-                        blnMatchFound = true;
+                        parentIonMz = double.Parse(mzText);
+                        matchFound = true;
                     }
                     catch (Exception)
                     {
-                        dblParentIonMZ = 0;
+                        parentIonMz = 0;
                     }
 
                 }
-                else if (strMZText.Length > 0)
+                else if (mzText.Length > 0)
                 {
-                    // Find the longest contiguous number that strMZText starts with
+                    // Find the longest contiguous number that mzText starts with
 
-                    intCharIndex = -1;
-                    while (intCharIndex < strMZText.Length - 1)
+                    var charIndex = -1;
+                    while (charIndex < mzText.Length - 1)
                     {
-                        if (char.IsNumber(strMZText[intCharIndex + 1]) || strMZText[intCharIndex + 1] == '.')
+                        if (char.IsNumber(mzText[charIndex + 1]) || mzText[charIndex + 1] == '.')
                         {
-                            intCharIndex += 1;
+                            charIndex += 1;
                         }
                         else
                         {
@@ -689,24 +687,24 @@ namespace ThermoRawFileReader
                         }
                     }
 
-                    if (intCharIndex >= 0)
+                    if (charIndex >= 0)
                     {
                         try
                         {
-                            dblParentIonMZ = double.Parse(strMZText.Substring(0, intCharIndex + 1));
-                            blnMatchFound = true;
+                            parentIonMz = double.Parse(mzText.Substring(0, charIndex + 1));
+                            matchFound = true;
 
                             var udtParentIonMzOnly = new udtParentIonInfoType();
                             udtParentIonMzOnly.Clear();
-                            udtParentIonMzOnly.MSLevel = intMSLevel;
-                            udtParentIonMzOnly.ParentIonMZ = dblParentIonMZ;
+                            udtParentIonMzOnly.MSLevel = msLevel;
+                            udtParentIonMzOnly.ParentIonMZ = parentIonMz;
 
-                            lstParentIons.Add(udtParentIonMzOnly);
+                            parentIons.Add(udtParentIonMzOnly);
 
                         }
                         catch (Exception)
                         {
-                            dblParentIonMZ = 0;
+                            parentIonMz = 0;
                         }
                     }
                 }
@@ -714,42 +712,42 @@ namespace ThermoRawFileReader
             }
             catch (Exception)
             {
-                blnMatchFound = false;
+                matchFound = false;
             }
 
-            return blnMatchFound;
+            return matchFound;
 
         }
 
-        public static bool ExtractMSLevel(string strFilterText, out int intMSLevel, out string strMZText)
+        public static bool ExtractMSLevel(string filterText, out int msLevel, out string mzText)
         {
-            // Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in strFilterText
+            // Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in filterText
             // Returns True if found and False if no match
 
-            // Populates intMSLevel with the number after "ms" and strMZText with the text after "ms2"
+            // Populates msLevel with the number after "ms" and mzText with the text after "ms2"
 
             var intMatchTextLength = 0;
 
-            intMSLevel = 1;
-            var intCharIndex = 0;
+            msLevel = 1;
+            var charIndex = 0;
 
-            var reMatchMS = mFindMS.Match(strFilterText);
+            var reMatchMS = mFindMS.Match(filterText);
 
             if (reMatchMS.Success)
             {
-                intMSLevel = Convert.ToInt32(reMatchMS.Groups["MSLevel"].Value);
-                intCharIndex = strFilterText.IndexOf(reMatchMS.ToString(), StringComparison.InvariantCultureIgnoreCase);
+                msLevel = Convert.ToInt32(reMatchMS.Groups["MSLevel"].Value);
+                charIndex = filterText.IndexOf(reMatchMS.ToString(), StringComparison.InvariantCultureIgnoreCase);
                 intMatchTextLength = reMatchMS.Length;
             }
 
-            if (intCharIndex > 0)
+            if (charIndex > 0)
             {
-                // Copy the text after "Full ms2" or "Full ms3" in strFilterText to strMZText
-                strMZText = strFilterText.Substring(intCharIndex + intMatchTextLength).Trim();
+                // Copy the text after "Full ms2" or "Full ms3" in filterText to mzText
+                mzText = filterText.Substring(charIndex + intMatchTextLength).Trim();
                 return true;
             }
 
-            strMZText = string.Empty;
+            mzText = string.Empty;
             return false;
         }
 
@@ -757,10 +755,6 @@ namespace ThermoRawFileReader
         {
             // Populates the mFileInfo structure
             // Function returns True if no error, False if an error
-
-            var intResult = 0;
-
-            var intMethodCount = 0;
 
             try
             {
@@ -775,10 +769,12 @@ namespace ThermoRawFileReader
 
                 mFileInfo.CreationDate = DateTime.MinValue;
                 mXRawFile.GetCreationDate(ref mFileInfo.CreationDate);
-                mXRawFile.IsError(ref intResult);
+
+                var errorCode = 0;
+                mXRawFile.IsError(ref errorCode);
 
                 // Unfortunately, .IsError() always returns 0, even if an error occurred
-                if (intResult != 0)
+                if (errorCode != 0)
                     return false;
 
                 mFileInfo.CreatorID = null;
@@ -798,15 +794,16 @@ namespace ThermoRawFileReader
                 if (mLoadMSMethodInfo)
                 {
 
-                    mXRawFile.GetNumInstMethods(ref intMethodCount);
+                    var methodCount = 0;
+                    mXRawFile.GetNumInstMethods(ref methodCount);
 
-                    for (var intIndex = 0; intIndex < intMethodCount; intIndex++)
+                    for (var methodIndex = 0; methodIndex < methodCount; methodIndex++)
                     {
-                        string strMethod = null;
-                        mXRawFile.GetInstMethod(intIndex, ref strMethod);
-                        if (!string.IsNullOrWhiteSpace(strMethod))
+                        string methodText = null;
+                        mXRawFile.GetInstMethod(methodIndex, ref methodText);
+                        if (!string.IsNullOrWhiteSpace(methodText))
                         {
-                            mFileInfo.InstMethods.Add(strMethod);
+                            mFileInfo.InstMethods.Add(methodText);
                         }
 
                     }
@@ -853,8 +850,8 @@ namespace ThermoRawFileReader
             }
             catch (Exception ex)
             {
-                var strError = "Error: Exception in FillFileInfo: " + ex.Message;
-                RaiseErrorMessage(strError);
+                var msg = "Error: Exception in FillFileInfo: " + ex.Message;
+                RaiseErrorMessage(msg);
                 return false;
             }
 
@@ -884,8 +881,8 @@ namespace ThermoRawFileReader
             }
             catch (Exception ex)
             {
-                var strError = "Error: Exception in GetActivationType: " + ex.Message;
-                RaiseWarningMessage(strError);
+                var msg = "Error: Exception in GetActivationType: " + ex.Message;
+                RaiseWarningMessage(msg);
                 return ActivationTypeConstants.Unknown;
             }
 
@@ -910,35 +907,35 @@ namespace ThermoRawFileReader
         public List<double> GetCollisionEnergy(int scan)
         {
 
-            var intNumMSOrders = 0;
-            var lstCollisionEnergies = new List<double>();
+            var numMsOrders = 0;
+            var collisionEnergies = new List<double>();
 
             try
             {
                 if (mXRawFile == null)
-                    return lstCollisionEnergies;
+                    return collisionEnergies;
 
-                mXRawFile.GetNumberOfMSOrdersFromScanNum(scan, ref intNumMSOrders);
+                mXRawFile.GetNumberOfMSOrdersFromScanNum(scan, ref numMsOrders);
 
-                for (var intMSOrder = 1; intMSOrder <= intNumMSOrders; intMSOrder++)
+                for (var msOrder = 1; msOrder <= numMsOrders; msOrder++)
                 {
-                    double dblCollisionEnergy = 0;
-                    mXRawFile.GetCollisionEnergyForScanNum(scan, intMSOrder, ref dblCollisionEnergy);
+                    double collisionEnergy = 0;
+                    mXRawFile.GetCollisionEnergyForScanNum(scan, msOrder, ref collisionEnergy);
 
-                    if ((dblCollisionEnergy > 0))
+                    if ((collisionEnergy > 0))
                     {
-                        lstCollisionEnergies.Add(dblCollisionEnergy);
+                        collisionEnergies.Add(collisionEnergy);
                     }
                 }
 
             }
             catch (Exception ex)
             {
-                var strError = "Error: Exception in GetCollisionEnergy: " + ex.Message;
-                RaiseErrorMessage(strError);
+                var msg = "Error: Exception in GetCollisionEnergyUnnormalized: " + ex.Message;
+                RaiseErrorMessage(msg);
             }
 
-            return lstCollisionEnergies;
+            return collisionEnergies;
 
         }
 
@@ -946,20 +943,22 @@ namespace ThermoRawFileReader
         {
             // Returns the number of scans, or -1 if an error
 
-            var intResult = 0;
-            var intScanCount = 0;
-
             try
             {
                 if (mXRawFile == null)
                     return -1;
 
-                mXRawFile.GetNumSpectra(ref intScanCount);
-                mXRawFile.IsError(ref intResult);
+                var scanCount = 0;
+
+                mXRawFile.GetNumSpectra(ref scanCount);
+
+                var errorCode = 0;
+                mXRawFile.IsError(ref errorCode);
+
                 // Unfortunately, .IsError() always returns 0, even if an error occurred
-                if (intResult == 0)
+                if (errorCode == 0)
                 {
-                    return intScanCount;
+                    return scanCount;
                 }
                 
                 return -1;
@@ -1056,12 +1055,12 @@ namespace ThermoRawFileReader
                 var numChannels = 0;
                 double frequency = 0;
 
-                var intBooleanVal = 0;
-                var intResult = 0;
+                var booleanValue = 0;
+                var errorCode = 0;
 
                 mXRawFile.GetScanHeaderInfoForScanNum(
                     scan, ref numPeaks, ref retentionTime, ref lowMass, ref highMass,
-                    ref totalIonCurrent, ref basePeakMZ, ref basePeakIntensity, ref numChannels, intBooleanVal, ref frequency);
+                    ref totalIonCurrent, ref basePeakMZ, ref basePeakIntensity, ref numChannels, booleanValue, ref frequency);
 
                 scanInfo.NumPeaks = numPeaks;
                 scanInfo.RetentionTime = retentionTime;
@@ -1073,23 +1072,23 @@ namespace ThermoRawFileReader
                 scanInfo.NumChannels = numChannels;
                 scanInfo.Frequency = frequency;
 
-                mXRawFile.IsError(ref intResult);
+                mXRawFile.IsError(ref errorCode);
                 // Unfortunately, .IsError() always returns 0, even if an error occurred
 
-                if (intResult != 0)
+                if (errorCode != 0)
                 {
                     CacheScanInfo(scan, scanInfo);
                     return false;
                 }
 
-                scanInfo.UniformTime = Convert.ToBoolean(intBooleanVal);
+                scanInfo.UniformTime = Convert.ToBoolean(booleanValue);
 
-                intBooleanVal = 0;
-                mXRawFile.IsCentroidScanForScanNum(scan, ref intBooleanVal);
+                booleanValue = 0;
+                mXRawFile.IsCentroidScanForScanNum(scan, ref booleanValue);
 
-                scanInfo.IsCentroided = Convert.ToBoolean(intBooleanVal);
+                scanInfo.IsCentroided = Convert.ToBoolean(booleanValue);
 
-                var intArrayCount = 0;
+                var arrayCount = 0;
                 object objLabels = null;
                 object objValues = null;
 
@@ -1098,21 +1097,21 @@ namespace ThermoRawFileReader
                     if (!mCorruptMemoryEncountered)
                     {
                         // Retrieve the additional parameters for this scan (including Scan Event)
-                        mXRawFile.GetTrailerExtraForScanNum(scan, ref objLabels, ref objValues, ref intArrayCount);
+                        mXRawFile.GetTrailerExtraForScanNum(scan, ref objLabels, ref objValues, ref arrayCount);
                     }
                 }
                 catch (AccessViolationException ex)
                 {
-                    var strWarningMessage = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " + scan + ": " + ex.Message;
-                    RaiseWarningMessage(strWarningMessage);
-                    intArrayCount = 0;
+                    var msg = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " + scan + ": " + ex.Message;
+                    RaiseWarningMessage(msg);
+                    arrayCount = 0;
 
                 }
                 catch (Exception ex)
                 {
-                    var strWarningMessage = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " + scan + ": " + ex.Message;
-                    RaiseWarningMessage(strWarningMessage);
-                    intArrayCount = 0;
+                    var msg = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " + scan + ": " + ex.Message;
+                    RaiseWarningMessage(msg);
+                    arrayCount = 0;
 
                     if (ex.Message.ToLower().Contains("memory is corrupt"))
                     {
@@ -1121,7 +1120,7 @@ namespace ThermoRawFileReader
                 }
 
                 scanInfo.EventNumber = 1;
-                if (intArrayCount > 0 && objLabels != null && objValues != null)
+                if (arrayCount > 0 && objLabels != null && objValues != null)
                 {
 
                     var scanEventNames =
@@ -1167,26 +1166,26 @@ namespace ThermoRawFileReader
 
                 // Lookup the filter text for this scan
                 // Parse out the parent ion m/z for fragmentation scans
-                // Must set strFilterText to Nothing prior to calling .GetFilterForScanNum()
-                string strFilterText = null;
-                mXRawFile.GetFilterForScanNum(scan, ref strFilterText);
+                // Must set filterText to Nothing prior to calling .GetFilterForScanNum()
+                string filterText = null;
+                mXRawFile.GetFilterForScanNum(scan, ref filterText);
 
-                scanInfo.FilterText = string.Copy(strFilterText);
+                scanInfo.FilterText = string.Copy(filterText);
 
-                scanInfo.IsFTMS = ScanIsFTMS(strFilterText);
+                scanInfo.IsFTMS = ScanIsFTMS(filterText);
 
                 if (string.IsNullOrWhiteSpace(scanInfo.FilterText))
                     scanInfo.FilterText = string.Empty;
 
                 if (scanInfo.EventNumber <= 1)
                 {
-                    int intMSLevel;
+                    int msLevel;
 
                     // XRaw periodically mislabels a scan as .EventNumber = 1 when it's really an MS/MS scan; check for this
-                    string strMZText;
-                    if (ExtractMSLevel(scanInfo.FilterText, out intMSLevel, out strMZText))
+                    string mzText;
+                    if (ExtractMSLevel(scanInfo.FilterText, out msLevel, out mzText))
                     {
-                        scanInfo.EventNumber = intMSLevel;
+                        scanInfo.EventNumber = msLevel;
                     }
                 }
 
@@ -1210,19 +1209,19 @@ namespace ThermoRawFileReader
                     }
                     else
                     {
-                        double dblParentIonMZ;
-                        int intMSLevel;
-                        string strCollisionMode;
+                        double parentIonMz;
+                        int msLevel;
+                        string collisionMode;
 
                         // Parse out the parent ion and collision energy from .FilterText
-                        if (ExtractParentIonMZFromFilterText(scanInfo.FilterText, out dblParentIonMZ, out intMSLevel, out strCollisionMode))
+                        if (ExtractParentIonMZFromFilterText(scanInfo.FilterText, out parentIonMz, out msLevel, out collisionMode))
                         {
-                            scanInfo.ParentIonMZ = dblParentIonMZ;
-                            scanInfo.CollisionMode = strCollisionMode;
+                            scanInfo.ParentIonMZ = parentIonMz;
+                            scanInfo.CollisionMode = collisionMode;
 
-                            if (intMSLevel > 2)
+                            if (msLevel > 2)
                             {
-                                scanInfo.MSLevel = intMSLevel;
+                                scanInfo.MSLevel = msLevel;
                             }
 
                             // Check whether this is an SRM MS2 scan
@@ -1233,7 +1232,6 @@ namespace ThermoRawFileReader
                             // Could not find "Full ms2" in .FilterText
                             // XRaw periodically mislabels a scan as .EventNumber > 1 when it's really an MS scan; check for this
 
-                            int msLevel;
                             bool simScan;
                             MRMScanTypeConstants eMRMScanType;
                             bool zoomScan;
@@ -1316,7 +1314,7 @@ namespace ThermoRawFileReader
 
                 // Retrieve the Status Log for this scan using the following
                 // The Status Log includes numerous instrument parameters, including voltages, temperatures, pressures, turbo pump speeds, etc. 
-                intArrayCount = 0;
+                arrayCount = 0;
                 objLabels = null;
                 objValues = null;
 
@@ -1324,23 +1322,23 @@ namespace ThermoRawFileReader
                 {
                     if (!mCorruptMemoryEncountered)
                     {
-                        double dblStatusLogRT = 0;
+                        double statusLogRT = 0;
 
-                        mXRawFile.GetStatusLogForScanNum(scan, dblStatusLogRT, ref objLabels, ref objValues, ref intArrayCount);
+                        mXRawFile.GetStatusLogForScanNum(scan, statusLogRT, ref objLabels, ref objValues, ref arrayCount);
                     }
                 }
                 catch (AccessViolationException ex)
                 {
-                    var strWarningMessage = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " + scan + ": " + ex.Message;
-                    RaiseWarningMessage(strWarningMessage);
-                    intArrayCount = 0;
+                    var msg = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " + scan + ": " + ex.Message;
+                    RaiseWarningMessage(msg);
+                    arrayCount = 0;
 
                 }
                 catch (Exception ex)
                 {
-                    var strWarningMessage = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " + scan + ": " + ex.Message;
-                    RaiseWarningMessage(strWarningMessage);
-                    intArrayCount = 0;
+                    var msg = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " + scan + ": " + ex.Message;
+                    RaiseWarningMessage(msg);
+                    arrayCount = 0;
 
                     if (ex.Message.ToLower().Contains("memory is corrupt"))
                     {
@@ -1348,7 +1346,7 @@ namespace ThermoRawFileReader
                     }
                 }
 
-                if (intArrayCount > 0)
+                if (arrayCount > 0)
                 {
                     var logNames =
                         ((IEnumerable)objLabels).Cast<object>()
@@ -1368,8 +1366,8 @@ namespace ThermoRawFileReader
             }
             catch (Exception ex)
             {
-                var strError = "Error: Exception in GetScanInfo: " + ex.Message;
-                RaiseWarningMessage(strError);
+                var msg = "Error: Exception in GetScanInfo: " + ex.Message;
+                RaiseWarningMessage(msg);
                 CacheScanInfo(scan, scanInfo);
                 return false;
             }
@@ -1380,10 +1378,10 @@ namespace ThermoRawFileReader
 
         }
 
-        public static string GetScanTypeNameFromFinniganScanFilterText(string strFilterText)
+        public static string GetScanTypeNameFromFinniganScanFilterText(string filterText)
         {
 
-            // Examines strFilterText to determine what the scan type is
+            // Examines filterText to determine what the scan type is
             // Examples:
             // Given                                                                ScanTypeName
             // ITMS + c ESI Full ms [300.00-2000.00]                                MS
@@ -1422,53 +1420,53 @@ namespace ThermoRawFileReader
             // FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]       ETciD-HMSn  (ETD fragmentation, then further fragmented by CID in the ion trap; detected with orbitrap)
             // FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]       EThcD-HMSn  (ETD fragmentation, then further fragmented by HCD in the ion routing multipole; detected with orbitrap)
 
-            var strScanTypeName = "MS";
+            var scanTypeName = "MS";
 
             try
             {
-                var blnValidScanFilter = true;
-                int intMSLevel;
-                var strCollisionMode = string.Empty;
+                var validScanFilter = true;
+                int msLevel;
+                var collisionMode = string.Empty;
                 MRMScanTypeConstants eMRMScanType;
-                var blnSIMScan = false;
-                var blnZoomScan = false;
+                var simScan = false;
+                var zoomScan = false;
 
-                if (strFilterText.Length == 0)
+                if (filterText.Length == 0)
                 {
-                    strScanTypeName = "MS";
-                    return strScanTypeName;
+                    scanTypeName = "MS";
+                    return scanTypeName;
                 }
 
-                string strMZText;
+                string mzText;
 
-                if (!ExtractMSLevel(strFilterText, out intMSLevel, out strMZText))
+                if (!ExtractMSLevel(filterText, out msLevel, out mzText))
                 {
                     // Assume this is an MS scan
-                    intMSLevel = 1;
+                    msLevel = 1;
                 }
 
-                if (intMSLevel > 1)
+                if (msLevel > 1)
                 {
-                    // Parse out the parent ion and collision energy from strFilterText
+                    // Parse out the parent ion and collision energy from filterText
 
-                    double dblParentIonMZ;
-                    if (ExtractParentIonMZFromFilterText(strFilterText, out dblParentIonMZ, out intMSLevel, out strCollisionMode))
+                    double parentIonMz;
+                    if (ExtractParentIonMZFromFilterText(filterText, out parentIonMz, out msLevel, out collisionMode))
                     {
                         // Check whether this is an SRM MS2 scan
-                        eMRMScanType = DetermineMRMScanType(strFilterText);
+                        eMRMScanType = DetermineMRMScanType(filterText);
                     }
                     else
                     {
-                        // Could not find "Full ms2" in strFilterText
+                        // Could not find "Full ms2" in filterText
                         // XRaw periodically mislabels a scan as .EventNumber > 1 when it's really an MS scan; check for this
-                        if (ValidateMSScan(strFilterText, out intMSLevel, out blnSIMScan, out eMRMScanType, out blnZoomScan))
+                        if (ValidateMSScan(filterText, out msLevel, out simScan, out eMRMScanType, out zoomScan))
                         {
                             // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                         }
                         else
                         {
-                            // Unknown format for strFilterText; return an error
-                            blnValidScanFilter = false;
+                            // Unknown format for filterText; return an error
+                            validScanFilter = false;
                         }
                     }
                 }
@@ -1476,53 +1474,53 @@ namespace ThermoRawFileReader
                 {
                     // MSLevel is 1
                     // Make sure .FilterText contains one of the known MS1, SIM or MRM tags
-                    if (ValidateMSScan(strFilterText, out intMSLevel, out blnSIMScan, out eMRMScanType, out blnZoomScan))
+                    if (ValidateMSScan(filterText, out msLevel, out simScan, out eMRMScanType, out zoomScan))
                     {
                         // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                     }
                     else
                     {
-                        // Unknown format for strFilterText; return an error
-                        blnValidScanFilter = false;
+                        // Unknown format for filterText; return an error
+                        validScanFilter = false;
                     }
                 }
 
 
-                if (blnValidScanFilter)
+                if (validScanFilter)
                 {
                     if (eMRMScanType == MRMScanTypeConstants.NotMRM)
                     {
-                        if (blnSIMScan)
+                        if (simScan)
                         {
-                            strScanTypeName = SIM_MS_TEXT.Trim();
+                            scanTypeName = SIM_MS_TEXT.Trim();
                         }
-                        else if (blnZoomScan)
+                        else if (zoomScan)
                         {
-                            strScanTypeName = "Zoom-MS";
+                            scanTypeName = "Zoom-MS";
 
                         }
                         else
                         {
                             // Normal, plain MS or MSn scan
 
-                            if (intMSLevel > 1)
+                            if (msLevel > 1)
                             {
-                                strScanTypeName = "MSn";
+                                scanTypeName = "MSn";
                             }
                             else
                             {
-                                strScanTypeName = "MS";
+                                scanTypeName = "MS";
                             }
 
-                            if (ScanIsFTMS(strFilterText))
+                            if (ScanIsFTMS(filterText))
                             {
                                 // HMS or HMSn scan
-                                strScanTypeName = "H" + strScanTypeName;
+                                scanTypeName = "H" + scanTypeName;
                             }
 
-                            if (intMSLevel > 1 && strCollisionMode.Length > 0)
+                            if (msLevel > 1 && collisionMode.Length > 0)
                             {
-                                strScanTypeName = CapitalizeCollisionMode(strCollisionMode) + "-" + strScanTypeName;
+                                scanTypeName = CapitalizeCollisionMode(collisionMode) + "-" + scanTypeName;
                             }
 
                         }
@@ -1534,40 +1532,40 @@ namespace ThermoRawFileReader
                         switch (eMRMScanType)
                         {
                             case MRMScanTypeConstants.MRMQMS:
-                                if (ContainsText(strFilterText, MRM_Q1MS_TEXT, 1))
+                                if (ContainsText(filterText, MRM_Q1MS_TEXT, 1))
                                 {
-                                    strScanTypeName = MRM_Q1MS_TEXT.Trim();
+                                    scanTypeName = MRM_Q1MS_TEXT.Trim();
 
                                 }
-                                else if (ContainsText(strFilterText, MRM_Q3MS_TEXT, 1))
+                                else if (ContainsText(filterText, MRM_Q3MS_TEXT, 1))
                                 {
-                                    strScanTypeName = MRM_Q3MS_TEXT.Trim();
+                                    scanTypeName = MRM_Q3MS_TEXT.Trim();
                                 }
                                 else
                                 {
                                     // Unknown QMS mode
-                                    strScanTypeName = "MRM QMS";
+                                    scanTypeName = "MRM QMS";
                                 }
 
                                 break;
                             case MRMScanTypeConstants.SRM:
-                                if (strCollisionMode.Length > 0)
+                                if (collisionMode.Length > 0)
                                 {
-                                    strScanTypeName = strCollisionMode.ToUpper() + "-SRM";
+                                    scanTypeName = collisionMode.ToUpper() + "-SRM";
                                 }
                                 else
                                 {
-                                    strScanTypeName = "CID-SRM";
+                                    scanTypeName = "CID-SRM";
                                 }
 
                                 break;
 
                             case MRMScanTypeConstants.FullNL:
-                                strScanTypeName = "MRM_Full_NL";
+                                scanTypeName = "MRM_Full_NL";
 
                                 break;
                             default:
-                                strScanTypeName = "MRM";
+                                scanTypeName = "MRM";
                                 break;
                         }
 
@@ -1583,44 +1581,44 @@ namespace ThermoRawFileReader
                 // Ignore errors here
             }
 
-            return strScanTypeName;
+            return scanTypeName;
 
         }
 
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         private void GetTuneData()
         {
-            var intNumTuneData = 0;
-            mXRawFile.GetNumTuneData(ref intNumTuneData);
+            var numTuneData = 0;
+            mXRawFile.GetNumTuneData(ref numTuneData);
 
-            for (var intIndex = 0; intIndex <= intNumTuneData - 1; intIndex++)
+            for (var index = 0; index <= numTuneData - 1; index++)
             {
-                var intTuneLabelCount = 0;
+                var tuneLabelCount = 0;
                 object objLabels = null;
                 object objValues = null;
 
-                string strWarningMessage;
+                string msg;
                 try
                 {
                     if (!mCorruptMemoryEncountered)
                     {
-                        mXRawFile.GetTuneData(intIndex, ref objLabels, ref objValues, ref intTuneLabelCount);
+                        mXRawFile.GetTuneData(index, ref objLabels, ref objValues, ref tuneLabelCount);
                     }
 
                 }
                 catch (AccessViolationException)
                 {
-                    strWarningMessage = "Unable to load tune data; possibly a corrupt .Raw file";
-                    RaiseWarningMessage(strWarningMessage);
+                    msg = "Unable to load tune data; possibly a corrupt .Raw file";
+                    RaiseWarningMessage(msg);
                     break;
 
                 }
                 catch (Exception ex)
                 {
                     // Exception getting TuneData
-                    strWarningMessage = "Warning: Exception calling mXRawFile.GetTuneData for Index " + intIndex + ": " + ex.Message;
-                    RaiseWarningMessage(strWarningMessage);
-                    intTuneLabelCount = 0;
+                    msg = "Warning: Exception calling mXRawFile.GetTuneData for Index " + index + ": " + ex.Message;
+                    RaiseWarningMessage(msg);
+                    tuneLabelCount = 0;
 
                     if (ex.Message.ToLower().Contains("memory is corrupt"))
                     {
@@ -1630,30 +1628,30 @@ namespace ThermoRawFileReader
                 }
 
 
-                if (intTuneLabelCount > 0)
+                if (tuneLabelCount > 0)
                 {
-                    strWarningMessage = string.Empty;
+                    msg = string.Empty;
                     if (objLabels == null)
                     {
                         // .GetTuneData returned a non-zero count, but no parameter names; unable to continue
-                        strWarningMessage = "Warning: the GetTuneData function returned a positive tune parameter count but no parameter names";
+                        msg = "Warning: the GetTuneData function returned a positive tune parameter count but no parameter names";
                     }
                     else if (objValues == null)
                     {
                         // .GetTuneData returned parameter names, but objValues is nothing; unable to continue
-                        strWarningMessage = "Warning: the GetTuneData function returned tune parameter names but no tune values";
+                        msg = "Warning: the GetTuneData function returned tune parameter names but no tune values";
                     }
 
-                    if (strWarningMessage.Length > 0)
+                    if (msg.Length > 0)
                     {
-                        strWarningMessage += " (Tune Method " + (intIndex + 1) + ")";
-                        RaiseWarningMessage(strWarningMessage);
-                        intTuneLabelCount = 0;
+                        msg += " (Tune Method " + (index + 1) + ")";
+                        RaiseWarningMessage(msg);
+                        tuneLabelCount = 0;
                     }
 
                 }
 
-                if (intTuneLabelCount <= 0 || objLabels == null || objValues == null)
+                if (tuneLabelCount <= 0 || objLabels == null || objValues == null)
                 {
                     continue;
                 }
@@ -1662,39 +1660,39 @@ namespace ThermoRawFileReader
                 newTuneMethod.Clear();
 
 
-                var strTuneSettingNames =
+                var tuneSettingNames =
                     ((IEnumerable)objLabels).Cast<object>()
                         .Select(x => x.ToString())
                         .ToArray();
 
-                var strTuneSettingValues =
+                var tuneSettingValues =
                     ((IEnumerable)objValues).Cast<object>()
                         .Select(x => x.ToString())
                         .ToArray();
 
                 // Step through the names and store in the .Setting() arrays
-                var strTuneCategory = "General";
-                for (var intSettingIndex = 0; intSettingIndex <= intTuneLabelCount - 1; intSettingIndex++)
+                var tuneCategory = "General";
+                for (var settingIndex = 0; settingIndex <= tuneLabelCount - 1; settingIndex++)
                 {
-                    if (strTuneSettingValues[intSettingIndex].Length == 0 && !strTuneSettingNames[intSettingIndex].EndsWith(":"))
+                    if (tuneSettingValues[settingIndex].Length == 0 && !tuneSettingNames[settingIndex].EndsWith(":"))
                     {
                         // New category
-                        if (strTuneSettingNames[intSettingIndex].Length > 0)
+                        if (tuneSettingNames[settingIndex].Length > 0)
                         {
-                            strTuneCategory = string.Copy(strTuneSettingNames[intSettingIndex]);
+                            tuneCategory = string.Copy(tuneSettingNames[settingIndex]);
                         }
                         else
                         {
-                            strTuneCategory = "General";
+                            tuneCategory = "General";
                         }
                     }
                     else
                     {
                         var tuneMethodSetting = new udtTuneMethodSetting()
                         {
-                            Category = string.Copy(strTuneCategory),
-                            Name = strTuneSettingNames[intSettingIndex].TrimEnd(':'),
-                            Value = string.Copy(strTuneSettingValues[intSettingIndex])
+                            Category = string.Copy(tuneCategory),
+                            Name = tuneSettingNames[settingIndex].TrimEnd(':'),
+                            Value = string.Copy(tuneSettingValues[settingIndex])
                         };
 
                         newTuneMethod.Settings.Add(tuneMethodSetting);
@@ -1716,10 +1714,10 @@ namespace ThermoRawFileReader
 
         }
 
-        public static string MakeGenericFinniganScanFilter(string strFilterText)
+        public static string MakeGenericFinniganScanFilter(string filterText)
         {
 
-            // Will make a generic version of the FilterText in strFilterText
+            // Will make a generic version of the FilterText in filterText
             // Examples:
             // From                                                                 To
             // ITMS + c ESI Full ms [300.00-2000.00]                                ITMS + c ESI Full ms
@@ -1741,47 +1739,47 @@ namespace ThermoRawFileReader
             // + p NSI Q3MS [150.070-1500.000]                                      + p NSI Q3MS
             // c NSI Full cnl 162.053 [300.000-1200.000]                            c NSI Full cnl
 
-            var strGenericScanFilterText = "MS";
+            var genericScanFilterText = "MS";
 
             try
             {
-                if (!string.IsNullOrWhiteSpace(strFilterText))
+                if (!string.IsNullOrWhiteSpace(filterText))
                 {
 
-                    strGenericScanFilterText = string.Copy(strFilterText);
+                    genericScanFilterText = string.Copy(filterText);
 
                     // First look for and remove numbers between square brackets
-                    var intCharIndex = strGenericScanFilterText.IndexOf('[');
-                    if (intCharIndex > 0)
+                    var bracketIndex = genericScanFilterText.IndexOf('[');
+                    if (bracketIndex > 0)
                     {
-                        strGenericScanFilterText = strGenericScanFilterText.Substring(0, intCharIndex).TrimEnd(' ');
+                        genericScanFilterText = genericScanFilterText.Substring(0, bracketIndex).TrimEnd(' ');
                     }
                     else
                     {
-                        strGenericScanFilterText = strGenericScanFilterText.TrimEnd(' ');
+                        genericScanFilterText = genericScanFilterText.TrimEnd(' ');
                     }
 
-                    intCharIndex = strGenericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.InvariantCultureIgnoreCase);
-                    if (intCharIndex > 0)
+                    var fullCnlCharIndex = genericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.InvariantCultureIgnoreCase);
+                    if (fullCnlCharIndex > 0)
                     {
                         // MRM neutral loss
                         // Remove any text after MRM_FullNL_TEXT
-                        strGenericScanFilterText = strGenericScanFilterText.Substring(0, intCharIndex + MRM_FullNL_TEXT.Length).Trim();
-                        return strGenericScanFilterText;
+                        genericScanFilterText = genericScanFilterText.Substring(0, fullCnlCharIndex + MRM_FullNL_TEXT.Length).Trim();
+                        return genericScanFilterText;
                     }
 
                     // Replace any digits before any @ sign with a 0
-                    if (strGenericScanFilterText.IndexOf('@') > 0)
+                    if (genericScanFilterText.IndexOf('@') > 0)
                     {
-                        strGenericScanFilterText = mCollisionSpecs.Replace(strGenericScanFilterText, " 0@");
+                        genericScanFilterText = mCollisionSpecs.Replace(genericScanFilterText, " 0@");
                     }
                     else
                     {
                         // No @ sign; look for text of the form "ms2 748.371"
-                        var reMatch = mMzWithoutCE.Match(strGenericScanFilterText);
+                        var reMatch = mMzWithoutCE.Match(genericScanFilterText);
                         if (reMatch.Success)
                         {
-                            strGenericScanFilterText = strGenericScanFilterText.Substring(0, reMatch.Groups["MzValue"].Index)
+                            genericScanFilterText = genericScanFilterText.Substring(0, reMatch.Groups["MzValue"].Index)
                             ;
                         }
                     }
@@ -1792,14 +1790,14 @@ namespace ThermoRawFileReader
                 // Ignore errors
             }
 
-            return strGenericScanFilterText;
+            return genericScanFilterText;
 
         }
 
-        private static bool ScanIsFTMS(string strFilterText)
+        private static bool ScanIsFTMS(string filterText)
         {
 
-            return ContainsText(strFilterText, "FTMS");
+            return ContainsText(filterText, "FTMS");
 
         }
 
@@ -1876,22 +1874,22 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Examines strFilterText to validate that it is a supported MS1 scan type (MS, SIM, or MRMQMS, or SRM scan)
+        /// Examines filterText to validate that it is a supported MS1 scan type (MS, SIM, or MRMQMS, or SRM scan)
         /// </summary>
-        /// <param name="strFilterText"></param>
-        /// <param name="intMSLevel"></param>
-        /// <param name="blnSIMScan"></param>
-        /// <param name="eMRMScanType"></param>
-        /// <param name="blnZoomScan"></param>
-        /// <returns>True if strFilterText contains a known MS scan type</returns>
+        /// <param name="filterText"></param>
+        /// <param name="msLevel"></param>
+        /// <param name="simScan"></param>
+        /// <param name="mrmScanType"></param>
+        /// <param name="zoomScan"></param>
+        /// <returns>True if filterText contains a known MS scan type</returns>
         /// <remarks>Returns false for MSn scans (like ms2 or ms3)</remarks>
-        public static bool ValidateMSScan(string strFilterText, out int intMSLevel, out bool blnSIMScan, out MRMScanTypeConstants eMRMScanType, out bool blnZoomScan)
+        public static bool ValidateMSScan(string filterText, out int msLevel, out bool simScan, out MRMScanTypeConstants mrmScanType, out bool zoomScan)
         {
 
-            intMSLevel = 0;
-            blnSIMScan = false;
-            eMRMScanType = MRMScanTypeConstants.NotMRM;
-            blnZoomScan = false;
+            msLevel = 0;
+            simScan = false;
+            mrmScanType = MRMScanTypeConstants.NotMRM;
+            zoomScan = false;
 
             var ms1Tags = new List<string> {
 				FULL_MS_TEXT,
@@ -1908,51 +1906,51 @@ namespace ThermoRawFileReader
 				MS_ONLY_DZ_TEXT
 			};
 
-            if (ContainsAny(strFilterText, ms1Tags, 1))
+            if (ContainsAny(filterText, ms1Tags, 1))
             {
                 // This is really a Full MS scan
-                intMSLevel = 1;
-                blnSIMScan = false;
+                msLevel = 1;
+                simScan = false;
                 return true;
             }
 
-            if (ContainsText(strFilterText, SIM_MS_TEXT, 1))
+            if (ContainsText(filterText, SIM_MS_TEXT, 1))
             {
                 // This is really a SIM MS scan
-                intMSLevel = 1;
-                blnSIMScan = true;
+                msLevel = 1;
+                simScan = true;
                 return true;
             }
 
-            if (ContainsAny(strFilterText, zoomTags, 1))
+            if (ContainsAny(filterText, zoomTags, 1))
             {
-                intMSLevel = 1;
-                blnZoomScan = true;
+                msLevel = 1;
+                zoomScan = true;
                 return true;
             }
 
-            if (ContainsText(strFilterText, MS_ONLY_PZ_MS2_TEXT, 1))
+            if (ContainsText(filterText, MS_ONLY_PZ_MS2_TEXT, 1))
             {
                 // Technically, this should have MSLevel = 2, but that would cause a bunch of problems elsewhere in MASIC
                 // Thus, we'll pretend it's MS1
-                intMSLevel = 1;
-                blnZoomScan = true;
+                msLevel = 1;
+                zoomScan = true;
                 return true;
             }
 
-            eMRMScanType = DetermineMRMScanType(strFilterText);
-            switch (eMRMScanType)
+            mrmScanType = DetermineMRMScanType(filterText);
+            switch (mrmScanType)
             {
                 case MRMScanTypeConstants.MRMQMS:
-                    intMSLevel = 1;
+                    msLevel = 1;
                     // ToDo: Add support for TSQ MRMQMS data
                     return true;
                 case MRMScanTypeConstants.SRM:
-                    intMSLevel = 2;
+                    msLevel = 2;
                     // ToDo: Add support for TSQ SRM data
                     return true;
                 case MRMScanTypeConstants.FullNL:
-                    intMSLevel = 2;
+                    msLevel = 2;
                     // ToDo: Add support for TSQ Full NL data
                     return true;
                 default:
@@ -1965,70 +1963,70 @@ namespace ThermoRawFileReader
         /// Obtain the mass and intensity list for the specified scan
         /// </summary>
         /// <param name="scan"></param>
-        /// <param name="dblMZList"></param>
-        /// <param name="dblIntensityList"></param>
+        /// <param name="mzList"></param>
+        /// <param name="intensityList"></param>
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] dblMZList, out double[] dblIntensityList, ref udtScanHeaderInfoType udtScanInfo)
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo)
         {
             const int intMaxNumberOfPeaks = 0;
-            const bool blnCentroid = false;
-            return GetScanData(scan, out dblMZList, out dblIntensityList, intMaxNumberOfPeaks, blnCentroid);
+            const bool centroidData = false;
+            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
         }
 
         /// <summary>
         /// Obtain the mass and intensity list for the specified scan
         /// </summary>
         /// <param name="scan"></param>
-        /// <param name="dblMZList"></param>
-        /// <param name="dblIntensityList"></param>
+        /// <param name="mzList"></param>
+        /// <param name="intensityList"></param>
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] dblMZList, out double[] dblIntensityList, ref udtScanHeaderInfoType udtScanInfo, bool blnCentroid)
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo, bool centroidData)
         {
             const int intMaxNumberOfPeaks = 0;
-            return GetScanData(scan, out dblMZList, out dblIntensityList, intMaxNumberOfPeaks, blnCentroid);
+            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
         }
 
         /// <summary>
         /// Obtain the mass and intensity list for the specified scan
         /// </summary>
         /// <param name="scan"></param>
-        /// <param name="dblMZList"></param>
-        /// <param name="dblIntensityList"></param>
+        /// <param name="mzList"></param>
+        /// <param name="intensityList"></param>
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
         /// <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] dblMZList, out double[] dblIntensityList, out udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks)
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks)
         {
-            const bool blnCentroid = false;
+            const bool centroidData = false;
             udtScanInfo = new udtScanHeaderInfoType();
-            return GetScanData(scan, out dblMZList, out dblIntensityList, intMaxNumberOfPeaks, blnCentroid);
+            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
         }
 
         /// <summary>
         /// Obtain the mass and intensity list for the specified scan
         /// </summary>
         /// <param name="scan"></param>
-        /// <param name="dblMZList"></param>
-        /// <param name="dblIntensityList"></param>
+        /// <param name="mzList"></param>
+        /// <param name="intensityList"></param>
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
         /// <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
-        /// <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] dblMZList, out double[] dblIntensityList, out udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks, bool blnCentroid)
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks, bool centroidData)
         {
             udtScanInfo = new udtScanHeaderInfoType();
-            return GetScanData(scan, out dblMZList, out dblIntensityList, intMaxNumberOfPeaks, blnCentroid);
+            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
         }
 
         /// <summary>
@@ -2042,8 +2040,8 @@ namespace ThermoRawFileReader
         public override int GetScanData(int scanNumber, out double[] mzList, out double[] intensityList)
         {
             const int intMaxNumberOfPeaks = 0;
-            const bool blnCentroid = false;
-            return GetScanData(scanNumber, out mzList, out intensityList, intMaxNumberOfPeaks, blnCentroid);
+            const bool centroidData = false;
+            return GetScanData(scanNumber, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
         }
 
         /// <summary>
@@ -2065,47 +2063,47 @@ namespace ThermoRawFileReader
         /// Obtain the mass and intensity for the specified scan
         /// </summary>
         /// <param name="scan">Scan number</param>
-        /// <param name="dblMZList">Output array of mass values</param>
-        /// <param name="dblIntensityList">Output array of intensity values (parallel to mzList)</param>
-        /// <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
-        /// <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+        /// <param name="mzList">Output array of mass values</param>
+        /// <param name="intensityList">Output array of intensity values (parallel to mzList)</param>
+        /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
+        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        public int GetScanData(int scan, out double[] dblMZList, out double[] dblIntensityList, int intMaxNumberOfPeaks, bool blnCentroid)
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks, bool centroidData)
         {
 
-            double[,] dblMassIntensityPairs;
+            double[,] massIntensityPairs;
 
-            var dataCount = GetScanData2D(scan, out dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid);
+            var dataCount = GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks, centroidData);
 
             try
             {
                 if (dataCount <= 0)
                 {
-                    dblMZList = new double[0];
-                    dblIntensityList = new double[0];
+                    mzList = new double[0];
+                    intensityList = new double[0];
                     return 0;
                 }
 
-                if (dblMassIntensityPairs.GetUpperBound(1) + 1 < dataCount)
+                if (massIntensityPairs.GetUpperBound(1) + 1 < dataCount)
                 {
-                    dataCount = dblMassIntensityPairs.GetUpperBound(1) + 1;
+                    dataCount = massIntensityPairs.GetUpperBound(1) + 1;
                 }
 
-                dblMZList = new double[dataCount];
-                dblIntensityList = new double[dataCount];
+                mzList = new double[dataCount];
+                intensityList = new double[dataCount];
                 var sortRequired = false;
 
                 for (var intIndex = 0; intIndex <= dataCount - 1; intIndex++)
                 {
-                    dblMZList[intIndex] = dblMassIntensityPairs[0, intIndex];
-                    dblIntensityList[intIndex] = dblMassIntensityPairs[1, intIndex];
+                    mzList[intIndex] = massIntensityPairs[0, intIndex];
+                    intensityList[intIndex] = massIntensityPairs[1, intIndex];
 
                     // Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z, 
                     // we have observed a few cases in certain scans of certain datasets that points with 
                     // similar m/z values are swapped and ths slightly out of order
                     // The following if statement checks for this
-                    if ((intIndex > 0 && dblMZList[intIndex] < dblMZList[intIndex - 1]))
+                    if ((intIndex > 0 && mzList[intIndex] < mzList[intIndex - 1]))
                     {
                         sortRequired = true;
                     }
@@ -2114,14 +2112,14 @@ namespace ThermoRawFileReader
 
                 if (sortRequired)
                 {
-                    Array.Sort(dblMZList, dblIntensityList);
+                    Array.Sort(mzList, intensityList);
                 }
 
             }
             catch
             {
-                dblMZList = new double[0];
-                dblIntensityList = new double[0];
+                mzList = new double[0];
+                intensityList = new double[0];
                 dataCount = -1;
             }
 
@@ -2133,53 +2131,53 @@ namespace ThermoRawFileReader
         /// Obtain the mass and intensity for the specified scan
         /// </summary>
         /// <param name="scan"></param>
-        /// <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+        /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        public int GetScanData2D(int scan, out double[,] dblMassIntensityPairs)
+        public int GetScanData2D(int scan, out double[,] massIntensityPairs)
         {
-            return GetScanData2D(scan, out dblMassIntensityPairs, intMaxNumberOfPeaks: 0, blnCentroid: false);
+            return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks: 0, centroidData: false);
         }
 
         /// <summary>
         /// Obtain the mass and intensity for the specified scan
         /// </summary>
         /// <param name="scan"></param>
-        /// <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+        /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="intMaxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
+        /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [Obsolete("This method is deprecated, use GetScanData2D that does not use udtScanHeaderInfo")]
-        public int GetScanData2D(int scan, out double[,] dblMassIntensityPairs, ref udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks)
+        public int GetScanData2D(int scan, out double[,] massIntensityPairs, ref udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks)
         {
-            return GetScanData2D(scan, out dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid: false);
+            return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks, centroidData: false);
         }
 
         /// <summary>
         /// Obtain the mass and intensity for the specified scan
         /// </summary>
         /// <param name="scan"></param>
-        /// <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
-        /// <param name="intMaxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
+        /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+        /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        public int GetScanData2D(int scan, out double[,] dblMassIntensityPairs, int intMaxNumberOfPeaks)
+        public int GetScanData2D(int scan, out double[,] massIntensityPairs, int maxNumberOfPeaks)
         {
-            return GetScanData2D(scan, out dblMassIntensityPairs, intMaxNumberOfPeaks, blnCentroid: false);
+            return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks, centroidData: false);
         }
 
         /// <summary>
         /// Obtain the mass and intensity for the specified scan
         /// </summary>
         /// <param name="scan"></param>
-        /// <param name="dblMassIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
-        /// <param name="intMaxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
-        /// <param name="blnCentroid">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+        /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+        /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
+        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
-        public int GetScanData2D(int scan, out double[,] dblMassIntensityPairs, int intMaxNumberOfPeaks, bool blnCentroid)
+        public int GetScanData2D(int scan, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
 
             // Note that we're using function attribute HandleProcessCorruptedStateExceptions
@@ -2207,14 +2205,14 @@ namespace ThermoRawFileReader
             {
                 if (mXRawFile == null)
                 {
-                    dblMassIntensityPairs = new double[0, 0];
+                    massIntensityPairs = new double[0, 0];
                     return -1;
                 }
 
                 // Make sure the MS controller is selected
                 if (!SetMSController())
                 {
-                    dblMassIntensityPairs = new double[0, 0];
+                    massIntensityPairs = new double[0, 0];
                     return -1;
                 }
 
@@ -2222,44 +2220,44 @@ namespace ThermoRawFileReader
                 // Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
                 var intIntensityCutoffValue = 0;
 
-                if (intMaxNumberOfPeaks < 0)
-                    intMaxNumberOfPeaks = 0;
+                if (maxNumberOfPeaks < 0)
+                    maxNumberOfPeaks = 0;
 
-                if (blnCentroid && scanInfo.IsCentroided)
+                if (centroidData && scanInfo.IsCentroided)
                 {
                     // The scan data is already centroided; don't try to re-centroid
-                    blnCentroid = false;
+                    centroidData = false;
                 }
 
-                if (blnCentroid && scanInfo.IsFTMS)
+                if (centroidData && scanInfo.IsFTMS)
                 {
                     // Centroiding is enabled, and the dataset was acquired on an Orbitrap, Exactive, or FTMS instrument 
 
-                    object massIntensityLabels = null;
+                    object massIntensityLabelsObject = null;
                     object labelFlags = null;
 
-                    mXRawFile.GetLabelData(ref massIntensityLabels, ref labelFlags, scan);
+                    mXRawFile.GetLabelData(ref massIntensityLabelsObject, ref labelFlags, scan);
 
-                    var dblMassIntensityLabels = (double[,])massIntensityLabels;
+                    var massIntensityLabels = (double[,])massIntensityLabelsObject;
 
-                    dataCount = dblMassIntensityLabels.GetLength(1);
+                    dataCount = massIntensityLabels.GetLength(1);
 
                     if (dataCount > 0)
                     {
-                        dblMassIntensityPairs = new double[2, dataCount];
+                        massIntensityPairs = new double[2, dataCount];
 
                         for (var i = 0; i <= dataCount - 1; i++)
                         {
-                            dblMassIntensityPairs[0, i] = dblMassIntensityLabels[0, i];
+                            massIntensityPairs[0, i] = massIntensityLabels[0, i];
                             // m/z
-                            dblMassIntensityPairs[1, i] = dblMassIntensityLabels[1, i];
+                            massIntensityPairs[1, i] = massIntensityLabels[1, i];
                             // Intensity
                         }
 
                     }
                     else
                     {
-                        dblMassIntensityPairs = new double[0, 0];
+                        massIntensityPairs = new double[0, 0];
                     }
 
                     // Dim byteFlags As Byte(,)
@@ -2278,30 +2276,30 @@ namespace ThermoRawFileReader
                     //			1032.56495			1032.6863		118
                     //			1513.7252			1513.9168		127
 
-                    int intCentroidResult;
-                    double dblCentroidPeakWidth = 0;
+                    int centroidResultFlag;
+                    double centroidPeakWidth = 0;
 
-                    if (blnCentroid)
+                    if (centroidData)
                     {
-                        intCentroidResult = 1;
+                        centroidResultFlag = 1;
                     }
                     else
                     {
-                        intCentroidResult = 0;
+                        centroidResultFlag = 0;
                     }
 
                     object massIntensityPairsList = null;
                     object peakList = null;
 
-                    mXRawFile.GetMassListFromScanNum(ref scan, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
+                    mXRawFile.GetMassListFromScanNum(ref scan, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, maxNumberOfPeaks, centroidResultFlag, centroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
 
                     if (dataCount > 0)
                     {
-                        dblMassIntensityPairs = (double[,])massIntensityPairsList;
+                        massIntensityPairs = (double[,])massIntensityPairsList;
                     }
                     else
                     {
-                        dblMassIntensityPairs = new double[0, 0];
+                        massIntensityPairs = new double[0, 0];
                     }
 
                 }
@@ -2323,7 +2321,7 @@ namespace ThermoRawFileReader
 
             }
 
-            dblMassIntensityPairs = new double[0, 0];
+            massIntensityPairs = new double[0, 0];
             return -1;
 
         }
@@ -2368,8 +2366,8 @@ namespace ThermoRawFileReader
 
                 if (!scanInfo.IsFTMS)
                 {
-                    var strWarningMessage = "Scan " + scan + " is not an FTMS scan; function GetScanLabelData cannot be used with this scan";
-                    RaiseWarningMessage(strWarningMessage);
+                    var msg = "Scan " + scan + " is not an FTMS scan; function GetScanLabelData cannot be used with this scan";
+                    RaiseWarningMessage(msg);
                     ftLabelData = new udtFTLabelInfoType[0];
                     return -1;
                 }
@@ -2489,8 +2487,8 @@ namespace ThermoRawFileReader
 
                 if (!scanInfo.IsFTMS)
                 {
-                    var strWarningMessage = "Scan " + scan + " is not an FTMS scan; function GetScanLabelData cannot be used with this scan";
-                    RaiseWarningMessage(strWarningMessage);
+                    var msg = "Scan " + scan + " is not an FTMS scan; function GetScanLabelData cannot be used with this scan";
+                    RaiseWarningMessage(msg);
                     massResolutionData = new udtMassPrecisionInfoType[0];
                     return -1;
                 }
@@ -2554,33 +2552,33 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="scanFirst"></param>
         /// <param name="scanLast"></param>
-        /// <param name="dblMassIntensityPairs"></param>
-        /// <param name="intMaxNumberOfPeaks"></param>
-        /// <param name="blnCentroid"></param>
+        /// <param name="massIntensityPairs"></param>
+        /// <param name="maxNumberOfPeaks"></param>
+        /// <param name="centroidData"></param>
         /// <returns>The number of data points</returns>
         /// <remarks></remarks>
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
-        public int GetScanDataSumScans(int scanFirst, int scanLast, out double[,] dblMassIntensityPairs, int intMaxNumberOfPeaks, bool blnCentroid)
+        public int GetScanDataSumScans(int scanFirst, int scanLast, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
 
             // Note that we're using function attribute HandleProcessCorruptedStateExceptions
             // to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
-            double dblCentroidPeakWidth = 0;
+            double centroidPeakWidth = 0;
             var dataCount = 0;
 
             try
             {
                 if (mXRawFile == null)
                 {
-                    dblMassIntensityPairs = new double[0, 0];
+                    massIntensityPairs = new double[0, 0];
                     return -1;
                 }
 
                 // Make sure the MS controller is selected
                 if (!SetMSController())
                 {
-                    dblMassIntensityPairs = new double[0, 0];
+                    massIntensityPairs = new double[0, 0];
                     return -1;
                 }
 
@@ -2610,14 +2608,14 @@ namespace ThermoRawFileReader
                 // Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
                 var intIntensityCutoffValue = 0;
 
-                if (intMaxNumberOfPeaks < 0)
-                    intMaxNumberOfPeaks = 0;
+                if (maxNumberOfPeaks < 0)
+                    maxNumberOfPeaks = 0;
 
                 // Warning: the masses reported by GetAverageMassList when centroiding are not properly calibrated and thus could be off by 0.3 m/z or more
                 // For an example, see function GetScanData2D above
 
                 int intCentroidResult;
-                if (blnCentroid)
+                if (centroidData)
                 {
                     intCentroidResult = 1;
                     // Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
@@ -2636,16 +2634,16 @@ namespace ThermoRawFileReader
                 object massIntensityPairsList = null;
                 object peakList = null;
 
-                mXRawFile.GetAverageMassList(ref scanFirst, ref scanLast, ref backgroundScan1First, ref backgroundScan1Last, ref backgroundScan2First, ref backgroundScan2Last, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, intMaxNumberOfPeaks,
-                        intCentroidResult, ref dblCentroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
+                mXRawFile.GetAverageMassList(ref scanFirst, ref scanLast, ref backgroundScan1First, ref backgroundScan1Last, ref backgroundScan2First, ref backgroundScan2Last, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, maxNumberOfPeaks,
+                        intCentroidResult, ref centroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
 
                 if (dataCount > 0)
                 {
-                    dblMassIntensityPairs = (double[,])massIntensityPairsList;
+                    massIntensityPairs = (double[,])massIntensityPairsList;
                 }
                 else
                 {
-                    dblMassIntensityPairs = new double[0, 0];
+                    massIntensityPairs = new double[0, 0];
                 }
 
                 return dataCount;
@@ -2665,7 +2663,7 @@ namespace ThermoRawFileReader
 
             }
 
-            dblMassIntensityPairs = new double[0, 0];
+            massIntensityPairs = new double[0, 0];
             return -1;
 
         }
@@ -2684,11 +2682,10 @@ namespace ThermoRawFileReader
             udtMRMInfo = InitializeMRMInfo();
         }
 
-        public sealed override bool OpenRawFile(string FileName)
+        public sealed override bool OpenRawFile(string filePath)
         {
             var intResult = 0;
-            var blnSuccess = false;
-
+            var success = false;
 
             try
             {
@@ -2702,50 +2699,50 @@ namespace ThermoRawFileReader
                     mXRawFile = (IXRawfile5)new MSFileReader_XRawfile();
                 }
 
-                mXRawFile.Open(FileName);
+                mXRawFile.Open(filePath);
                 mXRawFile.IsError(ref intResult);
                 // Unfortunately, .IsError() always returns 0, even if an error occurred
 
                 if (intResult == 0)
                 {
-                    mCachedFileName = FileName;
+                    mCachedFileName = filePath;
                     if (FillFileInfo())
                     {
 
                         if (mFileInfo.ScanStart == 0 && mFileInfo.ScanEnd == 0 && mFileInfo.VersionNumber == 0 && Math.Abs(mFileInfo.MassResolution - 0) < double.Epsilon && mFileInfo.InstModel == null)
                         {
                             // File actually didn't load correctly, since these shouldn't all be blank
-                            blnSuccess = false;
+                            success = false;
                         }
                         else
                         {
-                            blnSuccess = true;
+                            success = true;
                         }
                     }
                     else
                     {
-                        blnSuccess = false;
+                        success = false;
                     }
                 }
                 else
                 {
-                    blnSuccess = false;
+                    success = false;
                 }
 
             }
             catch (Exception)
             {
-                blnSuccess = false;
+                success = false;
             }
             finally
             {
-                if (!blnSuccess)
+                if (!success)
                 {
                     mCachedFileName = string.Empty;
                 }
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
