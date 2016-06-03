@@ -119,13 +119,54 @@ namespace ThermoRawFileReader
         #region "Structures"
         public struct udtParentIonInfoType
         {
+            /// <summary>
+            /// MS Level of the spectrum
+            /// </summary>
+            /// <remarks>1 for MS1 spectra, 2 for MS2, 3 for MS3</remarks>
             public int MSLevel;
+
+            /// <summary>
+            /// Parent ion m/z
+            /// </summary>
             public double ParentIonMZ;
+
+            /// <summary>
+            /// Collision mode
+            /// </summary>
+            /// <remarks>Examples: cid, etd, hcd, EThcD, ETciD</remarks>
             public string CollisionMode;
+
+            /// <summary>
+            /// Secondary collision mode
+            /// </summary>
+            /// <remarks>
+            /// For example, for filter string: ITMS + c NSI r d sa Full ms2 1143.72@etd120.55@cid20.00 [120.00-2000.00]
+            /// CollisionMode = ETciD
+            /// CollisionMode2 = cid
+            /// </remarks>
             public string CollisionMode2;
+
+            /// <summary>
+            /// Collision energy
+            /// </summary>
             public float CollisionEnergy;
+
+            /// <summary>
+            /// Secondary collision energy
+            /// </summary>
+            /// <remarks>
+            /// For example, for filter string: ITMS + c NSI r d sa Full ms2 1143.72@etd120.55@cid20.00 [120.00-2000.00]
+            /// CollisionEnergy = 120.55
+            /// CollisionEnergy2 = 20.0
+            /// </remarks>
             public float CollisionEnergy2;
+
+            /// <summary>
+            /// Activation type
+            /// </summary>
+            /// <remarks>Examples: CID, ETD, or HCD</remarks>
             public ActivationTypeConstants ActivationType;
+
             public void Clear()
             {
                 MSLevel = 1;
@@ -904,7 +945,13 @@ namespace ThermoRawFileReader
 
         }
 
-        public List<double> GetCollisionEnergy(int scan)
+        /// <summary>
+        /// Return un-normalized collision energies via call mXRawFile.GetCollisionEnergyForScanNum
+        /// </summary>
+        /// <param name="scan"></param>
+        /// <returns></returns>
+        [Obsolete("The collision energies reported by mXRawFile.GetCollisionEnergyForScanNum are not normalized and are thus not very useful")]
+        public List<double> GetCollisionEnergyUnnormalized(int scan)
         {
 
             var numMsOrders = 0;
@@ -932,6 +979,56 @@ namespace ThermoRawFileReader
             catch (Exception ex)
             {
                 var msg = "Error: Exception in GetCollisionEnergyUnnormalized: " + ex.Message;
+                RaiseErrorMessage(msg);
+            }
+
+            return collisionEnergies;
+
+        }
+
+        /// <summary>
+        /// Return the collision energy (or energies) for the given scan
+        /// </summary>
+        /// <param name="scan">Scan number</param>
+        /// <returns></returns>
+        public List<double> GetCollisionEnergy(int scan)
+        {
+
+            var collisionEnergies = new List<double>();
+
+            try
+            {
+                if (mXRawFile == null)
+                    return collisionEnergies;
+
+                clsScanInfo scanInfo;
+                GetScanInfo(scan, out scanInfo);
+
+                double parentIonMZ;
+                int msLevel;
+                string collisionMode;
+                List<udtParentIonInfoType> parentIons;
+
+                ExtractParentIonMZFromFilterText(scanInfo.FilterText, out parentIonMZ, out msLevel, out collisionMode, out parentIons);
+
+                foreach (var parentIon in parentIons)
+                {
+                    collisionEnergies.Add(parentIon.CollisionEnergy);
+
+                    if (parentIon.CollisionEnergy2 > 0)
+                    {
+                        // Filter text is of the form: ITMS + c NSI r d sa Full ms2 1143.72@etd120.55@cid20.00 [120.00-2000.00]
+                        // Data will be stored as
+                        // parentIon.CollisionEnergy = 120.55
+                        // parentIon.CollisionEnergy2 = 20.0
+                        collisionEnergies.Add(parentIon.CollisionEnergy2);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                var msg = "Error: Exception in GetCollisionEnergy: " + ex.Message;
                 RaiseErrorMessage(msg);
             }
 
