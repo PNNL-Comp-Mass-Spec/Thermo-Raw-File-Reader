@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using ThermoRawFileReader;
 
@@ -12,18 +13,304 @@ namespace RawFileReaderTests
         private const bool USE_REMOTE_PATHS = true;
 
         [Test]
+        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")]
+        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw")]
+        [TestCase(@"HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw")]
+        public void TestGetCollisionEnergy(string rawFileName)
+        {
+            // Keys in this Dictionary are filename, values are Collision Energies by scan
+            var expectedData = new Dictionary<string, Dictionary<int, List<double>>>();
+
+            var ce20 = new List<double>() { 20.00 };
+            var ce25 = new List<double>() { 25.00 };
+            var ce20_25 = new List<double>() { 20.00, 25.00 };
+
+            // Keys in this dictionary are scan number and values are collision energies
+            var file1Data = new Dictionary<int, List<double>> {
+                {2250, ce25},
+                {2251, ce25},
+                {2252, ce25},
+                {2253, new List<double>()},
+                {2254, ce25},
+                {2255, ce25},
+                {2256, ce25},
+                {2257, new List<double>()},
+                {2258, ce25},
+                {2259, ce25},
+                {2260, ce25}
+            };
+            expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
+
+            var file2Data = new Dictionary<int, List<double>> {
+                {39000, ce20},
+                {39001, ce20},
+                {39002, new List<double>()},
+                {39003, ce20},
+                {39004, ce20},
+                {39005, ce20},
+                {39006, ce20},
+                {39007, ce20_25},
+                {39008, ce20_25},
+                {39009, ce20},
+                {39010, ce20}
+            };
+            expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
+
+            var file3Data = new Dictionary<int, List<double>> {
+                {19000, ce20},
+                {19001, ce20_25},
+                {19002, ce20_25},
+                {19003, new List<double>()},
+                {19004, ce20},
+                {19005, ce20},
+                {19006, ce20},
+                {19007, ce20},
+                {19008, ce20_25},
+                {19009, ce20_25},
+                {19010, ce20}
+            };
+            expectedData.Add("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53", file3Data);
+
+            var dataFile = GetRawDataFile(rawFileName);
+
+            Dictionary<int, List<double>> collisionEnergiesThisFile;
+            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out collisionEnergiesThisFile))
+            {
+                Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+            }
+
+            var collisionEnergiesActual = new Dictionary<int, List<double>>();
+            var msLevelsActual = new Dictionary<int, int>();
+
+            using (var reader = new XRawFileIO(dataFile.FullName))
+            {
+                foreach(var scanNumber in collisionEnergiesThisFile.Keys)
+                {
+                    clsScanInfo scanInfo;
+                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+
+                    var collisionEnergiesThisScan = reader.GetCollisionEnergy(scanNumber);
+                    collisionEnergiesActual.Add(scanNumber, collisionEnergiesThisScan);
+
+                    msLevelsActual.Add(scanNumber, scanInfo.MSLevel);
+                }
+
+                Console.WriteLine("{0,-5} {1,-5} {2}", "Valid", "Scan", "Collision Energy");
+
+                foreach (var actualEnergiesOneScan in (from item in collisionEnergiesActual orderby item.Key select item))
+                {
+                    var scanNumber = actualEnergiesOneScan.Key;
+
+                    var expectedEnergies = collisionEnergiesThisFile[scanNumber];
+
+                    if (actualEnergiesOneScan.Value.Count == 0)
+                    {
+                        var msLevel = msLevelsActual[scanNumber];
+
+                        Assert.AreEqual(msLevel, 1,
+                                        "Scan {0} has no collision energies; should be msLevel 1 but is {1}",
+                                        scanNumber, msLevel);
+
+                        Console.WriteLine("{0,-5} {1,-5} {2}", true, scanNumber, "MS1 scan");
+                    }
+                    else
+                    {
+                        foreach (var actualEnergy in actualEnergiesOneScan.Value)
+                        {
+                            var isValid =
+                                expectedEnergies.Any(
+                                    expectedEnergy => Math.Abs(actualEnergy - expectedEnergy) < 0.00001);
+
+                            Console.WriteLine("{0,-5} {1,-5} {2}", isValid, scanNumber, actualEnergy.ToString("0.0"));
+
+                            Assert.IsTrue(isValid, "Unexpected collision energy {0} for scan {1}", actualEnergy, scanNumber);
+                        }
+                    }
+
+                    Assert.AreEqual(expectedEnergies.Count, actualEnergiesOneScan.Value.Count,
+                        "Collision energy count mismatch for scan {0}", scanNumber);
+                    
+                }
+
+            }
+        }
+
+        [Test]
         [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 3316)]
         [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 71147)]
         public void TestGetNumScans(string rawFileName, int expectedResult)
         {
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new ThermoRawFileReader.XRawFileIO(dataFile.FullName))
+            using (var reader = new XRawFileIO(dataFile.FullName))
             {
                 var scanCount = reader.GetNumScans();
 
                 Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
                 Assert.AreEqual(expectedResult, scanCount, "Scan count mismatch");
+            }
+        }
+
+        [Test]
+        [TestCase(@"B5_50uM_MS_r1.RAW", 1, 20, 20, 0)]
+        [TestCase(@"MNSLTFKK_ms.raw", 1, 88, 88, 0)]
+        [TestCase(@"QCShew200uL.raw", 4000, 4100, 101, 0)]
+        [TestCase(@"Wrighton_MT2_SPE_200avg_240k_neg_330-380.raw", 1, 200, 200, 0)]
+        [TestCase(@"1229_02blk1.raw", 6000, 6100, 77, 24)]
+        [TestCase(@"MCF7_histone_32_49B_400min_HCD_ETD_01172014_b.raw", 2300, 2400, 18, 83)]
+        [TestCase(@"lowdose_IMAC_iTRAQ1_PQDMSA.raw", 15000, 15100, 16, 85)]
+        [TestCase(@"MZ20150721blank2.raw", 1, 434, 62, 372)]
+        [TestCase(@"OG_CEPC_PU_22Oct13_Legolas_13-05-12.raw", 5000, 5100, 9, 92)]
+        [TestCase(@"blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900, 190, 211)]
+        [TestCase(@"HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw", 25200, 25600, 20, 381)]
+        [TestCase(@"MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 5900, 6000, 8, 93)]
+        [TestCase(@"IPA-blank-07_25Oct13_Gimli.raw", 1750, 1850, 101, 0)]
+        public void TestGetScanCountsByScanType(string rawFileName, int scanStart, int scanEnd, int expectedMS1, int expectedMS2)
+        {
+            // Keys in this Dictionary are filename, values are ScanCounts by collision mode, where the key is a Tuple of ScanType and FilterString
+            var expectedData = new Dictionary<string, Dictionary<Tuple<string, string>, int>>();
+
+            // Keys in this dictionary are scan type, values are a Dictionary of FilterString and the number of scans with that filter string
+            AddExpectedTupleAndCount(expectedData, "B5_50uM_MS_r1", "Q1MS", "+ c NSI Q1MS", 20);
+
+            AddExpectedTupleAndCount(expectedData, "MNSLTFKK_ms", "Q1MS", "+ p NSI Q1MS", 88);
+
+            AddExpectedTupleAndCount(expectedData, "QCShew200uL", "Q3MS", "+ c NSI Q3MS", 101);
+
+            AddExpectedTupleAndCount(expectedData, "Wrighton_MT2_SPE_200avg_240k_neg_330-380", "SIM ms", "FTMS - p NSI SIM ms", 200);
+
+            const string file5 = "1229_02blk1";
+            AddExpectedTupleAndCount(expectedData, file5, "MS", "ITMS + c NSI Full ms", 8);
+            AddExpectedTupleAndCount(expectedData, file5, "CID-MSn", "ITMS + c NSI d Full ms2 0@cid35.00", 24);
+            AddExpectedTupleAndCount(expectedData, file5, "SIM ms", "ITMS + p NSI SIM ms", 69);
+
+            const string file6 = "MCF7_histone_32_49B_400min_HCD_ETD_01172014_b";
+            AddExpectedTupleAndCount(expectedData, file6, "HMS", "FTMS + p NSI Full ms", 9);
+            AddExpectedTupleAndCount(expectedData, file6, "ETD-HMSn", "FTMS + p NSI d Full ms2 0@etd25.00", 46);
+            AddExpectedTupleAndCount(expectedData, file6, "HCD-HMSn", "FTMS + p NSI d Full ms2 0@hcd28.00", 37);
+            AddExpectedTupleAndCount(expectedData, file6, "SIM ms", "FTMS + p NSI d SIM ms", 9);
+
+            const string file7 = "lowdose_IMAC_iTRAQ1_PQDMSA";
+            AddExpectedTupleAndCount(expectedData, file7, "HMS", "FTMS + p NSI Full ms", 16);
+            AddExpectedTupleAndCount(expectedData, file7, "CID-MSn", "ITMS + c NSI d Full ms2 0@cid35.00", 43);
+            AddExpectedTupleAndCount(expectedData, file7, "PQD-MSn", "ITMS + c NSI d Full ms2 0@pqd22.00", 42);
+
+            const string file8 = "MZ20150721blank2";
+            AddExpectedTupleAndCount(expectedData, file8, "HMS", "FTMS + p NSI Full ms", 62);
+            AddExpectedTupleAndCount(expectedData, file8, "ETD-HMSn", "FTMS + p NSI d Full ms2 0@etd20.00", 186);
+            AddExpectedTupleAndCount(expectedData, file8, "ETD-HMSn", "FTMS + p NSI d Full ms2 0@etd25.00", 186);
+
+            const string file9 = "OG_CEPC_PU_22Oct13_Legolas_13-05-12";
+            AddExpectedTupleAndCount(expectedData, file9, "HMS", "FTMS + p NSI Full ms", 9);
+            AddExpectedTupleAndCount(expectedData, file9, "CID-MSn", "ITMS + c NSI d Full ms2 0@cid35.00", 46);
+            AddExpectedTupleAndCount(expectedData, file9, "ETD-MSn", "ITMS + c NSI d Full ms2 0@etd1000.00", 1);
+            AddExpectedTupleAndCount(expectedData, file9, "ETD-MSn", "ITMS + c NSI d Full ms2 0@etd333.33", 1);
+            AddExpectedTupleAndCount(expectedData, file9, "ETD-MSn", "ITMS + c NSI d Full ms2 0@etd400.00", 8);
+            AddExpectedTupleAndCount(expectedData, file9, "ETD-MSn", "ITMS + c NSI d Full ms2 0@etd500.00", 8);
+            AddExpectedTupleAndCount(expectedData, file9, "ETD-MSn", "ITMS + c NSI d Full ms2 0@etd666.67", 56);
+            AddExpectedTupleAndCount(expectedData, file9, "SA_ETD-MSn", "ITMS + c NSI d sa Full ms2 0@etd1000.00", 5);
+            AddExpectedTupleAndCount(expectedData, file9, "SA_ETD-MSn", "ITMS + c NSI d sa Full ms2 0@etd285.71", 1);
+            AddExpectedTupleAndCount(expectedData, file9, "SA_ETD-MSn", "ITMS + c NSI d sa Full ms2 0@etd333.33", 1);
+            AddExpectedTupleAndCount(expectedData, file9, "SA_ETD-MSn", "ITMS + c NSI d sa Full ms2 0@etd400.00", 14);
+            AddExpectedTupleAndCount(expectedData, file9, "SA_ETD-MSn", "ITMS + c NSI d sa Full ms2 0@etd500.00", 32);
+            AddExpectedTupleAndCount(expectedData, file9, "SA_ETD-MSn", "ITMS + c NSI d sa Full ms2 0@etd666.67", 260);
+
+            const string file10 = "blank_MeOH-3_18May16_Rainier_Thermo_10344958";
+            AddExpectedTupleAndCount(expectedData, file10, "HMS", "FTMS - p ESI Full ms", 190);
+            AddExpectedTupleAndCount(expectedData, file10, "CID-HMSn", "FTMS - c ESI d Full ms2 0@cid35.00", 207);
+            AddExpectedTupleAndCount(expectedData, file10, "CID-HMSn", "FTMS - c ESI d Full ms3 0@cid35.00 0@cid35.00", 4);
+
+            const string file11 = "HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53";
+            AddExpectedTupleAndCount(expectedData, file11, "HMS", "FTMS + p NSI Full ms", 20);
+            AddExpectedTupleAndCount(expectedData, file11, "CID-MSn", "ITMS + c NSI r d Full ms2 0@cid30.00", 231);
+            AddExpectedTupleAndCount(expectedData, file11, "ETciD-MSn", "ITMS + c NSI r d sa Full ms2 0@etd120.55@cid20.00", 46);
+            AddExpectedTupleAndCount(expectedData, file11, "ETciD-MSn", "ITMS + c NSI r d sa Full ms2 0@etd53.58@cid20.00", 4);
+            AddExpectedTupleAndCount(expectedData, file11, "ETD-MSn", "ITMS + c NSI r d Full ms2 0@etd120.55", 46);
+            AddExpectedTupleAndCount(expectedData, file11, "ETD-MSn", "ITMS + c NSI r d Full ms2 0@etd53.58", 4);
+            AddExpectedTupleAndCount(expectedData, file11, "EThcD-MSn", "ITMS + c NSI r d sa Full ms2 0@etd120.55@hcd20.00", 46);
+            AddExpectedTupleAndCount(expectedData, file11, "EThcD-MSn", "ITMS + c NSI r d sa Full ms2 0@etd53.58@hcd20.00", 4);
+
+            const string file12 = "MeOHBlank03POS_11May16_Legolas_HSS-T3_A925";
+            AddExpectedTupleAndCount(expectedData, file12, "HMS", "FTMS + p ESI Full ms", 8);
+            AddExpectedTupleAndCount(expectedData, file12, "CID-MSn", "ITMS + c ESI d Full ms2 0@cid35.00", 47);
+            AddExpectedTupleAndCount(expectedData, file12, "HCD-HMSn", "FTMS + c ESI d Full ms2 0@hcd30.00", 38);
+            AddExpectedTupleAndCount(expectedData, file12, "HCD-HMSn", "FTMS + c ESI d Full ms2 0@hcd35.00", 8);
+
+            AddExpectedTupleAndCount(expectedData, "IPA-blank-07_25Oct13_Gimli", "Zoom-MS", "ITMS + p NSI Z ms", 101);
+
+
+            var dataFile = GetRawDataFile(rawFileName);
+
+            using (var reader = new XRawFileIO(dataFile.FullName))
+            {
+                Console.WriteLine("Parsing scan headers for {0}", dataFile.Name);
+
+                var scanCountMS1 = 0;
+                var scanCountMS2 = 0;
+                var scanTypeCountsActual = new Dictionary<Tuple<string, string>, int>();
+
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    clsScanInfo scanInfo;
+                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+
+                    var scanType = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(scanInfo.FilterText);
+                    var genericScanFilter = XRawFileIO.MakeGenericFinniganScanFilter(scanInfo.FilterText);
+
+                    var scanTypeKey = new Tuple<string, string>(scanType, genericScanFilter);
+
+                    int observedScanCount;
+                    if (scanTypeCountsActual.TryGetValue(scanTypeKey, out observedScanCount))
+                    {
+                        scanTypeCountsActual[scanTypeKey] = observedScanCount + 1;
+                    }
+                    else
+                    {
+                        scanTypeCountsActual.Add(scanTypeKey, 1);
+                    }
+
+                    if (scanInfo.MSLevel > 1)
+                        scanCountMS2++;
+                    else
+                        scanCountMS1++;
+
+                }
+
+                Console.WriteLine("scanCountMS1={0}", scanCountMS1);
+                Console.WriteLine("scanCountMS2={0}", scanCountMS2);
+
+                Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+                Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+
+                Dictionary<Tuple<string, string>, int> expectedScanInfo;
+                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedScanInfo))
+                {
+                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                }
+                
+                Console.WriteLine("{0,-5} {1,5} {2}", "Valid", "Count", "ScanType");
+
+                foreach (var scanType in (from item in scanTypeCountsActual orderby item.Key select item))
+                {
+                    int expectedScanCount;
+                    if (expectedScanInfo.TryGetValue(scanType.Key, out expectedScanCount))
+                    {
+                        var isValid = scanType.Value == expectedScanCount;
+
+                        Console.WriteLine("{0,-5} {1,5} {2}", isValid, scanType.Value, scanType.Key);
+
+                        Assert.AreEqual(expectedScanCount, scanType.Value, "Scan type count mismatch");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Unexpected scan type found: {0}", scanType.Key);
+                        Assert.Fail("Unexpected scan type found: {0}", scanType.Key);
+                    }
+                }
             }
         }
 
@@ -110,12 +397,13 @@ namespace RawFileReaderTests
 
                 var scanCountMS1 = 0;
                 var scanCountMS2 = 0;
-                var fileDataWarned = false;
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanNumber, out scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
 
                     var scanSummary =
                         string.Format(
@@ -138,33 +426,138 @@ namespace RawFileReaderTests
                         scanCountMS1++;
 
                     Dictionary<int, string> expectedDataThisFile;
-                    if (expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
                     {
-
-                        string expectedScanSummary;
-                        if (expectedDataThisFile.TryGetValue(scanNumber, out expectedScanSummary))
-                        {
-                            Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary, "Scan summary mismatch, scan " + scanNumber);
-                        }
-
+                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                     }
-                    else
+                    
+                    string expectedScanSummary;
+                    if (expectedDataThisFile.TryGetValue(scanNumber, out expectedScanSummary))
                     {
-                        if (!fileDataWarned)
-                        {
-                            Console.WriteLine("Warning: not validating scan results for " + dataFile.Name);
-                            fileDataWarned = true;
-                        }
+                        Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
+                                        "Scan summary mismatch, scan " + scanNumber);
                     }
-
                 }
 
                 Console.WriteLine("scanCountMS1={0}", scanCountMS1);
                 Console.WriteLine("scanCountMS2={0}", scanCountMS2);
 
                 Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
-                Assert.AreEqual(expectedMS2, scanCountMS2, "MS1 scan count mismatch");
+                Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
             }
+        }
+
+        [Test]
+        [TestCase(@"B5_50uM_MS_r1.RAW", 1, 20)]
+        [TestCase(@"MNSLTFKK_ms.raw", 1, 88)]
+        [TestCase(@"QCShew200uL.raw", 4000, 4100)]
+        public void TestGetScanInfoMRM(string rawFileName, int scanStart, int scanEnd)
+        {
+            // Keys in this Dictionary are filename, values are the expected SIM scan counts
+            var expectedData = new Dictionary<string, KeyValuePair<string, int>>
+            {
+                {"B5_50uM_MS_r1", new KeyValuePair<string, int>("200.0_600.0_1000.0", 20)},
+                {"MNSLTFKK_ms", new KeyValuePair<string, int>("200.1_700.0_1200.0", 88)},
+                {"QCShew200uL", new KeyValuePair<string, int>("400.0_900.0_1400.0", 101)}
+            };
+
+            var dataFile = GetRawDataFile(rawFileName);
+
+            using (var reader = new XRawFileIO(dataFile.FullName))
+            {
+                Console.WriteLine("Examining MRM details in {0}", dataFile.Name);
+
+                var mrmRangeCountsActual = new Dictionary<string, int>();
+
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    clsScanInfo scanInfo;
+                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+
+                    foreach (var mrmRange in scanInfo.MRMInfo.MRMMassList)
+                    {
+                        var mrmRangeKey = 
+                            mrmRange.StartMass.ToString("0.0") + "_" + 
+                            mrmRange.CentralMass.ToString("0.0") + "_" + 
+                            mrmRange.EndMass.ToString("0.0");
+
+                        int observedScanCount;
+                        if (mrmRangeCountsActual.TryGetValue(mrmRangeKey, out observedScanCount))
+                        {
+                            mrmRangeCountsActual[mrmRangeKey] = observedScanCount + 1;
+                        }
+                        else
+                        {
+                            mrmRangeCountsActual.Add(mrmRangeKey, 1);
+                        }
+                    }
+
+                    Assert.IsTrue(mrmRangeCountsActual.Count == 1, "Found {0} MRM scan ranges; espected to only find 1", mrmRangeCountsActual.Count);
+                }
+
+                KeyValuePair<string, int> expectedMRMInfo;
+                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedMRMInfo))
+                {
+                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                }
+                
+                Console.WriteLine("{0,-5} {1,-5} {2}", "Valid", "Count", "MRMScanRange");
+
+                var mrmRangeActual = mrmRangeCountsActual.First();
+
+                if (expectedMRMInfo.Key == mrmRangeActual.Key)
+                {
+                    var isValid = mrmRangeActual.Value == expectedMRMInfo.Value;
+
+                    Console.WriteLine("{0,-5} {1,5} {2}", isValid, mrmRangeActual.Value, mrmRangeActual.Key);
+
+                    Assert.AreEqual(expectedMRMInfo.Value, mrmRangeActual.Value, "Scan type count mismatch");
+                }
+                else
+                {
+                    Console.WriteLine("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
+                    Assert.Fail("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
+                }
+                
+            }
+        }
+        
+        [Test]
+        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
+        public void TestGetScanInfoStruct(string rawFileName, int scanStart, int scanEnd)
+        {
+
+            var dataFile = GetRawDataFile(rawFileName);
+
+            using (var reader = new XRawFileIO(dataFile.FullName))
+            {
+
+                Console.WriteLine("Checking GetScanInfo initializing from a struct using {0}", dataFile.Name);
+
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    clsScanInfo scanInfo;
+                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+
+                    FinniganFileReaderBaseClass.udtScanHeaderInfoType scanInfoStruct;
+#pragma warning disable 618
+                    success = reader.GetScanInfo(scanNumber, out scanInfoStruct);
+#pragma warning restore 618
+                    Assert.IsTrue(success, "GetScanInfo (struct) returned false for scan " + scanNumber);
+
+                    Assert.AreEqual(scanInfoStruct.MSLevel, scanInfo.MSLevel);
+                    Assert.AreEqual(scanInfoStruct.IsCentroidScan, scanInfo.IsCentroided);
+                    Assert.AreEqual(scanInfoStruct.FilterText, scanInfo.FilterText);
+                    Assert.AreEqual(scanInfoStruct.BasePeakIntensity, scanInfo.BasePeakIntensity, 0.0001);
+                    Assert.AreEqual(scanInfoStruct.TotalIonCurrent, scanInfo.TotalIonCurrent, 0.0001);
+
+                }
+            }
+
         }
 
         [Test]
@@ -176,11 +569,11 @@ namespace RawFileReaderTests
 
             // Keys in this dictionary are the scan number of data being retrieved
             var file1Data = new Dictionary<int, Dictionary<string, string>> {
-                {1513, new Dictionary<string, string> {} },
-                {1514, new Dictionary<string, string> {} },
-                {1515, new Dictionary<string, string> {} },
-                {1516, new Dictionary<string, string> {} },
-                {1517, new Dictionary<string, string> {} }
+                {1513, new Dictionary<string, string>()},
+                {1514, new Dictionary<string, string>()},
+                {1515, new Dictionary<string, string>()},
+                {1516, new Dictionary<string, string>()},
+                {1517, new Dictionary<string, string>()}
             
             };
 
@@ -210,12 +603,12 @@ namespace RawFileReaderTests
 
 
             var file2Data = new Dictionary<int, Dictionary<string, string>> {
-                {16121, new Dictionary<string, string> {} },
-                {16122, new Dictionary<string, string> {} },
-                {16126, new Dictionary<string, string> {} },
-                {16131, new Dictionary<string, string> {} },
-                {16133, new Dictionary<string, string> {} },
-                {16141, new Dictionary<string, string> {} }
+                {16121, new Dictionary<string, string>()},
+                {16122, new Dictionary<string, string>()},
+                {16126, new Dictionary<string, string>()},
+                {16131, new Dictionary<string, string>()},
+                {16133, new Dictionary<string, string>()},
+                {16141, new Dictionary<string, string>()}
             
             };
 
@@ -261,8 +654,6 @@ namespace RawFileReaderTests
                                 "Scan", "Max#", "Centroid", "MzCount", "IntCount", 
                                 "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
 
-                var fileDataWarned = false;
-
                 for (var iteration = 1; iteration <= 4; iteration++)
                 {
                     int maxNumberOfPeaks;
@@ -294,13 +685,18 @@ namespace RawFileReaderTests
                         double[] mzList;
                         double[] intensityList;
 
-                        var success = reader.GetScanData(scanNumber, out mzList, out intensityList, maxNumberOfPeaks,
-                                                         centroidData);
+                        var dataPointsRead = reader.GetScanData(scanNumber, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
+
+                        Assert.IsTrue(dataPointsRead > 0, "GetScanData returned 0 for scan " + scanNumber);
+
+                        Assert.AreEqual(dataPointsRead, mzList.Length, "Data count mismatch vs. function return value");
 
                         var midPoint = (int)(intensityList.Length / 2f);
 
                         clsScanInfo scanInfo;
-                        reader.GetScanInfo(scanNumber, out scanInfo);
+                        var success = reader.GetScanInfo(scanNumber, out scanInfo);
+
+                        Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
 
                         var scanSummary =
                             string.Format(
@@ -313,30 +709,23 @@ namespace RawFileReaderTests
 
                  
                         Dictionary<int, Dictionary<string, string>> expectedDataThisFile;
-                        if (expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                        if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
                         {
-
-                            Dictionary<string, string> expectedDataByType;
-                            if (expectedDataThisFile.TryGetValue(scanNumber, out expectedDataByType))
-                            {
-                                var keySpec = maxNumberOfPeaks + "_" + centroidData;
-                                string expectedDataDetails;
-                                if (expectedDataByType.TryGetValue(keySpec, out expectedDataDetails))
-                                {
-                                    Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22), "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
-                                }
-                            }
-
+                            Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                         }
-                        else
+                        
+                        Dictionary<string, string> expectedDataByType;
+                        if (expectedDataThisFile.TryGetValue(scanNumber, out expectedDataByType))
                         {
-                            if (!fileDataWarned)
+                            var keySpec = maxNumberOfPeaks + "_" + centroidData;
+                            string expectedDataDetails;
+                            if (expectedDataByType.TryGetValue(keySpec, out expectedDataDetails))
                             {
-                                Console.WriteLine("Warning: not validating scan results for " + dataFile.Name);
-                                fileDataWarned = true;
+                                Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
+                                                "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
                             }
                         }
-
+                        
                         Console.WriteLine(scanSummary);
                     }
 
@@ -355,8 +744,8 @@ namespace RawFileReaderTests
 
             // Keys in this dictionary are the scan number of data being retrieved
             var file1Data = new Dictionary<int, Dictionary<string, string>> {
-                {1513, new Dictionary<string, string> {} },
-                {1514, new Dictionary<string, string> {} }            
+                {1513, new Dictionary<string, string>()},
+                {1514, new Dictionary<string, string>()}            
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -373,8 +762,8 @@ namespace RawFileReaderTests
 
 
             var file2Data = new Dictionary<int, Dictionary<string, string>> {
-                {16121, new Dictionary<string, string> {} },
-                {16122, new Dictionary<string, string> {} }            
+                {16121, new Dictionary<string, string>()},
+                {16122, new Dictionary<string, string>()}            
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -398,8 +787,6 @@ namespace RawFileReaderTests
                 Console.WriteLine("{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
                                 "Scan", "Max#", "Centroid", "DataCount", 
                                 "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
-
-                var fileDataWarned = false;
 
                 for (var iteration = 1; iteration <= 4; iteration++)
                 {
@@ -431,12 +818,17 @@ namespace RawFileReaderTests
 
                         double[,] dblMassIntensityPairs;
 
-                        var success = reader.GetScanData2D(scanNumber, out dblMassIntensityPairs, maxNumberOfPeaks, centroidData);
+                        var dataPointsRead = reader.GetScanData2D(scanNumber, out dblMassIntensityPairs, maxNumberOfPeaks, centroidData);
+
+                        Assert.IsTrue(dataPointsRead > 0, "GetScanData2D returned 0 for scan " + scanNumber);
 
                         clsScanInfo scanInfo;
-                        reader.GetScanInfo(scanNumber, out scanInfo);
+                        var success = reader.GetScanInfo(scanNumber, out scanInfo);
+
+                        Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
 
                         var lastIndex = dblMassIntensityPairs.GetUpperBound(1);
+
                         int dataCount;
 
                         if (maxNumberOfPeaks > 0)
@@ -477,6 +869,8 @@ namespace RawFileReaderTests
                             dataCount = lastIndex + 1;
                         }
 
+                        Assert.AreEqual(dataPointsRead, dataCount, "Data count mismatch vs. function return value");
+
                         var midPoint = (int)(dataCount / 2f);
 
                         var scanSummary =
@@ -490,27 +884,20 @@ namespace RawFileReaderTests
 
 
                         Dictionary<int, Dictionary<string, string>> expectedDataThisFile;
-                        if (expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                        if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
                         {
-
-                            Dictionary<string, string> expectedDataByType;
-                            if (expectedDataThisFile.TryGetValue(scanNumber, out expectedDataByType))
-                            {
-                                var keySpec = maxNumberOfPeaks + "_" + centroidData;
-                                string expectedDataDetails;
-                                if (expectedDataByType.TryGetValue(keySpec, out expectedDataDetails))
-                                {
-                                    Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22), "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
-                                }
-                            }
-
+                            Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                         }
-                        else
+                        
+                        Dictionary<string, string> expectedDataByType;
+                        if (expectedDataThisFile.TryGetValue(scanNumber, out expectedDataByType))
                         {
-                            if (!fileDataWarned)
+                            var keySpec = maxNumberOfPeaks + "_" + centroidData;
+                            string expectedDataDetails;
+                            if (expectedDataByType.TryGetValue(keySpec, out expectedDataDetails))
                             {
-                                Console.WriteLine("Warning: not validating scan results for " + dataFile.Name);
-                                fileDataWarned = true;
+                                Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
+                                                "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
                             }
                         }
 
@@ -531,7 +918,7 @@ namespace RawFileReaderTests
 
             // Keys in this dictionary are the start scan for summing
             var file1Data = new Dictionary<int, Dictionary<string, string>> {
-                {1513, new Dictionary<string, string> {} }        
+                {1513, new Dictionary<string, string>()}        
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -543,7 +930,7 @@ namespace RawFileReaderTests
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
             var file2Data = new Dictionary<int, Dictionary<string, string>> {
-                {16121, new Dictionary<string, string> {} }
+                {16121, new Dictionary<string, string>()}
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -563,8 +950,6 @@ namespace RawFileReaderTests
                 Console.WriteLine("{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
                                 "Scan", "Max#", "Centroid", "DataCount",
                                 "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
-
-                var fileDataWarned = false;
 
                 for (var iteration = 1; iteration <= 4; iteration++)
                 {
@@ -593,10 +978,14 @@ namespace RawFileReaderTests
 
                     double[,] dblMassIntensityPairs;
 
-                    var success = reader.GetScanDataSumScans(scanStart, scanEnd, out dblMassIntensityPairs, maxNumberOfPeaks, centroidData);
+                    var dataPointsRead = reader.GetScanDataSumScans(scanStart, scanEnd, out dblMassIntensityPairs, maxNumberOfPeaks, centroidData);
+
+                    Assert.IsTrue(dataPointsRead > 0, string.Format("GetScanDataSumScans returned 0 summing scans {0} to {1}", scanStart, scanEnd));
 
                     clsScanInfo scanInfo;
-                    reader.GetScanInfo(scanStart, out scanInfo);
+                    var success = reader.GetScanInfo(scanStart, out scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanStart);
 
                     var lastIndex = dblMassIntensityPairs.GetUpperBound(1);
                     int dataCount;
@@ -626,6 +1015,8 @@ namespace RawFileReaderTests
                         dataCount = lastIndex + 1;
                     }
 
+                    Assert.AreEqual(dataPointsRead, dataCount, "Data count mismatch vs. function return value");
+
                     var midPoint = (int)(dataCount / 2f);
 
                     var scanSummary =
@@ -639,27 +1030,20 @@ namespace RawFileReaderTests
 
 
                     Dictionary<int, Dictionary<string, string>> expectedDataThisFile;
-                    if (expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
                     {
-
-                        Dictionary<string, string> expectedDataByType;
-                        if (expectedDataThisFile.TryGetValue(scanStart, out expectedDataByType))
-                        {
-                            var keySpec = maxNumberOfPeaks + "_" + centroidData;
-                            string expectedDataDetails;
-                            if (expectedDataByType.TryGetValue(keySpec, out expectedDataDetails))
-                            {
-                                Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22), "Scan details mismatch, scan " + scanStart + ", keySpec " + keySpec);
-                            }
-                        }
-
+                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                     }
-                    else
+
+                    Dictionary<string, string> expectedDataByType;
+                    if (expectedDataThisFile.TryGetValue(scanStart, out expectedDataByType))
                     {
-                        if (!fileDataWarned)
+                        var keySpec = maxNumberOfPeaks + "_" + centroidData;
+                        string expectedDataDetails;
+                        if (expectedDataByType.TryGetValue(keySpec, out expectedDataDetails))
                         {
-                            Console.WriteLine("Warning: not validating scan results for " + dataFile.Name);
-                            fileDataWarned = true;
+                            Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
+                                            "Scan details mismatch, scan " + scanStart + ", keySpec " + keySpec);
                         }
                     }
 
@@ -721,18 +1105,28 @@ namespace RawFileReaderTests
                                   "Scan", "Count", "Mass", "Intensity",
                                   "Resolution", "Baseline", "Noise", "Charge", "ScanFilter");
 
-                var fileDataWarned = false;
-
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
 
                     // List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point
                     XRawFileIO.udtFTLabelInfoType[] ftLabelData;
 
-                    var success = reader.GetScanLabelData(scanNumber, out ftLabelData);
+                    var dataPointsRead = reader.GetScanLabelData(scanNumber, out ftLabelData);
+
+                    if (dataPointsRead == -1)
+                        Assert.AreEqual(0, ftLabelData.Length, "Data count mismatch vs. function return value");
+                    else
+                        Assert.AreEqual(dataPointsRead, ftLabelData.Length, "Data count mismatch vs. function return value");
 
                     clsScanInfo scanInfo;
-                    reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanStart);
+
+                    if (ftLabelData.Length == 0 && scanInfo.IsFTMS)
+                    {
+                        Assert.Fail("GetScanLabelData returned no data for FTMS scan " + scanNumber);
+                    }
 
                     string scanSummary;
 
@@ -765,23 +1159,16 @@ namespace RawFileReaderTests
                     }
 
                     Dictionary<int, string> expectedDataThisFile;
-                    if (expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
                     {
-
-                        string expectedScanSummary;
-                        if (expectedDataThisFile.TryGetValue(scanNumber, out expectedScanSummary))
-                        {
-                            Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary, "Scan summary mismatch, scan " + scanNumber);
-                        }
-
+                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                     }
-                    else
+                    
+                    string expectedScanSummary;
+                    if (expectedDataThisFile.TryGetValue(scanNumber, out expectedScanSummary))
                     {
-                        if (!fileDataWarned)
-                        {
-                            Console.WriteLine("Warning: not validating scan results for " + dataFile.Name);
-                            fileDataWarned = true;
-                        }
+                        Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
+                                        "Scan summary mismatch, scan " + scanNumber);
                     }
 
                     Console.WriteLine(scanSummary);
@@ -840,18 +1227,28 @@ namespace RawFileReaderTests
                                   "Scan", "Count", "Mass", "Intensity",
                                   "Resolution", "AccuracyMMU", "AccuracyPPM", "ScanFilter");
 
-                var fileDataWarned = false;
-
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
 
                     // List of Intensity, Mass, AccuracyMMU, AccuracyPPM, and Resolution for each data point
                     XRawFileIO.udtMassPrecisionInfoType[] massResolutionData;
 
-                    var success = reader.GetScanPrecisionData(scanNumber, out massResolutionData);
+                    var dataPointsRead = reader.GetScanPrecisionData(scanNumber, out massResolutionData);
+                    
+                    if (dataPointsRead == -1)
+                        Assert.AreEqual(0, massResolutionData.Length, "Data count mismatch vs. function return value");
+                    else
+                        Assert.AreEqual(dataPointsRead, massResolutionData.Length, "Data count mismatch vs. function return value");
 
                     clsScanInfo scanInfo;
-                    reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                    
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanStart);
+
+                    if (massResolutionData.Length == 0 && scanInfo.IsFTMS)
+                    {
+                        Assert.Fail("GetScanPrecisionData returned no data for FTMS scan " + scanNumber);                        
+                    }
 
                     string scanSummary;
 
@@ -882,23 +1279,16 @@ namespace RawFileReaderTests
                     }
 
                     Dictionary<int, string> expectedDataThisFile;
-                    if (expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
                     {
-
-                        string expectedScanSummary;
-                        if (expectedDataThisFile.TryGetValue(scanNumber, out expectedScanSummary))
-                        {
-                            Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary, "Scan summary mismatch, scan " + scanNumber);
-                        }
-
+                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                     }
-                    else
+                    
+                    string expectedScanSummary;
+                    if (expectedDataThisFile.TryGetValue(scanNumber, out expectedScanSummary))
                     {
-                        if (!fileDataWarned)
-                        {
-                            Console.WriteLine("Warning: not validating scan results for " + dataFile.Name);
-                            fileDataWarned = true;
-                        }
+                        Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
+                                        "Scan summary mismatch, scan " + scanNumber);
                     }
 
                     Console.WriteLine(scanSummary);
@@ -906,6 +1296,189 @@ namespace RawFileReaderTests
             }
         }
 
+        [Test]
+        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
+        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 45000, 45200)]
+        public void TestScanEventData(string rawFileName, int scanStart, int scanEnd)
+        {
+            // Keys in this Dictionary are filename, values are ScanCounts by event, where the key is a Tuple of EventName and EventValue
+            var expectedData = new Dictionary<string, Dictionary<Tuple<string, string>, int>>();
+
+            AddExpectedTupleAndCount(expectedData, "Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", "Resolution:", "Low", 101);
+            AddExpectedTupleAndCount(expectedData, "Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", "Scan Event:", "1", 25);
+            AddExpectedTupleAndCount(expectedData, "Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", "Scan Event:", "2", 25);
+            AddExpectedTupleAndCount(expectedData, "Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", "Scan Event:", "3", 25);
+            AddExpectedTupleAndCount(expectedData, "Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", "Scan Event:", "4", 26);
+
+            AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "Charge State:", "0", 21);
+            AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "Charge State:", "2", 134);
+            AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "Charge State:", "3", 30);
+            AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "Charge State:", "4", 14);
+            AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "Charge State:", "7", 1);
+            AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "Charge State:", "8", 1);
+            AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "MS2 Isolation Width:", "2.000", 180);
+            AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "MS2 Isolation Width:", "1200.000", 21);
+
+
+            var dataFile = GetRawDataFile(rawFileName);
+
+            Dictionary<Tuple<string, string>, int> expectedEventsThisFile;
+            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedEventsThisFile))
+            {
+                Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+            }
+
+            var eventsToCheck = (from item in expectedEventsThisFile select item.Key.Item1).Distinct().ToList();
+            var eventCountsActual = new Dictionary<Tuple<string, string>, int>();
+ 
+            using (var reader = new XRawFileIO(dataFile.FullName))
+            {
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    clsScanInfo scanInfo;
+                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+
+                    foreach (var eventName in eventsToCheck)
+                    {
+                        string eventValue;
+                        scanInfo.TryGetScanEvent(eventName, out eventValue);
+
+                        var eventKey = new Tuple<string, string>(eventName, eventValue);
+                        int scanCount;
+                        if (eventCountsActual.TryGetValue(eventKey, out scanCount))
+                        {
+                            eventCountsActual[eventKey] = scanCount + 1;
+                        }
+                        else
+                        {
+                            eventCountsActual.Add(eventKey, 1);
+                        }
+                    }
+
+                }
+
+                Console.WriteLine("{0,-5} {1,5} {2}", "Valid", "Count", "Event");
+
+                foreach (var observedEvent in (from item in eventCountsActual orderby item.Key select item))
+                {
+                    int expectedScanCount;
+                    if (expectedEventsThisFile.TryGetValue(observedEvent.Key, out expectedScanCount))                 
+                    {
+                        var isValid = observedEvent.Value == expectedScanCount;
+
+                        Console.WriteLine("{0,-5} {1,5} {2} {3}", isValid, observedEvent.Value, observedEvent.Key.Item1, observedEvent.Key.Item2);
+
+                        Assert.AreEqual(expectedScanCount, observedEvent.Value, "Event count mismatch");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
+                        Assert.Fail("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
+                    }
+                }
+
+            }
+        }
+
+        [Test]
+        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
+        [TestCase(@"MZ20150721blank2.raw", 300, 400)]
+        [TestCase(@"B5_50uM_MS_r1.RAW", 1, 20)]
+        public void TestScanInfoCopyFromStruct(string rawFileName, int scanStart, int scanEnd)
+        {
+
+            var dataFile = GetRawDataFile(rawFileName);
+
+            using (var reader = new XRawFileIO(dataFile.FullName))
+            {
+
+                Console.WriteLine("Checking clsScanInfo initializing from a struct using {0}", dataFile.Name);
+
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    clsScanInfo scanInfo;
+                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+
+                    var udtScanHeaderInfo = new FinniganFileReaderBaseClass.udtScanHeaderInfoType
+                    {
+                        MSLevel = scanInfo.MSLevel,
+                        EventNumber = scanInfo.EventNumber,
+                        SIMScan = scanInfo.SIMScan,
+                        MRMScanType = scanInfo.MRMScanType,
+                        ZoomScan = scanInfo.ZoomScan,
+                        NumPeaks = scanInfo.NumPeaks,
+                        RetentionTime = scanInfo.RetentionTime,
+                        LowMass = scanInfo.LowMass,
+                        HighMass = scanInfo.HighMass,
+                        TotalIonCurrent = scanInfo.TotalIonCurrent,
+                        BasePeakMZ = scanInfo.BasePeakMZ,
+                        BasePeakIntensity = scanInfo.BasePeakIntensity,
+                        FilterText = scanInfo.FilterText,
+                        ParentIonMZ = scanInfo.ParentIonMZ,
+                        ActivationType = scanInfo.ActivationType,
+                        CollisionMode = scanInfo.CollisionMode,
+                        IonMode = scanInfo.IonMode,
+                        MRMInfo = scanInfo.MRMInfo,
+                        NumChannels = scanInfo.NumChannels,
+                        UniformTime = scanInfo.UniformTime,
+                        Frequency = scanInfo.Frequency,
+                        IsCentroidScan = scanInfo.IsCentroided,
+                        ScanEventNames = new string[scanInfo.ScanEvents.Count],
+                        ScanEventValues = new string[scanInfo.ScanEvents.Count],
+                        StatusLogNames = new string[scanInfo.StatusLog.Count],
+                        StatusLogValues = new string[scanInfo.StatusLog.Count]
+                    };
+
+                    var targetIndex = 0;
+                    foreach (var scanEvent in scanInfo.ScanEvents)
+                    {
+                        udtScanHeaderInfo.ScanEventNames[targetIndex] = scanEvent.Key;
+                        udtScanHeaderInfo.ScanEventValues[targetIndex] = scanEvent.Value;
+                        targetIndex++;
+                    }
+
+                    targetIndex = 0;
+                    foreach (var scanEvent in scanInfo.StatusLog)
+                    {
+                        udtScanHeaderInfo.StatusLogNames[targetIndex] = scanEvent.Key;
+                        udtScanHeaderInfo.StatusLogValues[targetIndex] = scanEvent.Value;
+                        targetIndex++;
+                    }
+
+                    var scanInfoFromStruct = new clsScanInfo(scanInfo.ScanNumber, udtScanHeaderInfo);
+
+                    Assert.AreEqual(scanInfoFromStruct.MSLevel, scanInfo.MSLevel);
+                    Assert.AreEqual(scanInfoFromStruct.IsCentroided, scanInfo.IsCentroided);
+                    Assert.AreEqual(scanInfoFromStruct.FilterText, scanInfo.FilterText);
+                    Assert.AreEqual(scanInfoFromStruct.BasePeakIntensity, scanInfo.BasePeakIntensity, 0.0001);
+                    Assert.AreEqual(scanInfoFromStruct.TotalIonCurrent, scanInfo.TotalIonCurrent, 0.0001);
+
+                }
+            }
+
+        }
+
+        private void AddExpectedTupleAndCount(
+            IDictionary<string, Dictionary<Tuple<string, string>, int>> expectedData,
+            string fileName,
+            string tupleKey1,
+            string tupleKey2,
+            int scanCount)
+                {
+
+            Dictionary<Tuple<string, string>, int> expectedScanInfo;
+            if (!expectedData.TryGetValue(fileName, out expectedScanInfo))
+            {
+                expectedScanInfo = new Dictionary<Tuple<string, string>, int>();
+                expectedData.Add(fileName, expectedScanInfo);
+            }
+
+            expectedScanInfo.Add(new Tuple<string, string>(tupleKey1, tupleKey2), scanCount);
+        }
 
         private FileInfo GetRawDataFile(string rawFileName)
         {

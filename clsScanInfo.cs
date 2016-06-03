@@ -272,7 +272,6 @@ namespace ThermoRawFileReader
         /// <remarks></remarks>
         public clsScanInfo(int scan, FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfo) : this(scan)
         {
-
             CopyFromStruct(udtScanHeaderInfo);
         }
 

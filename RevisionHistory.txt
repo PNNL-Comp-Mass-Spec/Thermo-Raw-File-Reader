@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 2.0.5997; June 2, 2016
+	- Add new data-specific unit tests
+
 Version 2.0.5995; May 31, 2016
 	- Port to C#
 	- Change the namespace and DLL name to ThermoRawFileReader
