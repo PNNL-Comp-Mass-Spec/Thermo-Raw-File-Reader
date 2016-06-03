@@ -21,53 +21,55 @@ namespace RawFileReaderTests
             // Keys in this Dictionary are filename, values are Collision Energies by scan
             var expectedData = new Dictionary<string, Dictionary<int, List<double>>>();
 
-            var ce20 = new List<double>() { 20.00 };
-            var ce25 = new List<double>() { 25.00 };
-            var ce20_25 = new List<double>() { 20.00, 25.00 };
+            var ce30 = new List<double> { 30.00 };
+            var ce45 = new List<double> { 45.00 };
+            var ce20_120 = new List<double> { 20.00, 120.550003 };
+            var ce120 = new List<double> { 120.550003 };
+            var ms1Scan = new List<double>();
 
             // Keys in this dictionary are scan number and values are collision energies
             var file1Data = new Dictionary<int, List<double>> {
-                {2250, ce25},
-                {2251, ce25},
-                {2252, ce25},
-                {2253, new List<double>()},
-                {2254, ce25},
-                {2255, ce25},
-                {2256, ce25},
-                {2257, new List<double>()},
-                {2258, ce25},
-                {2259, ce25},
-                {2260, ce25}
+                {2250, ce45},
+                {2251, ce45},
+                {2252, ce45},
+                {2253, ms1Scan},
+                {2254, ce45},
+                {2255, ce45},
+                {2256, ce45},
+                {2257, ms1Scan},
+                {2258, ce45},
+                {2259, ce45},
+                {2260, ce45}
             };
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
             var file2Data = new Dictionary<int, List<double>> {
-                {39000, ce20},
-                {39001, ce20},
-                {39002, new List<double>()},
-                {39003, ce20},
-                {39004, ce20},
-                {39005, ce20},
-                {39006, ce20},
-                {39007, ce20_25},
-                {39008, ce20_25},
-                {39009, ce20},
-                {39010, ce20}
+                {39000, ce30},
+                {39001, ce30},
+                {39002, ms1Scan},
+                {39003, ce30},
+                {39004, ce30},
+                {39005, ce30},
+                {39006, ce120},
+                {39007, ce20_120},
+                {39008, ce20_120},
+                {39009, ce30},
+                {39010, ce30}
             };
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
 
             var file3Data = new Dictionary<int, List<double>> {
-                {19000, ce20},
-                {19001, ce20_25},
-                {19002, ce20_25},
-                {19003, new List<double>()},
-                {19004, ce20},
-                {19005, ce20},
-                {19006, ce20},
-                {19007, ce20},
-                {19008, ce20_25},
-                {19009, ce20_25},
-                {19010, ce20}
+                {19000, ce120},
+                {19001, ce20_120},
+                {19002, ce20_120},
+                {19003, ms1Scan},
+                {19004, ce30},
+                {19005, ce30},
+                {19006, ce30},
+                {19007, ce120},
+                {19008, ce20_120},
+                {19009, ce20_120},
+                {19010, ce30}
             };
             expectedData.Add("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53", file3Data);
 
@@ -119,18 +121,16 @@ namespace RawFileReaderTests
                     {
                         foreach (var actualEnergy in actualEnergiesOneScan.Value)
                         {
-                            var isValid =
-                                expectedEnergies.Any(
-                                    expectedEnergy => Math.Abs(actualEnergy - expectedEnergy) < 0.00001);
+                            var isValid = expectedEnergies.Any(expectedEnergy => Math.Abs(actualEnergy - expectedEnergy) < 0.00001);
 
-                            Console.WriteLine("{0,-5} {1,-5} {2}", isValid, scanNumber, actualEnergy.ToString("0.0"));
+                            Console.WriteLine("{0,-5} {1,-5} {2}", isValid, scanNumber, actualEnergy.ToString("0.00"));
 
-                            Assert.IsTrue(isValid, "Unexpected collision energy {0} for scan {1}", actualEnergy, scanNumber);
+                            Assert.IsTrue(isValid, "Unexpected collision energy {0} for scan {1}", actualEnergy.ToString("0.00"), scanNumber);
                         }
                     }
 
-                    Assert.AreEqual(expectedEnergies.Count, actualEnergiesOneScan.Value.Count,
-                        "Collision energy count mismatch for scan {0}", scanNumber);
+                    Assert.AreEqual(expectedEnergies.Count, actualEnergiesOneScan.Value.Count, 
+                                    "Collision energy count mismatch for scan {0}", scanNumber);
                     
                 }
 
