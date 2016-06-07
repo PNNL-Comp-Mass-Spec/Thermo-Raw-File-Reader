@@ -13,10 +13,10 @@ namespace RawFileReaderTests
         private const bool USE_REMOTE_PATHS = true;
 
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")]
-        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw")]
-        [TestCase(@"HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw")]
-        [TestCase(@"MZ0210MnxEF889ETD.raw")]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw")]
+        [TestCase("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw")]
+        [TestCase("MZ0210MnxEF889ETD.raw")]
         public void TestGetCollisionEnergy(string rawFileName)
         {
             // Keys in this Dictionary are filename, values are Collision Energies by scan
@@ -172,11 +172,11 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900, 190, 211, 0, 0)]
-        [TestCase(@"Corrupt_Qc_Shew_13_04_pt1_a_5Sep13_Cougar_13-06-14.raw", 500, 600, 0, 0, 500, 600)]
-        [TestCase(@"Corrupt_QC_Shew_07_03_pt25_e_6Apr08_Falcon_Fst-75-1.raw", 500, 600, 0, 0, 500, 600)]
+        [TestCase("blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900, 190, 211, 0, 0)]
+        [TestCase("Corrupt_Qc_Shew_13_04_pt1_a_5Sep13_Cougar_13-06-14.raw", 500, 600, 0, 0, 500, 600)]
+        [TestCase("Corrupt_QC_Shew_07_03_pt25_e_6Apr08_Falcon_Fst-75-1.raw", 500, 600, 0, 0, 500, 600)]
         // This file causes .NET to become unstable and aborts the unit tests
-        // [TestCase(@"Corrupt_Scans6920-7021_AID_STM_013_101104_06_LTQ_16Nov04_Earth_0904-8.raw", 6900, 7050, 10, 40, 6920, 7021)]
+        // [TestCase("Corrupt_Scans6920-7021_AID_STM_013_101104_06_LTQ_16Nov04_Earth_0904-8.raw", 6900, 7050, 10, 40, 6920, 7021)]
         public void TestCorruptDataHandling(
             string rawFileName,
             int scanStart,
@@ -291,8 +291,8 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 3316)]
-        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 71147)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 3316)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 71147)]
         public void TestGetNumScans(string rawFileName, int expectedResult)
         {
             var dataFile = GetRawDataFile(rawFileName);
@@ -307,19 +307,19 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"B5_50uM_MS_r1.RAW", 1, 20, 20, 0)]
-        [TestCase(@"MNSLTFKK_ms.raw", 1, 88, 88, 0)]
-        [TestCase(@"QCShew200uL.raw", 4000, 4100, 101, 0)]
-        [TestCase(@"Wrighton_MT2_SPE_200avg_240k_neg_330-380.raw", 1, 200, 200, 0)]
-        [TestCase(@"1229_02blk1.raw", 6000, 6100, 77, 24)]
-        [TestCase(@"MCF7_histone_32_49B_400min_HCD_ETD_01172014_b.raw", 2300, 2400, 18, 83)]
-        [TestCase(@"lowdose_IMAC_iTRAQ1_PQDMSA.raw", 15000, 15100, 16, 85)]
-        [TestCase(@"MZ20150721blank2.raw", 1, 434, 62, 372)]
-        [TestCase(@"OG_CEPC_PU_22Oct13_Legolas_13-05-12.raw", 5000, 5100, 9, 92)]
-        [TestCase(@"blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900, 190, 211)]
-        [TestCase(@"HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw", 25200, 25600, 20, 381)]
-        [TestCase(@"MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 5900, 6000, 8, 93)]
-        [TestCase(@"IPA-blank-07_25Oct13_Gimli.raw", 1750, 1850, 101, 0)]
+        [TestCase("B5_50uM_MS_r1.RAW", 1, 20, 20, 0)]
+        [TestCase("MNSLTFKK_ms.raw", 1, 88, 88, 0)]
+        [TestCase("QCShew200uL.raw", 4000, 4100, 101, 0)]
+        [TestCase("Wrighton_MT2_SPE_200avg_240k_neg_330-380.raw", 1, 200, 200, 0)]
+        [TestCase("1229_02blk1.raw", 6000, 6100, 77, 24)]
+        [TestCase("MCF7_histone_32_49B_400min_HCD_ETD_01172014_b.raw", 2300, 2400, 18, 83)]
+        [TestCase("lowdose_IMAC_iTRAQ1_PQDMSA.raw", 15000, 15100, 16, 85)]
+        [TestCase("MZ20150721blank2.raw", 1, 434, 62, 372)]
+        [TestCase("OG_CEPC_PU_22Oct13_Legolas_13-05-12.raw", 5000, 5100, 9, 92)]
+        [TestCase("blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900, 190, 211)]
+        [TestCase("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw", 25200, 25600, 20, 381)]
+        [TestCase("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 5900, 6000, 8, 93)]
+        [TestCase("IPA-blank-07_25Oct13_Gimli.raw", 1750, 1850, 101, 0)]
         public void TestGetScanCountsByScanType(string rawFileName, int scanStart, int scanEnd, int expectedMS1, int expectedMS2)
         {
             // Keys in this Dictionary are filename, values are ScanCounts by collision mode, where the key is a Tuple of ScanType and FilterString
@@ -468,8 +468,8 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521, 3, 6)]
-        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165, 3, 42)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521, 3, 6)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165, 3, 42)]
         public void TestGetScanInfo(string rawFileName, int scanStart, int scanEnd, int expectedMS1, int expectedMS2)
         {
             var expectedData = new Dictionary<string, Dictionary<int, string>>();
@@ -622,9 +622,9 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"B5_50uM_MS_r1.RAW", 1, 20)]
-        [TestCase(@"MNSLTFKK_ms.raw", 1, 88)]
-        [TestCase(@"QCShew200uL.raw", 4000, 4100)]
+        [TestCase("B5_50uM_MS_r1.RAW", 1, 20)]
+        [TestCase("MNSLTFKK_ms.raw", 1, 88)]
+        [TestCase("QCShew200uL.raw", 4000, 4100)]
         public void TestGetScanInfoMRM(string rawFileName, int scanStart, int scanEnd)
         {
             // Keys in this Dictionary are filename, values are the expected SIM scan counts
@@ -699,7 +699,7 @@ namespace RawFileReaderTests
         }
         
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
         public void TestGetScanInfoStruct(string rawFileName, int scanStart, int scanEnd)
         {
 
@@ -735,8 +735,8 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521)]
-        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165)]
         public void TestGetScanData(string rawFileName, int scanStart, int scanEnd)
         {
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
@@ -913,8 +913,8 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1514)]
-        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16122)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1514)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16122)]
         public void TestGetScanData2D(string rawFileName, int scanStart, int scanEnd)
         {
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
@@ -1087,8 +1087,8 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521)]
-        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165)]
         public void TestGetScanDataSumScans(string rawFileName, int scanStart, int scanEnd)
         {
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
@@ -1234,8 +1234,8 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1514)]
-        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16142)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1514)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16142)]
         public void TestGetScanLabelData(string rawFileName, int scanStart, int scanEnd)
         {
             var expectedData = new Dictionary<string, Dictionary<int, string>>();
@@ -1358,8 +1358,8 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1514)]
-        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16142)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1514)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16142)]
         public void TestGetScanPrecisionData(string rawFileName, int scanStart, int scanEnd)
         {
             var expectedData = new Dictionary<string, Dictionary<int, string>>();
@@ -1480,8 +1480,8 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
-        [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 45000, 45200)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 45000, 45200)]
         public void TestScanEventData(string rawFileName, int scanStart, int scanEnd)
         {
             // Keys in this Dictionary are filename, values are ScanCounts by event, where the key is a Tuple of EventName and EventValue
@@ -1566,9 +1566,9 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
-        [TestCase(@"MZ20150721blank2.raw", 300, 400)]
-        [TestCase(@"B5_50uM_MS_r1.RAW", 1, 20)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
+        [TestCase("MZ20150721blank2.raw", 300, 400)]
+        [TestCase("B5_50uM_MS_r1.RAW", 1, 20)]
         public void TestScanInfoCopyFromStruct(string rawFileName, int scanStart, int scanEnd)
         {
 
@@ -1678,8 +1678,9 @@ namespace RawFileReaderTests
 
             if (!dataFile.Exists)
             {
-                Console.WriteLine("File not found: " + dataFile.FullName);
-                Assert.Fail("File not found: " + dataFile.FullName);
+                var msg = "File not found: " + dataFile.FullName;
+                Console.WriteLine(msg);
+                Assert.Fail(msg);
             }
 
             return dataFile;
