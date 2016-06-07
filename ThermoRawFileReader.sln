@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermoRawFileReaderDLL", "ThermoRawFileReaderDLL.csproj", "{9A814C6C-BD10-4CE3-BD68-BB4774FB10A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermoRawFileReader", "ThermoRawFileReader.csproj", "{9A814C6C-BD10-4CE3-BD68-BB4774FB10A8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermoRawFileReaderUnitTests", "UnitTests\ThermoRawFileReaderUnitTests.csproj", "{ACADABB8-BF64-4FED-9157-E44BE88F9D1C}"
 EndProject
