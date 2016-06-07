@@ -16,6 +16,7 @@ namespace RawFileReaderTests
         [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")]
         [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw")]
         [TestCase(@"HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw")]
+        [TestCase(@"MZ0210MnxEF889ETD.raw")]
         public void TestGetCollisionEnergy(string rawFileName)
         {
             // Keys in this Dictionary are filename, values are Collision Energies by scan
@@ -28,7 +29,8 @@ namespace RawFileReaderTests
             var ms1Scan = new List<double>();
 
             // Keys in this dictionary are scan number and values are collision energies
-            var file1Data = new Dictionary<int, List<double>> {
+            var file1Data = new Dictionary<int, List<double>>
+            {
                 {2250, ce45},
                 {2251, ce45},
                 {2252, ce45},
@@ -43,7 +45,8 @@ namespace RawFileReaderTests
             };
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-            var file2Data = new Dictionary<int, List<double>> {
+            var file2Data = new Dictionary<int, List<double>>
+            {
                 {39000, ce30},
                 {39001, ce30},
                 {39002, ms1Scan},
@@ -58,7 +61,8 @@ namespace RawFileReaderTests
             };
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
 
-            var file3Data = new Dictionary<int, List<double>> {
+            var file3Data = new Dictionary<int, List<double>>
+            {
                 {19000, ce120},
                 {19001, ce20_120},
                 {19002, ce20_120},
@@ -73,6 +77,15 @@ namespace RawFileReaderTests
             };
             expectedData.Add("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53", file3Data);
 
+            var file4Data = new Dictionary<int, List<double>>
+            {
+                {1, ce30},
+                {2, ce30}
+
+            };
+            expectedData.Add("MZ0210MnxEF889ETD", file4Data);
+
+
             var dataFile = GetRawDataFile(rawFileName);
 
             Dictionary<int, List<double>> collisionEnergiesThisFile;
@@ -81,22 +94,29 @@ namespace RawFileReaderTests
                 Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
             }
 
+            // Keys are scan number, values are the list of collision energies
             var collisionEnergiesActual = new Dictionary<int, List<double>>();
+
+            // Keys are scan number, values are msLevel
             var msLevelsActual = new Dictionary<int, int>();
 
+            // Keys are scan number, values are the ActivationType, for example cid, etd, hcd
+            var activationTypesActual = new Dictionary<int, string>();
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
-                foreach(var scanNumber in collisionEnergiesThisFile.Keys)
+                foreach (var scanNumber in collisionEnergiesThisFile.Keys)
                 {
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanNumber, out scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
                     var collisionEnergiesThisScan = reader.GetCollisionEnergy(scanNumber);
                     collisionEnergiesActual.Add(scanNumber, collisionEnergiesThisScan);
 
                     msLevelsActual.Add(scanNumber, scanInfo.MSLevel);
+
+                    activationTypesActual.Add(scanNumber, scanInfo.ActivationType.ToString());
                 }
 
                 Console.WriteLine("{0,-5} {1,-5} {2}", "Valid", "Scan", "Collision Energy");
@@ -107,15 +127,25 @@ namespace RawFileReaderTests
 
                     var expectedEnergies = collisionEnergiesThisFile[scanNumber];
 
+                    var activationTypes = string.Join(", ", activationTypesActual[scanNumber]);
+
                     if (actualEnergiesOneScan.Value.Count == 0)
                     {
                         var msLevel = msLevelsActual[scanNumber];
 
-                        Assert.AreEqual(msLevel, 1,
-                                        "Scan {0} has no collision energies; should be msLevel 1 but is {1}",
-                                        scanNumber, msLevel);
+                        if (msLevel != 1)
+                        {
+                            var msg = string.Format(
+                                "Scan {0} has no collision energies, which should only be true for spectra with msLevel=1. This scan has msLevel={1} and activationType={2}",
+                                scanNumber, msLevel, activationTypes);
+                            Console.WriteLine(msg);
 
-                        Console.WriteLine("{0,-5} {1,-5} {2}", true, scanNumber, "MS1 scan");
+                            Assert.Fail(msg);
+                        }
+                        else
+                        {
+                            Console.WriteLine("{0,-5} {1,-5} {2}", true, scanNumber, "MS1 scan");
+                        }
                     }
                     else
                     {
@@ -129,9 +159,13 @@ namespace RawFileReaderTests
                         }
                     }
 
-                    Assert.AreEqual(expectedEnergies.Count, actualEnergiesOneScan.Value.Count, 
-                                    "Collision energy count mismatch for scan {0}", scanNumber);
-                    
+                    if (expectedEnergies.Count != actualEnergiesOneScan.Value.Count)
+                    {
+                        var msg = string.Format("Collision energy count mismatch for scan {0}", scanNumber);
+                        Console.WriteLine(msg);
+                        Assert.AreEqual(expectedEnergies.Count, actualEnergiesOneScan.Value.Count, msg);
+                    }
+
                 }
 
             }
@@ -256,7 +290,7 @@ namespace RawFileReaderTests
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanNumber, out scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
                     var scanType = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(scanInfo.FilterText);
                     var genericScanFilter = XRawFileIO.MakeGenericFinniganScanFilter(scanInfo.FilterText);
@@ -291,7 +325,7 @@ namespace RawFileReaderTests
                 {
                     Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                 }
-                
+
                 Console.WriteLine("{0,-5} {1,5} {2}", "Valid", "Count", "ScanType");
 
                 foreach (var scanType in (from item in scanTypeCountsActual orderby item.Key select item))
@@ -322,65 +356,69 @@ namespace RawFileReaderTests
             var expectedData = new Dictionary<string, Dictionary<int, string>>();
 
             // Keys in this dictionary are the scan number whose metadata is being retrieved
-            var file1Data = new Dictionary<int, string> {
-                {1513, "1 1   851 44.57 400 2000 6.3E+8 1089.978 1.2E+7     0.00 CID       Positive True False 11 79 + c ESI Full..."},
-                {1514, "2 2   109 44.60 230 1780 5.0E+6  528.128 7.2E+5   884.41 CID   cid Positive True False 11 79 + c d Full m..."},
-                {1515, "2 3   290 44.63 305 2000 2.6E+7 1327.414 6.0E+6  1147.67 CID   cid Positive True False 11 79 + c d Full m..."},
-                {1516, "2 4   154 44.66 400 2000 7.6E+5 1251.554 3.7E+4  1492.90 CID   cid Positive True False 11 79 + c d Full m..."},
-                {1517, "1 1   887 44.69 400 2000 8.0E+8 1147.613 1.0E+7     0.00 CID       Positive True False 11 79 + c ESI Full..."},
-                {1518, "2 2   190 44.71 380 2000 4.6E+6 1844.618 2.7E+5  1421.21 CID   cid Positive True False 11 79 + c d Full m..."},
-                {1519, "2 3   165 44.74 380 2000 6.0E+6 1842.547 6.9E+5  1419.24 CID   cid Positive True False 11 79 + c d Full m..."},
-                {1520, "2 4   210 44.77 265 2000 1.5E+6 1361.745 4.2E+4  1014.93 CID   cid Positive True False 11 79 + c d Full m..."},
-                {1521, "1 1   860 44.80 400 2000 6.9E+8 1126.627 2.9E+7     0.00 CID       Positive True False 11 79 + c ESI Full..."}
+            var file1Data = new Dictionary<int, string>
+            {
+                {1513, "1 1   851 44.57 400 2000 6.3E+8 1089.978 1.2E+7     0.00 CID       Positive True False 11 79   1.50 + c ESI Full..."},
+                {1514, "2 2   109 44.60 230 1780 5.0E+6  528.128 7.2E+5   884.41 CID   cid Positive True False 11 79  28.96 + c d Full m..."},
+                {1515, "2 3   290 44.63 305 2000 2.6E+7 1327.414 6.0E+6  1147.67 CID   cid Positive True False 11 79  14.13 + c d Full m..."},
+                {1516, "2 4   154 44.66 400 2000 7.6E+5 1251.554 3.7E+4  1492.90 CID   cid Positive True False 11 79 123.30 + c d Full m..."},
+                {1517, "1 1   887 44.69 400 2000 8.0E+8 1147.613 1.0E+7     0.00 CID       Positive True False 11 79   1.41 + c ESI Full..."},
+                {1518, "2 2   190 44.71 380 2000 4.6E+6 1844.618 2.7E+5  1421.21 CID   cid Positive True False 11 79  40.91 + c d Full m..."},
+                {1519, "2 3   165 44.74 380 2000 6.0E+6 1842.547 6.9E+5  1419.24 CID   cid Positive True False 11 79  37.84 + c d Full m..."},
+                {1520, "2 4   210 44.77 265 2000 1.5E+6 1361.745 4.2E+4  1014.93 CID   cid Positive True False 11 79  96.14 + c d Full m..."},
+                {1521, "1 1   860 44.80 400 2000 6.9E+8 1126.627 2.9E+7     0.00 CID       Positive True False 11 79   1.45 + c ESI Full..."}
             };
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-            var file2Data = new Dictionary<int, string> {
-                {16121, "1 1 45876 47.68 350 1550 1.9E+9  503.565 3.4E+8     0.00 CID       Positive False True 46 219 FTMS + p NSI..."},
-                {16122, "2 2  4124 47.68 106  817 1.6E+6  550.309 2.1E+5   403.22 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16123, "2 2  6484 47.68 143 1627 5.5E+5  506.272 4.9E+4   538.84 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16124, "2 2  8172 47.68 208 2000 7.8E+5  737.530 7.0E+4   776.27 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16125, "2 2  5828 47.68 120 1627 2.1E+5  808.486 2.2E+4   538.84 ETD   etd Positive True False 46 219 ITMS + c NSI..."},
-                {16126, "2 2  6228 47.68 120 1627 1.4E+5  536.209 9.0E+3   538.84 ETD ETciD Positive True False 46 219 ITMS + c NSI..."},
-                {16127, "2 2  7180 47.68 120 1627 1.3E+5  808.487 1.4E+4   538.84 ETD EThcD Positive True False 46 219 ITMS + c NSI..."},
-                {16128, "2 2  7980 47.69 225 1682 4.4E+5  805.579 2.3E+4   835.88 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16129, "2 2  7700 47.69 266 1986 3.4E+5  938.679 2.9E+4   987.89 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16130, "2 2  5180 47.69 110  853 2.7E+5  411.977 1.2E+4   421.26 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16131, "2 2   436 47.69 120 1986 2.1E+4  984.504 9.5E+3   987.89 ETD   etd Positive True False 46 219 ITMS + c NSI..."},
-                {16132, "2 2  2116 47.69 120  853 1.2E+4  421.052 6.8E+2   421.26 ETD   etd Positive True False 46 219 ITMS + c NSI..."},
-                {16133, "2 2  2444 47.70 120  853 1.5E+4  421.232 1.2E+3   421.26 ETD ETciD Positive True False 46 219 ITMS + c NSI..."},
-                {16134, "2 2  2948 47.70 120  853 1.4E+4  838.487 7.5E+2   421.26 ETD EThcD Positive True False 46 219 ITMS + c NSI..."},
-                {16135, "2 2   508 47.70 120 1986 2.1E+4  984.498 9.2E+3   987.89 ETD ETciD Positive True False 46 219 ITMS + c NSI..."},
-                {16136, "2 2   948 47.71 120 1986 2.3E+4  984.491 9.4E+3   987.89 ETD EThcD Positive True False 46 219 ITMS + c NSI..."},
-                {16137, "2 2  9580 47.71 336 2000 3.5E+5 1536.038 4.7E+3  1241.01 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16138, "2 2  7604 47.72 235 1760 2.9E+5  826.095 2.5E+4   874.84 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16139, "2 2   972 47.72 120 1760 1.6E+4  875.506 2.1E+3   874.84 ETD   etd Positive True False 46 219 ITMS + c NSI..."},
-                {16140, "2 2  1596 47.72 120 1760 1.8E+4 1749.846 2.0E+3   874.84 ETD ETciD Positive True False 46 219 ITMS + c NSI..."},
-                {16141, "2 2  2124 47.72 120 1760 1.6E+4  874.664 1.6E+3   874.84 ETD EThcD Positive True False 46 219 ITMS + c NSI..."},
-                {16142, "1 1 51976 47.73 350 1550 1.3E+9  503.565 1.9E+8     0.00 CID       Positive False True 46 219 FTMS + p NSI..."},
-                {16143, "2 2  5412 47.73 128  981 6.5E+5  444.288 6.4E+4   485.28 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16144, "2 2  4300 47.73 101 1561 5.0E+5  591.309 4.0E+4   387.66 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16145, "2 2  6740 47.73 162 1830 4.0E+5  567.912 2.8E+4   606.62 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16146, "2 2  4788 47.73 99  770 1.9E+5  532.308 3.4E+4   379.72 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16147, "2 2  6708 47.74 120 1830 3.8E+5  603.095 3.1E+4   606.62 ETD   etd Positive True False 46 219 ITMS + c NSI..."},
-                {16148, "2 2  7260 47.74 120 1830 1.5E+5  603.076 1.3E+4   606.62 ETD ETciD Positive True False 46 219 ITMS + c NSI..."},
-                {16149, "2 2  9172 47.74 120 1830 1.6E+5  603.027 1.1E+4   606.62 ETD EThcD Positive True False 46 219 ITMS + c NSI..."},
-                {16150, "2 2  5204 47.74 95 1108 3.8E+5  418.536 1.2E+5   365.88 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16151, "2 2  5636 47.75 146 1656 2.8E+5  501.523 4.3E+4   548.54 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16152, "2 2  9572 47.75 328 2000 1.8E+5  848.497 2.2E+3  1210.30 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16153, "2 2  5004 47.75 120 1656 1.3E+5  548.396 1.3E+4   548.54 ETD   etd Positive True False 46 219 ITMS + c NSI..."},
-                {16154, "2 2  4732 47.75 120 1656 4.2E+4  548.450 4.2E+3   548.54 ETD ETciD Positive True False 46 219 ITMS + c NSI..."},
-                {16155, "2 2  6228 47.76 120 1656 4.2E+4  550.402 3.6E+3   548.54 ETD EThcD Positive True False 46 219 ITMS + c NSI..."},
-                {16156, "2 2  9164 47.76 324 2000 1.5E+5 1491.872 1.0E+4  1197.57 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16157, "2 2  5916 47.76 124  950 2.2E+5  420.689 2.2E+4   469.71 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16158, "2 2  5740 47.76 306 2000 1.3E+5 1100.042 3.5E+3  1132.02 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16159, "2 2  5540 47.76 122  935 1.9E+5  445.117 2.7E+4   462.15 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16160, "2 2  5756 47.77 145 1646 3.4E+5  539.065 6.0E+4   545.18 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16161, "2 2  6100 47.77 157 1191 2.8E+5  541.462 6.0E+4   590.28 CID   cid Positive True False 46 219 ITMS + c NSI..."},
-                {16162, "2 2  2508 47.77 120 1191 8.4E+4 1180.615 5.1E+3   590.28 ETD   etd Positive True False 46 219 ITMS + c NSI..."},
-                {16163, "2 2  2644 47.77 120 1191 1.8E+4 1184.614 9.0E+2   590.28 ETD ETciD Positive True False 46 219 ITMS + c NSI..."},
-                {16164, "2 2  3180 47.77 120 1191 1.7E+4 1184.644 8.7E+2   590.28 ETD EThcD Positive True False 46 219 ITMS + c NSI..."},
-                {16165, "1 1 53252 47.78 350 1550 1.2E+9  503.565 1.6E+8     0.00 CID       Positive False True 46 219 FTMS + p NSI..."},
+            // Note that for this dataset NumPeaks does not accurately reflect the number of data in each mass spectrum (it's much higher than it should be)
+            // For example, scan 16121 has NumPeaks = 45876, but TestGetScanData() correctly finds 11888 data points for that scan
+            var file2Data = new Dictionary<int, string>
+            {
+                {16121, "1 1 45876 47.68 350 1550 1.9E+9  503.565 3.4E+8     0.00 CID       Positive False True 46 219   0.44 FTMS + p NSI..."},
+                {16122, "2 2  4124 47.68 106  817 1.6E+6  550.309 2.1E+5   403.22 CID   cid Positive True False 46 219  11.82 ITMS + c NSI..."},
+                {16123, "2 2  6484 47.68 143 1627 5.5E+5  506.272 4.9E+4   538.84 CID   cid Positive True False 46 219  26.07 ITMS + c NSI..."},
+                {16124, "2 2  8172 47.68 208 2000 7.8E+5  737.530 7.0E+4   776.27 CID   cid Positive True False 46 219  24.65 ITMS + c NSI..."},
+                {16125, "2 2  5828 47.68 120 1627 2.1E+5  808.486 2.2E+4   538.84 ETD   etd Positive True False 46 219  42.48 ITMS + c NSI..."},
+                {16126, "2 2  6228 47.68 120 1627 1.4E+5  536.209 9.0E+3   538.84 ETD ETciD Positive True False 46 219  58.96 ITMS + c NSI..."},
+                {16127, "2 2  7180 47.68 120 1627 1.3E+5  808.487 1.4E+4   538.84 ETD EThcD Positive True False 46 219  58.96 ITMS + c NSI..."},
+                {16128, "2 2  7980 47.69 225 1682 4.4E+5  805.579 2.3E+4   835.88 CID   cid Positive True False 46 219  42.71 ITMS + c NSI..."},
+                {16129, "2 2  7700 47.69 266 1986 3.4E+5  938.679 2.9E+4   987.89 CID   cid Positive True False 46 219  35.75 ITMS + c NSI..."},
+                {16130, "2 2  5180 47.69 110  853 2.7E+5  411.977 1.2E+4   421.26 CID   cid Positive True False 46 219  50.98 ITMS + c NSI..."},
+                {16131, "2 2   436 47.69 120 1986 2.1E+4  984.504 9.5E+3   987.89 ETD   etd Positive True False 46 219  26.55 ITMS + c NSI..."},
+                {16132, "2 2  2116 47.69 120  853 1.2E+4  421.052 6.8E+2   421.26 ETD   etd Positive True False 46 219 127.21 ITMS + c NSI..."},
+                {16133, "2 2  2444 47.70 120  853 1.5E+4  421.232 1.2E+3   421.26 ETD ETciD Positive True False 46 219 110.22 ITMS + c NSI..."},
+                {16134, "2 2  2948 47.70 120  853 1.4E+4  838.487 7.5E+2   421.26 ETD EThcD Positive True False 46 219 110.22 ITMS + c NSI..."},
+                {16135, "2 2   508 47.70 120 1986 2.1E+4  984.498 9.2E+3   987.89 ETD ETciD Positive True False 46 219  31.82 ITMS + c NSI..."},
+                {16136, "2 2   948 47.71 120 1986 2.3E+4  984.491 9.4E+3   987.89 ETD EThcD Positive True False 46 219  31.82 ITMS + c NSI..."},
+                {16137, "2 2  9580 47.71 336 2000 3.5E+5 1536.038 4.7E+3  1241.01 CID   cid Positive True False 46 219  30.70 ITMS + c NSI..."},
+                {16138, "2 2  7604 47.72 235 1760 2.9E+5  826.095 2.5E+4   874.84 CID   cid Positive True False 46 219  40.56 ITMS + c NSI..."},
+                {16139, "2 2   972 47.72 120 1760 1.6E+4  875.506 2.1E+3   874.84 ETD   etd Positive True False 46 219  45.88 ITMS + c NSI..."},
+                {16140, "2 2  1596 47.72 120 1760 1.8E+4 1749.846 2.0E+3   874.84 ETD ETciD Positive True False 46 219  54.15 ITMS + c NSI..."},
+                {16141, "2 2  2124 47.72 120 1760 1.6E+4  874.664 1.6E+3   874.84 ETD EThcD Positive True False 46 219  54.15 ITMS + c NSI..."},
+                {16142, "1 1 51976 47.73 350 1550 1.3E+9  503.565 1.9E+8     0.00 CID       Positive False True 46 219   0.79 FTMS + p NSI..."},
+                {16143, "2 2  5412 47.73 128  981 6.5E+5  444.288 6.4E+4   485.28 CID   cid Positive True False 46 219  22.26 ITMS + c NSI..."},
+                {16144, "2 2  4300 47.73 101 1561 5.0E+5  591.309 4.0E+4   387.66 CID   cid Positive True False 46 219  28.20 ITMS + c NSI..."},
+                {16145, "2 2  6740 47.73 162 1830 4.0E+5  567.912 2.8E+4   606.62 CID   cid Positive True False 46 219  37.30 ITMS + c NSI..."},
+                {16146, "2 2  4788 47.73  99  770 1.9E+5  532.308 3.4E+4   379.72 CID   cid Positive True False 46 219 100.00 ITMS + c NSI..."},
+                {16147, "2 2  6708 47.74 120 1830 3.8E+5  603.095 3.1E+4   606.62 ETD   etd Positive True False 46 219  25.47 ITMS + c NSI..."},
+                {16148, "2 2  7260 47.74 120 1830 1.5E+5  603.076 1.3E+4   606.62 ETD ETciD Positive True False 46 219  61.48 ITMS + c NSI..."},
+                {16149, "2 2  9172 47.74 120 1830 1.6E+5  603.027 1.1E+4   606.62 ETD EThcD Positive True False 46 219  61.48 ITMS + c NSI..."},
+                {16150, "2 2  5204 47.74  95 1108 3.8E+5  418.536 1.2E+5   365.88 CID   cid Positive True False 46 219 134.71 ITMS + c NSI..."},
+                {16151, "2 2  5636 47.75 146 1656 2.8E+5  501.523 4.3E+4   548.54 CID   cid Positive True False 46 219  30.60 ITMS + c NSI..."},
+                {16152, "2 2  9572 47.75 328 2000 1.8E+5  848.497 2.2E+3  1210.30 CID   cid Positive True False 46 219  38.05 ITMS + c NSI..."},
+                {16153, "2 2  5004 47.75 120 1656 1.3E+5  548.396 1.3E+4   548.54 ETD   etd Positive True False 46 219  50.35 ITMS + c NSI..."},
+                {16154, "2 2  4732 47.75 120 1656 4.2E+4  548.450 4.2E+3   548.54 ETD ETciD Positive True False 46 219 122.26 ITMS + c NSI..."},
+                {16155, "2 2  6228 47.76 120 1656 4.2E+4  550.402 3.6E+3   548.54 ETD EThcD Positive True False 46 219 122.26 ITMS + c NSI..."},
+                {16156, "2 2  9164 47.76 324 2000 1.5E+5 1491.872 1.0E+4  1197.57 CID   cid Positive True False 46 219  63.61 ITMS + c NSI..."},
+                {16157, "2 2  5916 47.76 124  950 2.2E+5  420.689 2.2E+4   469.71 CID   cid Positive True False 46 219 100.00 ITMS + c NSI..."},
+                {16158, "2 2  5740 47.76 306 2000 1.3E+5 1100.042 3.5E+3  1132.02 CID   cid Positive True False 46 219  27.79 ITMS + c NSI..."},
+                {16159, "2 2  5540 47.76 122  935 1.9E+5  445.117 2.7E+4   462.15 CID   cid Positive True False 46 219  69.09 ITMS + c NSI..."},
+                {16160, "2 2  5756 47.77 145 1646 3.4E+5  539.065 6.0E+4   545.18 CID   cid Positive True False 46 219  28.97 ITMS + c NSI..."},
+                {16161, "2 2  6100 47.77 157 1191 2.8E+5  541.462 6.0E+4   590.28 CID   cid Positive True False 46 219  37.92 ITMS + c NSI..."},
+                {16162, "2 2  2508 47.77 120 1191 8.4E+4 1180.615 5.1E+3   590.28 ETD   etd Positive True False 46 219  38.31 ITMS + c NSI..."},
+                {16163, "2 2  2644 47.77 120 1191 1.8E+4 1184.614 9.0E+2   590.28 ETD ETciD Positive True False 46 219 109.20 ITMS + c NSI..."},
+                {16164, "2 2  3180 47.77 120 1191 1.7E+4 1184.644 8.7E+2   590.28 ETD EThcD Positive True False 46 219 109.20 ITMS + c NSI..."},
+                {16165, "1 1 53252 47.78 350 1550 1.2E+9  503.565 1.6E+8     0.00 CID       Positive False True 46 219   0.76 FTMS + p NSI..."}
             };
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
 
@@ -389,11 +427,15 @@ namespace RawFileReaderTests
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
                 Console.WriteLine("Scan info for {0}", dataFile.Name);
-                Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18}",
-                                  "ScanNumber", "MSLevel", "EventNumber",
-                                  "NumPeaks", "RetentionTime", "LowMass", "HighMass", "TotalIonCurrent", "BasePeakMZ",
-                                  "BasePeakIntensity", "ParentIonMZ", "ActivationType", "CollisionMode",
-                                  "IonMode", "IsCentroided", "IsFTMS", "ScanEvents.Count", "StatusLog.Count", "FilterText");
+                Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18} {19}",
+                                  "Scan", "MSLevel", "Event",
+                                  "NumPeaks", "RetentionTime", 
+                                  "LowMass", "HighMass", "TotalIonCurrent",
+                                  "BasePeakMZ", "BasePeakIntensity",
+                                  "ParentIonMZ", "ActivationType", "CollisionMode",
+                                  "IonMode", "IsCentroided", "IsFTMS", 
+                                  "ScanEvents.Count", "StatusLog.Count", 
+                                  "IonInjectionTime" ,"FilterText");
 
                 var scanCountMS1 = 0;
                 var scanCountMS2 = 0;
@@ -403,11 +445,23 @@ namespace RawFileReaderTests
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanNumber, out scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+
+                    string injectionTimeText;
+                    double ionInjectionTime;
+
+                    if (scanInfo.TryGetScanEvent("Ion Injection Time (ms)", out injectionTimeText, true))
+                    {
+                        double.TryParse(injectionTimeText, out ionInjectionTime);
+                    }
+                    else
+                    {
+                        ionInjectionTime = 0;
+                    }
 
                     var scanSummary =
                         string.Format(
-                            "{0} {1} {2} {3,5} {4} {5} {6,4} {7} {8,8} {9} {10,8} {11} {12,5} {13} {14} {15} {16} {17} {18}",
+                            "{0} {1} {2} {3,5} {4} {5,3} {6,4} {7} {8,8} {9} {10,8} {11} {12,5} {13} {14} {15} {16} {17} {18,6} {19}",
                             scanInfo.ScanNumber, scanInfo.MSLevel, scanInfo.EventNumber,
                             scanInfo.NumPeaks, scanInfo.RetentionTime.ToString("0.00"),
                             scanInfo.LowMass.ToString("0"), scanInfo.HighMass.ToString("0"),
@@ -416,6 +470,7 @@ namespace RawFileReaderTests
                             scanInfo.ActivationType, scanInfo.CollisionMode,
                             scanInfo.IonMode, scanInfo.IsCentroided,
                             scanInfo.IsFTMS, scanInfo.ScanEvents.Count, scanInfo.StatusLog.Count,
+                            ionInjectionTime.ToString("0.00"),
                             scanInfo.FilterText.Substring(0, 12) + "...");
 
                     Console.WriteLine(scanSummary);
@@ -430,7 +485,7 @@ namespace RawFileReaderTests
                     {
                         Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                     }
-                    
+
                     string expectedScanSummary;
                     if (expectedDataThisFile.TryGetValue(scanNumber, out expectedScanSummary))
                     {
@@ -474,7 +529,7 @@ namespace RawFileReaderTests
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanNumber, out scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
                     foreach (var mrmRange in scanInfo.MRMInfo.MRMMassList)
                     {
@@ -541,13 +596,13 @@ namespace RawFileReaderTests
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanNumber, out scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
                     FinniganFileReaderBaseClass.udtScanHeaderInfoType scanInfoStruct;
 #pragma warning disable 618
                     success = reader.GetScanInfo(scanNumber, out scanInfoStruct);
 #pragma warning restore 618
-                    Assert.IsTrue(success, "GetScanInfo (struct) returned false for scan " + scanNumber);
+                    Assert.IsTrue(success, "GetScanInfo (struct) returned false for scan {0}", scanNumber);
 
                     Assert.AreEqual(scanInfoStruct.MSLevel, scanInfo.MSLevel);
                     Assert.AreEqual(scanInfoStruct.IsCentroidScan, scanInfo.IsCentroided);
@@ -568,13 +623,13 @@ namespace RawFileReaderTests
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
 
             // Keys in this dictionary are the scan number of data being retrieved
-            var file1Data = new Dictionary<int, Dictionary<string, string>> {
+            var file1Data = new Dictionary<int, Dictionary<string, string>> 
+            {
                 {1513, new Dictionary<string, string>()},
                 {1514, new Dictionary<string, string>()},
                 {1515, new Dictionary<string, string>()},
                 {1516, new Dictionary<string, string>()},
-                {1517, new Dictionary<string, string>()}
-            
+                {1517, new Dictionary<string, string>()}            
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -583,16 +638,19 @@ namespace RawFileReaderTests
             file1Data[1515].Add("0_False",  " 290      290  335.798   3.8E+4 1034.194   1.6E+4  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
             file1Data[1516].Add("0_False",  " 154      154  461.889   7.3E+3 1203.274   2.6E+3  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
             file1Data[1517].Add("0_False",  " 887      887  420.016   9.7E+5 1232.206   8.0E+5  + c ESI Full ms [400.00-2000.00]");
+
             file1Data[1513].Add("0_True",   " 851      851  409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
             file1Data[1514].Add("0_True",   " 109      109  281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
             file1Data[1515].Add("0_True",   " 290      290  335.798   3.8E+4 1034.194   1.6E+4  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
             file1Data[1516].Add("0_True",   " 154      154  461.889   7.3E+3 1203.274   2.6E+3  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
             file1Data[1517].Add("0_True",   " 887      887  420.016   9.7E+5 1232.206   8.0E+5  + c ESI Full ms [400.00-2000.00]");
+
             file1Data[1513].Add("50_False", "  50       50  747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
             file1Data[1514].Add("50_False", "  50       50  281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
             file1Data[1515].Add("50_False", "  50       50  353.590   9.7E+4 1157.949   3.6E+5  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
             file1Data[1516].Add("50_False", "  50       50  461.889   7.3E+3 1146.341   1.4E+4  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
             file1Data[1517].Add("50_False", "  50       50  883.347   8.9E+6 1206.792   5.5E+6  + c ESI Full ms [400.00-2000.00]");
+
             file1Data[1513].Add("50_True",  "  50       50  747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
             file1Data[1514].Add("50_True",  "  50       50  281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
             file1Data[1515].Add("50_True",  "  50       50  353.590   9.7E+4 1157.949   3.6E+5  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
@@ -602,14 +660,14 @@ namespace RawFileReaderTests
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
 
-            var file2Data = new Dictionary<int, Dictionary<string, string>> {
+            var file2Data = new Dictionary<int, Dictionary<string, string>> 
+            {
                 {16121, new Dictionary<string, string>()},
                 {16122, new Dictionary<string, string>()},
                 {16126, new Dictionary<string, string>()},
                 {16131, new Dictionary<string, string>()},
                 {16133, new Dictionary<string, string>()},
-                {16141, new Dictionary<string, string>()}
-            
+                {16141, new Dictionary<string, string>()}            
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -641,18 +699,13 @@ namespace RawFileReaderTests
             file2Data[16133].Add("50_True", "   50       50  356.206   7.5E+1  795.543   1.3E+2  ITMS + c NSI r d sa Full ms2 421.2619@etd120.55@cid20.00 [120.0000-853.0000]");
             file2Data[16141].Add("50_True", "   50       50  853.937   5.6E+1 1705.974   9.8E+1  ITMS + c NSI r d sa Full ms2 874.8397@etd120.55@hcd20.00 [120.0000-1760.0000]");
 
-
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
-            
+
 
             var dataFile = GetRawDataFile(rawFileName);
 
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
-                Console.WriteLine("Scan data for {0}", dataFile.Name);
-                Console.WriteLine("{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8} {8,-8}  {9}",
-                                "Scan", "Max#", "Centroid", "MzCount", "IntCount", 
-                                "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
 
                 for (var iteration = 1; iteration <= 4; iteration++)
                 {
@@ -679,6 +732,14 @@ namespace RawFileReaderTests
                             break;
                     }
 
+                    if (iteration == 1)
+                    {
+                        Console.WriteLine("Scan data for {0}", dataFile.Name);
+                        Console.WriteLine("{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8} {8,-8}  {9}",
+                                          "Scan", "Max#", "Centroid", "MzCount", "IntCount",
+                                          "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+                    }
+
                     for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                     {
 
@@ -687,7 +748,7 @@ namespace RawFileReaderTests
 
                         var dataPointsRead = reader.GetScanData(scanNumber, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
 
-                        Assert.IsTrue(dataPointsRead > 0, "GetScanData returned 0 for scan " + scanNumber);
+                        Assert.IsTrue(dataPointsRead > 0, "GetScanData returned 0 for scan {0}", scanNumber);
 
                         Assert.AreEqual(dataPointsRead, mzList.Length, "Data count mismatch vs. function return value");
 
@@ -696,7 +757,7 @@ namespace RawFileReaderTests
                         clsScanInfo scanInfo;
                         var success = reader.GetScanInfo(scanNumber, out scanInfo);
 
-                        Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+                        Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
                         var scanSummary =
                             string.Format(
@@ -707,13 +768,14 @@ namespace RawFileReaderTests
                                 mzList[midPoint].ToString("0.000"), intensityList[midPoint].ToString("0.0E+0"),
                                 scanInfo.FilterText);
 
-                 
+                        Console.WriteLine(scanSummary);
+
                         Dictionary<int, Dictionary<string, string>> expectedDataThisFile;
                         if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
                         {
                             Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                         }
-                        
+
                         Dictionary<string, string> expectedDataByType;
                         if (expectedDataThisFile.TryGetValue(scanNumber, out expectedDataByType))
                         {
@@ -724,16 +786,12 @@ namespace RawFileReaderTests
                                 Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
                                                 "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
                             }
-                        }
-                        
-                        Console.WriteLine(scanSummary);
+                        }                        
                     }
-
                 }
-
             }
-        }
 
+        }
 
         [Test]
         [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1514)]
@@ -743,7 +801,8 @@ namespace RawFileReaderTests
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
 
             // Keys in this dictionary are the scan number of data being retrieved
-            var file1Data = new Dictionary<int, Dictionary<string, string>> {
+            var file1Data = new Dictionary<int, Dictionary<string, string>> 
+            {
                 {1513, new Dictionary<string, string>()},
                 {1514, new Dictionary<string, string>()}            
             };
@@ -761,7 +820,8 @@ namespace RawFileReaderTests
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
 
-            var file2Data = new Dictionary<int, Dictionary<string, string>> {
+            var file2Data = new Dictionary<int, Dictionary<string, string>> 
+            {
                 {16121, new Dictionary<string, string>()},
                 {16122, new Dictionary<string, string>()}            
             };
@@ -820,12 +880,12 @@ namespace RawFileReaderTests
 
                         var dataPointsRead = reader.GetScanData2D(scanNumber, out massIntensityPairs, maxNumberOfPeaks, centroidData);
 
-                        Assert.IsTrue(dataPointsRead > 0, "GetScanData2D returned 0 for scan " + scanNumber);
+                        Assert.IsTrue(dataPointsRead > 0, "GetScanData2D returned 0 for scan {0}", scanNumber);
 
                         clsScanInfo scanInfo;
                         var success = reader.GetScanInfo(scanNumber, out scanInfo);
 
-                        Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+                        Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
                         var lastIndex = massIntensityPairs.GetUpperBound(1);
 
@@ -852,13 +912,13 @@ namespace RawFileReaderTests
                                 {
                                     if (massIntensityPairs[0, dataIndex] > 0)
                                     {
-                                        Console.WriteLine("Non-zero m/z value found at index " + dataIndex + " for scan " + scanNumber);
+                                        Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanNumber);
                                         Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
                                     }
 
                                     if (massIntensityPairs[1, dataIndex] > 0)
                                     {
-                                        Console.WriteLine("Non-zero intensity value found at index " + dataIndex + " for scan " + scanNumber);
+                                        Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanNumber);
                                         Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
                                     }
                                 }
@@ -882,6 +942,7 @@ namespace RawFileReaderTests
                                 massIntensityPairs[0, midPoint].ToString("0.000"), massIntensityPairs[1, midPoint].ToString("0.0E+0"),
                                 scanInfo.FilterText);
 
+                        Console.WriteLine(scanSummary);
 
                         Dictionary<int, Dictionary<string, string>> expectedDataThisFile;
                         if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
@@ -900,13 +961,10 @@ namespace RawFileReaderTests
                                                 "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
                             }
                         }
-
-                        Console.WriteLine(scanSummary);
                     }
-
                 }
-
             }
+
         }
 
         [Test]
@@ -917,7 +975,8 @@ namespace RawFileReaderTests
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
 
             // Keys in this dictionary are the start scan for summing
-            var file1Data = new Dictionary<int, Dictionary<string, string>> {
+            var file1Data = new Dictionary<int, Dictionary<string, string>> 
+            {
                 {1513, new Dictionary<string, string>()}        
             };
 
@@ -929,7 +988,8 @@ namespace RawFileReaderTests
 
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-            var file2Data = new Dictionary<int, Dictionary<string, string>> {
+            var file2Data = new Dictionary<int, Dictionary<string, string>> 
+            {
                 {16121, new Dictionary<string, string>()}
             };
 
@@ -985,7 +1045,7 @@ namespace RawFileReaderTests
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanStart, out scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanStart);
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
                     var lastIndex = massIntensityPairs.GetUpperBound(1);
                     int dataCount;
@@ -999,13 +1059,13 @@ namespace RawFileReaderTests
                         {
                             if (massIntensityPairs[0, dataIndex] > 0)
                             {
-                                Console.WriteLine("Non-zero m/z value found at index " + dataIndex + " for scan " + scanStart);
+                                Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanStart);
                                 Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
                             }
 
                             if (massIntensityPairs[1, dataIndex] > 0)
                             {
-                                Console.WriteLine("Non-zero intensity value found at index " + dataIndex + " for scan " + scanStart);
+                                Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanStart);
                                 Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
                             }
                         }
@@ -1063,13 +1123,15 @@ namespace RawFileReaderTests
 
             var noMatch = "  0                                                        ";
 
-            var file1Data = new Dictionary<int, string> {
+            var file1Data = new Dictionary<int, string> 
+            {
                 {1513, noMatch + "+ c ESI Full ms [400.00-2000.00]"},
                 {1514, noMatch + "+ c d Full ms2 884.41@cid45.00 [230.00-1780.00]"}               
             };
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-            var file2Data = new Dictionary<int, string> {
+            var file2Data = new Dictionary<int, string> 
+            {
                 {16121, "833  712.813   2.9E+5 22100.000 5705.175 159099.000        0  FTMS + p NSI Full ms [350.0000-1550.0000]"},
                 {16122, noMatch + "ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]"},
                 {16123, noMatch + "ITMS + c NSI r d Full ms2 538.8400@cid30.00 [143.0000-1627.0000]"},
@@ -1121,7 +1183,7 @@ namespace RawFileReaderTests
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanNumber, out scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanStart);
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
                     if (ftLabelData.Length == 0 && scanInfo.IsFTMS)
                     {
@@ -1185,13 +1247,15 @@ namespace RawFileReaderTests
 
             var noMatch = "  0                                               ";
 
-            var file1Data = new Dictionary<int, string> {
+            var file1Data = new Dictionary<int, string> 
+            {
                 {1513, noMatch + "+ c ESI Full ms [400.00-2000.00]"},
                 {1514, noMatch + "+ c d Full ms2 884.41@cid45.00 [230.00-1780.00]"}               
             };
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-            var file2Data = new Dictionary<int, string> {
+            var file2Data = new Dictionary<int, string> 
+            {
                 {16121, "833  712.813   2.9E+5 22100.000    2.138    3.000  FTMS + p NSI Full ms [350.0000-1550.0000]"},
                 {16122, noMatch + "ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]"},
                 {16123, noMatch + "ITMS + c NSI r d Full ms2 538.8400@cid30.00 [143.0000-1627.0000]"},
@@ -1242,8 +1306,8 @@ namespace RawFileReaderTests
 
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanNumber, out scanInfo);
-                    
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanStart);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
                     if (massResolutionData.Length == 0 && scanInfo.IsFTMS)
                     {
@@ -1338,7 +1402,7 @@ namespace RawFileReaderTests
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanNumber, out scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
                     foreach (var eventName in eventsToCheck)
                     {
@@ -1401,7 +1465,7 @@ namespace RawFileReaderTests
                     clsScanInfo scanInfo;
                     var success = reader.GetScanInfo(scanNumber, out scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan " + scanNumber);
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
                     var udtScanHeaderInfo = new FinniganFileReaderBaseClass.udtScanHeaderInfoType
                     {
@@ -1468,7 +1532,7 @@ namespace RawFileReaderTests
             string tupleKey1,
             string tupleKey2,
             int scanCount)
-                {
+        {
 
             Dictionary<Tuple<string, string>, int> expectedScanInfo;
             if (!expectedData.TryGetValue(fileName, out expectedScanInfo))
@@ -1492,7 +1556,6 @@ namespace RawFileReaderTests
             {
                 dataFile = new FileInfo(Path.Combine(@"..\..\..\Test_ThermoRawFileReader\bin", rawFileName));
             }
-
 
             if (!dataFile.Exists)
             {
