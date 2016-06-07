@@ -2167,6 +2167,7 @@ namespace ThermoRawFileReader
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks, bool centroidData)
         {
 
@@ -2219,6 +2220,9 @@ namespace ThermoRawFileReader
                 mzList = new double[0];
                 intensityList = new double[0];
                 dataCount = -1;
+
+                var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
+                RaiseWarningMessage(strError);
             }
 
             return dataCount;
@@ -2409,14 +2413,11 @@ namespace ThermoRawFileReader
             {
                 var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
                 RaiseWarningMessage(strError);
-
-
             }
             catch (Exception ex)
             {
                 var strError = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
                 RaiseErrorMessage(strError);
-
             }
 
             massIntensityPairs = new double[0, 0];

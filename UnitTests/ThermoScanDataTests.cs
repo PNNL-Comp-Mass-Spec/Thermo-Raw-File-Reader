@@ -172,80 +172,122 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase(@"Corrupt_Qc_Shew_13_04_pt1_a_5Sep13_Cougar_13-06-14.raw", 500, 600, 0, 0)]
-        [TestCase(@"Corrupt_QC_Shew_07_03_pt25_e_6Apr08_Falcon_Fst-75-1.raw", 500, 600, 0, 0)]
-        [TestCase(@"blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900, 190, 211)]
-        public void TestCorruptDataHandling(string rawFileName, int scanStart, int scanEnd, int expectedMS1, int expectedMS2)
+        [TestCase(@"blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900, 190, 211, 0, 0)]
+        [TestCase(@"Corrupt_Qc_Shew_13_04_pt1_a_5Sep13_Cougar_13-06-14.raw", 500, 600, 0, 0, 500, 600)]
+        [TestCase(@"Corrupt_QC_Shew_07_03_pt25_e_6Apr08_Falcon_Fst-75-1.raw", 500, 600, 0, 0, 500, 600)]
+        // This file causes .NET to become unstable and aborts the unit tests
+        // [TestCase(@"Corrupt_Scans6920-7021_AID_STM_013_101104_06_LTQ_16Nov04_Earth_0904-8.raw", 6900, 7050, 10, 40, 6920, 7021)]
+        public void TestCorruptDataHandling(
+            string rawFileName,
+            int scanStart,
+            int scanEnd,
+            int expectedMS1,
+            int expectedMS2,
+            int corruptScanStart,
+            int corruptScanEnd)
         {
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            try
             {
-                var scanCount = reader.GetNumScans();
-                Console.WriteLine("Scancount: {0}", scanCount);
 
-                if (expectedMS1 + expectedMS2 == 0)
+                using (var reader = new XRawFileIO(dataFile.FullName))
                 {
-                    Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
-                    Assert.IsTrue(scanCount == 0, "ScanCount is non-zero, while we expected it to be 0");
-                }
-                else
-                {
-                    Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is true while we expected it to be false");
-                    Assert.IsTrue(scanCount > 0, "ScanCount is zero, while we expected it to be > 0");
-                }
+                    var scanCount = reader.GetNumScans();
+                    Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
 
-                var scanCountMS1 = 0;
-                var scanCountMS2 = 0;
-
-                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
-                {
-                    clsScanInfo scanInfo;
-                    reader.GetScanInfo(scanNumber, out scanInfo);
-
-                    if (reader.FileInfo.CorruptFile)
+                    if (expectedMS1 + expectedMS2 == 0)
                     {
-                        Assert.IsTrue(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is not empty but should be since corrupt file");
+                        Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
+                        Assert.IsTrue(scanCount == 0, "ScanCount is non-zero, while we expected it to be 0");
                     }
                     else
                     {
-                        Assert.IsFalse(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is empty but should not be");
-
-                        if (scanInfo.MSLevel > 1)
-                            scanCountMS2++;
-                        else
-                            scanCountMS1++;
+                        Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is true while we expected it to be false");
+                        Assert.IsTrue(scanCount > 0, "ScanCount is zero, while we expected it to be > 0");
                     }
 
-                    double[] mzList;
-                    double[] intensityList;
+                    var scanCountMS1 = 0;
+                    var scanCountMS2 = 0;
 
-                    var dataPointCount = reader.GetScanData(scanNumber, out mzList, out intensityList);
-
-                    if (reader.FileInfo.CorruptFile)
+                    for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                     {
-                        Assert.IsTrue(dataPointCount == 0, "GetScanData unexpectedly reported a non-zero data count");
-                        Assert.IsTrue(mzList.Length == 0, "GetScanData unexpectedly returned m/z data");
-                        Assert.IsTrue(intensityList.Length == 0, "GetScanData unexpectedly returned intensity data");
+                        try 
+                        {
+                            clsScanInfo scanInfo;
+                            reader.GetScanInfo(scanNumber, out scanInfo);
+
+                            if (reader.FileInfo.CorruptFile)
+                            {
+                                Assert.IsTrue(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is not empty but should be since corrupt file");
+                            }
+                            else
+                            {
+                                Assert.IsFalse(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is empty but should not be");
+
+                                if (scanInfo.MSLevel > 1)
+                                    scanCountMS2++;
+                                else
+                                    scanCountMS1++;
+                            }
+
+                            double[] mzList;
+                            double[] intensityList;
+
+                            // Note: this function call will fail randomly with file Corrupt_Scans6920-7021_AID_STM_013_101104_06_LTQ_16Nov04_Earth_0904-8.raw
+                            // Furthermore, we are unable to catch the exception that occurs (or no exception is thrown) and adding
+                            // [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions] to the function does not help
+                            var dataPointCount = reader.GetScanData(scanNumber, out mzList, out intensityList);
+
+                            if (reader.FileInfo.CorruptFile)
+                            {
+                                Assert.IsTrue(dataPointCount == 0, "GetScanData unexpectedly reported a non-zero data count for scan {0}", scanNumber);
+                                Assert.IsTrue(mzList.Length == 0, "GetScanData unexpectedly returned m/z data for scan {0}", scanNumber);
+                                Assert.IsTrue(intensityList.Length == 0, "GetScanData unexpectedly returned intensity data for scan {0}", scanNumber);
+                            }
+                            else
+                            {
+                                if (dataPointCount == 0)
+                                {
+                                    Console.WriteLine("Corrupt scan encountered: {0}", scanNumber);
+
+                                    Assert.IsTrue(scanNumber >= corruptScanStart && scanNumber <= corruptScanEnd, "Unexpected corrupt scan found, scan {0}", scanNumber);
+                                    Assert.IsTrue(mzList.Length == 0, "GetScanData unexpectedly returned m/z data for scan {0}", scanNumber);
+                                    Assert.IsTrue(intensityList.Length == 0, "GetScanData unexpectedly returned intensity data for scan {0}", scanNumber);
+                                }
+                                else
+                                {
+                                    Assert.IsTrue(dataPointCount > 0, "GetScanData reported a data point count of 0 for scan {0}", scanNumber);
+                                    Assert.IsTrue(mzList.Length > 0, "GetScanData unexpectedly returned no m/z data for scan {0}", scanNumber);
+                                    Assert.IsTrue(intensityList.Length > 0, "GetScanData unexpectedly returned no intensity data for scan {0}", scanNumber);
+                                    Assert.IsTrue(mzList.Length == intensityList.Length, "Array length mismatch for m/z and intensity data for scan {0}", scanNumber);
+                                    Assert.IsTrue(dataPointCount == mzList.Length, "Array length does not agree with dataPointCount for scan {0}", scanNumber);
+                                }
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Exception reading scan {0}: {1}", scanNumber, ex.Message);
+                            Assert.Fail("Exception reading scan {0}", scanNumber);
+                        }
                     }
-                    else
-                    {
-                        Assert.IsTrue(dataPointCount > 0, "GetScanData reported a data point count of 0");
-                        Assert.IsTrue(mzList.Length > 0, "GetScanData unexpectedly returned no m/z data");
-                        Assert.IsTrue(intensityList.Length > 0, "GetScanData unexpectedly returned no intensity data");
-                        Assert.IsTrue(mzList.Length == intensityList.Length, "Array length mismatch for m/z and intensity data");
-                        Assert.IsTrue(dataPointCount == mzList.Length, "Array length does not agree with dataPointCount");
-                    }
+
+                    Console.WriteLine("scanCountMS1={0}", scanCountMS1);
+                    Console.WriteLine("scanCountMS2={0}", scanCountMS2);
+
+                    Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+                    Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+
                 }
+            }
+            catch (Exception ex)
+            {
+                var msg = string.Format("Exception opening .raw file {0}:\n{1}", rawFileName, ex.Message);
+                Console.WriteLine(msg);
+                Assert.Fail(msg);
+            }
 
-                Console.WriteLine("scanCountMS1={0}", scanCountMS1);
-                Console.WriteLine("scanCountMS2={0}", scanCountMS2);
-
-                Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
-                Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
-
-            }           
-            
         }
 
         [Test]
@@ -1636,6 +1678,7 @@ namespace RawFileReaderTests
 
             if (!dataFile.Exists)
             {
+                Console.WriteLine("File not found: " + dataFile.FullName);
                 Assert.Fail("File not found: " + dataFile.FullName);
             }
 
