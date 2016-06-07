@@ -1667,6 +1667,8 @@ namespace RawFileReaderTests
         {
             FileInfo dataFile;
 
+            // Disable the unreachable code warning
+#pragma warning disable 0162
             if (USE_REMOTE_PATHS)
             {
                 dataFile = new FileInfo(Path.Combine(@"\\proto-2\UnitTest_Files\ThermoRawFileReader", rawFileName));
@@ -1675,6 +1677,7 @@ namespace RawFileReaderTests
             {
                 dataFile = new FileInfo(Path.Combine(@"..\..\..\Test_ThermoRawFileReader\bin", rawFileName));
             }
+#pragma warning restore 0162
 
             if (!dataFile.Exists)
             {

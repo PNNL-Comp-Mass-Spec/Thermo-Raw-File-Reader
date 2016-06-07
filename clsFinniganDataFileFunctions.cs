@@ -22,7 +22,9 @@ using MSFileReaderLib;
 
 namespace ThermoRawFileReader
 {
-
+    /// <summary>
+    /// Class for reading Thermo Finnigan .raw files, using the IXRawfile5 interface
+    /// </summary>
     public class XRawFileIO : FinniganFileReaderBaseClass, IDisposable
     {
 
@@ -73,50 +75,144 @@ namespace ThermoRawFileReader
 
         private const string MZ_WITHOUT_COLLISION_ENERGY = "ms[2-9](?<MzValue> [0-9.]+)$";
 
-        // Used with .GetSeqRowSampleType()
+        /// <summary>
+        /// Sample types
+        /// </summary>
+        /// <remarks>Returned by <see cref="XRawFileIO.mXRawFile"/>.GetSeqRowSampleType()</remarks>
         public enum SampleTypeConstants
         {
+            /// <summary>
+            /// Unknown sample type
+            /// </summary>
             Unknown = 0,
+
+            /// <summary>
+            /// Blank sample
+            /// </summary>
             Blank = 1,
+
+            /// <summary>
+            /// QC sample
+            /// </summary>
             QC = 2,
+
+            /// <summary>
+            /// Standard Clear (None) sample
+            /// </summary>
             StandardClear_None = 3,
+
+            /// <summary>
+            /// Standard Update (None) sample
+            /// </summary>
             StandardUpdate_None = 4,
+
+            /// <summary>
+            /// Standard Bracket (Open) sample
+            /// </summary>
             StandardBracket_Open = 5,
+
+            /// <summary>
+            /// Standard Bracket Start (multiple brackets) sample
+            /// </summary>
             StandardBracketStart_MultipleBrackets = 6,
+
+            /// <summary>
+            /// Standard Bracket End (multiple brackets) sample
+            /// </summary>
             StandardBracketEnd_multipleBrackets = 7
         }
 
-        // Used with .SetController()
+        /// <summary>
+        /// Controller Types
+        /// </summary>
+        /// <remarks> Used with <see cref="SetMSController()"/></remarks>
         public enum ControllerTypeConstants
         {
+            /// <summary>
+            /// No Device
+            /// </summary>
             NoDevice = -1,
+
+            /// <summary>
+            /// MS Controller
+            /// </summary>
             MS = 0,
+
+            /// <summary>
+            /// Analog controller
+            /// </summary>
             Analog = 1,
+
+            /// <summary>
+            /// A/D card controller
+            /// </summary>
             AD_Card = 2,
+
+            /// <summary>
+            /// PDA controller
+            /// </summary>
             PDA = 3,
+
+            /// <summary>
+            /// UV controller
+            /// </summary>
             UV = 4
         }
 
-        // Used with .GetMassListXYZ()
+        /// <summary>
+        /// Intensity Cutoff Types
+        /// </summary>
+        /// <remarks>Used with <see cref="mXRawFile"/> functions in <see cref="XRawFileIO.GetScanData2D(int,out double[,],int,bool)"/> and <see cref="XRawFileIO.GetScanDataSumScans"/></remarks>
         public enum IntensityCutoffTypeConstants
         {
+            /// <summary>
+            /// All Values Returned
+            /// </summary>
             None = 0,
-            // AllValuesReturned
+
+            /// <summary>
+            /// Absolute Intensity Units
+            /// </summary>
             AbsoluteIntensityUnits = 1,
+
+            /// <summary>
+            /// Intensity relative to base peak
+            /// </summary>
             RelativeToBasePeak = 2
         }
 
+        /// <summary>
+        /// Instrument Flags
+        /// </summary>
         public class InstFlags
         {
+            /// <summary>
+            /// Total Ion Map
+            /// </summary>
             public const string TIM = "Total Ion Map";
+
+            /// <summary>
+            /// Neutral Loss Map
+            /// </summary>
             public const string NLM = "Neutral Loss Map";
+
+            /// <summary>
+            /// Parent Ion Map
+            /// </summary>
             public const string PIM = "Parent Ion Map";
+
+            /// <summary>
+            /// Data Dependent ZoomScan Map
+            /// </summary>
             public const string DDZMap = "Data Dependent ZoomScan Map";
         }
 
         #endregion
 
         #region "Structures"
+        /// <summary>
+        /// Type for storing Parent Ion Information
+        /// </summary>
         public struct udtParentIonInfoType
         {
             /// <summary>
@@ -167,6 +263,9 @@ namespace ThermoRawFileReader
             /// <remarks>Examples: CID, ETD, or HCD</remarks>
             public ActivationTypeConstants ActivationType;
 
+            /// <summary>
+            /// Clear the data
+            /// </summary>
             public void Clear()
             {
                 MSLevel = 1;
@@ -178,6 +277,10 @@ namespace ThermoRawFileReader
                 ActivationType = ActivationTypeConstants.Unknown;
             }
 
+            /// <summary>
+            /// Return a simple summary of the object
+            /// </summary>
+            /// <returns></returns>
             public override string ToString()
             {
                 if (string.IsNullOrWhiteSpace(CollisionMode))
@@ -192,22 +295,70 @@ namespace ThermoRawFileReader
 
         }
 
+        /// <summary>
+        /// Type for Mass Precision Information
+        /// </summary>
         public struct udtMassPrecisionInfoType
         {
+            /// <summary>
+            /// Peak Intensity
+            /// </summary>
             public double Intensity;
+
+            /// <summary>
+            /// Peak Mass
+            /// </summary>
             public double Mass;
+
+            /// <summary>
+            /// Peak Accuracy (in MMU)
+            /// </summary>
             public double AccuracyMMU;
+
+            /// <summary>
+            /// Peak Accuracy (in PPM)
+            /// </summary>
             public double AccuracyPPM;
+
+            /// <summary>
+            /// Peak Resolution
+            /// </summary>
             public double Resolution;
         }
 
+        /// <summary>
+        /// Type for storing FT Label Information
+        /// </summary>
         public struct udtFTLabelInfoType
         {
+            /// <summary>
+            /// Peak Mass
+            /// </summary>
             public double Mass;
+
+            /// <summary>
+            /// Peak Intensity
+            /// </summary>
             public double Intensity;
+
+            /// <summary>
+            /// Peak Resolution
+            /// </summary>
             public float Resolution;
+            
+            /// <summary>
+            /// Peak Baseline
+            /// </summary>
             public float Baseline;
+
+            /// <summary>
+            /// Peak Noise
+            /// </summary>
             public float Noise;
+
+            /// <summary>
+            /// Peak Charge
+            /// </summary>
             public int Charge;
         }
         #endregion
@@ -286,6 +437,10 @@ namespace ThermoRawFileReader
 
         }
 
+        /// <summary>
+        /// Test the functionality of the reader - can we instantiate the MSFileReader Object?
+        /// </summary>
+        /// <returns></returns>
         public override bool CheckFunctionality()
         {
             // I have a feeling this doesn't actually work, and will always return True
@@ -304,8 +459,10 @@ namespace ThermoRawFileReader
 
         }
 
+        /// <summary>
+        /// Close the .raw file
+        /// </summary>
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
-
         public override void CloseRawFile()
         {
             try
@@ -354,6 +511,11 @@ namespace ThermoRawFileReader
 
         }
 
+        /// <summary>
+        /// Determins the MRM scan type by parsing the scan filter string
+        /// </summary>
+        /// <param name="filterText"></param>
+        /// <returns></returns>
         public static MRMScanTypeConstants DetermineMRMScanType(string filterText)
         {
             var eMRMScanType = MRMScanTypeConstants.NotMRM;
@@ -390,6 +552,11 @@ namespace ThermoRawFileReader
             return eMRMScanType;
         }
 
+        /// <summary>
+        /// Determine the Ionization mode by parsing the scan filter string
+        /// </summary>
+        /// <param name="filterText"></param>
+        /// <returns></returns>
         public static IonModeConstants DetermineIonizationMode(string filterText)
         {
 
@@ -435,6 +602,12 @@ namespace ThermoRawFileReader
 
         }
 
+        /// <summary>
+        /// Parse out the MRM_QMS or SRM mass info from filterText
+        /// </summary>
+        /// <param name="filterText"></param>
+        /// <param name="mrmScanType"></param>
+        /// <param name="mrmInfo"></param>
         public static void ExtractMRMMasses(string filterText, MRMScanTypeConstants mrmScanType, out udtMRMInfoType mrmInfo)
         {
             // Parse out the MRM_QMS or SRM mass info from filterText
@@ -761,6 +934,13 @@ namespace ThermoRawFileReader
 
         }
 
+        /// <summary>
+        /// Extract the MS Level from the filter string
+        /// </summary>
+        /// <param name="filterText"></param>
+        /// <param name="msLevel"></param>
+        /// <param name="mzText"></param>
+        /// <returns></returns>
         public static bool ExtractMSLevel(string filterText, out int msLevel, out string mzText)
         {
             // Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in filterText
@@ -793,6 +973,10 @@ namespace ThermoRawFileReader
             return false;
         }
 
+        /// <summary>
+        /// Populate mFileInfo
+        /// </summary>
+        /// <returns></returns>
         protected override bool FillFileInfo()
         {
             // Populates the mFileInfo structure
@@ -1037,6 +1221,10 @@ namespace ThermoRawFileReader
 
         }
 
+        /// <summary>
+        /// Number of scans in the .raw file
+        /// </summary>
+        /// <returns>the number of scans, or -1 if an error</returns>
         public override int GetNumScans()
         {
             // Returns the number of scans, or -1 if an error
@@ -1475,7 +1663,12 @@ namespace ThermoRawFileReader
             return true;
 
         }
-
+        
+        /// <summary>
+        /// Parse the scan type name out of the scan filter string
+        /// </summary>
+        /// <param name="filterText"></param>
+        /// <returns></returns>
         public static string GetScanTypeNameFromFinniganScanFilterText(string filterText)
         {
 
@@ -1812,6 +2005,11 @@ namespace ThermoRawFileReader
 
         }
 
+        /// <summary>
+        /// Remove scan-specific data from a scan filter string; primarily removes the parent ion m/z and the scan m/z range
+        /// </summary>
+        /// <param name="filterText"></param>
+        /// <returns></returns>
         public static string MakeGenericFinniganScanFilter(string filterText)
         {
 
@@ -2767,6 +2965,10 @@ namespace ThermoRawFileReader
 
         }
 
+        /// <summary>
+        /// Get an initialized MRMInfo object
+        /// </summary>
+        /// <returns></returns>
         public static udtMRMInfoType InitializeMRMInfo()
         {
             var udtMRMInfo = new udtMRMInfoType();
@@ -2775,12 +2977,22 @@ namespace ThermoRawFileReader
             return udtMRMInfo;
         }
 
+        /// <summary>
+        /// Get an initialized MRMInfo object
+        /// </summary>
+        /// <param name="udtMRMInfo"></param>
+        /// <param name="intInitialMassCountCapacity"></param>
         [Obsolete("Use parameterless function InitializeMRMInfo instead")]
         public static void InitializeMRMInfo(out udtMRMInfoType udtMRMInfo, int intInitialMassCountCapacity)
         {
             udtMRMInfo = InitializeMRMInfo();
         }
 
+        /// <summary>
+        /// Open the .raw file
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         public sealed override bool OpenRawFile(string filePath)
         {
             var intResult = 0;

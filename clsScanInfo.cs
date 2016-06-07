@@ -4,17 +4,32 @@ using System.Linq;
 
 namespace ThermoRawFileReader
 {
+    /// <summary>
+    /// Container for metadata relating to a single scan
+    /// </summary>
     public class clsScanInfo
     {
 
         #region "Member variables"
 
+        /// <summary>
+        /// UTC Time that this scan info was cached
+        /// </summary>
         protected readonly DateTime mCacheDateUTC;
 
+        /// <summary>
+        /// Scan number
+        /// </summary>
         protected readonly int mScanNumber;
-        protected string mFilterString;
+
+        /// <summary>
+        /// Scan event data
+        /// </summary>
         protected readonly List<KeyValuePair<string, string>> mScanEvents;
 
+        /// <summary>
+        /// Status Log data
+        /// </summary>
         protected readonly List<KeyValuePair<string, string>> mStatusLog;
         #endregion
 
@@ -257,7 +272,7 @@ namespace ThermoRawFileReader
             mScanNumber = scan;
             mCacheDateUTC = DateTime.UtcNow;
 
-            mFilterString = string.Empty;
+            FilterText = string.Empty;
             CollisionMode = string.Empty;
             ActivationType = FinniganFileReaderBaseClass.ActivationTypeConstants.Unknown;
 
@@ -327,7 +342,10 @@ namespace ThermoRawFileReader
 
         }
 
-
+        /// <summary>
+        /// Overridden ToString(): Displays a short summary of this object
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             if (string.IsNullOrEmpty(FilterText)) {
