@@ -97,6 +97,8 @@ namespace ThermoRawFileReader
 			public int ScanStart;
 			public int ScanEnd;
 
+	        public bool CorruptFile;            // Auto-set to true if the file is corrupt / has no data
+
 	        public void Clear()
 	        {
                 AcquisitionDate = string.Empty;
@@ -122,6 +124,8 @@ namespace ThermoRawFileReader
                 MassResolution = 0;
                 ScanStart = 0;
                 ScanEnd = 0;
+
+	            CorruptFile = false;
 	        }
 		}
 

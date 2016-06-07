@@ -172,6 +172,83 @@ namespace RawFileReaderTests
         }
 
         [Test]
+        [TestCase(@"Corrupt_Qc_Shew_13_04_pt1_a_5Sep13_Cougar_13-06-14.raw", 500, 600, 0, 0)]
+        [TestCase(@"Corrupt_QC_Shew_07_03_pt25_e_6Apr08_Falcon_Fst-75-1.raw", 500, 600, 0, 0)]
+        [TestCase(@"blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900, 190, 211)]
+        public void TestCorruptDataHandling(string rawFileName, int scanStart, int scanEnd, int expectedMS1, int expectedMS2)
+        {
+            var dataFile = GetRawDataFile(rawFileName);
+
+            using (var reader = new XRawFileIO(dataFile.FullName))
+            {
+                var scanCount = reader.GetNumScans();
+                Console.WriteLine("Scancount: {0}", scanCount);
+
+                if (expectedMS1 + expectedMS2 == 0)
+                {
+                    Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
+                    Assert.IsTrue(scanCount == 0, "ScanCount is non-zero, while we expected it to be 0");
+                }
+                else
+                {
+                    Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is true while we expected it to be false");
+                    Assert.IsTrue(scanCount > 0, "ScanCount is zero, while we expected it to be > 0");
+                }
+
+                var scanCountMS1 = 0;
+                var scanCountMS2 = 0;
+
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    clsScanInfo scanInfo;
+                    reader.GetScanInfo(scanNumber, out scanInfo);
+
+                    if (reader.FileInfo.CorruptFile)
+                    {
+                        Assert.IsTrue(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is not empty but should be since corrupt file");
+                    }
+                    else
+                    {
+                        Assert.IsFalse(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is empty but should not be");
+
+                        if (scanInfo.MSLevel > 1)
+                            scanCountMS2++;
+                        else
+                            scanCountMS1++;
+                    }
+
+                    double[] mzList;
+                    double[] intensityList;
+
+                    var dataPointCount = reader.GetScanData(scanNumber, out mzList, out intensityList);
+
+                    if (reader.FileInfo.CorruptFile)
+                    {
+                        Assert.IsTrue(dataPointCount == 0, "GetScanData unexpectedly reported a non-zero data count");
+                        Assert.IsTrue(mzList.Length == 0, "GetScanData unexpectedly returned m/z data");
+                        Assert.IsTrue(intensityList.Length == 0, "GetScanData unexpectedly returned intensity data");
+                    }
+                    else
+                    {
+                        Assert.IsTrue(dataPointCount > 0, "GetScanData reported a data point count of 0");
+                        Assert.IsTrue(mzList.Length > 0, "GetScanData unexpectedly returned no m/z data");
+                        Assert.IsTrue(intensityList.Length > 0, "GetScanData unexpectedly returned no intensity data");
+                        Assert.IsTrue(mzList.Length == intensityList.Length, "Array length mismatch for m/z and intensity data");
+                        Assert.IsTrue(dataPointCount == mzList.Length, "Array length does not agree with dataPointCount");
+                    }
+                }
+
+                Console.WriteLine("scanCountMS1={0}", scanCountMS1);
+                Console.WriteLine("scanCountMS2={0}", scanCountMS2);
+
+                Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+                Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+
+            }           
+            
+        }
+
+        [Test]
         [TestCase(@"Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 3316)]
         [TestCase(@"HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 71147)]
         public void TestGetNumScans(string rawFileName, int expectedResult)

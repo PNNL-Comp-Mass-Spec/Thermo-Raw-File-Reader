@@ -329,6 +329,7 @@ namespace ThermoRawFileReader
             {
                 mXRawFile = null;
                 mCachedFileName = string.Empty;
+                mFileInfo.Clear();
             }
 
         }
@@ -2810,6 +2811,7 @@ namespace ThermoRawFileReader
                         {
                             // File actually didn't load correctly, since these shouldn't all be blank
                             success = false;
+                            mFileInfo.CorruptFile = true;
                         }
                         else
                         {
