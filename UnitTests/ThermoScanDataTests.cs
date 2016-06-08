@@ -728,8 +728,8 @@ namespace RawFileReaderTests
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
-                    FinniganFileReaderBaseClass.udtScanHeaderInfoType scanInfoStruct;
 #pragma warning disable 618
+                    udtScanHeaderInfoType scanInfoStruct;
                     success = reader.GetScanInfo(scanNumber, out scanInfoStruct);
 #pragma warning restore 618
                     Assert.IsTrue(success, "GetScanInfo (struct) returned false for scan {0}", scanNumber);
@@ -1301,7 +1301,7 @@ namespace RawFileReaderTests
                 {
 
                     // List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point
-                    XRawFileIO.udtFTLabelInfoType[] ftLabelData;
+                    udtFTLabelInfoType[] ftLabelData;
 
                     var dataPointsRead = reader.GetScanLabelData(scanNumber, out ftLabelData);
 
@@ -1425,7 +1425,7 @@ namespace RawFileReaderTests
                 {
 
                     // List of Intensity, Mass, AccuracyMMU, AccuracyPPM, and Resolution for each data point
-                    XRawFileIO.udtMassPrecisionInfoType[] massResolutionData;
+                    udtMassPrecisionInfoType[] massResolutionData;
 
                     var dataPointsRead = reader.GetScanPrecisionData(scanNumber, out massResolutionData);
                     
@@ -1597,7 +1597,8 @@ namespace RawFileReaderTests
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
-                    var udtScanHeaderInfo = new FinniganFileReaderBaseClass.udtScanHeaderInfoType
+#pragma warning disable 618
+                    var udtScanHeaderInfo = new udtScanHeaderInfoType
                     {
                         MSLevel = scanInfo.MSLevel,
                         EventNumber = scanInfo.EventNumber,
@@ -1626,6 +1627,7 @@ namespace RawFileReaderTests
                         StatusLogNames = new string[scanInfo.StatusLog.Count],
                         StatusLogValues = new string[scanInfo.StatusLog.Count]
                     };
+#pragma warning restore 618
 
                     var targetIndex = 0;
                     foreach (var scanEvent in scanInfo.ScanEvents)
@@ -1643,7 +1645,9 @@ namespace RawFileReaderTests
                         targetIndex++;
                     }
 
+#pragma warning disable 618
                     var scanInfoFromStruct = new clsScanInfo(scanInfo.ScanNumber, udtScanHeaderInfo);
+#pragma warning restore 618
 
                     Assert.AreEqual(scanInfoFromStruct.MSLevel, scanInfo.MSLevel);
                     Assert.AreEqual(scanInfoFromStruct.IsCentroided, scanInfo.IsCentroided);

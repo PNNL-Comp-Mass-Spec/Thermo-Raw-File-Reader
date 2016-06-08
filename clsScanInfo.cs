@@ -85,7 +85,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns>1 or 2 if this is a multiple reaction monitoring scan (MRMQMS or SRM)</returns>
         /// <remarks></remarks>
-        public FinniganFileReaderBaseClass.MRMScanTypeConstants MRMScanType { get; set; }
+        public MRMScanTypeConstants MRMScanType { get; set; }
 
         /// <summary>
         /// Zoom scan flag
@@ -173,7 +173,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public FinniganFileReaderBaseClass.ActivationTypeConstants ActivationType { get; set; }
+        public ActivationTypeConstants ActivationType { get; set; }
 
         /// <summary>
         /// Collision mode, determined from the filter string
@@ -189,7 +189,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public FinniganFileReaderBaseClass.IonModeConstants IonMode { get; set; }
+        public IonModeConstants IonMode { get; set; }
 
         /// <summary>
         /// MRM mode
@@ -197,7 +197,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public FinniganFileReaderBaseClass.udtMRMInfoType MRMInfo { get; set; }
+        public MRMInfo MRMInfo { get; set; }
 
         /// <summary>
         /// 
@@ -274,7 +274,7 @@ namespace ThermoRawFileReader
 
             FilterText = string.Empty;
             CollisionMode = string.Empty;
-            ActivationType = FinniganFileReaderBaseClass.ActivationTypeConstants.Unknown;
+            ActivationType = ActivationTypeConstants.Unknown;
 
             mScanEvents = new List<KeyValuePair<string, string>>();
             mStatusLog = new List<KeyValuePair<string, string>>();
@@ -285,7 +285,8 @@ namespace ThermoRawFileReader
         /// Constructor with scan number and data in a udtScanHeaderInfoType struct
         /// </summary>
         /// <remarks></remarks>
-        public clsScanInfo(int scan, FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfo) : this(scan)
+        [Obsolete("udtScanHeaderInfoType is obsolete")]
+        public clsScanInfo(int scan, udtScanHeaderInfoType udtScanHeaderInfo) : this(scan)
         {
             CopyFromStruct(udtScanHeaderInfo);
         }
@@ -360,7 +361,8 @@ namespace ThermoRawFileReader
         #region "Private methods"
 
 
-        private void CopyFromStruct(FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfoType)
+        [Obsolete("Use clsScanInfo")]
+        private void CopyFromStruct(udtScanHeaderInfoType udtScanHeaderInfoType)
         {
             MSLevel = udtScanHeaderInfoType.MSLevel;
             EventNumber = udtScanHeaderInfoType.EventNumber;

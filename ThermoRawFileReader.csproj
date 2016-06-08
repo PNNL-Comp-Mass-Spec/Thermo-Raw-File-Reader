@@ -40,8 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="clsFinniganDataFileFunctions.cs" />
-    <Compile Include="clsFinniganDataFileFunctionsBaseClass.cs" />
+    <Compile Include="DataObjects.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="XRawFileIO.cs" />
     <Compile Include="clsScanInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

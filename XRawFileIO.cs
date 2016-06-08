@@ -25,10 +25,14 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Class for reading Thermo Finnigan .raw files, using the IXRawfile5 interface
     /// </summary>
-    public class XRawFileIO : FinniganFileReaderBaseClass, IDisposable
+    public class XRawFileIO : IDisposable
     {
+        #region "Constants"
 
-        #region "Constants and Enums"
+        /// <summary>
+        /// Maximum size of the scan info cache
+        /// </summary>
+        protected int MAX_SCANS_TO_CACHE_INFO = 50000;
 
         // Note that each of these strings has a space at the end; this is important to avoid matching inappropriate text in the filter string
         private const string MS_ONLY_C_TEXT = " c ms ";
@@ -75,295 +79,34 @@ namespace ThermoRawFileReader
 
         private const string MZ_WITHOUT_COLLISION_ENERGY = "ms[2-9](?<MzValue> [0-9.]+)$";
 
-        /// <summary>
-        /// Sample types
-        /// </summary>
-        /// <remarks>Returned by <see cref="XRawFileIO.mXRawFile"/>.GetSeqRowSampleType()</remarks>
-        public enum SampleTypeConstants
-        {
-            /// <summary>
-            /// Unknown sample type
-            /// </summary>
-            Unknown = 0,
-
-            /// <summary>
-            /// Blank sample
-            /// </summary>
-            Blank = 1,
-
-            /// <summary>
-            /// QC sample
-            /// </summary>
-            QC = 2,
-
-            /// <summary>
-            /// Standard Clear (None) sample
-            /// </summary>
-            StandardClear_None = 3,
-
-            /// <summary>
-            /// Standard Update (None) sample
-            /// </summary>
-            StandardUpdate_None = 4,
-
-            /// <summary>
-            /// Standard Bracket (Open) sample
-            /// </summary>
-            StandardBracket_Open = 5,
-
-            /// <summary>
-            /// Standard Bracket Start (multiple brackets) sample
-            /// </summary>
-            StandardBracketStart_MultipleBrackets = 6,
-
-            /// <summary>
-            /// Standard Bracket End (multiple brackets) sample
-            /// </summary>
-            StandardBracketEnd_multipleBrackets = 7
-        }
-
-        /// <summary>
-        /// Controller Types
-        /// </summary>
-        /// <remarks> Used with <see cref="SetMSController()"/></remarks>
-        public enum ControllerTypeConstants
-        {
-            /// <summary>
-            /// No Device
-            /// </summary>
-            NoDevice = -1,
-
-            /// <summary>
-            /// MS Controller
-            /// </summary>
-            MS = 0,
-
-            /// <summary>
-            /// Analog controller
-            /// </summary>
-            Analog = 1,
-
-            /// <summary>
-            /// A/D card controller
-            /// </summary>
-            AD_Card = 2,
-
-            /// <summary>
-            /// PDA controller
-            /// </summary>
-            PDA = 3,
-
-            /// <summary>
-            /// UV controller
-            /// </summary>
-            UV = 4
-        }
-
-        /// <summary>
-        /// Intensity Cutoff Types
-        /// </summary>
-        /// <remarks>Used with <see cref="mXRawFile"/> functions in <see cref="XRawFileIO.GetScanData2D(int,out double[,],int,bool)"/> and <see cref="XRawFileIO.GetScanDataSumScans"/></remarks>
-        public enum IntensityCutoffTypeConstants
-        {
-            /// <summary>
-            /// All Values Returned
-            /// </summary>
-            None = 0,
-
-            /// <summary>
-            /// Absolute Intensity Units
-            /// </summary>
-            AbsoluteIntensityUnits = 1,
-
-            /// <summary>
-            /// Intensity relative to base peak
-            /// </summary>
-            RelativeToBasePeak = 2
-        }
-
-        /// <summary>
-        /// Instrument Flags
-        /// </summary>
-        public class InstFlags
-        {
-            /// <summary>
-            /// Total Ion Map
-            /// </summary>
-            public const string TIM = "Total Ion Map";
-
-            /// <summary>
-            /// Neutral Loss Map
-            /// </summary>
-            public const string NLM = "Neutral Loss Map";
-
-            /// <summary>
-            /// Parent Ion Map
-            /// </summary>
-            public const string PIM = "Parent Ion Map";
-
-            /// <summary>
-            /// Data Dependent ZoomScan Map
-            /// </summary>
-            public const string DDZMap = "Data Dependent ZoomScan Map";
-        }
-
-        #endregion
-
-        #region "Structures"
-        /// <summary>
-        /// Type for storing Parent Ion Information
-        /// </summary>
-        public struct udtParentIonInfoType
-        {
-            /// <summary>
-            /// MS Level of the spectrum
-            /// </summary>
-            /// <remarks>1 for MS1 spectra, 2 for MS2, 3 for MS3</remarks>
-            public int MSLevel;
-
-            /// <summary>
-            /// Parent ion m/z
-            /// </summary>
-            public double ParentIonMZ;
-
-            /// <summary>
-            /// Collision mode
-            /// </summary>
-            /// <remarks>Examples: cid, etd, hcd, EThcD, ETciD</remarks>
-            public string CollisionMode;
-
-            /// <summary>
-            /// Secondary collision mode
-            /// </summary>
-            /// <remarks>
-            /// For example, for filter string: ITMS + c NSI r d sa Full ms2 1143.72@etd120.55@cid20.00 [120.00-2000.00]
-            /// CollisionMode = ETciD
-            /// CollisionMode2 = cid
-            /// </remarks>
-            public string CollisionMode2;
-
-            /// <summary>
-            /// Collision energy
-            /// </summary>
-            public float CollisionEnergy;
-
-            /// <summary>
-            /// Secondary collision energy
-            /// </summary>
-            /// <remarks>
-            /// For example, for filter string: ITMS + c NSI r d sa Full ms2 1143.72@etd120.55@cid20.00 [120.00-2000.00]
-            /// CollisionEnergy = 120.55
-            /// CollisionEnergy2 = 20.0
-            /// </remarks>
-            public float CollisionEnergy2;
-
-            /// <summary>
-            /// Activation type
-            /// </summary>
-            /// <remarks>Examples: CID, ETD, or HCD</remarks>
-            public ActivationTypeConstants ActivationType;
-
-            /// <summary>
-            /// Clear the data
-            /// </summary>
-            public void Clear()
-            {
-                MSLevel = 1;
-                ParentIonMZ = 0;
-                CollisionMode = string.Empty;
-                CollisionMode2 = string.Empty;
-                CollisionEnergy = 0;
-                CollisionEnergy2 = 0;
-                ActivationType = ActivationTypeConstants.Unknown;
-            }
-
-            /// <summary>
-            /// Return a simple summary of the object
-            /// </summary>
-            /// <returns></returns>
-            public override string ToString()
-            {
-                if (string.IsNullOrWhiteSpace(CollisionMode))
-                {
-                    return "ms" + MSLevel + " " + ParentIonMZ.ToString("0.0#");
-                }
-                else
-                {
-                    return "ms" + MSLevel + " " + ParentIonMZ.ToString("0.0#") + "@" + CollisionMode + CollisionEnergy.ToString("0.00");
-                }
-            }
-
-        }
-
-        /// <summary>
-        /// Type for Mass Precision Information
-        /// </summary>
-        public struct udtMassPrecisionInfoType
-        {
-            /// <summary>
-            /// Peak Intensity
-            /// </summary>
-            public double Intensity;
-
-            /// <summary>
-            /// Peak Mass
-            /// </summary>
-            public double Mass;
-
-            /// <summary>
-            /// Peak Accuracy (in MMU)
-            /// </summary>
-            public double AccuracyMMU;
-
-            /// <summary>
-            /// Peak Accuracy (in PPM)
-            /// </summary>
-            public double AccuracyPPM;
-
-            /// <summary>
-            /// Peak Resolution
-            /// </summary>
-            public double Resolution;
-        }
-
-        /// <summary>
-        /// Type for storing FT Label Information
-        /// </summary>
-        public struct udtFTLabelInfoType
-        {
-            /// <summary>
-            /// Peak Mass
-            /// </summary>
-            public double Mass;
-
-            /// <summary>
-            /// Peak Intensity
-            /// </summary>
-            public double Intensity;
-
-            /// <summary>
-            /// Peak Resolution
-            /// </summary>
-            public float Resolution;
-            
-            /// <summary>
-            /// Peak Baseline
-            /// </summary>
-            public float Baseline;
-
-            /// <summary>
-            /// Peak Noise
-            /// </summary>
-            public float Noise;
-
-            /// <summary>
-            /// Peak Charge
-            /// </summary>
-            public int Charge;
-        }
         #endregion
 
         #region "Classwide Variables"
+
+        /// <summary>
+        /// The currently loaded .raw file
+        /// </summary>
+        protected string mCachedFileName;
+
+        /// <summary>
+        /// The scan info cache
+        /// </summary>
+        protected Dictionary<int, clsScanInfo> mCachedScanInfo;
+
+        /// <summary>
+        /// File info for the currently loaded .raw file
+        /// </summary>
+        protected RawFileInfo mFileInfo = new RawFileInfo();
+
+        /// <summary>
+        /// MS Method Information
+        /// </summary>
+        protected bool mLoadMSMethodInfo = true;
+
+        /// <summary>
+        /// MS Tune Information
+        /// </summary>
+        protected bool mLoadMSTuneInfo = true;
 
         // Cached XRawFile object, for faster accessing
         private IXRawfile5 mXRawFile;
@@ -387,6 +130,84 @@ namespace ThermoRawFileReader
         private static readonly Regex mMzWithoutCE = new Regex(MZ_WITHOUT_COLLISION_ENERGY, RegexOptions.Compiled);
         #endregion
 
+        #region "Properties"
+
+        /// <summary>
+        /// Get FileInfo about the currently loaded .raw file
+        /// </summary>
+        public RawFileInfo FileInfo
+        {
+            get { return mFileInfo; }
+        }
+
+        /// <summary>
+        /// MS Method information
+        /// </summary>
+        public bool LoadMSMethodInfo
+        {
+            get { return mLoadMSMethodInfo; }
+            set { mLoadMSMethodInfo = value; }
+        }
+
+        /// <summary>
+        /// MS Tune Info
+        /// </summary>
+        public bool LoadMSTuneInfo
+        {
+            get { return mLoadMSTuneInfo; }
+            set { mLoadMSTuneInfo = value; }
+        }
+
+        #endregion
+
+        #region "Events"
+
+        /// <summary>
+        /// Event handler for reporting error messages
+        /// </summary>
+        public event ReportErrorEventHandler ReportError;
+
+        /// <summary>
+        /// Event handler delegate for reporting error messages
+        /// </summary>
+        /// <param name="strMessage"></param>
+        public delegate void ReportErrorEventHandler(string strMessage);
+
+        /// <summary>
+        /// Event handler for reporting warning messages
+        /// </summary>
+        public event ReportWarningEventHandler ReportWarning;
+
+        /// <summary>
+        /// Event handler delegate for reporting warning messages
+        /// </summary>
+        /// <param name="strMessage"></param>
+        public delegate void ReportWarningEventHandler(string strMessage);
+
+        /// <summary>
+        /// Report an error message to the error event handler
+        /// </summary>
+        /// <param name="message"></param>
+        protected void RaiseErrorMessage(string message)
+        {
+            if (ReportError != null)
+            {
+                ReportError(message);
+            }
+        }
+
+        /// <summary>
+        /// Report a warning message to the warning event handler
+        /// </summary>
+        /// <param name="message"></param>
+        protected void RaiseWarningMessage(string message)
+        {
+            if (ReportWarning != null)
+            {
+                ReportWarning(message);
+            }
+        }
+        #endregion
 
         private void CacheScanInfo(int scan, clsScanInfo scanInfo)
         {
@@ -441,7 +262,7 @@ namespace ThermoRawFileReader
         /// Test the functionality of the reader - can we instantiate the MSFileReader Object?
         /// </summary>
         /// <returns></returns>
-        public override bool CheckFunctionality()
+        public bool CheckFunctionality()
         {
             // I have a feeling this doesn't actually work, and will always return True
             try
@@ -463,7 +284,7 @@ namespace ThermoRawFileReader
         /// Close the .raw file
         /// </summary>
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
-        public override void CloseRawFile()
+        public void CloseRawFile()
         {
             try
             {
@@ -608,7 +429,7 @@ namespace ThermoRawFileReader
         /// <param name="filterText"></param>
         /// <param name="mrmScanType"></param>
         /// <param name="mrmInfo"></param>
-        public static void ExtractMRMMasses(string filterText, MRMScanTypeConstants mrmScanType, out udtMRMInfoType mrmInfo)
+        public static void ExtractMRMMasses(string filterText, MRMScanTypeConstants mrmScanType, out MRMInfo mrmInfo)
         {
             // Parse out the MRM_QMS or SRM mass info from filterText
             // It should be of the form 
@@ -621,7 +442,7 @@ namespace ThermoRawFileReader
             // Note: we do not parse mass information out for Full Neutral Loss scans
             // MRM_FullNL_TEXT: c NSI Full cnl 162.053 [300.000-1200.000]
 
-            mrmInfo = InitializeMRMInfo();
+            mrmInfo = new MRMInfo();
 
             if (string.IsNullOrWhiteSpace(filterText))
             {
@@ -639,8 +460,6 @@ namespace ThermoRawFileReader
                 }
 
                 reMatch = mMassRanges.Match(reMatch.Value);
-
-                mrmInfo = InitializeMRMInfo();
 
                 while (reMatch.Success)
                 {
@@ -977,7 +796,7 @@ namespace ThermoRawFileReader
         /// Populate mFileInfo
         /// </summary>
         /// <returns></returns>
-        protected override bool FillFileInfo()
+        protected bool FillFileInfo()
         {
             // Populates the mFileInfo structure
             // Function returns True if no error, False if an error
@@ -1066,7 +885,7 @@ namespace ThermoRawFileReader
                 mXRawFile.GetSeqRowSampleName(ref mFileInfo.SampleName);
                 mXRawFile.GetSeqRowComment(ref mFileInfo.SampleComment);
 
-                mFileInfo.TuneMethods = new List<udtTuneMethodType>();
+                mFileInfo.TuneMethods = new List<TuneMethod>();
 
                 if (mLoadMSTuneInfo)
                 {
@@ -1131,47 +950,6 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Return un-normalized collision energies via call mXRawFile.GetCollisionEnergyForScanNum
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <returns></returns>
-        [Obsolete("The collision energies reported by mXRawFile.GetCollisionEnergyForScanNum are not normalized and are thus not very useful")]
-        public List<double> GetCollisionEnergyUnnormalized(int scan)
-        {
-
-            var numMsOrders = 0;
-            var collisionEnergies = new List<double>();
-
-            try
-            {
-                if (mXRawFile == null)
-                    return collisionEnergies;
-
-                mXRawFile.GetNumberOfMSOrdersFromScanNum(scan, ref numMsOrders);
-
-                for (var msOrder = 1; msOrder <= numMsOrders; msOrder++)
-                {
-                    double collisionEnergy = 0;
-                    mXRawFile.GetCollisionEnergyForScanNum(scan, msOrder, ref collisionEnergy);
-
-                    if ((collisionEnergy > 0))
-                    {
-                        collisionEnergies.Add(collisionEnergy);
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                var msg = "Error: Exception in GetCollisionEnergyUnnormalized: " + ex.Message;
-                RaiseErrorMessage(msg);
-            }
-
-            return collisionEnergies;
-
-        }
-
-        /// <summary>
         /// Return the collision energy (or energies) for the given scan
         /// </summary>
         /// <param name="scan">Scan number</param>
@@ -1225,7 +1003,7 @@ namespace ThermoRawFileReader
         /// Number of scans in the .raw file
         /// </summary>
         /// <returns>the number of scans, or -1 if an error</returns>
-        public override int GetNumScans()
+        public  int GetNumScans()
         {
             // Returns the number of scans, or -1 if an error
 
@@ -1260,38 +1038,11 @@ namespace ThermoRawFileReader
         /// Get the header info for the specified scan
         /// </summary>
         /// <param name="scan">Scan number</param>
-        /// <param name="udtScanInfo">Scan header info struct</param>
-        /// <returns>True if no error, False if an error</returns>
-        /// <remarks></remarks>
-        [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
-        [Obsolete("Use GetScanInfo that returns a class")]
-        public override bool GetScanInfo(int scan, out udtScanHeaderInfoType udtScanInfo)
-        {
-
-            clsScanInfo scanInfo;
-            var success = GetScanInfo(scan, out scanInfo);
-
-            if (success)
-            {
-                udtScanInfo = ScanInfoClassToStruct(scanInfo);
-            }
-            else
-            {
-                udtScanInfo = new udtScanHeaderInfoType();
-            }
-
-            return success;
-        }
-
-        /// <summary>
-        /// Get the header info for the specified scan
-        /// </summary>
-        /// <param name="scan">Scan number</param>
         /// <param name="scanInfo">Scan header info class</param>
         /// <returns>True if no error, False if an error</returns>
         /// <remarks></remarks>
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
-        public override bool GetScanInfo(int scan, out clsScanInfo scanInfo)
+        public bool GetScanInfo(int scan, out clsScanInfo scanInfo)
         {
 
             // Check for the scan in the cache
@@ -1584,7 +1335,7 @@ namespace ThermoRawFileReader
                 // Now that we know MSLevel we can lookup the activation type (aka activation method)
                 scanInfo.ActivationType = GetActivationType(scan, scanInfo.MSLevel);
 
-                udtMRMInfoType newMRMInfo;
+                MRMInfo newMRMInfo;
 
                 if (scanInfo.MRMScanType != MRMScanTypeConstants.NotMRM)
                 {
@@ -1593,7 +1344,7 @@ namespace ThermoRawFileReader
                 }
                 else
                 {
-                    newMRMInfo = InitializeMRMInfo();
+                    newMRMInfo = new MRMInfo();
                 }
 
                 scanInfo.MRMInfo = newMRMInfo;
@@ -1947,7 +1698,7 @@ namespace ThermoRawFileReader
                     continue;
                 }
 
-                var newTuneMethod = new udtTuneMethodType();
+                var newTuneMethod = new TuneMethod();
                 newTuneMethod.Clear();
 
 
@@ -2097,56 +1848,6 @@ namespace ThermoRawFileReader
 
         }
 
-        private udtScanHeaderInfoType ScanInfoClassToStruct(clsScanInfo scanInfo)
-        {
-
-            var udtScanInfo = new udtScanHeaderInfoType
-            {
-                MSLevel = scanInfo.MSLevel,
-                EventNumber = scanInfo.EventNumber,
-                SIMScan = scanInfo.SIMScan,
-                MRMScanType = scanInfo.MRMScanType,
-                ZoomScan = scanInfo.ZoomScan,
-                NumPeaks = scanInfo.NumPeaks,
-                RetentionTime = scanInfo.RetentionTime,
-                LowMass = scanInfo.LowMass,
-                HighMass = scanInfo.HighMass,
-                TotalIonCurrent = scanInfo.TotalIonCurrent,
-                BasePeakMZ = scanInfo.BasePeakMZ,
-                BasePeakIntensity = scanInfo.BasePeakIntensity,
-                FilterText = scanInfo.FilterText,
-                ParentIonMZ = scanInfo.ParentIonMZ,
-                ActivationType = scanInfo.ActivationType,
-                CollisionMode = scanInfo.CollisionMode,
-                IonMode = scanInfo.IonMode,
-                MRMInfo = scanInfo.MRMInfo,
-                NumChannels = scanInfo.NumChannels,
-                UniformTime = scanInfo.UniformTime,
-                Frequency = scanInfo.Frequency,
-                IsCentroidScan = scanInfo.IsCentroided,
-                ScanEventNames = new string[scanInfo.ScanEvents.Count],
-                ScanEventValues = new string[scanInfo.ScanEvents.Count]
-            };
-
-            for (var i = 0; i < scanInfo.ScanEvents.Count; i++)
-            {
-                udtScanInfo.ScanEventNames[i] = scanInfo.ScanEvents[i].Key;
-                udtScanInfo.ScanEventValues[i] = scanInfo.ScanEvents[i].Value;
-            }
-
-            udtScanInfo.StatusLogNames = new string[scanInfo.StatusLog.Count];
-            udtScanInfo.StatusLogValues = new string[scanInfo.StatusLog.Count];
-
-            for (var i = 0; i < scanInfo.StatusLog.Count; i++)
-            {
-                udtScanInfo.StatusLogNames[i] = scanInfo.StatusLog[i].Key;
-                udtScanInfo.StatusLogValues[i] = scanInfo.StatusLog[i].Value;
-            }
-
-            return udtScanInfo;
-
-        }
-
         private bool SetMSController()
         {
             // A controller is typically the MS, UV, analog, etc.
@@ -2258,82 +1959,12 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Obtain the mass and intensity list for the specified scan
         /// </summary>
-        /// <param name="scan"></param>
-        /// <param name="mzList"></param>
-        /// <param name="intensityList"></param>
-        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo)
-        {
-            const int intMaxNumberOfPeaks = 0;
-            const bool centroidData = false;
-            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
-        }
-
-        /// <summary>
-        /// Obtain the mass and intensity list for the specified scan
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <param name="mzList"></param>
-        /// <param name="intensityList"></param>
-        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
-        /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo, bool centroidData)
-        {
-            const int intMaxNumberOfPeaks = 0;
-            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
-        }
-
-        /// <summary>
-        /// Obtain the mass and intensity list for the specified scan
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <param name="mzList"></param>
-        /// <param name="intensityList"></param>
-        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
-        /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks)
-        {
-            const bool centroidData = false;
-            udtScanInfo = new udtScanHeaderInfoType();
-            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
-        }
-
-        /// <summary>
-        /// Obtain the mass and intensity list for the specified scan
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <param name="mzList"></param>
-        /// <param name="intensityList"></param>
-        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
-        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
-        /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks, bool centroidData)
-        {
-            udtScanInfo = new udtScanHeaderInfoType();
-            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
-        }
-
-        /// <summary>
-        /// Obtain the mass and intensity list for the specified scan
-        /// </summary>
         /// <param name="scanNumber">Scan number</param>
         /// <param name="mzList">Output array of mass values</param>
         /// <param name="intensityList">Output array of intensity values (parallel to mzList)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        public override int GetScanData(int scanNumber, out double[] mzList, out double[] intensityList)
+        public int GetScanData(int scanNumber, out double[] mzList, out double[] intensityList)
         {
             const int intMaxNumberOfPeaks = 0;
             const bool centroidData = false;
@@ -2349,7 +1980,7 @@ namespace ThermoRawFileReader
         /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        public override int GetScanData(int scanNumber, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks)
+        public int GetScanData(int scanNumber, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks)
         {
             const bool centroid = false;
             return GetScanData(scanNumber, out mzList, out intensityList, maxNumberOfPeaks, centroid);
@@ -2437,21 +2068,6 @@ namespace ThermoRawFileReader
         public int GetScanData2D(int scan, out double[,] massIntensityPairs)
         {
             return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks: 0, centroidData: false);
-        }
-
-        /// <summary>
-        /// Obtain the mass and intensity for the specified scan
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
-        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
-        /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated, use GetScanData2D that does not use udtScanHeaderInfo")]
-        public int GetScanData2D(int scan, out double[,] massIntensityPairs, ref udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks)
-        {
-            return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks, centroidData: false);
         }
 
         /// <summary>
@@ -2966,34 +2582,11 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Get an initialized MRMInfo object
-        /// </summary>
-        /// <returns></returns>
-        public static udtMRMInfoType InitializeMRMInfo()
-        {
-            var udtMRMInfo = new udtMRMInfoType();
-            udtMRMInfo.Clear();
-
-            return udtMRMInfo;
-        }
-
-        /// <summary>
-        /// Get an initialized MRMInfo object
-        /// </summary>
-        /// <param name="udtMRMInfo"></param>
-        /// <param name="intInitialMassCountCapacity"></param>
-        [Obsolete("Use parameterless function InitializeMRMInfo instead")]
-        public static void InitializeMRMInfo(out udtMRMInfoType udtMRMInfo, int intInitialMassCountCapacity)
-        {
-            udtMRMInfo = InitializeMRMInfo();
-        }
-
-        /// <summary>
         /// Open the .raw file
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public sealed override bool OpenRawFile(string filePath)
+        public bool OpenRawFile(string filePath)
         {
             var intResult = 0;
             var success = false;
@@ -3058,7 +2651,7 @@ namespace ThermoRawFileReader
 
         }
 
-        private bool TuneMethodsMatch(udtTuneMethodType udtMethod1, udtTuneMethodType udtMethod2)
+        private bool TuneMethodsMatch(TuneMethod udtMethod1, TuneMethod udtMethod2)
         {
 
             if (udtMethod1.Settings.Count != udtMethod2.Settings.Count)
@@ -3113,5 +2706,211 @@ namespace ThermoRawFileReader
         {
             CloseRawFile();
         }
+
+        #region "Obsolete Functions"
+
+        /// <summary>
+        /// Return un-normalized collision energies via call mXRawFile.GetCollisionEnergyForScanNum
+        /// </summary>
+        /// <param name="scan"></param>
+        /// <returns></returns>
+        [Obsolete("The collision energies reported by mXRawFile.GetCollisionEnergyForScanNum are not normalized and are thus not very useful")]
+        public List<double> GetCollisionEnergyUnnormalized(int scan)
+        {
+
+            var numMsOrders = 0;
+            var collisionEnergies = new List<double>();
+
+            try
+            {
+                if (mXRawFile == null)
+                    return collisionEnergies;
+
+                mXRawFile.GetNumberOfMSOrdersFromScanNum(scan, ref numMsOrders);
+
+                for (var msOrder = 1; msOrder <= numMsOrders; msOrder++)
+                {
+                    double collisionEnergy = 0;
+                    mXRawFile.GetCollisionEnergyForScanNum(scan, msOrder, ref collisionEnergy);
+
+                    if ((collisionEnergy > 0))
+                    {
+                        collisionEnergies.Add(collisionEnergy);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                var msg = "Error: Exception in GetCollisionEnergyUnnormalized: " + ex.Message;
+                RaiseErrorMessage(msg);
+            }
+
+            return collisionEnergies;
+        }
+
+        /// <summary>
+        /// Get the header info for the specified scan
+        /// </summary>
+        /// <param name="scan">Scan number</param>
+        /// <param name="udtScanInfo">Scan header info struct</param>
+        /// <returns>True if no error, False if an error</returns>
+        /// <remarks></remarks>
+        [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
+        [Obsolete("Use GetScanInfo that returns a class")]
+        public bool GetScanInfo(int scan, out udtScanHeaderInfoType udtScanInfo)
+        {
+
+            clsScanInfo scanInfo;
+            var success = GetScanInfo(scan, out scanInfo);
+
+            if (success)
+            {
+                udtScanInfo = ScanInfoClassToStruct(scanInfo);
+            }
+            else
+            {
+                udtScanInfo = new udtScanHeaderInfoType();
+            }
+
+            return success;
+        }
+
+        [Obsolete("udtScanHeaderInfoType is obsolete")]
+        private udtScanHeaderInfoType ScanInfoClassToStruct(clsScanInfo scanInfo)
+        {
+
+            var udtScanInfo = new udtScanHeaderInfoType
+            {
+                MSLevel = scanInfo.MSLevel,
+                EventNumber = scanInfo.EventNumber,
+                SIMScan = scanInfo.SIMScan,
+                MRMScanType = scanInfo.MRMScanType,
+                ZoomScan = scanInfo.ZoomScan,
+                NumPeaks = scanInfo.NumPeaks,
+                RetentionTime = scanInfo.RetentionTime,
+                LowMass = scanInfo.LowMass,
+                HighMass = scanInfo.HighMass,
+                TotalIonCurrent = scanInfo.TotalIonCurrent,
+                BasePeakMZ = scanInfo.BasePeakMZ,
+                BasePeakIntensity = scanInfo.BasePeakIntensity,
+                FilterText = scanInfo.FilterText,
+                ParentIonMZ = scanInfo.ParentIonMZ,
+                ActivationType = scanInfo.ActivationType,
+                CollisionMode = scanInfo.CollisionMode,
+                IonMode = scanInfo.IonMode,
+                MRMInfo = scanInfo.MRMInfo,
+                NumChannels = scanInfo.NumChannels,
+                UniformTime = scanInfo.UniformTime,
+                Frequency = scanInfo.Frequency,
+                IsCentroidScan = scanInfo.IsCentroided,
+                ScanEventNames = new string[scanInfo.ScanEvents.Count],
+                ScanEventValues = new string[scanInfo.ScanEvents.Count]
+            };
+
+            for (var i = 0; i < scanInfo.ScanEvents.Count; i++)
+            {
+                udtScanInfo.ScanEventNames[i] = scanInfo.ScanEvents[i].Key;
+                udtScanInfo.ScanEventValues[i] = scanInfo.ScanEvents[i].Value;
+            }
+
+            udtScanInfo.StatusLogNames = new string[scanInfo.StatusLog.Count];
+            udtScanInfo.StatusLogValues = new string[scanInfo.StatusLog.Count];
+
+            for (var i = 0; i < scanInfo.StatusLog.Count; i++)
+            {
+                udtScanInfo.StatusLogNames[i] = scanInfo.StatusLog[i].Key;
+                udtScanInfo.StatusLogValues[i] = scanInfo.StatusLog[i].Value;
+            }
+
+            return udtScanInfo;
+
+        }
+
+        /// <summary>
+        /// Obtain the mass and intensity list for the specified scan
+        /// </summary>
+        /// <param name="scan"></param>
+        /// <param name="mzList"></param>
+        /// <param name="intensityList"></param>
+        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
+        /// <returns>The number of data points, or -1 if an error</returns>
+        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo)
+        {
+            const int intMaxNumberOfPeaks = 0;
+            const bool centroidData = false;
+            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
+        }
+
+        /// <summary>
+        /// Obtain the mass and intensity list for the specified scan
+        /// </summary>
+        /// <param name="scan"></param>
+        /// <param name="mzList"></param>
+        /// <param name="intensityList"></param>
+        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
+        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+        /// <returns>The number of data points, or -1 if an error</returns>
+        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo, bool centroidData)
+        {
+            const int intMaxNumberOfPeaks = 0;
+            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
+        }
+
+        /// <summary>
+        /// Obtain the mass and intensity list for the specified scan
+        /// </summary>
+        /// <param name="scan"></param>
+        /// <param name="mzList"></param>
+        /// <param name="intensityList"></param>
+        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
+        /// <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
+        /// <returns>The number of data points, or -1 if an error</returns>
+        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks)
+        {
+            const bool centroidData = false;
+            udtScanInfo = new udtScanHeaderInfoType();
+            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
+        }
+
+        /// <summary>
+        /// Obtain the mass and intensity list for the specified scan
+        /// </summary>
+        /// <param name="scan"></param>
+        /// <param name="mzList"></param>
+        /// <param name="intensityList"></param>
+        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
+        /// <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
+        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+        /// <returns>The number of data points, or -1 if an error</returns>
+        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks, bool centroidData)
+        {
+            udtScanInfo = new udtScanHeaderInfoType();
+            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
+        }
+
+        /// <summary>
+        /// Obtain the mass and intensity for the specified scan
+        /// </summary>
+        /// <param name="scan"></param>
+        /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
+        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
+        /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
+        /// <returns>The number of data points, or -1 if an error</returns>
+        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        [Obsolete("This method is deprecated, use GetScanData2D that does not use udtScanHeaderInfo")]
+        public int GetScanData2D(int scan, out double[,] massIntensityPairs, ref udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks)
+        {
+            return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks, centroidData: false);
+        }
+        #endregion
     }
 }
