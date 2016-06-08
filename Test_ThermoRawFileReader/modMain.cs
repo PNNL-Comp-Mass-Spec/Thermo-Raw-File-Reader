@@ -213,7 +213,7 @@ namespace Test_ThermoRawFileReader
                                 }
 
                                 if (oScanInfo.IsFTMS) {
-                                    XRawFileIO.udtFTLabelInfoType[] ftLabelData;
+                                    udtFTLabelInfoType[] ftLabelData;
 
                                     var dataCount = oReader.GetScanLabelData(iScanNum, out ftLabelData);
 
@@ -225,7 +225,7 @@ namespace Test_ThermoRawFileReader
                                         Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", ftLabelData[iDataPoint].Mass.ToString("0.000"), ftLabelData[iDataPoint].Intensity.ToString("0"), ftLabelData[iDataPoint].Resolution.ToString("0"), ftLabelData[iDataPoint].Baseline.ToString("0.0"), ftLabelData[iDataPoint].Noise.ToString("0"), ftLabelData[iDataPoint].Charge.ToString("0"));
                                     }
 
-                                    XRawFileIO.udtMassPrecisionInfoType[] ftPrecisionData;
+                                    udtMassPrecisionInfoType[] ftPrecisionData;
 
                                     dataCount = oReader.GetScanPrecisionData(iScanNum, out ftPrecisionData);
 
@@ -300,12 +300,12 @@ namespace Test_ThermoRawFileReader
                 int intMSLevel;
                 bool blnSIMScan;
                 bool blnZoomScan;
-                FinniganFileReaderBaseClass.MRMScanTypeConstants eMRMScanType;
+                MRMScanTypeConstants eMRMScanType;
 
                 var validMS1Scan = XRawFileIO.ValidateMSScan(filterItem, out intMSLevel, out blnSIMScan, out eMRMScanType, out blnZoomScan);
 
                 if (validMS1Scan) {
-                    if (eMRMScanType == FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM) {
+                    if (eMRMScanType == MRMScanTypeConstants.NotMRM) {
                         Console.Write("  MSLevel={0}", intMSLevel);
                     } else {
                         Console.Write("  MSLevel={0}, MRMScanType={1}", intMSLevel, eMRMScanType);
