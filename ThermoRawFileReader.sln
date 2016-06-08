@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermoRawFileReader", "Ther
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermoRawFileReaderUnitTests", "UnitTests\ThermoRawFileReaderUnitTests.csproj", "{ACADABB8-BF64-4FED-9157-E44BE88F9D1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_ThermoRawFileReader", "Test_ThermoRawFileReader\Test_ThermoRawFileReader.csproj", "{EBAFAB40-68C9-473E-8B43-568F97DCC13E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{ACADABB8-BF64-4FED-9157-E44BE88F9D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACADABB8-BF64-4FED-9157-E44BE88F9D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACADABB8-BF64-4FED-9157-E44BE88F9D1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBAFAB40-68C9-473E-8B43-568F97DCC13E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBAFAB40-68C9-473E-8B43-568F97DCC13E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBAFAB40-68C9-473E-8B43-568F97DCC13E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBAFAB40-68C9-473E-8B43-568F97DCC13E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
