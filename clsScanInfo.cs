@@ -7,6 +7,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Container for metadata relating to a single scan
     /// </summary>
+    [CLSCompliant(true)]
     public class clsScanInfo
     {
 

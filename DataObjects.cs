@@ -6,6 +6,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Type for Tune Methods
     /// </summary>
+    [CLSCompliant(true)]
     public class TuneMethod
     {
         /// <summary>
@@ -25,6 +26,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Type for Tune Method Settings
     /// </summary>
+    [CLSCompliant(true)]
     public struct udtTuneMethodSetting
     {
         /// <summary>
@@ -46,6 +48,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Type for File Information
     /// </summary>
+    [CLSCompliant(true)]
     public class RawFileInfo
     {
         /// <summary>
@@ -200,11 +203,44 @@ namespace ThermoRawFileReader
 
             CorruptFile = false;
         }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public RawFileInfo()
+        {
+            AcquisitionDate = string.Empty;
+            AcquisitionFilename = string.Empty;
+            Comment1 = string.Empty;
+            Comment2 = string.Empty;
+            SampleName = string.Empty;
+            SampleComment = string.Empty;
+            CreationDate = DateTime.MinValue;
+
+            CreatorID = string.Empty;
+            InstFlags = string.Empty;
+            InstHardwareVersion = string.Empty;
+            InstSoftwareVersion = string.Empty;
+            InstMethods = new List<string>();
+            InstModel = string.Empty;
+            InstName = string.Empty;
+            InstrumentDescription = string.Empty;
+            InstSerialNumber = string.Empty;
+            TuneMethods = new List<TuneMethod>();
+
+            VersionNumber = 0;
+            MassResolution = 0;
+            ScanStart = 0;
+            ScanEnd = 0;
+
+            CorruptFile = false;
+        }
     }
 
     /// <summary>
     /// Type for storing MRM Mass Ranges
     /// </summary>
+    [CLSCompliant(true)]
     public struct udtMRMMassRangeType
     {
         /// <summary>
@@ -235,6 +271,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Type for MRM Information
     /// </summary>
+    [CLSCompliant(true)]
     public class MRMInfo
     {
         /// <summary>
@@ -294,6 +331,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Type for scan header information/metadata
     /// </summary>
+    [CLSCompliant(true)]
     [Obsolete("Use clsScanInfo")]
     public struct udtScanHeaderInfoType
     {
@@ -447,6 +485,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Type for storing Parent Ion Information
     /// </summary>
+    [CLSCompliant(true)]
     public struct udtParentIonInfoType
     {
         /// <summary>
@@ -532,6 +571,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Type for Mass Precision Information
     /// </summary>
+    [CLSCompliant(true)]
     public struct udtMassPrecisionInfoType
     {
         /// <summary>
@@ -563,6 +603,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Type for storing FT Label Information
     /// </summary>
+    [CLSCompliant(true)]
     public struct udtFTLabelInfoType
     {
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -13,6 +14,12 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+
+// Assembly marked as NOT compliant. (MSFileReaderLib has an enum with non-compliant names,
+// and since it is an "Embedded Interop Type", the compiler complains about it if we mark
+// the whole assembly as CLS Compliant. Working around that problem by marking the assembly
+// as not CLS compliant, and marking all objects as CLS Compliant=true)
+[assembly: CLSCompliant(false)]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

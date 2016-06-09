@@ -25,6 +25,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Class for reading Thermo Finnigan .raw files, using the IXRawfile5 interface
     /// </summary>
+    [CLSCompliant(true)]
     public class XRawFileIO : IDisposable
     {
         #region "Constants"

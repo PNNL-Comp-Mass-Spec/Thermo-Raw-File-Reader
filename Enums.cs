@@ -1,8 +1,11 @@
-﻿namespace ThermoRawFileReader
+﻿using System;
+
+namespace ThermoRawFileReader
 {
     /// <summary>
     /// Activation Types enum
     /// </summary>
+    [CLSCompliant(true)]
     public enum ActivationTypeConstants
     {
         /// <summary>
@@ -69,6 +72,7 @@
     /// <summary>
     /// MRM Scan Types
     /// </summary>
+    [CLSCompliant(true)]
     public enum MRMScanTypeConstants
     {
         /// <summary>
@@ -95,6 +99,7 @@
     /// <summary>
     /// Ion Modes
     /// </summary>
+    [CLSCompliant(true)]
     public enum IonModeConstants
     {
         /// <summary>
@@ -117,6 +122,7 @@
     /// Sample types
     /// </summary>
     /// <remarks>Returned by <see cref="XRawFileIO.mXRawFile"/>.GetSeqRowSampleType()</remarks>
+    [CLSCompliant(true)]
     public enum SampleTypeConstants
     {
         /// <summary>
@@ -164,6 +170,7 @@
     /// Controller Types
     /// </summary>
     /// <remarks> Used with <see cref="XRawFileIO.SetMSController()"/></remarks>
+    [CLSCompliant(true)]
     public enum ControllerTypeConstants
     {
         /// <summary>
@@ -201,6 +208,7 @@
     /// Intensity Cutoff Types
     /// </summary>
     /// <remarks>Used with <see cref="XRawFileIO.mXRawFile"/> functions in <see cref="XRawFileIO.GetScanData2D(int,out double[,],int,bool)"/> and <see cref="XRawFileIO.GetScanDataSumScans"/></remarks>
+    [CLSCompliant(true)]
     public enum IntensityCutoffTypeConstants
     {
         /// <summary>
@@ -222,6 +230,7 @@
     /// <summary>
     /// Instrument Flags
     /// </summary>
+    [CLSCompliant(true)]
     public class InstFlags
     {
         /// <summary>
