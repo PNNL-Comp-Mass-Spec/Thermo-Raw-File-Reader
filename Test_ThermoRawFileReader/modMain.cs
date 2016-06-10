@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using FileProcessor;
 using ThermoRawFileReader;
 
@@ -20,6 +22,19 @@ namespace Test_ThermoRawFileReader
 
             if (commandLineParser.NeedToShowHelp) {
                 ShowProgramHelp();
+                return;
+            }
+
+            var extractScanFilters = commandLineParser.IsParameterPresent("GetFilters");
+            if (extractScanFilters)
+            {
+                var workingDirectory = ".";
+
+                if (commandLineParser.NonSwitchParameterCount > 0)
+                {
+                    workingDirectory = commandLineParser.RetrieveNonSwitchParameter(0);
+                }
+                ExtractScanFilters(workingDirectory);
                 return;
             }
 
@@ -76,6 +91,155 @@ namespace Test_ThermoRawFileReader
 
         }
 
+
+        private static void ExtractScanFilters(string directoryToScan)
+        {
+            var reParentIonMZ = new Regex("[0-9.]+@", RegexOptions.Compiled);
+
+            var reParentIonMZnoAt = new Regex("(ms[2-9]|cnl|pr) [0-9.]+ ", RegexOptions.Compiled);
+
+            var reMassRange = new Regex(@"[0-9.]+-[0-9.]+", RegexOptions.Compiled);
+
+            var reCollisionMode = new Regex("(?<CollisionMode>cid|etd|hcd|pqd)[0-9.]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+            var reSID = new Regex("sid=[0-9.]+", RegexOptions.Compiled);
+
+
+            var diWorkingDirectory = new DirectoryInfo(directoryToScan);
+            if (!diWorkingDirectory.Exists)
+            {
+                Console.WriteLine("Folder not found: " + diWorkingDirectory.FullName);
+                return;
+            }
+
+            // Keys in this dictionary are generic scan filters
+            // Values are a tuple of <ScanFilter, Observation Count, First Dataset>
+            var lstFilters = new Dictionary<string, Tuple<string, int, string>>();
+ 
+            // Find the Masic _ScanStatsEx.txt files in the source folder
+            var scanStatsFiles = diWorkingDirectory.GetFiles("*_ScanStatsEx.txt");
+
+            if (scanStatsFiles.Length == 0)
+            {
+                Console.WriteLine("No _ScanStatsEx.txt files were found in folder " + diWorkingDirectory.FullName);
+                return;
+            }
+
+            Console.WriteLine("Parsing _ScanStatsEx.txt files in folder " + diWorkingDirectory.Name);
+            var dtLastProgress = DateTime.UtcNow;
+
+            var filesProcessed = 0;
+            foreach (var dataFile in scanStatsFiles)
+            {
+                using (var reader = new StreamReader(new FileStream(dataFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                {
+                    if (reader.EndOfStream)
+                        continue;
+
+                    var headerLine = reader.ReadLine();
+                    if (headerLine == null)
+                    {
+                        continue;
+                    }
+
+                    var headers = headerLine.Split('\t');
+                    var scanFilterIndex = -1;
+
+                    for(var headerIndex = 0; headerIndex < headers.Length; headerIndex ++)
+                    {
+                        if (headers[headerIndex] == "Scan Filter Text")
+                        {
+                            scanFilterIndex = headerIndex;
+                            break;
+                        }
+                    }
+
+                    if (scanFilterIndex < 0)
+                    {
+                        Console.WriteLine("Scan Filter Text not found in: " + dataFile.Name);
+                        continue;
+                    }
+                    
+                    while (!reader.EndOfStream)
+                    {
+                        var dataLine = reader.ReadLine();
+                        if (string.IsNullOrWhiteSpace(dataLine))
+                            continue;
+
+                        var dataColumns = dataLine.Split('\t');
+                        if (dataColumns.Length < scanFilterIndex)
+                            continue;
+
+                        var scanFilter = dataColumns[scanFilterIndex];
+
+                        // Scan filter will be of the form
+                        //    FTMS + p NSI d Full ms2 343.4@etd20.00
+                        // or ITMS + p NSI d Z ms [163.00-173.00]
+                        // or + c NSI d Full ms2 150.100 [10.000-155.100]
+                        // etc.
+
+                        // Change 343.4@ to 0@
+                        // Also change [163.00-173.00] to [0.00-0.00]
+                        //  and change [163.00-173.00,403.00-413.00] to [0.00-0.00,0.00-0.00]
+                        // Also change etd20.0 to etd00.0
+                        // Also change sid=30.00 to sid=00.00
+
+                        var scanFilterGeneric = reParentIonMZ.Replace(scanFilter, "0@");
+                        scanFilterGeneric = reMassRange.Replace(scanFilterGeneric, "0.00-0.00");
+                        scanFilterGeneric = reSID.Replace(scanFilterGeneric, "sid=0.00");
+
+                        var matchesParentNoAt = reParentIonMZnoAt.Matches(scanFilterGeneric);
+                        foreach (Match match in matchesParentNoAt)
+                        {
+                            scanFilterGeneric = scanFilterGeneric.Replace(match.Value, match.Groups[1].Value + " 0.000");
+                        }
+
+                        var matchesCollision = reCollisionMode.Matches(scanFilterGeneric);
+                        foreach (Match match in matchesCollision)
+                        {
+                            scanFilterGeneric = scanFilterGeneric.Replace(match.Value, match.Groups[1].Value + "00.00");
+                        }
+
+                        Tuple<string, int, string> filterStats;
+                        if (lstFilters.TryGetValue(scanFilterGeneric, out filterStats))
+                        {
+                            lstFilters[scanFilterGeneric] = new Tuple<string, int, string>(
+                                filterStats.Item1,
+                                filterStats.Item2 + 1,
+                                filterStats.Item3);
+                        }
+                        else
+                        {
+                            lstFilters.Add(scanFilterGeneric, new Tuple<string, int, string>(scanFilter, 1, dataFile.Name));
+                        }
+
+                    }
+                }
+
+                filesProcessed++;
+
+                if (DateTime.UtcNow.Subtract(dtLastProgress).TotalSeconds >= 2)
+                {
+                    dtLastProgress = DateTime.UtcNow;
+                    var percentComplete = filesProcessed / (float)scanStatsFiles.Length * 100.0;
+                    Console.WriteLine(percentComplete.ToString("0.0") + "% complete");
+                }
+
+            }
+
+            // Write the cached scan filters
+            var outputFilePath = Path.Combine(diWorkingDirectory.FullName, "ScanFiltersFound.txt");  
+            
+            using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+            {
+                writer.WriteLine("{0}\t{1}\t{2}\t{3}", "Generic_Filter", "Example_Filter", "Count", "First_Dataset");
+
+                foreach (var filter in lstFilters)
+                {
+                    writer.WriteLine("{0}\t{1}\t{2}\t{3}", filter.Key, filter.Value.Item1, filter.Value.Item2, filter.Value.Item3);
+                }
+            }
+        }
 
         private static void ShowProgramHelp()
         {
