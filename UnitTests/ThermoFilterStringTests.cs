@@ -352,7 +352,7 @@ namespace RawFileReaderTests
         }
 
         /// <summary>
-        /// Test ExtractParentIonMZFromFilterText
+        /// Test ExtractParentIonMZFromFilterText(string, out double)
         /// </summary>
         /// <param name="filterText">FilterText</param>
         /// <param name="expectedParentIons">ParentIon Mz (could be comma-separated list, with ! marking the "best" parent ion m/z)</param>
@@ -370,11 +370,14 @@ namespace RawFileReaderTests
         [TestCase("ITMS + c ESI Full ms [300.00-2000.00]                                            ", "0", 1, "")]
         [TestCase("ITMS + p ESI d Z ms [1108.00-1118.00]                                            ", "0", 1, "")]
         [TestCase("+ p ms2 777.00@cid30.00 [210.00-1200.00]                                         ", "777", 2, "cid")]
+        [TestCase("+ c NSI SRM ms2 400.576 [376.895-376.897, 459.772-459.774, 516.314-516.316]      ", "400.576", 2, "")]
+        [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", "748.371", 2, "")]
         [TestCase("+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]               ", "501.56", 2, "cid")]
+        [TestCase("+ p NSI SRM ms2 1025.250 [300.000-1500.00]                                       ", "1025.250", 2, "")]
         [TestCase("FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]    ", "712.85!, 407.92", 2, "hcd")]
         [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]   ", "1073.48", 2, "ETciD")]
         [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]   ", "1073.48", 2, "EThcD")]
-        [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", "748.371", 2, "")]
+        [TestCase("FTMS + p NSI Full ms                                                             ", "0", 1, "")]
         [TestCase("0                                                                                                                            ", "0", 1, "")]
         [TestCase("ITMS + p NSI d Z ms [351.00-361.00]                                                                                          ", "0", 1, "")]
         [TestCase("ITMS + c NSI Full ms [150.00-700.00]                                                                                         ", "0", 1, "")]
@@ -519,30 +522,7 @@ namespace RawFileReaderTests
             int msLevel = 0;
             string collisionMode = string.Empty;
 
-            // This was created for use in other programs that only need the parent ion m/z, and no other functions from ThermoRawFileReader.
-            // Other projects that use this:
-            //      PHRPReader
-            // Take the following block of code, plus the 2 private Regexes defined below.
-            // ------------------------------- Start Take code from here ----------------------------------------------
-            Regex reg;
-            if (!filterText.ToLower().Contains("msx"))
-            {
-                reg = _nonMsxRegex;
-            }
-            else
-            {
-                reg = _msxRegex;
-            }
-
-            var match = reg.Match(filterText);
-            if (match.Success)
-            {
-                var matchData = match.Groups[1].Value;
-                Console.WriteLine(matchData);
-                double.TryParse(matchData, out parentIonMZ);
-            }
-            // ------------------------------- End Take code from here ----------------------------------------------
-
+            var success = XRawFileIO.ExtractParentIonMZFromFilterText(filterText, out parentIonMZ);
             Console.WriteLine(filterText + " -- ms" + msLevel + ", " + parentIonMZ.ToString("0.00") + " " + collisionMode);
 
             var expectedParentIonList = expectedParentIons.Split(',');
@@ -555,22 +535,6 @@ namespace RawFileReaderTests
             }
             Assert.AreEqual(expectedParentIonMZ, parentIonMZ, 0.001, "Parent ion m/z mismatch");
         }
-
-        /// <summary>
-        /// Non-msx scan - grouping returns the last parent ion m/z
-        /// </summary>
-        /// <remarks>
-        /// This ugly regex takes advantage of greediness to grab the last number that could be the parent ion m/z
-        /// </remarks>
-        private readonly Regex _nonMsxRegex = new Regex(@".*[Mm][Ss]\d*[^\[]* (\d+\.?\d*)@?[A-Za-z]*\d*\.?\d* ?(\[.*\])?\s*", RegexOptions.Compiled);
-
-        /// <summary>
-        /// msx scan - grouping returns the first parent ion m/z
-        /// </summary>
-        /// <remarks>
-        /// This ugly regex grabs the first number that could be the parent ion m/z, for use with msx scans (the first parent ion m/z corresponds to the highest peak)
-        /// </remarks>
-        private readonly Regex _msxRegex = new Regex(@".*[Mm][Ss]\d* (\d+\.?\d*)@?[A-Za-z]*\d*\.?\d* ?[^\[]*(\[.*\])?\s*", RegexOptions.Compiled);
 
         [Test]
         [TestCase("FTMS + p NSI Full ms [400.00-2000.00]                                          ", "FTMS + p NSI Full ms")]

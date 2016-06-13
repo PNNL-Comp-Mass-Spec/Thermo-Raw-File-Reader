@@ -72,6 +72,12 @@ namespace ThermoRawFileReader
         // This RegEx matches text like 1312.95@45.00 or 756.98@cid35.00 or 902.5721@etd120.55@cid20.00
         private const string PARENTION_REGEX = "(?<ParentMZ>[0-9.]+)@(?<CollisionMode1>[a-z]*)(?<CollisionEnergy1>[0-9.]+)(@(?<CollisionMode2>[a-z]+)(?<CollisionEnergy2>[0-9.]+))?";
 
+        // These RegEx match on a filter string, with the only group being the Parent Ion m/z
+        // This RegEx takes advantage of greediness to grab the last number that could be the parent ion m/z
+        private const string PARENTION_ONLY_NONMSX_REGEX = @".*[Mm][Ss]\d*[^\[]* (?<ParentMZ>\d+\.?\d*)@?[A-Za-z]*\d*\.?\d* ?(\[.*\])?\s*";
+        // This RegEx grabs the first number that could be the parent ion m/z, for use with msx scans (the first parent ion m/z corresponds to the highest peak)
+        private const string PARENTION_ONLY_MSX_REGEX = @".*[Mm][Ss]\d* (?<ParentMZ>\d+\.?\d*)@?[A-Za-z]*\d*\.?\d* ?[^\[]*(\[.*\])?\s*";
+
         // This RegEx looks for "sa" prior to Full ms"
         private const string SA_REGEX = " sa Full ms";
         private const string MSX_REGEX = " Full msx ";
@@ -122,6 +128,8 @@ namespace ThermoRawFileReader
 
         private static readonly Regex mMassRanges = new Regex(MASSRANGES_REGEX, RegexOptions.Compiled);
         private static readonly Regex mFindParentIon = new Regex(PARENTION_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindParentIonOnlyNonMsx = new Regex(PARENTION_ONLY_NONMSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindParentIonOnlyMsx = new Regex(PARENTION_ONLY_MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex mFindSAFullMS = new Regex(SA_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private static readonly Regex mFindFullMSx = new Regex(MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -502,6 +510,45 @@ namespace ThermoRawFileReader
 
                 reMatch = reMatch.NextMatch();
             }
+        }
+
+        /// <summary>
+        /// Parse out the parent ion from filterText
+        /// </summary>
+        /// <param name="filterText"></param>
+        /// <param name="parentIonMz">Parent ion m/z (output)</param>
+        /// <returns>True if success</returns>
+        /// <remarks>If multiple parent ion m/z values are listed then parentIonMz will have the last one.  However, if the filter text contains "Full msx" then parentIonMz will have the first parent ion listed</remarks>
+        /// <remarks>
+        /// This was created for use in other programs that only need the parent ion m/z, and no other functions from ThermoRawFileReader.
+        /// Other projects that use this:
+        ///      PHRPReader
+        /// 
+        /// To copy this, take the code from this function, plus the regex strings <see cref="PARENTION_ONLY_NONMSX_REGEX"/> and <see cref="PARENTION_ONLY_MSX_REGEX"/>,
+        /// with their uses in <see cref="mFindParentIonOnlyNonMsx"/> and <see cref="mFindParentIonOnlyMsx"/>
+        /// </remarks>
+        public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz)
+        {
+            parentIonMz = 0;
+            var success = false;
+            Regex reg;
+            if (!filterText.ToLower().Contains("msx"))
+            {
+                reg = mFindParentIonOnlyNonMsx;
+            }
+            else
+            {
+                reg = mFindParentIonOnlyMsx;
+            }
+
+            var match = reg.Match(filterText);
+            if (match.Success)
+            {
+                var matchData = match.Groups["ParentMZ"].Value;
+                Console.WriteLine(matchData);
+                success = double.TryParse(matchData, out parentIonMz);
+            }
+            return success;
         }
 
         /// <summary>
