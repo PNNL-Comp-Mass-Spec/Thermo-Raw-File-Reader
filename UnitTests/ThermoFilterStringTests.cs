@@ -19,8 +19,17 @@ namespace RawFileReaderTests
         [TestCase("+ p NSI SRM ms2 1025.250 [300.000-1500.00]                                        ", MRMScanTypeConstants.SRM)]
         [TestCase("+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]                ", MRMScanTypeConstants.SRM)]
         [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", MRMScanTypeConstants.SRM)]
+        [TestCase("+ c NSI SIM pr 95.099 [105.099-105.101, 150.099-150.101, 370.199-370.201, 208.099-208.101, 300.199-300.201, 304.199-304.201]", MRMScanTypeConstants.SRM)]
+        [TestCase("FTMS - p NSI w SIM ms [817.00-917.00]                                             ", MRMScanTypeConstants.SIM)]
+        [TestCase("FTMS + c NSI d SIM ms [782.00-792.00]                                             ", MRMScanTypeConstants.SIM)]
+        [TestCase("ITMS + c NSI SIM ms [286.50-289.50]                                               ", MRMScanTypeConstants.SIM)]
+        [TestCase("+ c EI SRM ms2 160.000 [72.999-73.001]                                            ", MRMScanTypeConstants.SRM)]
         [TestCase("+ p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]                  ", MRMScanTypeConstants.MRMQMS)]
         [TestCase("+ p NSI Q3MS [150.070-1500.000]                                                   ", MRMScanTypeConstants.MRMQMS)]
+        [TestCase("- p NSI Q3MS [807.100-810.100, 851.100-854.100]                                   ", MRMScanTypeConstants.MRMQMS)]
+        [TestCase("+ c NSI Q3MS [380.000-1350.000]                                                   ", MRMScanTypeConstants.MRMQMS)]
+        [TestCase("+ c CI Q1MS [50.000-600.000]                                                      ", MRMScanTypeConstants.MRMQMS)]
+        [TestCase("+ c EI Q1MS [50.000-600.000]                                                      ", MRMScanTypeConstants.MRMQMS)]
         [TestCase("c NSI Full cnl 162.053 [300.000-1200.000]                                         ", MRMScanTypeConstants.FullNL)]
         public void DetermineMRMScanType(string filterText, MRMScanTypeConstants expectedResult)
         {
@@ -54,6 +63,10 @@ namespace RawFileReaderTests
         [TestCase("+ p NSI Q3MS [150.070-1500.000]                                      ", "150.070-1500.000")]
         [TestCase("+ c NSI SRM ms2 965.958 [300.000-1500.00]                            ", "300.000-1500.00")]
         [TestCase("+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]   ", "507.259-507.261; 635-319-635.32")]
+        [TestCase("+ c NSI SIM pr 95.099 [105.099-105.101, 150.099-150.101, 370.199-370.201, 208.099-208.101]", "105.099-105.101; 150.099-150.101; 370.199-370.201; 208.099-208.101")]
+        [TestCase("FTMS - p NSI w SIM ms [817.00-917.00]                                ", "817.00-917.00")]
+        [TestCase("FTMS + c NSI d SIM ms [782.00-792.00]                                ", "782.00-792.00")]
+        [TestCase("ITMS + c NSI SIM ms [286.50-289.50]                                  ", "286.50-289.50")]
         public void ExtractMRMMasses(string filterText, string expectedMassList)
         {
             MRMInfo udtMRMInfo;
@@ -635,50 +648,57 @@ namespace RawFileReaderTests
 
         [Test]
         [TestCase("FTMS + p NSI Full ms [400.00-2000.00]                                             ", true, 1, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]                          ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]                          ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
         [TestCase("+ c EI SRM ms2 247.000 [300.000-1500.00]                                          ", true, 2, false, MRMScanTypeConstants.SRM, false)]
         [TestCase("+ c NSI SRM ms2 965.958 [300.000-1500.00]                                         ", true, 2, false, MRMScanTypeConstants.SRM, false)]
         [TestCase("+ p NSI SRM ms2 1025.250 [300.000-1500.00]                                        ", true, 2, false, MRMScanTypeConstants.SRM, false)]
         [TestCase("+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]                ", true, 2, false, MRMScanTypeConstants.SRM, false)]
         [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", true, 2, false, MRMScanTypeConstants.SRM, false)]
-        [TestCase("+ p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]                  ", true, 1, false, MRMScanTypeConstants.MRMQMS, false)]
-        [TestCase("+ p NSI Q3MS [150.070-1500.000]                                                   ", true, 1, false, MRMScanTypeConstants.MRMQMS, false)]
+        [TestCase("+ p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]                  ", true, 1, true, MRMScanTypeConstants.MRMQMS, false)]
+        [TestCase("+ p NSI Q3MS [150.070-1500.000]                                                   ", true, 1, true, MRMScanTypeConstants.MRMQMS, false)]
         [TestCase("c NSI Full cnl 162.053 [300.000-1200.000]                                         ", true, 2, false, MRMScanTypeConstants.FullNL, false)]
         [TestCase("ITMS + c ESI Full ms [300.00-2000.00]                                             ", true, 1, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                                    ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("- p NSI Full ms2 168.070 [300.000-1500.00]                                        ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]                       ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI d Full ms10 421.76@35.00                                             ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI d sa Full ms2 467.16@etd100.00 [50.00-1880.00]                       ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI d Full ms2 467.16@etd100.00 [50.00-1880.00]                          ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI d Full ms2 756.98@cid35.00 [195.00-2000.00]                          ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]                           ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c ESI d Full ms2 342.90@cid35.00 [50.00-2000.00]                           ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                                    ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("- p NSI Full ms2 168.070 [300.000-1500.00]                                        ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]                       ", false, 3, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI d Full ms10 421.76@35.00                                             ", false, 10, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI d sa Full ms2 467.16@etd100.00 [50.00-1880.00]                       ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI d Full ms2 467.16@etd100.00 [50.00-1880.00]                          ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI d Full ms2 756.98@cid35.00 [195.00-2000.00]                          ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]                           ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c ESI d Full ms2 342.90@cid35.00 [50.00-2000.00]                           ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
         [TestCase("ITMS + p ESI d Z ms [1108.00-1118.00]                                             ", true, 1, false, MRMScanTypeConstants.NotMRM, true)]
         [TestCase("ITMS + p ESI d Z ms [579.00-589.00]                                               ", true, 1, false, MRMScanTypeConstants.NotMRM, true)]
-        [TestCase("+ p ms2 777.00@cid30.00 [210.00-1200.00]                                          ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]     ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]    ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]    ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c ESI d Full ms2 583.26@cid35.00 [150.00-1180.00]                          ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]                       ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("+ c NSI Full ms2 1083.000 [300.000-1500.00]                                       ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("- p NSI Full ms2 247.060 [300.000-1500.00]                                        ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("- c NSI d Full ms2 921.597 [300.000-1500.00]                                      ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI r d sa Full ms2 996.8542@etd120.55@cid20.00 [120.0000-2000.0000]     ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + p NSI CRM ms3 332.14@cid35.00 288.10@cid35.00 [242.00-248.00, 285.00-291.00]  ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + p NSI Z ms [150.00-2000.00]                                                ", true, 1, false, MRMScanTypeConstants.NotMRM, true)]
+        [TestCase("ITMS + p NSI d Z ms [351.00-361.00]                                               ", true, 1, false, MRMScanTypeConstants.NotMRM, true)]
+        [TestCase("ITMS + c NSI d Z ms [428.00-438.00]                                               ", true, 1, false, MRMScanTypeConstants.NotMRM, true)]
+        [TestCase("+ p ms2 777.00@cid30.00 [210.00-1200.00]                                          ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]     ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]    ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]    ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c ESI d Full ms2 583.26@cid35.00 [150.00-1180.00]                          ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]                       ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("+ c NSI Full ms2 1083.000 [300.000-1500.00]                                       ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("- p NSI Full ms2 247.060 [300.000-1500.00]                                        ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("- c NSI d Full ms2 921.597 [300.000-1500.00]                                      ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI r d sa Full ms2 996.8542@etd120.55@cid20.00 [120.0000-2000.0000]     ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + p NSI CRM ms3 332.14@cid35.00 288.10@cid35.00 [242.00-248.00, 285.00-291.00]  ", false, 3, false, MRMScanTypeConstants.NotMRM, false)]
         [TestCase("FTMS + p NSI Full ms                                                              ", true, 1, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI r d Full ms2 916.3716@cid30.00 [247.0000-2000.0000]                  ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("ITMS + c NSI r d Full ms2 916.3716@hcd30.00 [100.0000-2000.0000]                  ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("FTMS + c NSI r d Full ms2 744.0129@cid30.00 [199.0000-2000.0000]                  ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("FTMS + p NSI r d Full ms2 944.4316@hcd30.00 [100.0000-2000.0000]                  ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
-        [TestCase("FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]    ", false, 0, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI r d Full ms2 916.3716@cid30.00 [247.0000-2000.0000]                  ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("ITMS + c NSI r d Full ms2 916.3716@hcd30.00 [100.0000-2000.0000]                  ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("FTMS + c NSI r d Full ms2 744.0129@cid30.00 [199.0000-2000.0000]                  ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("FTMS + p NSI r d Full ms2 944.4316@hcd30.00 [100.0000-2000.0000]                  ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]    ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("FTMS - p NSI w SIM ms [817.00-917.00]                                             ", true, 1, true, MRMScanTypeConstants.SIM, false)]
+        [TestCase("FTMS + c NSI d SIM ms [782.00-792.00]                                             ", true, 1, true, MRMScanTypeConstants.SIM, false)]
+        [TestCase("ITMS + c NSI SIM ms [286.50-289.50]                                               ", true, 1, true, MRMScanTypeConstants.SIM, false)]
         public void ValidateMSScan(
             string filterText, 
             bool expectedIsValidMS1orSIM, 
             int expectedMSLevel, 
             bool expectedIsSIMScan,
-            MRMScanTypeConstants expectedMRMScanType, bool expectedIsZoomScan)
+            MRMScanTypeConstants expectedMRMScanType, 
+            bool expectedIsZoomScan)
         {
             int msLevel;
             bool isSIMScan;
@@ -689,7 +709,7 @@ namespace RawFileReaderTests
 
             Console.WriteLine(filterText + "  -- ms" + msLevel + "; SIM=" + isSIMScan + "; MRMScanType=" + mrmScanType);
 
-            Assert.AreEqual(expectedIsValidMS1orSIM, isValid, "Validation mismatch");
+            Assert.AreEqual(expectedIsValidMS1orSIM, isValid, "Mismatch for IsValidMS1orSIM");
             Assert.AreEqual(expectedMSLevel, msLevel, "MSLevel mismatch");
             Assert.AreEqual(expectedIsSIMScan, isSIMScan, "SIMScan mismatch");
             Assert.AreEqual(expectedMRMScanType, mrmScanType, "MRMScanType mismatch");

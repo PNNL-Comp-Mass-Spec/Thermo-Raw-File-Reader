@@ -334,10 +334,10 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Determins the MRM scan type by parsing the scan filter string
+        /// Determines the MRM scan type by parsing the scan filter string
         /// </summary>
         /// <param name="filterText"></param>
-        /// <returns></returns>
+        /// <returns>MRM scan type enum</returns>
         public static MRMScanTypeConstants DetermineMRMScanType(string filterText)
         {
             var eMRMScanType = MRMScanTypeConstants.NotMRM;
@@ -368,7 +368,10 @@ namespace ThermoRawFileReader
             else if (ContainsText(filterText, MRM_FullNL_TEXT, 1))
             {
                 eMRMScanType = MRMScanTypeConstants.FullNL;
-
+            }
+            else if (ContainsText(filterText, SIM_MS_TEXT, 1))
+            {
+                eMRMScanType = MRMScanTypeConstants.SIM;
             }
 
             return eMRMScanType;
@@ -429,16 +432,20 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="filterText"></param>
         /// <param name="mrmScanType"></param>
-        /// <param name="mrmInfo"></param>
+        /// <param name="mrmInfo">Output: MRM info class</param>
+        /// <remarks>We do not parse mass information out for Full Neutral Loss scans</remarks>
         public static void ExtractMRMMasses(string filterText, MRMScanTypeConstants mrmScanType, out MRMInfo mrmInfo)
         {
             // Parse out the MRM_QMS or SRM mass info from filterText
             // It should be of the form 
+
+            // SIM:              p NSI SIM ms [330.00-380.00]
+            // or
             // MRM_Q1MS_TEXT:    p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]
             // or
             // MRM_Q3MS_TEXT:    p NSI Q3MS [150.070-1500.000]
             // or
-            // MRM_SRM_TEXT:    c NSI SRM ms2 489.270@cid17.00 [397.209-392.211, 579.289-579.291]
+            // MRM_SRM_TEXT:     c NSI SRM ms2 489.270@cid17.00 [397.209-392.211, 579.289-579.291]
 
             // Note: we do not parse mass information out for Full Neutral Loss scans
             // MRM_FullNL_TEXT: c NSI Full cnl 162.053 [300.000-1200.000]
@@ -450,49 +457,50 @@ namespace ThermoRawFileReader
                 return;
             }
 
-            if (mrmScanType == MRMScanTypeConstants.MRMQMS | mrmScanType == MRMScanTypeConstants.SRM)
-            {
-                // Parse out the text between the square brackets
-                var reMatch = mMassList.Match(filterText);
-
-                if (!reMatch.Success)
-                {
-                    return;
-                }
-
-                reMatch = mMassRanges.Match(reMatch.Value);
-
-                while (reMatch.Success)
-                {
-                    try
-                    {
-                        // Note that group 0 is the full mass range (two mass values, separated by a dash)
-                        // Group 1 is the first mass value
-                        // Group 2 is the second mass value
-
-                        var mrmMassRange = new udtMRMMassRangeType
-                        {
-                            StartMass = double.Parse(reMatch.Groups["StartMass"].Value),
-                            EndMass = double.Parse(reMatch.Groups["EndMass"].Value)
-                        };
-
-                        var centralMass = mrmMassRange.StartMass + (mrmMassRange.EndMass - mrmMassRange.StartMass) / 2;
-                        mrmMassRange.CentralMass = Math.Round(centralMass, 6);
-
-                        mrmInfo.MRMMassList.Add(mrmMassRange);
-
-                    }
-                    catch (Exception)
-                    {
-                        // Error parsing out the mass values; skip this group
-                    }
-
-                    reMatch = reMatch.NextMatch();
-                }
-            }
-            else
+            if (!(mrmScanType == MRMScanTypeConstants.SIM |
+                  mrmScanType == MRMScanTypeConstants.MRMQMS |
+                  mrmScanType == MRMScanTypeConstants.SRM))
             {
                 // Unsupported MRM type
+                return;
+            }
+
+            // Parse out the text between the square brackets
+            var reMatch = mMassList.Match(filterText);
+
+            if (!reMatch.Success)
+            {
+                return;
+            }
+
+            reMatch = mMassRanges.Match(reMatch.Value);
+
+            while (reMatch.Success)
+            {
+                try
+                {
+                    // Note that group 0 is the full mass range (two mass values, separated by a dash)
+                    // Group 1 is the first mass value
+                    // Group 2 is the second mass value
+
+                    var mrmMassRange = new udtMRMMassRangeType
+                    {
+                        StartMass = double.Parse(reMatch.Groups["StartMass"].Value),
+                        EndMass = double.Parse(reMatch.Groups["EndMass"].Value)
+                    };
+
+                    var centralMass = mrmMassRange.StartMass + (mrmMassRange.EndMass - mrmMassRange.StartMass) / 2;
+                    mrmMassRange.CentralMass = Math.Round(centralMass, 6);
+
+                    mrmInfo.MRMMassList.Add(mrmMassRange);
+
+                }
+                catch (Exception)
+                {
+                    // Error parsing out the mass values; skip this group
+                }
+
+                reMatch = reMatch.NextMatch();
             }
         }
 
@@ -1876,15 +1884,19 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="filterText"></param>
         /// <param name="msLevel"></param>
-        /// <param name="simScan"></param>
+        /// <param name="simScan">True if mrmScanType is SIM or MRMQMS</param>
         /// <param name="mrmScanType"></param>
         /// <param name="zoomScan"></param>
         /// <returns>True if filterText contains a known MS scan type</returns>
         /// <remarks>Returns false for MSn scans (like ms2 or ms3)</remarks>
-        public static bool ValidateMSScan(string filterText, out int msLevel, out bool simScan, out MRMScanTypeConstants mrmScanType, out bool zoomScan)
+        public static bool ValidateMSScan(
+            string filterText, 
+            out int msLevel, 
+            out bool simScan, 
+            out MRMScanTypeConstants mrmScanType, 
+            out bool zoomScan)
         {
 
-            msLevel = 0;
             simScan = false;
             mrmScanType = MRMScanTypeConstants.NotMRM;
             zoomScan = false;
@@ -1906,17 +1918,8 @@ namespace ThermoRawFileReader
 
             if (ContainsAny(filterText, ms1Tags, 1))
             {
-                // This is really a Full MS scan
+                // This is a Full MS scan
                 msLevel = 1;
-                simScan = false;
-                return true;
-            }
-
-            if (ContainsText(filterText, SIM_MS_TEXT, 1))
-            {
-                // This is really a SIM MS scan
-                msLevel = 1;
-                simScan = true;
                 return true;
             }
 
@@ -1939,19 +1942,25 @@ namespace ThermoRawFileReader
             mrmScanType = DetermineMRMScanType(filterText);
             switch (mrmScanType)
             {
-                case MRMScanTypeConstants.MRMQMS:
+                case MRMScanTypeConstants.SIM:
+                    // Selected ion monitoring, which is MS1 of a narrow m/z range
                     msLevel = 1;
-                    // ToDo: Add support for TSQ MRMQMS data
+                    simScan = true;
+                    return true;
+                case MRMScanTypeConstants.MRMQMS:
+                    // Multiple SIM ranges in a single scan
+                    msLevel = 1;
+                    simScan = true;
                     return true;
                 case MRMScanTypeConstants.SRM:
                     msLevel = 2;
-                    // ToDo: Add support for TSQ SRM data
                     return true;
                 case MRMScanTypeConstants.FullNL:
                     msLevel = 2;
-                    // ToDo: Add support for TSQ Full NL data
                     return true;
                 default:
+                    string mzText;
+                    ExtractMSLevel(filterText, out msLevel, out mzText);
                     return false;
             }
 

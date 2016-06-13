@@ -93,7 +93,12 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Full neutral loss scan
         /// </summary>
-        FullNL = 3
+        FullNL = 3,
+
+        /// <summary>
+        /// Selected Ion Monitoring (SIM), which is MS1 of a limited m/z range
+        /// </summary>
+        SIM = 4
     }
 
     /// <summary>
