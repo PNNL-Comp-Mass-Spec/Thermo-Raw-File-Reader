@@ -535,27 +535,27 @@ namespace ThermoRawFileReader
         /// </remarks>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz)
         {
-            parentIonMz = 0;
-            var success = false;
-
-            Regex reg;
-            if (!filterText.ToLower().Contains("msx"))
+            Regex matcher;
+            if (filterText.ToLower().Contains("msx"))
             {
-                reg = mFindParentIonOnlyNonMsx;
+                matcher = mFindParentIonOnlyMsx;
             }
             else
             {
-                reg = mFindParentIonOnlyMsx;
+				matcher = mFindParentIonOnlyNonMsx;                
             }
 
-            var match = reg.Match(filterText);
+            var match = matcher.Match(filterText);
             if (match.Success)
             {
-                var matchData = match.Groups["ParentMZ"].Value;
-                Console.WriteLine(matchData);
-                success = double.TryParse(matchData, out parentIonMz);
+                var parentIonMzText = match.Groups["ParentMZ"].Value;
+
+                var success = double.TryParse(parentIonMzText, out parentIonMz);
+                return success;
             }
-            return success;
+            
+            parentIonMz = 0;
+            return false;
         }
 
         /// <summary>

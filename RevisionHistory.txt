@@ -1,5 +1,9 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 2.0.6008; June 13, 2016
+	- Extend unit tests with a wide variety of Thermo scan filters
+	- Add 2-parameter version of ExtractParentIonMZFromFilterTest (code is mirrored in the PHRPReader)
+
 Version 2.0.5997; June 2, 2016
 	- Add new data-specific unit tests
 
