@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
 using ThermoRawFileReader;
 
@@ -139,7 +138,7 @@ namespace RawFileReaderTests
         }
 
         /// <summary>
-        /// Test ExtractParentIonMZFromFilterText
+        /// Test ExtractParentIonMZFromFilterText(string, out double, out int, out string, out list of udtParentIonInfoType)
         /// </summary>
         /// <param name="filterText">FilterText</param>
         /// <param name="expectedParentIons">ParentIon Mz (could be comma-separated list, with ! marking the "best" parent ion m/z)</param>
@@ -518,9 +517,9 @@ namespace RawFileReaderTests
         [TestCase("ITMS + p NSI Full ms2 1155.10@cid10.00 [315.00-2000.00]                                                                      ", "1155.10", 2, "cid")]
         public void ExtractParentIonMZOnlyFromFilterText(string filterText, string expectedParentIons, int expectedMSLevel, string expectedCollisionMode)
         {
-            double parentIonMZ = 0;
-            int msLevel = 0;
-            string collisionMode = string.Empty;
+            double parentIonMZ;
+            var msLevel = 0;
+            var collisionMode = string.Empty;
 
             var success = XRawFileIO.ExtractParentIonMZFromFilterText(filterText, out parentIonMZ);
             Console.WriteLine(filterText + " -- ms" + msLevel + ", " + parentIonMZ.ToString("0.00") + " " + collisionMode);

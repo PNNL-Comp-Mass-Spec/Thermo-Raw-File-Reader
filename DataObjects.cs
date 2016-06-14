@@ -117,7 +117,7 @@ namespace ThermoRawFileReader
         /// Instrument Methods
         /// </summary>
         /// <remarks>Typically only have one instrument method; the length of this array defines the number of instrument methods</remarks>
-        public List<string> InstMethods = new List<string>();
+        public List<string> InstMethods;
 
         /// <summary>
         /// Instrument Model
@@ -144,7 +144,7 @@ namespace ThermoRawFileReader
         /// Tune Methods
         /// </summary>
         /// <remarks>Typically have one or two tune methods; the length of this array defines the number of tune methods defined</remarks>
-        public List<TuneMethod> TuneMethods = new List<TuneMethod>();
+        public List<TuneMethod> TuneMethods;
 
         /// <summary>
         /// File format Version Number

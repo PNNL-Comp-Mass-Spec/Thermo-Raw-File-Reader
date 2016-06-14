@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using FileProcessor;
@@ -280,10 +279,6 @@ namespace Test_ThermoRawFileReader
 
                     var strCollisionEnergies = string.Empty;
 
-                    var dblMzList = new double[1];
-                    var dblIntensityList = new double[1];
-                    var dblMassIntensityPairs = new double[1, 1];
-
                     ShowMethod(oReader);
 
                     var scanStep = 1;
@@ -298,7 +293,6 @@ namespace Test_ThermoRawFileReader
                             scanEnd = scanStart;
                         }
                     }
-
 
                     for (var iScanNum = scanStart; iScanNum <= scanEnd; iScanNum += scanStep) {
                         clsScanInfo oScanInfo;
@@ -349,6 +343,9 @@ namespace Test_ThermoRawFileReader
 
                                 Console.WriteLine();
                                 Console.WriteLine("Spectrum for scan " + iScanNum);
+
+                                double[] dblMzList;
+                                double[] dblIntensityList;
                                 var intDataCount = oReader.GetScanData(iScanNum, out dblMzList, out dblIntensityList, 0, centroid);
 
                                 var mzDisplayStepSize = 50;
@@ -365,6 +362,8 @@ namespace Test_ThermoRawFileReader
 
                                 if (iScanNum + scansToSum < iNumScans & testSumming) {
                                     // Get the data for scan iScanNum through iScanNum + 15
+
+                                    double[,] dblMassIntensityPairs;
                                     var dataCount = oReader.GetScanDataSumScans(iScanNum, iScanNum + scansToSum, out dblMassIntensityPairs, 0, centroid);
 
                                     Console.WriteLine("Summed spectrum, scans " + iScanNum + " through " + (iScanNum + scansToSum));
