@@ -2,7 +2,6 @@
 echo Copy the DLL, PDF, and XML to Lib folders
 @echo on
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /Y
-xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\" /Y
 
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\" /Y
 
@@ -10,12 +9,8 @@ xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MASIC\L
 
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\" /Y
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MSGF_Runner\Lib\" /Y
-xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PHRPReader\Lib\" /Y
-xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\PeptideListToXML\Lib\" /Y
-xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\Lib\" /Y
 
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs\" /Y
-xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\dll" /Y
 
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\lib\" /Y
 
@@ -34,7 +29,7 @@ xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_M
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin\" /Y
 
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Ape_PlugIn\bin\Debug\" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_AScore_PlugIn\bin\Debug" /Y
+rem xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_AScore_PlugIn\bin\Debug" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Cyclops_PlugIn\bin\Debug" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_DataImport_Plugin\bin" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Decon2ls_PlugIn_Decon2LSV2\bin\Debug" /Y
@@ -76,7 +71,7 @@ xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_M
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_SMAQC_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_XTandem_PlugIn\bin" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestApePlugIn\bin\Debug\" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestAScorePlugIn\bin\Debug" /Y
+rem xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestAScorePlugIn\bin\Debug" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestMagePlugIn\bin\Debug\" /Y
 
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\CaptureTaskManager\CaptureTaskManager\bin\Debug\" /Y
@@ -100,21 +95,6 @@ xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PEKto
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\DLL\Debug\" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\Exe\Debug" /Y
 
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\" /Y
-
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\CreateMSGFDBResultsFileFromPHRP\bin" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PeptideHitResultsProcessor\bin\" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PHRPReader\bin\" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\Test_PHRPReader\bin" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PeptideListToXML\bin\" /Y
-
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\x86\" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\x64\" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x86\" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x64\" /Y
-
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\SMAQC\bin\Debug" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\SMAQC\bin\release" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\ThermoRawFileReader\Test_ThermoRawFileReader\bin\Debug\" /Y
 
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\GordonSlysz\DeconTools_IQ\DeconConsole\bin\x86\Debug" /Y
@@ -143,12 +123,6 @@ xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\GordonSlysz\Deco
 
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\GordonSlysz\DimethylLabelingIq\Library" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\GordonSlysz\IqTargetCreator\Library" /Y
-
-if exist "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug"   xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug" /Y
-if exist "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Release" xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Release" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Debug" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Release" /Y
-xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\lib" /Y
 
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\JoshAldrich\InterferenceDetection\IDM_Console\bin\Debug" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\bin\Debug" /Y
