@@ -10,6 +10,11 @@ namespace RawFileReaderTests
     public class ThermoFilterStringTests
     {
 
+        //
+        // To see the Console.Writeline() results for a series of test cases for a given Test, run NUnit from the command line.  For example:
+        // cd "C:\Program Files (x86)\NUnit.org\nunit-console"
+        // c:nunit3-console.exe --noresult --where "method =~ /Filter*/" RawFileReaderTests.dll
+
         [Test]
         [TestCase("FTMS + p NSI Full ms [400.00-2000.00]                                             ", MRMScanTypeConstants.NotMRM)]
         [TestCase("FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]                          ", MRMScanTypeConstants.NotMRM)]
