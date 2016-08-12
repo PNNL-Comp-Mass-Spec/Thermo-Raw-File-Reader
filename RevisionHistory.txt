@@ -1,5 +1,8 @@
 ThermoRawFileReaderDLL Change Log
 
+Version 2.0.6068; August 12, 2016
+	- Check for null filterText in GetScanTypeNameFromFinniganScanFilterText
+
 Version 2.0.6008; June 13, 2016
 	- Extend unit tests with a wide variety of Thermo scan filters
 	- Add 2-parameter version of ExtractParentIonMZFromFilterTest (code is mirrored in the PHRPReader)

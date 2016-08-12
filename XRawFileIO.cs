@@ -673,7 +673,7 @@ namespace ThermoRawFileReader
                     collisionMode = GetCapturedValue(reMatchParentIon, "CollisionMode1");
 
                     var collisionEnergy = GetCapturedValue(reMatchParentIon, "CollisionEnergy1");
-                    if (!string.IsNullOrEmpty(collisionEnergy))
+                    if (!string.IsNullOrWhiteSpace(collisionEnergy))
                     {
                         float.TryParse(collisionEnergy, out collisionEnergyValue);
                     }
@@ -681,14 +681,14 @@ namespace ThermoRawFileReader
                     float collisionEnergy2Value = 0;
                     var collisionMode2 = GetCapturedValue(reMatchParentIon, "CollisionMode2");
 
-                    if (!string.IsNullOrEmpty(collisionMode2))
+                    if (!string.IsNullOrWhiteSpace(collisionMode2))
                     {
                         var collisionEnergy2 = GetCapturedValue(reMatchParentIon, "CollisionEnergy2");
                         float.TryParse(collisionEnergy2, out collisionEnergy2Value);
                     }
 
                     var allowSecondaryActivation = true;
-                    if (string.Equals(collisionMode, "ETD", StringComparison.InvariantCultureIgnoreCase) & !string.IsNullOrEmpty(collisionMode2))
+                    if (string.Equals(collisionMode, "ETD", StringComparison.InvariantCultureIgnoreCase) & !string.IsNullOrWhiteSpace(collisionMode2))
                     {
                         if (string.Equals(collisionMode2, "CID", StringComparison.InvariantCultureIgnoreCase))
                         {
@@ -702,7 +702,7 @@ namespace ThermoRawFileReader
                         }
                     }
 
-                    if (allowSecondaryActivation && !string.IsNullOrEmpty(collisionMode))
+                    if (allowSecondaryActivation && !string.IsNullOrWhiteSpace(collisionMode))
                     {
                         if (supplementalActivationEnabled)
                         {
@@ -1002,7 +1002,7 @@ namespace ThermoRawFileReader
 
             if ((capturedValue != null))
             {
-                if (!string.IsNullOrEmpty(capturedValue.Value))
+                if (!string.IsNullOrWhiteSpace(capturedValue.Value))
                 {
                     return capturedValue.Value;
                 }
@@ -1462,7 +1462,6 @@ namespace ThermoRawFileReader
 
                 }
 
-
             }
             catch (Exception ex)
             {
@@ -1536,7 +1535,7 @@ namespace ThermoRawFileReader
                 var simScan = false;
                 var zoomScan = false;
 
-                if (filterText.Length == 0)
+                if (string.IsNullOrWhiteSpace(filterText))
                 {
                     scanTypeName = "MS";
                     return scanTypeName;

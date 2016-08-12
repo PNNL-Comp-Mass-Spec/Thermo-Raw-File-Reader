@@ -12,11 +12,13 @@ xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MSGF_Ru
 
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs\" /Y
 
-xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\lib\" /Y
+xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\lib\InformedProteomics.Backend" /Y
+xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\src\MultiAlignRogue\bin\Debug\" /Y
+
 
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\DLLLibrary" /Y
 
-xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\SangtaeKim\InformedProteomics\lib" /Y
+xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\SangtaeKim\InformedProteomics\lib\MSIL\" /Y
 
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\KevinCrowell\IMSDemultiplexer\IMSDemultiplexer\lib" /Y
 

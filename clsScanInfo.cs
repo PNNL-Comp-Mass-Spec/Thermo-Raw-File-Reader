@@ -350,7 +350,7 @@ namespace ThermoRawFileReader
         /// <returns></returns>
         public override string ToString()
         {
-            if (string.IsNullOrEmpty(FilterText)) {
+            if (string.IsNullOrWhiteSpace(FilterText)) {
                 return "Scan " + ScanNumber + ": Generic ScanHeaderInfo";
             } else {
                 return "Scan " + ScanNumber + ": " + FilterText;

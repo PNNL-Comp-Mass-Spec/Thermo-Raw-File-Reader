@@ -471,7 +471,7 @@ namespace ThermoRawFileReader
         /// <returns></returns>
         public override string ToString()
         {
-            if (string.IsNullOrEmpty(FilterText))
+            if (string.IsNullOrWhiteSpace(FilterText))
             {
                 return "Generic udtScanHeaderInfoType";
             }
