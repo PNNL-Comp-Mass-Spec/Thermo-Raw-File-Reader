@@ -1098,6 +1098,37 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
+        /// Get the retention time for the specified scan. Use when searching for scans in a time range.
+        /// </summary>
+        /// <param name="scan">Scan number</param>
+        /// <param name="retentionTime">retention time</param>
+        /// <returns>True if no error, False if an error</returns>
+        [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
+        public bool GetRetentionTime(int scan, out double retentionTime)
+        {
+            retentionTime = 0;
+            try
+            {
+                if (mXRawFile == null)
+                    return false;
+
+                // Make sure the MS controller is selected
+                if (!SetMSController())
+                    return false;
+
+                mXRawFile.RTFromScanNum(scan, ref retentionTime);
+            }
+            catch (Exception ex)
+            {
+                var msg = "Error: Exception in GetRetentionTime: " + ex.Message;
+                RaiseWarningMessage(msg);
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Get the header info for the specified scan
         /// </summary>
         /// <param name="scan">Scan number</param>
