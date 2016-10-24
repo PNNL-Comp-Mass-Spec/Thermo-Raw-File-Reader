@@ -11,7 +11,6 @@ namespace Test_ThermoRawFileReader
     static class modMain
     {
 
-
         private const string DEFAULT_FILE_PATH = @"..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW";
 
         public static void Main()

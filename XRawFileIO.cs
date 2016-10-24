@@ -102,12 +102,12 @@ namespace ThermoRawFileReader
         /// <summary>
         /// The scan info cache
         /// </summary>
-        protected Dictionary<int, clsScanInfo> mCachedScanInfo;
+        protected readonly Dictionary<int, clsScanInfo> mCachedScanInfo;
 
         /// <summary>
         /// File info for the currently loaded .raw file
         /// </summary>
-        protected RawFileInfo mFileInfo = new RawFileInfo();
+        protected readonly RawFileInfo mFileInfo = new RawFileInfo();
 
         /// <summary>
         /// MS Method Information
@@ -362,9 +362,9 @@ namespace ThermoRawFileReader
             }
 
             var mrmQMSTags = new List<string> {
-				MRM_Q1MS_TEXT,
-				MRM_Q3MS_TEXT
-			};
+                MRM_Q1MS_TEXT,
+                MRM_Q3MS_TEXT
+            };
 
             if (ContainsAny(filterText, mrmQMSTags, 1))
             {
@@ -542,7 +542,7 @@ namespace ThermoRawFileReader
             }
             else
             {
-				matcher = mFindParentIonOnlyNonMsx;                
+                matcher = mFindParentIonOnlyNonMsx;                
             }
 
             var match = matcher.Match(filterText);
@@ -1987,19 +1987,19 @@ namespace ThermoRawFileReader
             zoomScan = false;
 
             var ms1Tags = new List<string> {
-				FULL_MS_TEXT,
-				MS_ONLY_C_TEXT,
-				MS_ONLY_P_TEXT,
-				MS_ONLY_P_NSI_TEXT,
-				FULL_PR_TEXT,
-				FULL_LOCK_MS_TEXT
-			};
+                FULL_MS_TEXT,
+                MS_ONLY_C_TEXT,
+                MS_ONLY_P_TEXT,
+                MS_ONLY_P_NSI_TEXT,
+                FULL_PR_TEXT,
+                FULL_LOCK_MS_TEXT
+            };
 
             var zoomTags = new List<string> {
-				MS_ONLY_Z_TEXT,
-				MS_ONLY_PZ_TEXT,
-				MS_ONLY_DZ_TEXT
-			};
+                MS_ONLY_Z_TEXT,
+                MS_ONLY_PZ_TEXT,
+                MS_ONLY_DZ_TEXT
+            };
 
             if (ContainsAny(filterText, ms1Tags, 1))
             {
@@ -2695,7 +2695,13 @@ namespace ThermoRawFileReader
 
                 if (mXRawFile == null)
                 {
-                    mXRawFile = (IXRawfile5)new MSFileReader_XRawfile();
+                    // ReSharper disable once SuspiciousTypeConversion.Global
+                    mXRawFile = new MSFileReader_XRawfile() as IXRawfile5;
+                }
+
+                if (mXRawFile == null)
+                {
+                    throw new Exception("Could not instantiate an instance of MSFileReader_XRawfile");
                 }
 
                 mXRawFile.Open(filePath);
