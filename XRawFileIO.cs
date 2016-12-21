@@ -298,15 +298,41 @@ namespace ThermoRawFileReader
             {
                 return false;
             }
-
         }
 
         /// <summary>
         /// Tests to see if we can load the needed Thermo MSFileReader DLL class without errors
         /// </summary>
         /// <returns></returns>
-        public static bool IsMSFileReaderInstalled()
+        // ReSharper disable once InconsistentNaming
+        public bool IsMSFileReaderInstalled()
         {
+            var error = "";
+            var result = IsMSFileReaderInstalled(out error);
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                RaiseErrorMessage(error);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Tests to see if we can load the needed Thermo MSFileReader DLL class without errors
+        /// </summary>
+        /// <param name="error">Reason for failure</param>
+        /// <returns></returns>
+        // ReSharper disable once InconsistentNaming
+        public static bool IsMSFileReaderInstalled(out string error)
+        {
+            var typeAvailable = false;
+            var canInstantiateType = false;
+            error = "";
+            var bitness = "x86";
+            if (Environment.Is64BitProcess)
+            {
+                bitness = "x64";
+            }
             try
             {
                 //Assembly.Load("Interop.MSFileReaderLib"); // by name; is a COM library
@@ -316,18 +342,28 @@ namespace ThermoRawFileReader
                 var type = Type.GetTypeFromProgID("MSFileReader.XRawfile"); // Returns null if exact name isn't found.
                 if (type != null)
                 {
+                    typeAvailable = true;
                     // Probably enough to just check for being able to get the type
                     //return true;
                     // This just becomes an extra sanity check
                     var obj = Activator.CreateInstance(type);
                     if (obj != null)
                     {
+                        canInstantiateType = true;
                         return true;
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
+                if (typeAvailable && !canInstantiateType)
+                {
+                    error = "MSFileReader is installed, but not for this platform. Install MSFileReader " + bitness;
+                }
+                else
+                {
+                    error = "MSFileReader is not installed. Install MSFileReader " + bitness;
+                }
                 return false;
             }
             return false;
