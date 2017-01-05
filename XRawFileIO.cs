@@ -30,11 +30,6 @@ namespace ThermoRawFileReader
     {
         #region "Constants"
 
-        /// <summary>
-        /// Maximum size of the scan info cache
-        /// </summary>
-        protected int MAX_SCANS_TO_CACHE_INFO = 50000;
-
         // Note that each of these strings has a space at the end; this is important to avoid matching inappropriate text in the filter string
         private const string MS_ONLY_C_TEXT = " c ms ";
         private const string MS_ONLY_P_TEXT = " p ms ";
@@ -95,6 +90,11 @@ namespace ThermoRawFileReader
         #region "Classwide Variables"
 
         /// <summary>
+        /// Maximum size of the scan info cache
+        /// </summary>
+        protected int mMaxScansToCacheInfo = 50000;
+
+        /// <summary>
         /// The currently loaded .raw file
         /// </summary>
         protected string mCachedFileName;
@@ -102,7 +102,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// The scan info cache
         /// </summary>
-        protected readonly Dictionary<int, clsScanInfo> mCachedScanInfo;
+        protected readonly Dictionary<int, clsScanInfo> mCachedScanInfo = new Dictionary<int, clsScanInfo>();
 
         /// <summary>
         /// File info for the currently loaded .raw file
@@ -173,6 +173,33 @@ namespace ThermoRawFileReader
             set { mLoadMSTuneInfo = value; }
         }
 
+        /// <summary>
+        /// Changes the maximum number of scan metadata cached. Set to 0 to disable caching. Default 50000.
+        /// </summary>
+        public int ScanInfoCacheMaxSize
+        {
+            get { return mMaxScansToCacheInfo; }
+            set
+            {
+                mMaxScansToCacheInfo = value;
+                if (mMaxScansToCacheInfo < 0)
+                {
+                    mMaxScansToCacheInfo = 0;
+                }
+                if (mCachedScanInfo.Count > 0)
+                {
+                    if (mMaxScansToCacheInfo == 0)
+                    {
+                        mCachedScanInfo.Clear();
+                    }
+                    else
+                    {
+                        RemoveCachedScanInfoOverLimit(mMaxScansToCacheInfo);
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region "Events"
@@ -226,25 +253,9 @@ namespace ThermoRawFileReader
 
         private void CacheScanInfo(int scan, clsScanInfo scanInfo)
         {
-            if (mCachedScanInfo.Count > MAX_SCANS_TO_CACHE_INFO)
+            if (ScanInfoCacheMaxSize == 0)
             {
-                // Remove the oldest entry in mCachedScanInfo
-                var minimumScanNumber = -1;
-                var dtMinimumCacheDate = DateTime.UtcNow;
-
-                foreach (var cachedInfo in mCachedScanInfo.Values)
-                {
-                    if (minimumScanNumber < 0 || cachedInfo.CacheDateUTC < dtMinimumCacheDate)
-                    {
-                        minimumScanNumber = cachedInfo.ScanNumber;
-                        dtMinimumCacheDate = cachedInfo.CacheDateUTC;
-                    }
-                }
-
-                if (mCachedScanInfo.ContainsKey(minimumScanNumber))
-                {
-                    mCachedScanInfo.Remove(minimumScanNumber);
-                }
+                return;
             }
 
             if (mCachedScanInfo.ContainsKey(scan))
@@ -252,8 +263,27 @@ namespace ThermoRawFileReader
                 mCachedScanInfo.Remove(scan);
             }
 
-            mCachedScanInfo.Add(scan, scanInfo);
+            RemoveCachedScanInfoOverLimit(mMaxScansToCacheInfo - 1);
 
+            mCachedScanInfo.Add(scan, scanInfo);
+        }
+
+        private void RemoveCachedScanInfoOverLimit(int limit)
+        {
+            if (mCachedScanInfo.Count > limit)
+            {
+                // Remove the oldest entry(ies) in mCachedScanInfo
+                var numToRemove = mCachedScanInfo.Count - limit;
+
+                var toRemove = mCachedScanInfo.Values.OrderBy(x => x.CacheDateUTC).Take(numToRemove);
+                foreach (var cachedInfo in toRemove)
+                {
+                    if (mCachedScanInfo.ContainsKey(cachedInfo.ScanNumber))
+                    {
+                        mCachedScanInfo.Remove(cachedInfo.ScanNumber);
+                    }
+                }
+            }
         }
 
         private static string CapitalizeCollisionMode(string collisionMode)
@@ -627,7 +657,7 @@ namespace ThermoRawFileReader
                 var success = double.TryParse(parentIonMzText, out parentIonMz);
                 return success;
             }
-            
+
             parentIonMz = 0;
             return false;
         }
@@ -1161,7 +1191,7 @@ namespace ThermoRawFileReader
                 {
                     return scanCount;
                 }
-                
+
                 return -1;
             }
             catch (Exception)
@@ -1581,7 +1611,7 @@ namespace ThermoRawFileReader
             return true;
 
         }
-        
+
         /// <summary>
         /// Parse the scan type name out of the scan filter string
         /// </summary>
@@ -2865,8 +2895,6 @@ namespace ThermoRawFileReader
         /// <remarks></remarks>
         public XRawFileIO(string rawFilePath)
         {
-            mCachedScanInfo = new Dictionary<int, clsScanInfo>();
-
             if (!(string.IsNullOrWhiteSpace(rawFilePath)))
             {
                 OpenRawFile(rawFilePath);
