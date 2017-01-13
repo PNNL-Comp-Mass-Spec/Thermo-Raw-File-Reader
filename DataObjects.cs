@@ -627,7 +627,7 @@ namespace ThermoRawFileReader
         public float Baseline;
 
         /// <summary>
-        /// Peak Noise
+        /// Peak Signal/Noise
         /// </summary>
         public float Noise;
 
