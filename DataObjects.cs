@@ -607,8 +607,9 @@ namespace ThermoRawFileReader
     public struct udtFTLabelInfoType
     {
         /// <summary>
-        /// Peak Mass
+        /// Peak m/z
         /// </summary>
+        /// <remarks>This is observed m/z; it is not monoisotopic mass</remarks>
         public double Mass;
 
         /// <summary>
@@ -627,13 +628,39 @@ namespace ThermoRawFileReader
         public float Baseline;
 
         /// <summary>
-        /// Peak Signal/Noise
+        /// Peak Noise
         /// </summary>
+        /// <remarks>For signal/noise ratio, see SignalToNoise</remarks>
         public float Noise;
 
         /// <summary>
         /// Peak Charge
         /// </summary>
+        /// <remarks>Will be 0 if the charge could not be determined</remarks>
         public int Charge;
+
+        /// <summary>
+        /// Signal to noise ratio
+        /// </summary>
+        /// <returns>Intensity divided by noise, or 0 if Noise is 0</returns>
+        public double SignalToNoise
+        {
+            get
+            {
+                if (Noise > 0)
+                    return Intensity / Noise;
+
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Return a summary of this object
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return string.Format("m/z {0,9:F3}, S/N {1,7:F1}, intensity {2,12:F0}", Mass, SignalToNoise, Intensity);
+        }
     }
 }

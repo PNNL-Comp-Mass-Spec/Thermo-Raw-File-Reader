@@ -12,7 +12,7 @@ xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MSGF_Ru
 
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs\" /Y
 
-xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\lib\InformedProteomics.Backend" /Y
+xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\lib\InformedProteomics" /Y
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\src\MultiAlignRogue\bin\Debug\" /Y
 
 

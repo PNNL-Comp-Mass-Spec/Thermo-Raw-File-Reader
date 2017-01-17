@@ -1,4 +1,18 @@
-ThermoRawFileReaderDLL Change Log
+ThermoRawFileReader Change Log
+
+Version 2.0.6225; January 16, 2017
+	- Add property SignalToNoise to udtFTLabelInfoType
+
+Version 2.0.6214; January 5, 2017
+	- Allow the ScanInfo cache size to be changed or disabled
+		- Update using ScanInfoCacheMaxSize
+		- Defaults to 50000 spectra
+
+Version 2.0.6198; December 20, 2016
+	- Add a function that can be used to check if MSFileReader is installed and usable
+
+Version 2.0.6136; October 19, 2016
+	- Add GetRetentionTime, which returns the elution time (aka retention time) of a given scan number
 
 Version 2.0.6068; August 12, 2016
 	- Check for null filterText in GetScanTypeNameFromFinniganScanFilterText
