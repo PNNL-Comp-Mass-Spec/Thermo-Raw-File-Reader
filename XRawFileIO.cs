@@ -7,7 +7,7 @@ using MSFileReaderLib;
 
 // These functions utilize MSFileReader.XRawfile2.dll to extract scan header info and
 // raw mass spectrum info from Finnigan LCQ, LTQ, and LTQ-FT files
-// 
+//
 // Required Dlls: fileio.dll, fregistry.dll, and MSFileReader.XRawfile2.dll
 // DLLs obtained from: Thermo software named "MSFileReader2.2"
 // Download link: http://sjsupport.thermofinnigan.com/public/detail.asp?id=703
@@ -35,9 +35,9 @@ namespace ThermoRawFileReader
         private const string MS_ONLY_P_TEXT = " p ms ";
 
         private const string MS_ONLY_P_NSI_TEXT = " p NSI ms ";
-        private const string MS_ONLY_PZ_TEXT = " p Z ms ";			// Likely a zoom scan			
-        private const string MS_ONLY_DZ_TEXT = " d Z ms ";			// Dependent zoom scan			
-        private const string MS_ONLY_PZ_MS2_TEXT = " d Z ms2 ";		// Dependent MS2 zoom scan			
+        private const string MS_ONLY_PZ_TEXT = " p Z ms ";			// Likely a zoom scan
+        private const string MS_ONLY_DZ_TEXT = " d Z ms ";			// Dependent zoom scan
+        private const string MS_ONLY_PZ_MS2_TEXT = " d Z ms2 ";		// Dependent MS2 zoom scan
         private const string MS_ONLY_Z_TEXT = " NSI Z ms ";			// Likely a zoom scan
 
         private const string FULL_MS_TEXT = "Full ms ";
@@ -48,7 +48,7 @@ namespace ThermoRawFileReader
         private const string MRM_Q1MS_TEXT = "Q1MS ";
         private const string MRM_Q3MS_TEXT = "Q3MS ";
         private const string MRM_SRM_TEXT = "SRM ms2";
-        private const string MRM_FullNL_TEXT = "Full cnl ";			// MRM neutral loss; yes, cnl starts with a c		
+        private const string MRM_FullNL_TEXT = "Full cnl ";			// MRM neutral loss; yes, cnl starts with a c
         private const string MRM_SIM_PR_TEXT = "SIM pr ";			// TSQ: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., Biofilm-1000pg-std-mix_06Dec14_Smeagol-3
 
         // This RegEx matches Full ms2, Full ms3, ..., Full ms10, Full ms11, ...
@@ -555,7 +555,7 @@ namespace ThermoRawFileReader
         public static void ExtractMRMMasses(string filterText, MRMScanTypeConstants mrmScanType, out MRMInfo mrmInfo)
         {
             // Parse out the MRM_QMS or SRM mass info from filterText
-            // It should be of the form 
+            // It should be of the form
 
             // SIM:              p NSI SIM ms [330.00-380.00]
             // or
@@ -633,7 +633,7 @@ namespace ThermoRawFileReader
         /// This was created for use in other programs that only need the parent ion m/z, and no other functions from ThermoRawFileReader.
         /// Other projects that use this:
         ///      PHRPReader
-        /// 
+        ///
         /// To copy this, take the code from this function, plus the regex strings <see cref="PARENTION_ONLY_NONMSX_REGEX"/> and <see cref="PARENTION_ONLY_MSX_REGEX"/>,
         /// with their uses in <see cref="mFindParentIonOnlyNonMsx"/> and <see cref="mFindParentIonOnlyMsx"/>
         /// </remarks>
@@ -646,7 +646,7 @@ namespace ThermoRawFileReader
             }
             else
             {
-                matcher = mFindParentIonOnlyNonMsx;                
+                matcher = mFindParentIonOnlyNonMsx;
             }
 
             var match = matcher.Match(filterText);
@@ -688,9 +688,9 @@ namespace ThermoRawFileReader
         /// <returns>True if success</returns>
         /// <remarks>If multiple parent ion m/z values are listed then parentIonMz will have the last one.  However, if the filter text contains "Full msx" then parentIonMz will have the first parent ion listed</remarks>
         public static bool ExtractParentIonMZFromFilterText(
-            string filterText, 
-            out double parentIonMz, 
-            out int msLevel, 
+            string filterText,
+            out double parentIonMz,
+            out int msLevel,
             out string collisionMode,
             out List<udtParentIonInfoType> parentIons)
         {
@@ -699,7 +699,7 @@ namespace ThermoRawFileReader
             // or "+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]"
             // or "ITMS + c NSI d Full ms10 421.76@35.00"
             // or "ITMS + c NSI d sa Full ms2 467.16@etd100.00 [50.00-1880.00]"              ' Note: sa stands for "supplemental activation"
-            // or "ITMS + c NSI d Full ms2 467.16@etd100.00 [50.00-1880.00]" 
+            // or "ITMS + c NSI d Full ms2 467.16@etd100.00 [50.00-1880.00]"
             // or "ITMS + c NSI d Full ms2 756.98@cid35.00 [195.00-2000.00]"
             // or "ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]"
             // or "ITMS + c ESI d Full ms2 342.90@cid35.00 [50.00-2000.00]"
@@ -1548,7 +1548,7 @@ namespace ThermoRawFileReader
                 scanInfo.MRMInfo = newMRMInfo;
 
                 // Retrieve the Status Log for this scan using the following
-                // The Status Log includes numerous instrument parameters, including voltages, temperatures, pressures, turbo pump speeds, etc. 
+                // The Status Log includes numerous instrument parameters, including voltages, temperatures, pressures, turbo pump speeds, etc.
                 arrayCount = 0;
                 objLabels = null;
                 objValues = null;
@@ -1727,7 +1727,7 @@ namespace ThermoRawFileReader
 
                 if (validScanFilter)
                 {
-                    if (eMRMScanType == MRMScanTypeConstants.NotMRM || 
+                    if (eMRMScanType == MRMScanTypeConstants.NotMRM ||
                         eMRMScanType == MRMScanTypeConstants.SIM)
                     {
                         if (simScan)
@@ -2079,10 +2079,10 @@ namespace ThermoRawFileReader
         /// <returns>True if filterText contains a known MS scan type</returns>
         /// <remarks>Returns false for MSn scans (like ms2 or ms3)</remarks>
         public static bool ValidateMSScan(
-            string filterText, 
-            out int msLevel, 
-            out bool simScan, 
-            out MRMScanTypeConstants mrmScanType, 
+            string filterText,
+            out int msLevel,
+            out bool simScan,
+            out MRMScanTypeConstants mrmScanType,
             out bool zoomScan)
         {
 
@@ -2226,8 +2226,8 @@ namespace ThermoRawFileReader
                     mzList[intIndex] = massIntensityPairs[0, intIndex];
                     intensityList[intIndex] = massIntensityPairs[1, intIndex];
 
-                    // Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z, 
-                    // we have observed a few cases in certain scans of certain datasets that points with 
+                    // Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z,
+                    // we have observed a few cases in certain scans of certain datasets that points with
                     // similar m/z values are swapped and ths slightly out of order
                     // The following if statement checks for this
                     if ((intIndex > 0 && mzList[intIndex] < mzList[intIndex - 1]))
@@ -2346,7 +2346,7 @@ namespace ThermoRawFileReader
 
                 if (centroidData && scanInfo.IsFTMS)
                 {
-                    // Centroiding is enabled, and the dataset was acquired on an Orbitrap, Exactive, or FTMS instrument 
+                    // Centroiding is enabled, and the dataset was acquired on an Orbitrap, Exactive, or FTMS instrument
 
                     object massIntensityLabelsObject = null;
                     object labelFlags = null;
