@@ -2363,10 +2363,10 @@ namespace ThermoRawFileReader
 
                         for (var i = 0; i <= dataCount - 1; i++)
                         {
-                            massIntensityPairs[0, i] = massIntensityLabels[0, i];
                             // m/z
-                            massIntensityPairs[1, i] = massIntensityLabels[1, i];
+                            massIntensityPairs[0, i] = massIntensityLabels[0, i];
                             // Intensity
+                            massIntensityPairs[1, i] = massIntensityLabels[1, i];
                         }
 
                     }
@@ -2374,9 +2374,6 @@ namespace ThermoRawFileReader
                     {
                         massIntensityPairs = new double[0, 0];
                     }
-
-                    // Dim byteFlags As Byte(,)
-                    // byteFlags = CType(labelFlags, Byte(,))
 
                 }
                 else
