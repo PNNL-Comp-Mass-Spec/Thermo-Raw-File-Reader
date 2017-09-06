@@ -2,3 +2,9 @@
 .hg
 ThermoRawFileReader_SourceCode
 /.hgignore
+.vs/
+*.suo
+*.user
+**/.vs/
+**/obj/
+**/bin/
