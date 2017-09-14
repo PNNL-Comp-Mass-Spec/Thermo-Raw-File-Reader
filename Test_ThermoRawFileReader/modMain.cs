@@ -113,7 +113,7 @@ namespace Test_ThermoRawFileReader
             // Keys in this dictionary are generic scan filters
             // Values are a tuple of <ScanFilter, Observation Count, First Dataset>
             var lstFilters = new Dictionary<string, Tuple<string, int, string>>();
- 
+
             // Find the Masic _ScanStatsEx.txt files in the source folder
             var scanStatsFiles = diWorkingDirectory.GetFiles("*_ScanStatsEx.txt");
 
@@ -157,7 +157,7 @@ namespace Test_ThermoRawFileReader
                         Console.WriteLine("Scan Filter Text not found in: " + dataFile.Name);
                         continue;
                     }
-                    
+
                     while (!reader.EndOfStream)
                     {
                         var dataLine = reader.ReadLine();
@@ -226,8 +226,8 @@ namespace Test_ThermoRawFileReader
             }
 
             // Write the cached scan filters
-            var outputFilePath = Path.Combine(diWorkingDirectory.FullName, "ScanFiltersFound.txt");  
-            
+            var outputFilePath = Path.Combine(diWorkingDirectory.FullName, "ScanFiltersFound.txt");
+
             using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
             {
                 writer.WriteLine("{0}\t{1}\t{2}\t{3}", "Generic_Filter", "Example_Filter", "Count", "First_Dataset");
@@ -363,7 +363,9 @@ namespace Test_ThermoRawFileReader
                                     // Get the data for scan iScanNum through iScanNum + 15
 
                                     double[,] dblMassIntensityPairs;
+#pragma warning disable 618
                                     var dataCount = oReader.GetScanDataSumScans(iScanNum, iScanNum + scansToSum, out dblMassIntensityPairs, 0, centroid);
+#pragma warning restore 618
 
                                     Console.WriteLine("Summed spectrum, scans " + iScanNum + " through " + (iScanNum + scansToSum));
 

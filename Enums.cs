@@ -19,7 +19,7 @@ namespace ThermoRawFileReader
         CID = 0,
 
         /// <summary>
-        /// Multi Photo Dissociation
+        /// Multi Photon Dissociation
         /// </summary>
         MPD = 1,
 
@@ -54,7 +54,7 @@ namespace ThermoRawFileReader
         SA = 7,
 
         /// <summary>
-        /// Photon Transfer Reaction
+        /// Proton Transfer Reaction
         /// </summary>
         PTR = 8,
 
@@ -66,7 +66,147 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Negative Photon Transfer Reaction
         /// </summary>
-        NPTR = 10
+        NPTR = 10,
+
+        /// <summary>
+        /// Ultra Violet Photo Dissociation
+        /// </summary>
+        UVPD = 11,
+
+        /// <summary>
+        /// Mode A
+        /// </summary>
+        ModeA = 12,
+
+        /// <summary>
+        /// Mode B
+        /// </summary>
+        ModeB = 13,
+
+        /// <summary>
+        /// Mode C
+        /// </summary>
+        ModeC = 14,
+
+        /// <summary>
+        /// Mode D
+        /// </summary>
+        ModeD = 15,
+
+        /// <summary>
+        /// Mode E
+        /// </summary>
+        ModeE = 16,
+
+        /// <summary>
+        /// Mode F
+        /// </summary>
+        ModeF = 17,
+
+        /// <summary>
+        /// Mode G
+        /// </summary>
+        ModeG = 18,
+
+        /// <summary>
+        /// Mode H
+        /// </summary>
+        ModeH = 19,
+
+        /// <summary>
+        /// Mode I
+        /// </summary>
+        ModeI = 20,
+
+        /// <summary>
+        /// Mode J
+        /// </summary>
+        ModeJ = 21,
+
+        /// <summary>
+        /// Mode K
+        /// </summary>
+        ModeK = 22,
+
+        /// <summary>
+        /// Mode L
+        /// </summary>
+        ModeL = 23,
+
+        /// <summary>
+        /// Mode M
+        /// </summary>
+        ModeM = 24,
+
+        /// <summary>
+        /// Mode N
+        /// </summary>
+        ModeN = 25,
+
+        /// <summary>
+        /// Mode O
+        /// </summary>
+        ModeO = 26,
+
+        /// <summary>
+        /// Mode P
+        /// </summary>
+        ModeP = 27,
+
+        /// <summary>
+        /// Mode Q
+        /// </summary>
+        ModeQ = 28,
+
+        /// <summary>
+        /// Mode R
+        /// </summary>
+        ModeR = 29,
+
+        /// <summary>
+        /// Mode S
+        /// </summary>
+        ModeS = 30,
+
+        /// <summary>
+        /// Mode T
+        /// </summary>
+        ModeT = 31,
+
+        /// <summary>
+        /// Mode U
+        /// </summary>
+        ModeU = 32,
+
+        /// <summary>
+        /// Mode V
+        /// </summary>
+        ModeV = 33,
+
+        /// <summary>
+        /// Mode W
+        /// </summary>
+        ModeW = 34,
+
+        /// <summary>
+        /// Mode X
+        /// </summary>
+        ModeX = 35,
+
+        /// <summary>
+        /// Mode Y
+        /// </summary>
+        ModeY = 36,
+
+        /// <summary>
+        /// Mode Z
+        /// </summary>
+        ModeZ = 37,
+
+        /// <summary>
+        /// Last Activation
+        /// </summary>
+        LastActivation = 38,
     }
 
     /// <summary>
@@ -191,22 +331,27 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Analog controller
         /// </summary>
-        Analog = 1,
+        MSAnalog = 1,
 
         /// <summary>
         /// A/D card controller
         /// </summary>
-        AD_Card = 2,
-
-        /// <summary>
-        /// PDA controller
-        /// </summary>
-        PDA = 3,
+        Analog = 2,
 
         /// <summary>
         /// UV controller
         /// </summary>
-        UV = 4
+        UV = 3,
+
+        /// <summary>
+        /// PDA controller
+        /// </summary>
+        PDA = 4,
+
+        /// <summary>
+        /// Other controller
+        /// </summary>
+        Other = 5
     }
 
     /// <summary>

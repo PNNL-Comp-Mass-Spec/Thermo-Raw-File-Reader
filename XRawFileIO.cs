@@ -1,9 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using MSFileReaderLib;
+using ThermoFisher.CommonCore.Data;
+using ThermoFisher.CommonCore.Data.Business;
+using ThermoFisher.CommonCore.Data.Interfaces;
+using ThermoFisher.CommonCore.MassPrecisionEstimator;
+using ThermoFisher.CommonCore.RawFileReader;
+using ThermoFisher.CommonCore.BackgroundSubtraction;
 
 // These functions utilize MSFileReader.XRawfile2.dll to extract scan header info and
 // raw mass spectrum info from Finnigan LCQ, LTQ, and LTQ-FT files
@@ -120,7 +126,8 @@ namespace ThermoRawFileReader
         protected bool mLoadMSTuneInfo = true;
 
         // Cached XRawFile object, for faster accessing
-        private IXRawfile5 mXRawFile;
+        private IRawDataPlus mXRawFile;
+        private IFileHeader mXRawFileHeader;
 
         private bool mCorruptMemoryEncountered;
 
@@ -319,7 +326,7 @@ namespace ThermoRawFileReader
             try
             {
                 // ReSharper disable once UnusedVariable
-                var objXRawFile = new MSFileReader_XRawfile();
+                //var objXRawFile = new MSFileReader_XRawfile();
 
                 // If we get here, all is fine
                 return true;
@@ -409,7 +416,7 @@ namespace ThermoRawFileReader
             {
                 if ((mXRawFile != null))
                 {
-                    mXRawFile.Close();
+                    mXRawFile.Dispose();
                 }
                 mCorruptMemoryEncountered = false;
 
@@ -975,31 +982,34 @@ namespace ThermoRawFileReader
 
                 // Make sure the MS controller is selected
                 if (!SetMSController())
+                {
+                    mFileInfo.Clear();
+                    mFileInfo.CorruptFile = true;
                     return false;
+                }
 
                 mFileInfo.Clear();
 
                 mFileInfo.CreationDate = DateTime.MinValue;
-                mXRawFile.GetCreationDate(ref mFileInfo.CreationDate);
-
-                var errorCode = 0;
-                mXRawFile.IsError(ref errorCode);
+                mFileInfo.CreationDate = mXRawFileHeader.CreationDate;
 
                 // Unfortunately, .IsError() always returns 0, even if an error occurred
-                if (errorCode != 0)
+                if (mXRawFile.IsError)
                     return false;
 
                 mFileInfo.CreatorID = null;
-                mXRawFile.GetCreatorID(ref mFileInfo.CreatorID);
+                mFileInfo.CreatorID = mXRawFileHeader.WhoCreatedId;
+
+                var instData = mXRawFile.GetInstrumentData();
 
                 mFileInfo.InstFlags = null;
-                mXRawFile.GetInstFlags(ref mFileInfo.InstFlags);
+                mFileInfo.InstFlags = instData.Flags;
 
                 mFileInfo.InstHardwareVersion = null;
-                mXRawFile.GetInstHardwareVersion(ref mFileInfo.InstHardwareVersion);
+                mFileInfo.InstHardwareVersion = instData.HardwareVersion;
 
                 mFileInfo.InstSoftwareVersion = null;
-                mXRawFile.GetInstSoftwareVersion(ref mFileInfo.InstSoftwareVersion);
+                mFileInfo.InstSoftwareVersion = instData.SoftwareVersion;
 
                 mFileInfo.InstMethods.Clear();
 
@@ -1007,12 +1017,12 @@ namespace ThermoRawFileReader
                 {
 
                     var methodCount = 0;
-                    mXRawFile.GetNumInstMethods(ref methodCount);
+                    methodCount = mXRawFile.InstrumentMethodsCount;
 
                     for (var methodIndex = 0; methodIndex < methodCount; methodIndex++)
                     {
                         string methodText = null;
-                        mXRawFile.GetInstMethod(methodIndex, ref methodText);
+                        methodText = mXRawFile.GetInstrumentMethod(methodIndex);
                         if (!string.IsNullOrWhiteSpace(methodText))
                         {
                             mFileInfo.InstMethods.Add(methodText);
@@ -1026,16 +1036,19 @@ namespace ThermoRawFileReader
                 mFileInfo.InstrumentDescription = null;
                 mFileInfo.InstSerialNumber = null;
 
-                mXRawFile.GetInstModel(ref mFileInfo.InstModel);
-                mXRawFile.GetInstName(ref mFileInfo.InstName);
-                mXRawFile.GetInstrumentDescription(ref mFileInfo.InstrumentDescription);
-                mXRawFile.GetInstSerialNumber(ref mFileInfo.InstSerialNumber);
+                mFileInfo.InstModel = instData.Model;
+                mFileInfo.InstName = instData.Name;
+                mFileInfo.InstrumentDescription = mXRawFileHeader.FileDescription;
+                mFileInfo.InstSerialNumber = instData.SerialNumber;
 
-                mXRawFile.GetVersionNumber(ref mFileInfo.VersionNumber);
-                mXRawFile.GetMassResolution(ref mFileInfo.MassResolution);
+                mFileInfo.VersionNumber = mXRawFileHeader.Revision;
 
-                mXRawFile.GetFirstSpectrumNumber(ref mFileInfo.ScanStart);
-                mXRawFile.GetLastSpectrumNumber(ref mFileInfo.ScanEnd);
+                var runData = mXRawFile.RunHeaderEx;
+
+                mFileInfo.MassResolution = runData.MassResolution;
+
+                mFileInfo.ScanStart = runData.FirstSpectrum;
+                mFileInfo.ScanEnd = runData.LastSpectrum;
 
                 mFileInfo.AcquisitionDate = null;
                 mFileInfo.AcquisitionFilename = null;
@@ -1045,12 +1058,15 @@ namespace ThermoRawFileReader
                 mFileInfo.SampleComment = null;
 
                 // Note that the following are typically blank
-                mXRawFile.GetAcquisitionDate(ref mFileInfo.AcquisitionDate);
-                mXRawFile.GetAcquisitionFileName(ref mFileInfo.AcquisitionFilename);
-                mXRawFile.GetComment1(ref mFileInfo.Comment1);
-                mXRawFile.GetComment2(ref mFileInfo.Comment2);
-                mXRawFile.GetSeqRowSampleName(ref mFileInfo.SampleName);
-                mXRawFile.GetSeqRowComment(ref mFileInfo.SampleComment);
+                mFileInfo.AcquisitionDate = mXRawFileHeader.CreationDate.ToString(CultureInfo.InvariantCulture);
+                //mXRawFile.GetAcquisitionFileName(mFileInfo.AcquisitionFilename); // DEPRECATED
+                //TODO: WHERE?: mFileInfo.Comment1 = mXRawFileHeader.Comment1;
+                //TODO: WHERE?: mFileInfo.Comment2 = mXRawFileHeader.Comment2;
+
+                var sampleInfo = mXRawFile.SampleInformation;
+
+                mFileInfo.SampleName = sampleInfo.SampleName;
+                mFileInfo.SampleComment = sampleInfo.Comment;
 
                 mFileInfo.TuneMethods = new List<TuneMethod>();
 
@@ -1073,17 +1089,22 @@ namespace ThermoRawFileReader
 
         private ActivationTypeConstants GetActivationType(int scan, int msLevel)
         {
-
-
             try
             {
-                var activationTypeCode = 0;
+                var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
+                var reactions = scanFilter.MassCount;
+                var activationTypeCode = scanFilter.GetActivation(0);
+                //var activationTypeCode = scanFilter.GetActivation(reactions - 1); // Fails for ETciD/EThcD
 
-                mXRawFile.GetActivationTypeForScanNum(scan, msLevel, ref activationTypeCode);
+                // TODO: Verify: mXRawFile.GetActivationTypeForScanNum(scan, msLevel, ref activationTypeCode);
 
                 ActivationTypeConstants activationType;
 
-                if (!Enum.TryParse(activationTypeCode.ToString(), out activationType))
+                try
+                {
+                    activationType = (ActivationTypeConstants) ((int) activationTypeCode);
+                }
+                catch
                 {
                     activationType = ActivationTypeConstants.Unknown;
                 }
@@ -1181,13 +1202,14 @@ namespace ThermoRawFileReader
 
                 var scanCount = 0;
 
-                mXRawFile.GetNumSpectra(ref scanCount);
+                var runData = mXRawFile.RunHeaderEx;
 
-                var errorCode = 0;
-                mXRawFile.IsError(ref errorCode);
+                scanCount = runData.SpectraCount;
+
+                var errorCode = mXRawFile.IsError;
 
                 // Unfortunately, .IsError() always returns 0, even if an error occurred
-                if (errorCode == 0)
+                if (!errorCode)
                 {
                     return scanCount;
                 }
@@ -1220,7 +1242,7 @@ namespace ThermoRawFileReader
                 if (!SetMSController())
                     return false;
 
-                mXRawFile.RTFromScanNum(scan, ref retentionTime);
+                retentionTime = mXRawFile.RetentionTimeFromScanNumber(scan);
             }
             catch (Exception ex)
             {
@@ -1268,7 +1290,10 @@ namespace ThermoRawFileReader
 
                 // Make sure the MS controller is selected
                 if (!SetMSController())
+                {
+                    CacheScanInfo(scan, scanInfo);
                     return false;
+                }
 
                 // Initialize the values that will be populated using GetScanHeaderInfoForScanNum()
                 scanInfo.NumPeaks = 0;
@@ -1280,48 +1305,31 @@ namespace ThermoRawFileReader
                 scanInfo.FilterText = string.Empty;
                 scanInfo.IonMode = IonModeConstants.Unknown;
 
-                var numPeaks = 0;
-                double retentionTime = 0;
-                double lowMass = 0;
-                double highMass = 0;
-                double totalIonCurrent = 0;
-                double basePeakMZ = 0;
-                double basePeakIntensity = 0;
-                var numChannels = 0;
-                double frequency = 0;
+                var scanStats = mXRawFile.GetScanStatsForScanNumber(scan);
 
-                var booleanValue = 0;
-                var errorCode = 0;
+                scanInfo.NumPeaks = scanStats.PacketCount;
+                scanInfo.RetentionTime = scanStats.StartTime;
+                scanInfo.LowMass = scanStats.LowMass;
+                scanInfo.HighMass = scanStats.HighMass;
+                scanInfo.TotalIonCurrent = scanStats.TIC;
+                scanInfo.BasePeakMZ = scanStats.BasePeakMass;
+                scanInfo.BasePeakIntensity = scanStats.BasePeakIntensity;
+                scanInfo.NumChannels = scanStats.NumberOfChannels;
+                scanInfo.Frequency = scanStats.Frequency;
 
-                mXRawFile.GetScanHeaderInfoForScanNum(
-                    scan, ref numPeaks, ref retentionTime, ref lowMass, ref highMass,
-                    ref totalIonCurrent, ref basePeakMZ, ref basePeakIntensity, ref numChannels, booleanValue, ref frequency);
 
-                scanInfo.NumPeaks = numPeaks;
-                scanInfo.RetentionTime = retentionTime;
-                scanInfo.LowMass = lowMass;
-                scanInfo.HighMass = highMass;
-                scanInfo.TotalIonCurrent = totalIonCurrent;
-                scanInfo.BasePeakMZ = basePeakMZ;
-                scanInfo.BasePeakIntensity = basePeakIntensity;
-                scanInfo.NumChannels = numChannels;
-                scanInfo.Frequency = frequency;
-
-                mXRawFile.IsError(ref errorCode);
+                var errorCode = mXRawFile.IsError;
                 // Unfortunately, .IsError() always returns 0, even if an error occurred
 
-                if (errorCode != 0)
+                if (errorCode)
                 {
                     CacheScanInfo(scan, scanInfo);
                     return false;
                 }
 
-                scanInfo.UniformTime = Convert.ToBoolean(booleanValue);
+                scanInfo.UniformTime = scanStats.IsUniformTime;
 
-                booleanValue = 0;
-                mXRawFile.IsCentroidScanForScanNum(scan, ref booleanValue);
-
-                scanInfo.IsCentroided = Convert.ToBoolean(booleanValue);
+                scanInfo.IsCentroided = scanStats.IsCentroidScan;
 
                 var arrayCount = 0;
                 object objLabels = null;
@@ -1332,7 +1340,11 @@ namespace ThermoRawFileReader
                     if (!mCorruptMemoryEncountered)
                     {
                         // Retrieve the additional parameters for this scan (including Scan Event)
-                        mXRawFile.GetTrailerExtraForScanNum(scan, ref objLabels, ref objValues, ref arrayCount);
+                        // TODO: Verify: mXRawFile.GetTrailerExtraForScanNum(scan, ref objLabels, ref objValues, ref arrayCount);
+                        var data = mXRawFile.GetTrailerExtraInformation(scan);
+                        arrayCount = data.Length;
+                        objLabels = data.Labels;
+                        objValues = data.Values;
                     }
                 }
                 catch (AccessViolationException ex)
@@ -1403,7 +1415,8 @@ namespace ThermoRawFileReader
                 // Parse out the parent ion m/z for fragmentation scans
                 // Must set filterText to Nothing prior to calling .GetFilterForScanNum()
                 string filterText = null;
-                mXRawFile.GetFilterForScanNum(scan, ref filterText);
+                filterText = mXRawFile.GetFilterForScanNumber(scan).ToString();
+                // TODO: Verify: mXRawFile.GetFilterForScanNum(scan, ref filterText);
 
                 scanInfo.FilterText = string.Copy(filterText);
 
@@ -1531,7 +1544,14 @@ namespace ThermoRawFileReader
                 scanInfo.IonMode = DetermineIonizationMode(scanInfo.FilterText);
 
                 // Now that we know MSLevel we can lookup the activation type (aka activation method)
-                scanInfo.ActivationType = GetActivationType(scan, scanInfo.MSLevel);
+                if (scanInfo.MSLevel > 1)
+                {
+                    scanInfo.ActivationType = GetActivationType(scan, scanInfo.MSLevel);
+                }
+                else
+                {
+                    scanInfo.ActivationType = ActivationTypeConstants.CID;
+                }
 
                 MRMInfo newMRMInfo;
 
@@ -1557,9 +1577,14 @@ namespace ThermoRawFileReader
                 {
                     if (!mCorruptMemoryEncountered)
                     {
-                        double statusLogRT = 0;
+                        // TODO: Verify: mXRawFile.GetStatusLogForScanNum(scan, statusLogRT, ref objLabels, ref objValues, ref arrayCount);
 
-                        mXRawFile.GetStatusLogForScanNum(scan, statusLogRT, ref objLabels, ref objValues, ref arrayCount);
+                        var rt = mXRawFile.RetentionTimeFromScanNumber(scan);
+                        var data = mXRawFile.GetStatusLogForRetentionTime(rt);
+
+                        arrayCount = data.Length;
+                        objLabels = data.Labels;
+                        objValues = data.Values;
                     }
                 }
                 catch (AccessViolationException ex)
@@ -1828,8 +1853,7 @@ namespace ThermoRawFileReader
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         private void GetTuneData()
         {
-            var numTuneData = 0;
-            mXRawFile.GetNumTuneData(ref numTuneData);
+            var numTuneData = mXRawFile.GetTuneDataCount();
 
             for (var index = 0; index <= numTuneData - 1; index++)
             {
@@ -1842,7 +1866,10 @@ namespace ThermoRawFileReader
                 {
                     if (!mCorruptMemoryEncountered)
                     {
-                        mXRawFile.GetTuneData(index, ref objLabels, ref objValues, ref tuneLabelCount);
+                        var tuneData = mXRawFile.GetTuneData(index);
+                        objLabels = tuneData.Labels;
+                        objValues = tuneData.Values;
+                        tuneLabelCount = tuneData.Length;
                     }
 
                 }
@@ -2051,21 +2078,16 @@ namespace ThermoRawFileReader
             // A controller is typically the MS, UV, analog, etc.
             // See ControllerTypeConstants
 
-            var intResult = 0;
+            mXRawFile.SelectInstrument(Device.MS, 1);
+            var hasMsData = mXRawFile.SelectMsData();
 
-            mXRawFile.SetCurrentController((int)ControllerTypeConstants.MS, 1);
-            mXRawFile.IsError(ref intResult);
+            if (!hasMsData)
+            {
+                mCorruptMemoryEncountered = true;
+            }
+
             // Unfortunately, .IsError() always returns 0, even if an error occurred
-
-            if (intResult == 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
+            return hasMsData;
         }
 
         /// <summary>
@@ -2333,7 +2355,6 @@ namespace ThermoRawFileReader
 
                 var strFilter = string.Empty;
                 // Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
-                var intIntensityCutoffValue = 0;
 
                 if (maxNumberOfPeaks < 0)
                     maxNumberOfPeaks = 0;
@@ -2347,34 +2368,40 @@ namespace ThermoRawFileReader
                 if (centroidData && scanInfo.IsFTMS)
                 {
                     // Centroiding is enabled, and the dataset was acquired on an Orbitrap, Exactive, or FTMS instrument
+                    var data = mXRawFile.GetSimplifiedCentroids(scan);
 
-                    object massIntensityLabelsObject = null;
-                    object labelFlags = null;
-
-                    mXRawFile.GetLabelData(ref massIntensityLabelsObject, ref labelFlags, scan);
-
-                    var massIntensityLabels = (double[,])massIntensityLabelsObject;
-
-                    dataCount = massIntensityLabels.GetLength(1);
+                    dataCount = data.Masses.Length;
+                    //if (maxNumberOfPeaks > 0)
+                    //{
+                    //    dataCount = Math.Min(dataCount, maxNumberOfPeaks);
+                    //}
 
                     if (dataCount > 0)
                     {
                         massIntensityPairs = new double[2, dataCount];
+                        var masses = data.Masses;
+                        var intensities = data.Intensities;
 
-                        for (var i = 0; i <= dataCount - 1; i++)
+                        //if (maxNumberOfPeaks > 0)
+                        //{
+                        //    Array.Sort(intensities, masses);
+                        //    Array.Reverse(intensities);
+                        //    Array.Reverse(masses);
+                        //    Array.Sort(masses, intensities, 0, dataCount);
+                        //}
+
+                        for (var i = 0; i < dataCount; i++)
                         {
                             // m/z
-                            massIntensityPairs[0, i] = massIntensityLabels[0, i];
+                            massIntensityPairs[0, i] = masses[i];
                             // Intensity
-                            massIntensityPairs[1, i] = massIntensityLabels[1, i];
+                            massIntensityPairs[1, i] = intensities[i];
                         }
-
                     }
                     else
                     {
                         massIntensityPairs = new double[0, 0];
                     }
-
                 }
                 else
                 {
@@ -2388,26 +2415,36 @@ namespace ThermoRawFileReader
                     //			1032.56495			1032.6863		118
                     //			1513.7252			1513.9168		127
 
-                    int centroidResultFlag;
-                    double centroidPeakWidth = 0;
+                    // TODO: Can we get centroided Ion trap data? does it matter?: mXRawFile.GetMassListFromScanNum(ref scan, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, maxNumberOfPeaks, centroidResultFlag, centroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
+                    var data = mXRawFile.GetSimplifiedScan(scan);
 
-                    if (centroidData)
+                    dataCount = data.Masses.Length;
+                    if (maxNumberOfPeaks > 0)
                     {
-                        centroidResultFlag = 1;
+                        dataCount = Math.Min(dataCount, maxNumberOfPeaks);
                     }
-                    else
-                    {
-                        centroidResultFlag = 0;
-                    }
-
-                    object massIntensityPairsList = null;
-                    object peakList = null;
-
-                    mXRawFile.GetMassListFromScanNum(ref scan, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, maxNumberOfPeaks, centroidResultFlag, centroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
 
                     if (dataCount > 0)
                     {
-                        massIntensityPairs = (double[,])massIntensityPairsList;
+                        massIntensityPairs = new double[2, dataCount];
+                        var masses = data.Masses;
+                        var intensities = data.Intensities;
+
+                        if (maxNumberOfPeaks > 0)
+                        {
+                            Array.Sort(intensities, masses);
+                            Array.Reverse(intensities);
+                            Array.Reverse(masses);
+                            Array.Sort(masses, intensities, 0, dataCount);
+                        }
+
+                        for (var i = 0; i < dataCount; i++)
+                        {
+                            // m/z
+                            massIntensityPairs[0, i] = masses[i];
+                            // Intensity
+                            massIntensityPairs[1, i] = intensities[i];
+                        }
                     }
                     else
                     {
@@ -2481,47 +2518,32 @@ namespace ThermoRawFileReader
                     return -1;
                 }
 
-                object labelData = null;
-                object labelFlags = null;
+                var data = mXRawFile.GetCentroidStream(scan, false);
 
-                mXRawFile.GetLabelData(ref labelData, ref labelFlags, ref scan);
-
-                var labelDataArray = (double[,])labelData;
-
-                var dataCount = labelDataArray.GetLength(1);
-                var maxColIndex = labelDataArray.GetLength(0) - 1;
+                var dataCount = data.Length;
 
                 if (dataCount > 0)
                 {
                     ftLabelData = new udtFTLabelInfoType[dataCount];
 
+                    var masses = data.Masses;
+                    var intensities = data.Intensities;
+                    var resolutions = data.Resolutions;
+                    var baselines = data.Baselines;
+                    var noises = data.Noises;
+                    var charges = data.Charges;
+
                     for (var i = 0; i <= dataCount - 1; i++)
                     {
                         var labelInfo = new udtFTLabelInfoType
                         {
-                            Mass = labelDataArray[0, i],
-                            Intensity = labelDataArray[1, i]
+                            Mass = masses[i],
+                            Intensity = intensities[i],
+                            Resolution = Convert.ToSingle(resolutions[i]),
+                            Baseline = Convert.ToSingle(baselines[i]),
+                            Noise = Convert.ToSingle(noises[i]),
+                            Charge = Convert.ToInt32(charges[i])
                         };
-
-                        if (maxColIndex >= 2)
-                        {
-                            labelInfo.Resolution = Convert.ToSingle(labelDataArray[2, i]);
-                        }
-
-                        if (maxColIndex >= 3)
-                        {
-                            labelInfo.Baseline = Convert.ToSingle(labelDataArray[3, i]);
-                        }
-
-                        if (maxColIndex >= 4)
-                        {
-                            labelInfo.Noise = Convert.ToSingle(labelDataArray[4, i]);
-                        }
-
-                        if (maxColIndex >= 5)
-                        {
-                            labelInfo.Charge = Convert.ToInt32(labelDataArray[5, i]);
-                        }
 
                         ftLabelData[i] = labelInfo;
                     }
@@ -2602,27 +2624,30 @@ namespace ThermoRawFileReader
                     return -1;
                 }
 
-                object massResolutionDataList = null;
-
-                mXRawFile.GetMassPrecisionEstimate(scan, ref massResolutionDataList, ref dataCount);
-
-                var massPrecisionArray = (double[,])massResolutionDataList;
-
-                dataCount = massPrecisionArray.GetLength(1);
-
-                if (dataCount > 0)
+                //object massResolutionDataList = null;
+                // TODO: Verify: mXRawFile.GetMassPrecisionEstimate(scan, ref massResolutionDataList, ref dataCount);
+                var mpe = new PrecisionEstimate
                 {
+                    Rawfile = mXRawFile,
+                    ScanNumber = scan
+                };
+
+                var results = mpe.GetMassPrecisionEstimate().ToList();
+
+                if (results.Count > 0)
+                {
+                    dataCount = results.Count;
                     massResolutionData = new udtMassPrecisionInfoType[dataCount];
 
-                    for (var i = 0; i <= dataCount - 1; i++)
+                    for (var i = 0; i < dataCount; i++)
                     {
                         var massPrecisionInfo = new udtMassPrecisionInfoType
                         {
-                            Intensity = massPrecisionArray[0, i],
-                            Mass = massPrecisionArray[1, i],
-                            AccuracyMMU = massPrecisionArray[2, i],
-                            AccuracyPPM = massPrecisionArray[3, i],
-                            Resolution = massPrecisionArray[4, i]
+                            Intensity = results[i].Intensity,
+                            Mass = results[i].Mass,
+                            AccuracyMMU = results[i].MassAccuracyInMmu,
+                            AccuracyPPM = results[i].MassAccuracyInPpm,
+                            Resolution = results[i].Resolution
                         };
 
                         massResolutionData[i] = massPrecisionInfo;
@@ -2641,8 +2666,6 @@ namespace ThermoRawFileReader
             {
                 var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
                 RaiseWarningMessage(strError);
-
-
             }
             catch (Exception ex)
             {
@@ -2667,17 +2690,28 @@ namespace ThermoRawFileReader
         /// <returns>The number of data points</returns>
         /// <remarks></remarks>
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
+        [Obsolete("Not used internally, and can't get comparable results from the NuGet Thermo DLLs")]
         public int GetScanDataSumScans(int scanFirst, int scanLast, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
 
             // Note that we're using function attribute HandleProcessCorruptedStateExceptions
             // to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
+#pragma warning disable 219
             double centroidPeakWidth = 0;
             var dataCount = 0;
 
             try
             {
+                // TODO: This is a reference to try to encourage proper copying of DLLs.
+                var bgSub = new BackgroundSubtractor();
+                var info = bgSub.ToString();
+                if (string.IsNullOrWhiteSpace(info))
+                {
+                    massIntensityPairs = new double[0, 0];
+                    return -1;
+                }
+
                 if (mXRawFile == null)
                 {
                     massIntensityPairs = new double[0, 0];
@@ -2715,7 +2749,6 @@ namespace ThermoRawFileReader
                 var strFilter = string.Empty;
 
                 // Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
-                var intIntensityCutoffValue = 0;
 
                 if (maxNumberOfPeaks < 0)
                     maxNumberOfPeaks = 0;
@@ -2743,12 +2776,38 @@ namespace ThermoRawFileReader
                 object massIntensityPairsList = null;
                 object peakList = null;
 
-                mXRawFile.GetAverageMassList(ref scanFirst, ref scanLast, ref backgroundScan1First, ref backgroundScan1Last, ref backgroundScan2First, ref backgroundScan2Last, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, maxNumberOfPeaks,
-                        intCentroidResult, ref centroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
+                // TODO: Verify: mXRawFile.GetAverageMassList(ref scanFirst, ref scanLast, ref backgroundScan1First, ref backgroundScan1Last, ref backgroundScan2First, ref backgroundScan2Last, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, maxNumberOfPeaks,
+                // TODO: Verify:         intCentroidResult, ref centroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
+
+                var data = mXRawFile.AverageScansInScanRange(scanFirst, scanLast, strFilter, null, new FtAverageOptions(){});
+                data.PreferCentroids = centroidData;
+
+                var masses = data.PreferredMasses;
+                dataCount = masses.Length;
+
+                if (maxNumberOfPeaks > 0)
+                {
+                    dataCount = Math.Min(dataCount, maxNumberOfPeaks);
+                }
 
                 if (dataCount > 0)
                 {
-                    massIntensityPairs = (double[,])massIntensityPairsList;
+                    var intensities = data.PreferredIntensities;
+
+                    if (maxNumberOfPeaks > 0)
+                    {
+                        Array.Sort(intensities, masses);
+                        Array.Reverse(intensities);
+                        Array.Reverse(masses);
+                        Array.Sort(masses, intensities, 0, maxNumberOfPeaks);
+                    }
+
+                    massIntensityPairs = new double[2, dataCount];
+                    for (var i = 0; i < masses.Length; i++)
+                    {
+                        massIntensityPairs[0, i] = masses[i];
+                        massIntensityPairs[1, i] = intensities[i];
+                    }
                 }
                 else
                 {
@@ -2774,7 +2833,7 @@ namespace ThermoRawFileReader
 
             massIntensityPairs = new double[0, 0];
             return -1;
-
+#pragma warning restore 219
         }
 
         /// <summary>
@@ -2784,7 +2843,6 @@ namespace ThermoRawFileReader
         /// <returns></returns>
         public bool OpenRawFile(string filePath)
         {
-            var intResult = 0;
             var success = false;
 
             try
@@ -2794,22 +2852,11 @@ namespace ThermoRawFileReader
 
                 mCachedScanInfo.Clear();
 
-                if (mXRawFile == null)
-                {
-                    // ReSharper disable once SuspiciousTypeConversion.Global
-                    mXRawFile = new MSFileReader_XRawfile() as IXRawfile5;
-                }
-
-                if (mXRawFile == null)
-                {
-                    throw new Exception("Could not instantiate an instance of MSFileReader_XRawfile");
-                }
-
-                mXRawFile.Open(filePath);
-                mXRawFile.IsError(ref intResult);
+                mXRawFile = RawFileReaderAdapter.FileFactory(filePath);
+                mXRawFileHeader = mXRawFile.FileHeader;
                 // Unfortunately, .IsError() always returns 0, even if an error occurred
 
-                if (intResult == 0)
+                if (!mXRawFile.IsError)
                 {
                     mCachedFileName = filePath;
                     if (FillFileInfo())
@@ -2926,12 +2973,14 @@ namespace ThermoRawFileReader
                 if (mXRawFile == null)
                     return collisionEnergies;
 
-                mXRawFile.GetNumberOfMSOrdersFromScanNum(scan, ref numMsOrders);
+                var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
+
+                numMsOrders = (int)scanFilter.MSOrder;
 
                 for (var msOrder = 1; msOrder <= numMsOrders; msOrder++)
                 {
                     double collisionEnergy = 0;
-                    mXRawFile.GetCollisionEnergyForScanNum(scan, msOrder, ref collisionEnergy);
+                    collisionEnergy = scanFilter.GetEnergy(msOrder);
 
                     if ((collisionEnergy > 0))
                     {

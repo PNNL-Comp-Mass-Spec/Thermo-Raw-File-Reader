@@ -117,7 +117,7 @@ namespace RawFileReaderTests
         [TestCase("FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]    ", 2, "712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]")]
         [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]   ", 2, "1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]")]
         [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]   ", 2, "1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]")]
-        [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", 2, "748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]")]     
+        [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", 2, "748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]")]
 
         public void ExtractMSLevel(string filterText, int expectedMSLevel, string expectedMzText)
         {
@@ -661,11 +661,11 @@ namespace RawFileReaderTests
         [TestCase("FTMS + c NSI d SIM ms [782.00-792.00]                                             ", true, 1, true, MRMScanTypeConstants.SIM, false)]
         [TestCase("ITMS + c NSI SIM ms [286.50-289.50]                                               ", true, 1, true, MRMScanTypeConstants.SIM, false)]
         public void ValidateMSScan(
-            string filterText, 
-            bool expectedIsValidMS1orSIM, 
-            int expectedMSLevel, 
+            string filterText,
+            bool expectedIsValidMS1orSIM,
+            int expectedMSLevel,
             bool expectedIsSIMScan,
-            MRMScanTypeConstants expectedMRMScanType, 
+            MRMScanTypeConstants expectedMRMScanType,
             bool expectedIsZoomScan)
         {
             int msLevel;

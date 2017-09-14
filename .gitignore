@@ -8,3 +8,4 @@ ThermoRawFileReader_SourceCode
 **/.vs/
 **/obj/
 **/bin/
+/packages
