@@ -1093,10 +1093,13 @@ namespace ThermoRawFileReader
             {
                 var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
                 var reactions = scanFilter.MassCount;
-                var activationTypeCode = scanFilter.GetActivation(0);
-                //var activationTypeCode = scanFilter.GetActivation(reactions - 1); // Fails for ETciD/EThcD
+                var adj = 1; // Subtract 1 to be within range
+                if (scanFilter.GetIsMultipleActivation(reactions - adj))
+                {
+                    adj++; // Subtract 2 (instead of 1), since the last activation is part of a ETciD/EThcD pair
+                }
 
-                // TODO: Verify: mXRawFile.GetActivationTypeForScanNum(scan, msLevel, ref activationTypeCode);
+                var activationTypeCode = scanFilter.GetActivation(reactions - adj);
 
                 ActivationTypeConstants activationType;
 
