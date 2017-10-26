@@ -17,6 +17,7 @@ namespace RawFileReaderTests
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw")]
         [TestCase("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw")]
         [TestCase("MZ0210MnxEF889ETD.raw")]
+        [TestCase("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01.raw")]
         public void TestGetCollisionEnergy(string rawFileName)
         {
             // Keys in this Dictionary are filename, values are Collision Energies by scan
@@ -85,6 +86,20 @@ namespace RawFileReaderTests
             };
             expectedData.Add("MZ0210MnxEF889ETD", file4Data);
 
+            var file5Data = new Dictionary<int, List<double>>
+            {
+                {27799, ms1Scan},
+                {27800, ce30},
+                {27801, ce30},
+                {27802, ce30},
+                {27803, ce30},
+                {27804, ce30},
+                {27805, ms1Scan},
+                {27806, ce30},
+                {27807, ce30},
+
+            };
+            expectedData.Add("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", file5Data);
 
             var dataFile = GetRawDataFile(rawFileName);
 
@@ -471,6 +486,7 @@ namespace RawFileReaderTests
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521, 3, 6)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165, 3, 42)]
+        [TestCase("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01.raw", 20500, 20520, 7, 14)]
         public void TestGetScanInfo(string rawFileName, int scanStart, int scanEnd, int expectedMS1, int expectedMS2)
         {
             var expectedData = new Dictionary<string, Dictionary<int, string>>();
@@ -541,6 +557,36 @@ namespace RawFileReaderTests
                 {16165, "1 1 53252 47.78 350 1550 1.2E+9  503.565 1.6E+8     0.00 CID       Positive False True 46 219   0.76 FTMS + p NSI..."}
             };
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
+
+
+            // Note that for this dataset NumPeaks does not accurately reflect the number of data in each mass spectrum (it's much higher than it should be)
+            // For example, scan 16121 has NumPeaks = 45876, but TestGetScanData() correctly finds 11888 data points for that scan
+            var file3Data = new Dictionary<int, string>
+            {
+                {20500, "2 2  1264 41.90 110 1068 2.6E+6  416.224 2.9E+5   352.54 HCD   hcd Positive True True 34 221  12.93 FTMS + c NSI..."},
+                {20501, "1 1 13472 41.90 350 1800 1.3E+9  599.293 1.0E+8     0.00 CID       Positive False True 34 221   0.09 FTMS + p NSI..."},
+                {20502, "2 2  1680 41.90 110 1883 3.9E+6 1063.568 2.2E+5   624.30 HCD   hcd Positive True True 34 221  12.87 FTMS + c NSI..."},
+                {20503, "2 2  1392 41.90 110 1924 3.1E+6  637.336 3.0E+5   637.69 HCD   hcd Positive True True 34 221  13.69 FTMS + c NSI..."},
+                {20504, "1 1 14120 41.90 350 1800 1.3E+9  554.304 9.7E+7     0.00 CID       Positive False True 34 221   0.09 FTMS + p NSI..."},
+                {20505, "2 2  2048 41.90 110 1233 8.4E+6  911.447 1.1E+6   611.29 HCD   hcd Positive True True 34 221  17.86 FTMS + c NSI..."},
+                {20506, "2 2  1488 41.90 110 1111 6.9E+6  207.112 6.4E+5   550.31 HCD   hcd Positive True True 34 221  10.58 FTMS + c NSI..."},
+                {20507, "1 1 14016 41.91 350 1800 1.2E+9  554.304 9.0E+7     0.00 CID       Positive False True 34 221   0.09 FTMS + p NSI..."},
+                {20508, "2 2  1296 41.91 110 1253 3.9E+6  887.511 4.0E+5   621.35 HCD   hcd Positive True True 34 221  14.21 FTMS + c NSI..."},
+                {20509, "2 2  1776 41.91 110 1075 6.0E+6  445.242 5.1E+5   532.29 HCD   hcd Positive True True 34 221  14.14 FTMS + c NSI..."},
+                {20510, "1 1 14184 41.91 350 1800 1.3E+9  554.304 9.4E+7     0.00 CID       Positive False True 34 221   0.09 FTMS + p NSI..."},
+                {20511, "2 2  2224 41.91 110  958 1.1E+7  120.081 8.8E+5   473.77 HCD   hcd Positive True True 34 221  12.22 FTMS + c NSI..."},
+                {20512, "2 2  1568 41.91 110 1401 8.4E+6  891.457 1.5E+6   695.36 HCD   hcd Positive True True 34 221  12.01 FTMS + c NSI..."},
+                {20513, "2 2  2112 41.91 110  926 5.1E+6  777.422 4.6E+5   457.74 HCD   hcd Positive True True 34 221  20.47 FTMS + c NSI..."},
+                {20514, "1 1 14804 41.91 350 1800 1.4E+9  554.305 1.0E+8     0.00 CID       Positive False True 34 221   0.09 FTMS + p NSI..."},
+                {20515, "2 2   928 41.91 110 1730 8.0E+6  859.948 3.1E+6   859.94 HCD   hcd Positive True True 34 221  10.05 FTMS + c NSI..."},
+                {20516, "1 1 14232 41.92 350 1800 1.4E+9  554.305 1.1E+8     0.00 CID       Positive False True 34 221   0.09 FTMS + p NSI..."},
+                {20517, "2 2  1792 41.92 110 1339 4.2E+6  697.397 3.0E+5   442.91 HCD   hcd Positive True True 34 221  14.09 FTMS + c NSI..."},
+                {20518, "2 2  1216 41.92 110 2000 3.7E+6  999.457 3.8E+5   737.69 HCD   hcd Positive True True 34 221  12.55 FTMS + c NSI..."},
+                {20519, "2 2  2144 41.92 110 1241 8.9E+6  742.409 5.7E+5   615.27 HCD   hcd Positive True True 34 221  12.77 FTMS + c NSI..."},
+                {20520, "1 1 14428 41.92 350 1800 1.7E+9  554.305 1.3E+8     0.00 CID       Positive False True 34 221   0.08 FTMS + p NSI..."}
+
+            };
+            expectedData.Add("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", file3Data);
 
             var dataFile = GetRawDataFile(rawFileName);
 
@@ -1445,6 +1491,7 @@ namespace RawFileReaderTests
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 45000, 45200)]
+        [TestCase("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01.raw", 15000, 15006)]
         public void TestScanEventData(string rawFileName, int scanStart, int scanEnd)
         {
             // Keys in this Dictionary are filename, values are ScanCounts by event, where the key is a Tuple of EventName and EventValue
@@ -1464,6 +1511,26 @@ namespace RawFileReaderTests
             AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "Charge State:", "8", 1);
             AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "MS2 Isolation Width:", "2.000", 180);
             AddExpectedTupleAndCount(expectedData, "HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", "MS2 Isolation Width:", "1200.000", 21);
+
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Ion Injection Time (ms):", "0.063", 1);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Ion Injection Time (ms):", "0.068", 1);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Ion Injection Time (ms):", "0.075", 1);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Ion Injection Time (ms):", "0.078", 1);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Ion Injection Time (ms):", "9.588", 1);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Ion Injection Time (ms):", "10.863", 1);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Ion Injection Time (ms):", "12.628", 1);
+
+
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Orbitrap Resolution:", "60000", 4);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Orbitrap Resolution:", "7500", 3);
+
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "HCD Energy:", "-1.00", 4);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "HCD Energy:", "-26.93", 1);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "HCD Energy:", "-42.03", 1);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "HCD Energy:", "-24.22", 1);
+
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "MS2 Isolation Width:", "-1.00", 4);
+            AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "MS2 Isolation Width:", "2.00", 3);
 
 
             var dataFile = GetRawDataFile(rawFileName);
