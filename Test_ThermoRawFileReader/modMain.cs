@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using FileProcessor;
+using PRISM;
 using ThermoRawFileReader;
 
 namespace Test_ThermoRawFileReader
@@ -243,6 +244,16 @@ namespace Test_ThermoRawFileReader
             }
         }
 
+        private static void ShowError(string message, Exception ex = null)
+        {
+            ConsoleMsgUtils.ShowError(message, ex);
+        }
+
+        private static void ShowWarning(string message)
+        {
+            ConsoleMsgUtils.ShowWarning(message);
+        }
+
         private static void ShowProgramHelp()
         {
             var assemblyNameLocation = Assembly.GetExecutingAssembly().Location;
@@ -261,7 +272,6 @@ namespace Test_ThermoRawFileReader
             Console.WriteLine("If /Start and /End are not provided, then will read every 21 scans");
 
         }
-
 
         private static void TestReader(string rawFilePath, bool centroid = false, bool testSumming = false, int scanStart = 0, int scanEnd = 0)
         {
