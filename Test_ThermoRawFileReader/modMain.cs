@@ -89,6 +89,7 @@ namespace Test_ThermoRawFileReader
             // Uncomment the following to test the GetCollisionEnergy() function
             // TestReader(@"..\EDRN_ERG_Spop_ETV1_50fmolHeavy_0p5ugB53A_Frac48_3Oct12_Gandalf_W33A1_16a.raw");
 
+            TestGetAllScanEvents(@"\\proto-2\UnitTest_Files\ThermoRawFileReader\QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01.raw");
 
             Console.WriteLine("Done");
 
@@ -438,17 +439,99 @@ namespace Test_ThermoRawFileReader
             }
         }
 
+        private static void TestGetAllScanEvents(string rawFilePath)
+        {
+            try
+            {
+                if (!File.Exists(rawFilePath))
+                {
+                    Console.WriteLine("File not found, skipping: " + rawFilePath);
+                    return;
+                }
 
+                Console.WriteLine();
+                Console.WriteLine("Opening " + rawFilePath);
+
+                // Keys in this dictionary are event names
+                // Values are dictionaries tracking all of the values for each event (key is value, value is occurrence of that value)
+               var scanEventStats = new Dictionary<string, Dictionary<string, int>>();
+
+                var lastProgress = DateTime.UtcNow;
+                var scansRead = 0;
+
+                using (var oReader = new XRawFileIO(rawFilePath))
+                {
+                    var scanCount = oReader.GetNumScans();
+
+                    for (var scanNum = 1; scanNum <= scanCount; scanNum++)
+                    {
+                        var success = oReader.GetScanInfo(scanNum, out clsScanInfo oScanInfo);
+
+                        if (!success)
+                        {
+                            ShowWarning("GetScanInfo returned false for scan " + scanNum);
+                            continue;
+                        }
+                        foreach (var eventItem in oScanInfo.ScanEvents)
+                        {
+                            if (scanEventStats.TryGetValue(eventItem.Key, out var valueStats))
+                            {
+                            }
+                            else
+                            {
+                                valueStats = new Dictionary<string, int>();
+                                scanEventStats.Add(eventItem.Key, valueStats);
                             }
 
+                            if (valueStats.TryGetValue(eventItem.Value, out var valueCount))
+                            {
+                                valueStats[eventItem.Value] = valueCount + 1;
+                            }
+                            else
+                            {
+                                valueStats.Add(eventItem.Value, 1);
+                            }
+                        }
+
+                        scansRead++;
+                        if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds > 3 && scansRead % 100 == 0)
+                        {
+                            lastProgress = DateTime.UtcNow;
+                            var percentComplete = scansRead / (double)scanCount * 100;
+                            Console.WriteLine("Reading scan events; {0:F1}% complete ({1} / {2} scans)", percentComplete, scansRead, scanCount);
                         }
                     }
 
                 }
 
+                Console.WriteLine("{0,-38} {1,-10} {2,-20} {3}", "Event name", "Values", "Most Common Value", "Occurrence count");
+                foreach (var eventInfo in scanEventStats)
+                {
+                    var eventName = eventInfo.Key;
 
-            } catch (Exception ex) {
-                Console.WriteLine("Error in sub TestReader: " + ex.Message);
+                    var valueCount = eventInfo.Value.Count;
+
+                    var occurrenceCount = 0;
+                    var mostCommonValue = "";
+
+                    foreach (var item in eventInfo.Value)
+                    {
+                        if (item.Value <= occurrenceCount) continue;
+                        occurrenceCount = item.Value;
+                        mostCommonValue = item.Key;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(mostCommonValue))
+                        Console.WriteLine("{0,-38} {1,-10} {2,-20} {3:N0}", eventName, valueCount, "whitespace", occurrenceCount);
+                    else
+                        Console.WriteLine("{0,-38} {1,-10} {2,-20} {3:N0}", eventName, valueCount, mostCommonValue, occurrenceCount);
+                }
+
+                Console.WriteLine();
+            }
+            catch (Exception ex)
+            {
+                ShowError("Error in TestGetAllScanEvents: " + ex.Message, ex);
             }
         }
 
