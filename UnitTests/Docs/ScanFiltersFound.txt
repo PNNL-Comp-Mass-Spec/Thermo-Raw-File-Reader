@@ -1,0 +1,139 @@
+Generic_Filter	Example_Filter	Count	First_Dataset
+0	0	77	010411_500ngdc2_ScanStatsEx.txt
+ITMS + p NSI d Z ms [0.00-0.00]	ITMS + p NSI d Z ms [351.00-361.00]	7807	010411_500ngdc2_ScanStatsEx.txt
+ITMS + c NSI Full ms [0.00-0.00]	ITMS + c NSI Full ms [150.00-700.00]	24495	010411_500ngdc2_ScanStatsEx.txt
+ITMS + p NSI SIM ms [0.00-0.00]	ITMS + p NSI SIM ms [329.10-335.10]	25473	0106_50cpdc25caf_ScanStatsEx.txt
+ITMS + p NSI CRM ms3 0@cid00.00 0@cid00.00 [0.00-0.00, 0.00-0.00]	ITMS + p NSI CRM ms3 332.14@cid35.00 288.10@cid35.00 [240.00-250.00, 309.00-319.00]	2126	0106_50cpdc25caf_ScanStatsEx.txt
+ITMS + p NSI SRM ms2 0@cid00.00 [0.00-0.00]	ITMS + p NSI SRM ms2 332.00@cid35.00 [283.00-293.00]	2126	0106_50cpdc25caf_ScanStatsEx.txt
+ITMS + c NSI Full ms2 0@cid00.00 [0.00-0.00]	ITMS + c NSI Full ms2 195.00@cid35.00 [50.00-300.00]	15217	0106_50cpdc25caf_ScanStatsEx.txt
+ITMS + p NSI CRM ms4 0@cid00.00 0@cid00.00 0@cid00.00 [0.00-0.00]	ITMS + p NSI CRM ms4 332.00@cid50.00 288.00@cid50.00 245.00@cid0.00 [200.00-300.00]	1174	0213_03cpdc100_ScanStatsEx.txt
+FTMS + p NSI d Full ms2 0@cid00.00 [0.00-0.00]	FTMS + p NSI d Full ms2 819.00@cid35.00 [215.00-830.00]	10127	022810_His_Ctrl_102210_RPLC_012510_F4_2ndC1_H022210_4p5K_2_ScanStatsEx.txt
+FTMS + p NSI d Full ms2 0@etd00.00 [0.00-0.00]	FTMS + p NSI d Full ms2 819.00@etd20.00 [100.00-830.00]	9926	022810_His_Ctrl_102210_RPLC_012510_F4_2ndC1_H022210_4p5K_2_ScanStatsEx.txt
+FTMS + p NSI Full ms [0.00-0.00]	FTMS + p NSI Full ms [400.00-2000.00]	170982	022810_His_Ctrl_102210_RPLC_012510_F4_2ndC1_H022210_4p5K_2_ScanStatsEx.txt
+ITMS - p NSI d Full ms [0.00-0.00]	ITMS - p NSI d Full ms [100.00-300.00]	110	022810_His_Ctrl_102210_RPLC_012510_F4_2ndC1_H022210_4p5K_2_ScanStatsEx.txt
+ITMS - p NSI Full ms [0.00-0.00]	ITMS - p NSI Full ms [100.00-300.00]	331	022810_His_Ctrl_102210_RPLC_012510_F4_2ndC1_H022210_4p5K_2_ScanStatsEx.txt
+FTMS + p NSI d Full ms2 0@pqd00.00 [0.00-0.00]	FTMS + p NSI d Full ms2 1161.19@pqd35.00 [50.00-2000.00]	2595	080210_HisHeLa031010_3ug_R051910_ScanStatsEx.txt
+ITMS + c NSI d Full ms2 0@cid00.00 [0.00-0.00]	ITMS + c NSI d Full ms2 370.98@cid35.00 [90.00-755.00]	121594	1120_11_1000ngcpdc_ScanStatsEx.txt
+ITMS + c NSI d Full ms3 0@cid00.00 0@cid00.00 [0.00-0.00]	ITMS + c NSI d Full ms3 346.00@cid35.00 258.07@cid35.00 [60.00-530.00]	1701	1120_11_1000ngcpdc_ScanStatsEx.txt
+ITMS + c NSI d Full ms4 0@cid00.00 0@cid00.00 0@cid00.00 [0.00-0.00]	ITMS + c NSI d Full ms4 205.09@cid35.00 177.09@cid35.00 131.08@cid35.00 [50.00-275.00]	89	1120_11_1000ngcpdc_ScanStatsEx.txt
+ITMS + c NSI Full ms3 0@cid00.00 0@cid00.00 [0.00-0.00]	ITMS + c NSI Full ms3 332.10@cid35.00 288.10@cid35.00 [75.00-350.00]	4148	1208_13_blank_ScanStatsEx.txt
+ITMS + c NSI SIM ms [0.00-0.00]	ITMS + c NSI SIM ms [286.50-289.50]	6400	1217_1t100UDC_ScanStatsEx.txt
+FTMS + p ESI Full ms [0.00-0.00]	FTMS + p ESI Full ms [300.00-1700.00]	11129	20091210_Velos1_NaNa_SA_Hela_PhosphoCID_replicate01_FR_03_ScanStatsEx.txt
+ITMS + c ESI d w Full ms2 0@cid00.00 [0.00-0.00]	ITMS + c ESI d w Full ms2 323.44@cid35.00 [75.00-660.00]	17410	20091210_Velos1_NaNa_SA_Hela_PhosphoCID_replicate01_FR_03_ScanStatsEx.txt
+FTMS + c NSI Full ms [0.00-0.00]	FTMS + c NSI Full ms [400.00-1700.00]	3581	20140219_Sphagnum_Deep_Aug2011_26Jun_BB_4pctSDS_TR2_11_ScanStatsEx.txt
+FTMS - c NSI Full ms [0.00-0.00]	FTMS - c NSI Full ms [400.00-1700.00]	752	20140219_Sphagnum_Deep_Aug2011_26Jun_BB_4pctSDS_TR2_11_ScanStatsEx.txt
+ITMS + p NSI d Full ms2 0@cid00.00 [0.00-0.00]	ITMS + p NSI d Full ms2 901.47@cid30.00 [235.00-1815.00]	14270	2015_06_15_Ecoli_digest_standard_400k-IT_3_ScanStatsEx.txt
+FTMS - p NSI Full ms2 0@cid00.00 [0.00-0.00]	FTMS - p NSI Full ms2 652.20@cid0.00 [175.00-1200.00]	185	2016-03-18_DFO-E-1ppm_400k_iso625_neg_200avg_ScanStatsEx.txt
+FTMS - c NSI Full ms2 0@hcd00.00 [0.00-0.00]	FTMS - c NSI Full ms2 223.03@hcd32.00 [50.00-475.00]	42126	2B4_Mock_TLE_1_Neg_31Jul13_Gimli_13-07-01_ScanStatsEx.txt
+ITMS - p NSI d Full ms2 0@cid00.00 [0.00-0.00]	ITMS - p NSI d Full ms2 145.01@cid35.00 [50.00-305.00]	2918	4_10__gperml_MSMS_ScanStatsEx.txt
+FTMS - p NSI Full ms [0.00-0.00]	FTMS - p NSI Full ms [70.00-910.00]	4687	4_10__gperml_MSMS_ScanStatsEx.txt
+ITMS - p NSI d Full ms3 0@cid00.00 0@cid00.00 [0.00-0.00]	ITMS - p NSI d Full ms3 347.50@cid35.00 317.88@cid35.00 [75.00-650.00]	400	4_10__gperml_MSMS_ScanStatsEx.txt
+FTMS + p NSI Full ms2 0@hcd00.00 [0.00-0.00]	FTMS + p NSI Full ms2 480.30@hcd28.00 [66.67-1000.00]	22828	5fmol_HMEC_DIA3_15Mar16_Gandalf_ScanStatsEx.txt
+FTMS + p NSI d Full ms2 0@hcd00.00 [0.00-0.00]	FTMS + p NSI d Full ms2 613.39@hcd32.00 [100.00-1240.00]	64840	ATP_0001_rerun_run2_23Apr13_Methow_13-02-10_ScanStatsEx.txt
+ITMS + p NSI Full ms [0.00-0.00]	ITMS + p NSI Full ms [400.00-2000.00]	11914	Blank-2_16Oct15_Oak_14-11-08_ScanStatsEx.txt
+FTMS + c NSI d Full ms2 0@hcd00.00 [0.00-0.00]	FTMS + c NSI d Full ms2 413.27@hcd30.00 [100.00-865.00]	204329	blank-42_03Jun16_Samwise_16-03-32_160610060421_ScanStatsEx.txt
+ITMS + c NSI d w Full ms2 0@cid00.00 [0.00-0.00]	ITMS + c NSI d w Full ms2 371.10@cid35.00 [90.00-385.00]	5809	blank-mid_19AUG15_Samwise_15-06-26_ScanStatsEx.txt
+FTMS + c NSI d Full ms3 0@cid00.00 0@hcd00.00 [0.00-0.00]	FTMS + c NSI d Full ms3 437.26@cid35.00 654.47@hcd45.00 [100.00-2000.00]	1064	blank-mid_19AUG15_Samwise_15-06-26_ScanStatsEx.txt
+FTMS + p NSI sid=0.00  Full ms [0.00-0.00]	FTMS + p NSI sid=30.00  Full ms [500.00-2000.00]	12415	Blank1_22Mar16_Bain_15-02-02RZ_ScanStatsEx.txt
+FTMS + c NSI sid=0.00  d Full ms2 0@hcd00.00 [0.00-0.00]	FTMS + c NSI sid=30.00  d Full ms2 859.56@hcd30.00 [100.00-2000.00]	10129	Blank1_22Mar16_Bain_15-02-02RZ_ScanStatsEx.txt
+ITMS - c NSI d Full ms2 0@cid00.00 [0.00-0.00]	ITMS - c NSI d Full ms2 191.87@cid35.00 [50.00-780.00]	30151	Blank2_1_19Jan16_Falcon_15-09-22_ScanStatsEx.txt
+ITMS + c NSI r d Full ms2 0@hcd00.00 [0.00-0.00]	ITMS + c NSI r d Full ms2 421.8336@hcd35.00 [110.0000-854.0000]	122448	Blank_06Feb16_Pipppin_15-08-53_01_ScanStatsEx.txt
+FTMS - p ESI Full ms [0.00-0.00]	FTMS - p ESI Full ms [50.00-500.00]	3028	blank_MeOH-3_18May16_Rainier_Thermo_10344958_ScanStatsEx.txt
+FTMS - c ESI d Full ms2 0@cid00.00 [0.00-0.00]	FTMS - c ESI d Full ms2 112.99@cid35.00 [50.00-350.00]	1692	blank_MeOH-3_18May16_Rainier_Thermo_10344958_ScanStatsEx.txt
+FTMS - c ESI d Full ms3 0@cid00.00 0@cid00.00 [0.00-0.00]	FTMS - c ESI d Full ms3 226.98@cid35.00 117.02@cid35.00 [50.00-365.00]	69	blank_MeOH-3_18May16_Rainier_Thermo_10344958_ScanStatsEx.txt
+- p NSI Full ms2 0.000[0.00-0.00]	- p NSI Full ms2 218.110 [50.100-250.000]	3715	BVitamins_pantothenic_acid_ScanStatsEx.txt
+FTMS + p NSI sa Full ms2 0@etd00.00 [0.00-0.00]	FTMS + p NSI sa Full ms2 968.57@etd10.00 [200.00-2000.00]	2009	CAH_test_05_140306163003_ScanStatsEx.txt
+ITMS + p NSI d Full ms2 0@etd00.00 [0.00-0.00]	ITMS + p NSI d Full ms2 430.89@etd150.00 [50.00-875.00]	6873	caoli_B_CIDETD150_09072011_2_ScanStatsEx.txt
++ p NSI Full pr 0.000[0.00-0.00]	+ p NSI Full pr 150.000 [150.100-400.000]	71	CDF_150113120423_ScanStatsEx.txt
++ p NSI Q1MS [0.00-0.00]	+ p NSI Q1MS [150.100-400.000]	28	CDF_150113120423_ScanStatsEx.txt
+FTMS + p NSI Full ms2 0@cid00.00 [0.00-0.00]	FTMS + p NSI Full ms2 1100.00@cid0.00 [300.00-2000.00]	352	Cort_ApcB_6_04Aug2012_1100_ScanStatsEx.txt
+FTMS + c NSI Full ms2 0@hcd00.00 [0.00-0.00]	FTMS + c NSI Full ms2 808.41@hcd28.00 [100.00-2000.00]	16	CPTAC_TUBA4A_MSms_808_ScanStatsEx.txt
+ITMS + p NSI sid=0.00  Full ms [0.00-0.00]	ITMS + p NSI sid=35.00  Full ms [210.00-2000.00]	82	Diazo_INP_Trx_10Nov14_1_ScanStatsEx.txt
+FTMS + p NSI Full msx ms2 0@hcd00.00 0@hcd00.00 0@hcd00.00 [0.00-0.00]	FTMS + p NSI Full msx ms2 636.04@hcd28.00 641.04@hcd28.00 654.05@hcd28.00 [88.00-1355.00]	2984	DIA_5mz_35k-Res_5e6AGC_24Feb16_Gandalf_MClass6228A_ScanStatsEx.txt
+FTMS + c NSI Full msx ms2 0@hcd00.00 0@hcd00.00 0@hcd00.00 0@hcd00.00 [0.00-0.00]	FTMS + c NSI Full msx ms2 818.12@hcd27.00 863.14@hcd27.00 838.13@hcd27.00 638.04@hcd27.00 [88.33-1785.00]	21147	DIA_MSX_03_8Dec15_Gandalf_Mclass_ScanStatsEx.txt
+FTMS + p NSI SIM ms [0.00-0.00]	FTMS + p NSI SIM ms [521.90-523.90]	18976	EDRN_Serum_07_PRM_Multiplex-8_01_19Nov13_Samwise_13-07-28_ScanStatsEx.txt
+FTMS + c NSI d Full ms2 0@cid00.00 [0.00-0.00]	FTMS + c NSI d Full ms2 1303.24@cid35.00 [345.00-2000.00]	27581	Elite_QCmam_test11c_CurrentTune_160507201813_ScanStatsEx.txt
+FTMS + p NSI Full ms2 0@etd00.00 [0.00-0.00]	FTMS + p NSI Full ms2 881.00@etd200.00 [240.00-2000.00]	9	Enolase_240k_He_881_ETD_200ms_3micro_ScanStatsEx.txt
+FTMS + p NSI sid=0.00  Full ms2 0@cid00.00 [0.00-0.00]	FTMS + p NSI sid=35.00  Full ms2 994.00@cid35.00 [270.00-2000.00]	1458	Enolase_test_CID_Jared_ScanStatsEx.txt
+FTMS + p NSI sid=0.00  Full ms2 0@etd00.00 [0.00-0.00]	FTMS + p NSI sid=35.00  Full ms2 994.00@etd100.00 [400.00-2000.00]	1368	Enolase_test_ETD_Jared_ScanStatsEx.txt
+FTMS + p NSI sid=0.00  Full ms2 0@hcd00.00 [0.00-0.00]	FTMS + p NSI sid=35.00  Full ms2 994.00@hcd1.00 [500.00-2000.00]	1455	Enolase_test_MS_Jared_ScanStatsEx.txt
+ITMS + c NSI sid=0.00  d Full ms2 0@cid00.00 [0.00-0.00]	ITMS + c NSI sid=35.00  d Full ms2 445.12@cid35.00 [110.00-460.00]	9707	Eric_sample_1_23May11_Sphinx_11-03-27_ScanStatsEx.txt
+FTMS + c NSI Full ms2 0@cid00.00 [0.00-0.00]	FTMS + c NSI Full ms2 612.78@cid35.00 [165.00-2000.00]	288	f-CpxA_GC_13Apr16_160413102704_ScanStatsEx.txt
+FTMS + c NSI Full ms3 0@cid00.00 0@cid00.00 [0.00-0.00]	FTMS + c NSI Full ms3 559.30@cid35.00 421.51@cid35.00 [115.00-2000.00]	69	f-CpxA_GC_13Apr16_160413102704_ScanStatsEx.txt
+FTMS {0,0}  - p NSI Full ms [0.00-0.00]	FTMS {0,0}  - p NSI Full ms [250.00-2400.00]	13812	Gly08_Exact01_Jaguar_200nL_SP01_3X_C1_12_20Aug12_Neg_ScanStatsEx.txt
+ITMS + c NSI r d Full ms2 0@cid00.00 [0.00-0.00]	ITMS + c NSI r d Full ms2 394.7961@cid30.00 [103.0000-800.0000]	97186	HCC-38_pSTY_CID-ETD_10Feb16_Pippin_15-08-53_ScanStatsEx.txt
+ITMS + c NSI r d Full ms2 0@etd00.00 [0.00-0.00]	ITMS + c NSI r d Full ms2 626.4867@etd30.14 [120.0000-2000.0000]	806	HCC-38_pSTY_CID-ETD_10Feb16_Pippin_15-08-53_ScanStatsEx.txt
+ITMS + c NSI r d sa Full ms2 0@etd00.00@cid00.00 [0.00-0.00]	ITMS + c NSI r d sa Full ms2 437.5289@etd53.58@cid20.00 [120.0000-1323.0000]	10480	HCC-38_pSTY_CID-ETD_10Feb16_Pippin_15-08-53_ScanStatsEx.txt
+ITMS + c NSI r d sa Full ms2 0@etd00.00@hcd00.00 [0.00-0.00]	ITMS + c NSI r d sa Full ms2 437.5289@etd53.58@hcd20.00 [120.0000-1323.0000]	806	HCC-38_pSTY_CID-ETD_10Feb16_Pippin_15-08-53_ScanStatsEx.txt
+- c NSI Q3MS [0.00-0.00]	- c NSI Q3MS [65.000-900.000]	11170	HilicMix_0pt5UGperML_1_H4_082114_ScanStatsEx.txt
+ITMS + c NSI sid=0.00  Full ms [0.00-0.00]	ITMS + c NSI sid=5.00  Full ms [150.00-2000.00]	6503	HisHemeFrag_006_ScanStatsEx.txt
+ITMS - c NSI Full ms [0.00-0.00]	ITMS - c NSI Full ms [75.00-1500.00]	1913	HQC_3_9Jul14_Cougar_14-03-02_ScanStatsEx.txt
+ITMS + p NSI Z ms [0.00-0.00]	ITMS + p NSI Z ms [150.00-2000.00]	3084	IPA-blank-07_25Oct13_Gimli_ScanStatsEx.txt
++ c NSI Full ms2 0.000[0.00-0.00]	+ c NSI Full ms2 856.930 [300.000-1200.000]	1	KDS_IPQVLLPEEEK_ce30_ScanStatsEx.txt
+ITMS + c NSI d Full ms2 0@pqd00.00 [0.00-0.00]	ITMS + c NSI d Full ms2 916.13@pqd28.50 [50.00-2000.00]	6077	Klemke_YAP_iTRAQ_4p_S1_02_20Nov09_Griffin_09-08-15_ScanStatsEx.txt
+ITMS + c NSI d sa Full ms2 0@etd00.00 [0.00-0.00]	ITMS + c NSI d sa Full ms2 377.19@etd100.00 [50.00-1145.00]	6904	Klemke_YAP_iTRAQ_4p_S1_02_20Nov09_Griffin_09-08-15_ScanStatsEx.txt
++ c NSI Full cnl 0.000[0.00-0.00]	+ c NSI Full cnl 162.053 [300.000-1200.000]	17635	MBGC_NL_P_25V_ROC_08-10-31_05-25-09_ScanStatsEx.txt
+- c NSI Full pr 0.000[0.00-0.00]	- c NSI Full pr 225.007 [300.000-1200.000]	14713	MBGC_Precursor_N_25V_ROC_08-10-31_05-25-09_ScanStatsEx.txt
+- c NSI Q1MS [0.00-0.00]	- c NSI Q1MS [600.000-1000.000]	25561	MBGC_Product_N_L2_25V_ROC_08-10-31_05-22-09_ScanStatsEx.txt
+- c NSI d Full ms2 0.000[0.00-0.00]	- c NSI d Full ms2 671.207 [10.000-676.207]	70	MBGC_Product_N_L2_25V_ROC_08-10-31_05-22-09_ScanStatsEx.txt
+- p NSI Q3MS [0.00-0.00, 0.00-0.00]	- p NSI Q3MS [807.100-810.100, 851.100-854.100]	4360	MCoA_10252015_151026142626_ScanStatsEx.txt
+FTMS + p EI Full ms [0.00-0.00]	FTMS + p EI Full ms [50.00-600.00]	1039	MDu_Metab_R1_C_T70_ScanStatsEx.txt
+FTMS + p EI Full lock ms [0.00-0.00]	FTMS + p EI Full lock ms [50.00-600.00]	13838	MDu_Metab_R1_C_T70_ScanStatsEx.txt
+FTMS + p NSI sps d Full ms3 0@hcd00.00 0@hcd00.00 [0.00-0.00]	FTMS + p NSI sps d Full ms3 432.8866@hcd30.00 149.0201@hcd65.00 [110.0000-500.0000]	42667	mLm_CC_WL_TMT10_Set-1_07_25Mar16_Pippin_16-03-05_ScanStatsEx.txt
+FTMS + c ESI d Full ms2 0@hcd00.00 [0.00-0.00]	FTMS + c ESI d Full ms2 391.29@hcd30.00 [90.00-405.00]	4237	mLm_PNNL_Adult_09_Heart_L_POS_150mm_31May16_Polaroid_HSST3-A923_ScanStatsEx.txt
+ITMS + c ESI d Full ms2 0@cid00.00 [0.00-0.00]	ITMS + c ESI d Full ms2 391.29@cid35.00 [65.00-405.00]	14418	mLm_PNNL_Adult_09_Heart_L_POS_150mm_31May16_Polaroid_HSST3-A923_ScanStatsEx.txt
+FTMS + p NSI d SIM ms [0.00-0.00]	FTMS + p NSI d SIM ms [613.00-623.00]	579	MRSA_Int_Stat_Pool_15Jun14_Bane_ETD-HCD_ScanStatsEx.txt
+FTMS + c NSI d Full ms2 0@etd00.00 [0.00-0.00]	FTMS + c NSI d Full ms2 632.55@etd100.00 [100.00-2000.00]	3459	MRSA_Int_Stat_Pool_15Jun14_Bane_ETD-HCD_ScanStatsEx.txt
+FTMS + p NSI d sa Full ms2 0@etd00.00 [0.00-0.00]	FTMS + p NSI d sa Full ms2 858.56@etd33.33 [100.00-2000.00]	5596	Mtb_HN878_Probe2_LongSep_29Sep14_141001104925_ScanStatsEx.txt
+FTMS + p NSI Full ms3 0@cid00.00 0@cid00.00 [0.00-0.00]	FTMS + p NSI Full ms3 1395.00@cid40.00 769.00@cid26.00 [210.00-2000.00]	157	MZ0210MnxEF1395_769CID_lowE_ScanStatsEx.txt
+FTMS + p NSI d sa Full ms2 0@etd00.00@hcd00.00 [0.00-0.00]	FTMS + p NSI d sa Full ms2 686.2169@etd10.00@hcd10.00 [110.0000-2000.0000]	2116	MZ20160217DS_histone_test_160217115509_ScanStatsEx.txt
+FTMS + p NSI d sa Full ms2 0@etd00.00@cid00.00 [0.00-0.00]	FTMS + p NSI d sa Full ms2 686.2169@etd10.00@cid10.00 [110.0000-2000.0000]	2116	MZ20160217DS_histone_test_160217115509_ScanStatsEx.txt
+FTMS + c NSI d sa Full ms2 0@etd00.00 [0.00-0.00]	FTMS + c NSI d sa Full ms2 430.89@etd50.00 [100.00-1735.00]	2226	M_Wholelung_intact_1_21May15_Bane_14-09-01RZ_ScanStatsEx.txt
+ITMS + c NSI d Full ms2 0@etd00.00 [0.00-0.00]	ITMS + c NSI d Full ms2 327.01@etd500.00 [50.00-1320.00]	23484	OG_CEPC_PU_22Oct13_Legolas_13-05-12_ScanStatsEx.txt
+FTMS - c ESI d Full ms2 0@hcd00.00 [0.00-0.00]	FTMS - c ESI d Full ms2 255.23@hcd30.00 [90.00-525.00]	2786	OMICS_MFB001_icMERS_36HRS_C_Lipid_011_NEG_07Jun16_Legolas_HSS-T3_A925_ScanStatsEx.txt
+ITMS - c ESI d Full ms2 0@cid00.00 [0.00-0.00]	ITMS - c ESI d Full ms2 255.23@cid35.00 [50.00-525.00]	5435	OMICS_MFB001_icMERS_36HRS_C_Lipid_011_NEG_07Jun16_Legolas_HSS-T3_A925_ScanStatsEx.txt
+FTMS {1,1}  - p ESI Full ms [0.00-0.00]	FTMS {1,1}  - p ESI Full ms [150.00-1800.00]	25	OSM_NaOH_Lab_Dial_22May15_ScanStatsEx.txt
+ITMS - p NSI Full ms2 0@cid00.00 [0.00-0.00]	ITMS - p NSI Full ms2 988.50@cid0.00 [270.00-1000.00]	448	PC2323neg_1_100225154346_ScanStatsEx.txt
+FTMS {1,1}  - p NSI Full ms [0.00-0.00]	FTMS {1,1}  - p NSI Full ms [150.00-1000.00]	6698	Peat6Methanol25_4_09_04_ScanStatsEx.txt
+ITMS + c NSI r d w Full ms2 0@cid00.00 [0.00-0.00]	ITMS + c NSI r d w Full ms2 255.27@cid35.00 [60.00-2000.00]	69691	PhageMix1-2ndRun_ScanStatsEx.txt
+ITMS - c ESI Full ms [0.00-0.00]	ITMS - c ESI Full ms [65.00-800.00]	11845	Phyllosphere_solvents_method_141216120915_ScanStatsEx.txt
+ITMS + c ESI Full ms [0.00-0.00]	ITMS + c ESI Full ms [65.00-800.00]	6961	Phylo2_ScanStatsEx.txt
++ c NSI Full ms [0.00-0.00]	+ c NSI Full ms [400.00-2000.00]	1613	Plasmin_C18_052311_1a_ScanStatsEx.txt
++ c NSI d Full ms2 0@cid00.00 [0.00-0.00]	+ c NSI d Full ms2 550.74@cid35.00 [140.00-1115.00]	7950	Plasmin_C18_052311_1a_ScanStatsEx.txt
+FTMS + p ESI d Full ms2 0@cid00.00 [0.00-0.00]	FTMS + p ESI d Full ms2 112.89@cid35.00 [50.00-240.00]	5910	Psphere_Low_pH_17Dec14_ACN_FTMS-FTMSMS-Pos_ScanStatsEx.txt
++ c NSI Q3MS [0.00-0.00]	+ c NSI Q3MS [380.000-1350.000]	15238	QC_Aragorn_2pumptrapTest_13apr2016r4_ScanStatsEx.txt
+FTMS + c NSI d SIM ms [0.00-0.00]	FTMS + c NSI d SIM ms [782.00-792.00]	2170	QC_Shew_11_06_500ng_HCD-1_21May12_Lynx_12-02-29_ScanStatsEx.txt
+FTMS {0,0}  + p NSI Full ms [0.00-0.00]	FTMS {0,0}  + p NSI Full ms [400.00-2000.00]	4387	QC_Shew_12_02_60min_Run-11_5Oct12_Andromeda_12-09-05_ScanStatsEx.txt
+ITMS + c NSI d SIM ms [0.00-0.00]	ITMS + c NSI d SIM ms [428.00-438.00]	100	QC_Shew_12_02_HCD_25_Lynx_12-06-01_ScanStatsEx.txt
+FTMS {1,1}  + p NSI Full ms2 0@hcd00.00 [0.00-0.00]	FTMS {1,1}  + p NSI Full ms2 1000.00@hcd25.00 [300.00-2000.00]	6734	QC_Shew_13_01-pt5_2_16Jan15_Falcon_12-08-15_ScanStatsEx.txt
+FTMS {1,1}  + p NSI sid=0.00  Full ms [0.00-0.00]	FTMS {1,1}  + p NSI sid=35.00  Full ms [300.00-2000.00]	6766	QC_Shew_13_01-pt5_6_16Jan13_Falcon_12-08-15_ScanStatsEx.txt
+FTMS + c NSI d sa Full ms2 0@etd00.00@hcd00.00 [0.00-0.00]	FTMS + c NSI d sa Full ms2 738.2079@etd19.29@hcd20.00 [120.0000-2000.0000]	10241	QC_Shew_15_02-R2-500ng_06Jan16_Pippin_15-08-53_ScanStatsEx.txt
+FTMS + c NSI k d Full ms3 0@hcd00.00 0@hcd00.00 [0.00-0.00]	FTMS + c NSI k d Full ms3 978.7619@hcd30.00 256.2410@hcd65.00 [110.0000-500.0000]	42374	QC_Shew_16_01_2_12Apr16_Pippin_16-03-05_ScanStatsEx.txt
+FTMS - p NSI d Full ms2 0@hcd00.00 [0.00-0.00]	FTMS - p NSI d Full ms2 1082.08@hcd30.00 [148.67-2230.00]	52	QC_Shew_a_PosNeg_15_02_16Oct15_Arwen_15-07-13_ScanStatsEx.txt
+FTMS + c NSI sid=0.00  d Full ms2 0@cid00.00 [0.00-0.00]	FTMS + c NSI sid=30.00  d Full ms2 453.79@cid35.00 [110.00-2000.00]	7854	QC_Shew_Intact_2_9Oct14_Bane_C2Column3_ScanStatsEx.txt
++ c EI SRM ms2 0.000[0.00-0.00]	+ c EI SRM ms2 160.000 [72.999-73.001]	87058	RCE_06-13_TG_MD_MRM_Mix24all_ScanStatsEx.txt
+FTMS + p NSI d Full ms3 0@cid00.00 0@cid00.00 [0.00-0.00]	FTMS + p NSI d Full ms3 850.70@cid35.00 756.71@cid35.00 [195.00-2000.00]	86	Rituximab_1pmol_TCEP_MS3_ScanStatsEx.txt
+FTMS + p NSI sid=0.00  d Full ms2 0@cid00.00 [0.00-0.00]	FTMS + p NSI sid=35.00  d Full ms2 501.11@cid35.00 [125.00-2000.00]	1708	RV_2004_Trp_01_ScanStatsEx.txt
++ c EI Q1MS [0.00-0.00]	+ c EI Q1MS [50.000-600.000]	5850	SBEP_Buffereffect_unPBS2_ScanStatsEx.txt
++ c CI Q1MS [0.00-0.00]	+ c CI Q1MS [50.000-600.000]	5852	SBEP_Buffereffect_Val_No_ScanStatsEx.txt
+FTMS - p ESI d Full ms2 0@hcd00.00 [0.00-0.00]	FTMS - p ESI d Full ms2 87.01@hcd45.00 [50.00-185.00]	1053	StdMix-2_24Mar15_Rainier_ZIC-pHILIC_ScanStatsEx.txt
+FTMS + p ESI d Full ms2 0@hcd00.00 [0.00-0.00]	FTMS + p ESI d Full ms2 445.12@hcd60.00 [100.00-460.00]	5416	SUP_2012_Feb25_CPTAC2_HJ_ScanStatsEx.txt
+ITMS + c NSI t d Full ms2 0@cid00.00 [0.00-0.00]	ITMS + c NSI t d Full ms2 815.2148@cid35.00 [219.0000-1641.0000]	23306	TEDDY_40-5_06Jan16_Pippin_15-08-53_ScanStatsEx.txt
+FTMS + p NSI sps d Full ms3 0@cid00.00 0@hcd00.00 [0.00-0.00]	FTMS + p NSI sps d Full ms3 815.2148@cid35.00 708.8861@hcd65.00 [120.0000-500.0000]	23097	TEDDY_40-5_06Jan16_Pippin_15-08-53_ScanStatsEx.txt
++ c NSI SIM pr 0.000[0.00-0.00, 0.00-0.00, 0.00-0.00, 0.00-0.00, 0.00-0.00, 0.00-0.00]	+ c NSI SIM pr 95.099 [105.099-105.101, 150.099-150.101, 370.199-370.201, 208.099-208.101, 300.199-300.201, 304.199-304.201]	91	test02_ScanStatsEx.txt
++ c NSI Full pr 0.000[0.00-0.00]	+ c NSI Full pr 1000.000 [150.000-1500.000]	39	test02_ScanStatsEx.txt
++ c NSI d Full ms2 0.000[0.00-0.00]	+ c NSI d Full ms2 150.100 [10.000-155.100]	1225	test04_ScanStatsEx.txt
++ c NSI Q1MS [0.00-0.00]	+ c NSI Q1MS [150.000-1500.000]	3469	Test3_0p5ugBSAdigest_fullscan_2015July14_Gandalf1_ScanStatsEx.txt
+ITMS + c NSI d Z ms [0.00-0.00]	ITMS + c NSI d Z ms [428.00-438.00]	2938	Test_ETD_1_31Oct12_Lynx_12-06-01_ScanStatsEx.txt
+FTMS + c NSI Full ms2 0@etd00.00 [0.00-0.00]	FTMS + c NSI Full ms2 779.60@etd25.00 [210.00-2000.00]	152	Ubi_ETD_ScanStatsEx.txt
+ITMS + c NSI r d Full ms3 0@cid00.00 0@cid00.00 [0.00-0.00]	ITMS + c NSI r d Full ms3 617.4266@cid35.00 277.2909@cid35.00 [71.0000-842.0000]	57351	UDN_IgG_PBS_15Apr16_Pippin_16-03-37_ScanStatsEx.txt
+FTMS + c NSI d sa Full ms2 0@etd00.00@cid00.00 [0.00-0.00]	FTMS + c NSI d sa Full ms2 963.2524@etd120.55@cid10.00 [120.0000-1937.0000]	6962	UDN_test_Blank_3Jun16_Oak_16-03-13_ScanStatsEx.txt
++ p NSI Full ms2 0.000[0.00-0.00]	+ p NSI Full ms2 713.950 [200.070-1500.000]	40	VDYESQSTDTQNFS_SESK_MSMS_713_ScanStatsEx.txt
++ p NSI Q3MS [0.00-0.00]	+ p NSI Q3MS [200.070-1300.000]	79	VDYESQSTDTQNFS_SESK_ScanStatsEx.txt
+- p NSI Q3MS [0.00-0.00]	- p NSI Q3MS [150.000-1500.000]	736	VitaminMSMS_DCM_Col1_JX_05082015_ScanStatsEx.txt
+FTMS + p NSI sid=0.00  d Full ms2 0@hcd00.00 [0.00-0.00]	FTMS + p NSI sid=15.00  d Full ms2 820.19@hcd25.00 [400.00-2000.00]	550	WHIM2_GFrep03_GFfrac05_inj05_ScanStatsEx.txt
+ITMS - p NSI sid=0.00  Full ms [0.00-0.00]	ITMS - p NSI sid=15.00  Full ms [500.00-2000.00]	186	WHIM2_GFrep03_GFfrac05_inj05_ScanStatsEx.txt
++ c ESI Full ms [0.00-0.00]	+ c ESI Full ms [400.00-2000.00]	1078	WQ-PLAS03-F23_17July03_Earth_0113-1_4-20_ScanStatsEx.txt
++ c d Full ms2 0@cid00.00 [0.00-0.00]	+ c d Full ms2 1013.32@cid45.00 [265.00-2000.00]	3147	WQ-PLAS03-F23_17July03_Earth_0113-1_4-20_ScanStatsEx.txt
+FTMS - p NSI SIM ms [0.00-0.00]	FTMS - p NSI SIM ms [330.00-380.00]	199	Wrighton_MT2_SPE_200avg_240k_neg_330-380_ScanStatsEx.txt
+ITMS + p NSI Full ms2 0@cid00.00 [0.00-0.00]	ITMS + p NSI Full ms2 1155.10@cid10.00 [315.00-2000.00]	199	XG_DI_TG1_ScanStatsEx.txt
