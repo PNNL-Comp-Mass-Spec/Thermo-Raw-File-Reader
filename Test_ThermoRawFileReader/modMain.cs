@@ -481,12 +481,10 @@ namespace Test_ThermoRawFileReader
                             ShowWarning("GetScanInfo returned false for scan " + scanNum);
                             continue;
                         }
+
                         foreach (var eventItem in oScanInfo.ScanEvents)
                         {
-                            if (scanEventStats.TryGetValue(eventItem.Key, out var valueStats))
-                            {
-                            }
-                            else
+                            if (!scanEventStats.TryGetValue(eventItem.Key, out var valueStats))
                             {
                                 valueStats = new Dictionary<string, int>();
                                 scanEventStats.Add(eventItem.Key, valueStats);
