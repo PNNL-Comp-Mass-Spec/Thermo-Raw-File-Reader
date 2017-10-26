@@ -166,9 +166,9 @@ namespace RawFileReaderTests
                         {
                             var isValid = expectedEnergies.Any(expectedEnergy => Math.Abs(actualEnergy - expectedEnergy) < 0.00001);
 
-                            Console.WriteLine("{0,-5} {1,-5} {2}", isValid, scanNumber, actualEnergy.ToString("0.00"));
+                            Console.WriteLine("{0,-5} {1,-5} {2:F2}", isValid, scanNumber, actualEnergy);
 
-                            Assert.IsTrue(isValid, "Unexpected collision energy {0} for scan {1}", actualEnergy.ToString("0.00"), scanNumber);
+                            Assert.IsTrue(isValid, "Unexpected collision energy {0:F2} for scan {1}", actualEnergy, scanNumber);
                         }
                     }
 
@@ -625,16 +625,14 @@ namespace RawFileReaderTests
 
                     var scanSummary =
                         string.Format(
-                            "{0} {1} {2} {3,5} {4} {5,3} {6,4} {7} {8,8} {9} {10,8} {11} {12,5} {13} {14} {15} {16} {17} {18,6} {19}",
+                            "{0} {1} {2} {3,5} {4:F2} {5,3:0} {6,4:0} {7:0.0E+0} {8,8:F3} {9:0.0E+0} {10,8:F2} {11} {12,5} {13} {14} {15} {16} {17} {18,6:F2} {19}",
                             scanInfo.ScanNumber, scanInfo.MSLevel, scanInfo.EventNumber,
-                            scanInfo.NumPeaks, scanInfo.RetentionTime.ToString("0.00"),
-                            scanInfo.LowMass.ToString("0"), scanInfo.HighMass.ToString("0"),
-                            scanInfo.TotalIonCurrent.ToString("0.0E+0"), scanInfo.BasePeakMZ.ToString("0.000"),
-                            scanInfo.BasePeakIntensity.ToString("0.0E+0"), scanInfo.ParentIonMZ.ToString("0.00"),
+                            scanInfo.NumPeaks, scanInfo.RetentionTime,
+                            scanInfo.LowMass, scanInfo.HighMass,
+                            scanInfo.TotalIonCurrent, scanInfo.BasePeakMZ, scanInfo.BasePeakIntensity, scanInfo.ParentIonMZ,
                             scanInfo.ActivationType, scanInfo.CollisionMode,
                             scanInfo.IonMode, scanInfo.IsCentroided,
-                            scanInfo.IsFTMS, scanInfo.ScanEvents.Count, scanInfo.StatusLog.Count,
-                            ionInjectionTime.ToString("0.00"),
+                            scanInfo.IsFTMS, scanInfo.ScanEvents.Count, scanInfo.StatusLog.Count, ionInjectionTime,
                             scanInfo.FilterText.Substring(0, 12) + "...");
 
                     Console.WriteLine(scanSummary);
@@ -913,11 +911,11 @@ namespace RawFileReaderTests
 
                         var scanSummary =
                             string.Format(
-                                "{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8} {7,8} {8,8}  {9}",
+                                "{0} {1,3} {2,8} {3,8} {4,8} {5,8:F3} {6,8:0.0E+0} {7,8:F3} {8,8:0.0E+0}  {9}",
                                 scanNumber, maxNumberOfPeaks, centroidData,
                                 mzList.Length, intensityList.Length,
-                                mzList[0].ToString("0.000"), intensityList[0].ToString("0.0E+0"),
-                                mzList[midPoint].ToString("0.000"), intensityList[midPoint].ToString("0.0E+0"),
+                                mzList[0], intensityList[0],
+                                mzList[midPoint], intensityList[midPoint],
                                 scanInfo.FilterText);
 
                         Console.WriteLine(scanSummary);
@@ -1080,11 +1078,11 @@ namespace RawFileReaderTests
 
                         var scanSummary =
                             string.Format(
-                                "{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8} {7,8}  {8}",
+                                "{0} {1,3} {2,8} {3,8} {4,8:F3} {5,8:0.0E+0} {6,8:F3} {7,8:0.0E+0}  {8}",
                                 scanNumber, maxNumberOfPeaks, centroidData,
                                 dataCount,
-                                massIntensityPairs[0, 0].ToString("0.000"), massIntensityPairs[1,0].ToString("0.0E+0"),
-                                massIntensityPairs[0, midPoint].ToString("0.000"), massIntensityPairs[1, midPoint].ToString("0.0E+0"),
+                                massIntensityPairs[0, 0], massIntensityPairs[1,0],
+                                massIntensityPairs[0, midPoint], massIntensityPairs[1, midPoint],
                                 scanInfo.FilterText);
 
                         Console.WriteLine(scanSummary);
@@ -1220,11 +1218,11 @@ namespace RawFileReaderTests
 
                     var scanSummary =
                         string.Format(
-                            "{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8} {7,8}  {8}",
+                            "{0} {1,3} {2,8} {3,8} {4,8:F3} {5,8:0.0E+0} {6,8:F3} {7,8:0.0E+0}  {8}",
                             scanStart, maxNumberOfPeaks, centroidData,
                             dataCount,
-                            massIntensityPairs[0, 0].ToString("0.000"), massIntensityPairs[1, 0].ToString("0.0E+0"),
-                            massIntensityPairs[0, midPoint].ToString("0.000"), massIntensityPairs[1, midPoint].ToString("0.0E+0"),
+                            massIntensityPairs[0, 0], massIntensityPairs[1, 0],
+                            massIntensityPairs[0, midPoint], massIntensityPairs[1, midPoint],
                             scanInfo.FilterText);
 
 
@@ -1343,14 +1341,14 @@ namespace RawFileReaderTests
                     {
                         var midPoint = (int)(ftLabelData.Length / 2f);
 
-                        scanSummary = string.Format("{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8} {7,8}  {8}",
+                        scanSummary = string.Format("{0} {1,3} {2,8:F3} {3,8:0.0E+0} {4,8:F3} {5,8:F3} {6,8:F3} {7,8:0}  {8}",
                                 scanNumber, ftLabelData.Length,
-                                ftLabelData[midPoint].Mass.ToString("0.000"),
-                                ftLabelData[midPoint].Intensity.ToString("0.0E+0"),
-                                ftLabelData[midPoint].Resolution.ToString("0.000"),
-                                ftLabelData[midPoint].Baseline.ToString("0.000"),
-                                ftLabelData[midPoint].Noise.ToString("0.000"),
-                                ftLabelData[midPoint].Charge.ToString("0"),
+                                ftLabelData[midPoint].Mass,
+                                ftLabelData[midPoint].Intensity,
+                                ftLabelData[midPoint].Resolution,
+                                ftLabelData[midPoint].Baseline,
+                                ftLabelData[midPoint].Noise,
+                                ftLabelData[midPoint].Charge,
                                 scanInfo.FilterText);
                     }
 
@@ -1462,13 +1460,13 @@ namespace RawFileReaderTests
                     {
                         var midPoint = (int)(massResolutionData.Length / 2f);
 
-                        scanSummary = string.Format("{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8}  {7}",
+                        scanSummary = string.Format("{0} {1,3} {2,8:F3} {3,8:0.0E+0} {4,8:F3} {5,8:F3} {6,8:F3}  {7}",
                                 scanNumber, massResolutionData.Length,
-                                massResolutionData[midPoint].Mass.ToString("0.000"),
-                                massResolutionData[midPoint].Intensity.ToString("0.0E+0"),
-                                massResolutionData[midPoint].Resolution.ToString("0.000"),
-                                massResolutionData[midPoint].AccuracyMMU.ToString("0.000"),
-                                massResolutionData[midPoint].AccuracyPPM.ToString("0.000"),                               
+                                massResolutionData[midPoint].Mass,
+                                massResolutionData[midPoint].Intensity,
+                                massResolutionData[midPoint].Resolution,
+                                massResolutionData[midPoint].AccuracyMMU,
+                                massResolutionData[midPoint].AccuracyPPM,
                                 scanInfo.FilterText);
                     }
 
