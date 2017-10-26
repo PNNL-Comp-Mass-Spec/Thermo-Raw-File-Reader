@@ -10,8 +10,6 @@ xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MASIC\L
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\" /Y
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MSGF_Runner\Lib\" /Y
 
-xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs\" /Y
-
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\lib\InformedProteomics" /Y
 xcopy Release\ThermoRawFileReader.* "F:\My Documents\Projects\BrianLaMarche\MultiAlign\src\MultiAlignRogue\bin\Debug\" /Y
 
@@ -60,6 +58,8 @@ xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\MSGF_
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\lib\" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\DLL\Debug\" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\Exe\Debug" /Y
+
+xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\ProteowizardWrapper\UnitTests\lib\" /Y
 
 xcopy Release\ThermoRawFileReader.dll "F:\My Documents\Projects\DataMining\ThermoRawFileReader\Test_ThermoRawFileReader\bin\Debug\" /Y
 
