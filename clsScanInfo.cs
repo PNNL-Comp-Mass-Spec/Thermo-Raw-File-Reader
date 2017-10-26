@@ -274,7 +274,6 @@ namespace ThermoRawFileReader
 
             mScanEvents = new List<KeyValuePair<string, string>>();
             mStatusLog = new List<KeyValuePair<string, string>>();
-
         }
 
         /// <summary>
@@ -295,7 +294,7 @@ namespace ThermoRawFileReader
         /// <remarks></remarks>
         public void StoreScanEvents(string[] eventNames, string[] eventValues)
         {
-            StoreParallelStrings(mScanEvents, eventNames, eventValues);
+            StoreParallelStrings(mScanEvents, eventNames, eventValues, true, true);
         }
 
         /// <summary>
@@ -392,13 +391,31 @@ namespace ThermoRawFileReader
 
         }
 
-
-        private void StoreParallelStrings(ICollection<KeyValuePair<string, string>> targetList, IList<string> names, IList<string> values)
+        private void StoreParallelStrings(
+            ICollection<KeyValuePair<string, string>> targetList,
+            IList<string> names,
+            IList<string> values,
+            bool skipEmptyNames = false,
+            bool replaceTabsInValues = false)
         {
             targetList.Clear();
 
-            for (var i = 0; i <= names.Count - 1; i++) {
-                targetList.Add(new KeyValuePair<string, string>(names[i], values[i]));
+            for (var i = 0; i <= names.Count - 1; i++)
+            {
+                if (skipEmptyNames && (string.IsNullOrWhiteSpace(names[i]) || names[i] == "\u0001"))
+                {
+                    // Name is empty or null
+                    continue;
+                }
+
+                if (replaceTabsInValues && values[i].Contains("\t"))
+                {
+                    targetList.Add(new KeyValuePair<string, string>(names[i], values[i].Replace("\t", " ")));
+                }
+                else
+                {
+                    targetList.Add(new KeyValuePair<string, string>(names[i], values[i]));
+                }
             }
 
         }
