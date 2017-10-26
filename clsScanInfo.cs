@@ -26,11 +26,13 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Scan event data
         /// </summary>
+        /// <remarks>Ignores scan events with a blank or null event name</remarks>
         protected readonly List<KeyValuePair<string, string>> mScanEvents;
 
         /// <summary>
         /// Status Log data
         /// </summary>
+        /// <remarks>Includes blank events that separate log sections</remarks>
         protected readonly List<KeyValuePair<string, string>> mStatusLog;
         #endregion
 
@@ -42,9 +44,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>Used for determining which cached scan info can be discarded if too many scans become cached</remarks>
-        public DateTime CacheDateUTC {
-            get { return mCacheDateUTC; }
-        }
+        public DateTime CacheDateUTC => mCacheDateUTC;
 
         /// <summary>
         /// Scan number
@@ -52,9 +52,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public int ScanNumber {
-            get { return mScanNumber; }
-        }
+        public int ScanNumber => mScanNumber;
 
         /// <summary>
         /// MS Level
@@ -201,7 +199,7 @@ namespace ThermoRawFileReader
         public MRMInfo MRMInfo { get; set; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <value></value>
         /// <returns></returns>
@@ -246,9 +244,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns>List of key/value pairs</returns>
         /// <remarks></remarks>
-        public List<KeyValuePair<string, string>> ScanEvents {
-            get { return mScanEvents; }
-        }
+        public List<KeyValuePair<string, string>> ScanEvents => mScanEvents;
 
         /// <summary>
         /// Status log data
@@ -256,9 +252,8 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns>List of key/value pairs</returns>
         /// <remarks></remarks>
-        public List<KeyValuePair<string, string>> StatusLog {
-            get { return mStatusLog; }
-        }
+        public List<KeyValuePair<string, string>> StatusLog => mStatusLog;
+
         #endregion
 
         #region "Constructor and public methods"
@@ -293,7 +288,7 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Store this scan's scan events using a parallel string arrays
+        /// Store this scan's scan events using parallel string arrays
         /// </summary>
         /// <param name="eventNames"></param>
         /// <param name="eventValues"></param>
@@ -304,7 +299,7 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Store this scan's scan events using a parallel string arrays
+        /// Store this scan's log messages using parallel string arrays
         /// </summary>
         /// <param name="logNames"></param>
         /// <param name="logValues"></param>
@@ -352,9 +347,9 @@ namespace ThermoRawFileReader
         {
             if (string.IsNullOrWhiteSpace(FilterText)) {
                 return "Scan " + ScanNumber + ": Generic ScanHeaderInfo";
-            } else {
-                return "Scan " + ScanNumber + ": " + FilterText;
             }
+
+            return "Scan " + ScanNumber + ": " + FilterText;
         }
 
         #endregion

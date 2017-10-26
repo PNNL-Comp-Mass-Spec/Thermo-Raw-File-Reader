@@ -150,18 +150,15 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Get FileInfo about the currently loaded .raw file
         /// </summary>
-        public RawFileInfo FileInfo
-        {
-            get { return mFileInfo; }
-        }
+        public RawFileInfo FileInfo => mFileInfo;
 
         /// <summary>
         /// MS Method information
         /// </summary>
         public bool LoadMSMethodInfo
         {
-            get { return mLoadMSMethodInfo; }
-            set { mLoadMSMethodInfo = value; }
+            get => mLoadMSMethodInfo;
+            set => mLoadMSMethodInfo = value;
         }
 
         /// <summary>
@@ -169,8 +166,8 @@ namespace ThermoRawFileReader
         /// </summary>
         public bool LoadMSTuneInfo
         {
-            get { return mLoadMSTuneInfo; }
-            set { mLoadMSTuneInfo = value; }
+            get => mLoadMSTuneInfo;
+            set => mLoadMSTuneInfo = value;
         }
 
         /// <summary>
@@ -178,7 +175,7 @@ namespace ThermoRawFileReader
         /// </summary>
         public int ScanInfoCacheMaxSize
         {
-            get { return mMaxScansToCacheInfo; }
+            get => mMaxScansToCacheInfo;
             set
             {
                 mMaxScansToCacheInfo = value;
