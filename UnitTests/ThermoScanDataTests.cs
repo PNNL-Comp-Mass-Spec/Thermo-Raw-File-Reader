@@ -88,8 +88,7 @@ namespace RawFileReaderTests
 
             var dataFile = GetRawDataFile(rawFileName);
 
-            Dictionary<int, List<double>> collisionEnergiesThisFile;
-            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out collisionEnergiesThisFile))
+            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var collisionEnergiesThisFile))
             {
                 Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
             }
@@ -106,8 +105,7 @@ namespace RawFileReaderTests
             {
                 foreach (var scanNumber in collisionEnergiesThisFile.Keys)
                 {
-                    clsScanInfo scanInfo;
-                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -212,10 +210,9 @@ namespace RawFileReaderTests
 
                     for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                     {
-                        try 
+                        try
                         {
-                            clsScanInfo scanInfo;
-                            reader.GetScanInfo(scanNumber, out scanInfo);
+                            reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                             if (reader.FileInfo.CorruptFile)
                             {
@@ -231,13 +228,10 @@ namespace RawFileReaderTests
                                     scanCountMS1++;
                             }
 
-                            double[] mzList;
-                            double[] intensityList;
-
                             // Note: this function call will fail randomly with file Corrupt_Scans6920-7021_AID_STM_013_101104_06_LTQ_16Nov04_Earth_0904-8.raw
                             // Furthermore, we are unable to catch the exception that occurs (or no exception is thrown) and adding
                             // [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions] to the function does not help
-                            var dataPointCount = reader.GetScanData(scanNumber, out mzList, out intensityList);
+                            var dataPointCount = reader.GetScanData(scanNumber, out var mzList, out var intensityList);
 
                             if (reader.FileInfo.CorruptFile)
                             {
@@ -417,8 +411,7 @@ namespace RawFileReaderTests
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    clsScanInfo scanInfo;
-                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -427,8 +420,7 @@ namespace RawFileReaderTests
 
                     var scanTypeKey = new Tuple<string, string>(scanType, genericScanFilter);
 
-                    int observedScanCount;
-                    if (scanTypeCountsActual.TryGetValue(scanTypeKey, out observedScanCount))
+                    if (scanTypeCountsActual.TryGetValue(scanTypeKey, out var observedScanCount))
                     {
                         scanTypeCountsActual[scanTypeKey] = observedScanCount + 1;
                     }
@@ -450,8 +442,7 @@ namespace RawFileReaderTests
                 Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
                 Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
 
-                Dictionary<Tuple<string, string>, int> expectedScanInfo;
-                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedScanInfo))
+                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedScanInfo))
                 {
                     Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                 }
@@ -460,8 +451,7 @@ namespace RawFileReaderTests
 
                 foreach (var scanType in (from item in scanTypeCountsActual orderby item.Key select item))
                 {
-                    int expectedScanCount;
-                    if (expectedScanInfo.TryGetValue(scanType.Key, out expectedScanCount))
+                    if (expectedScanInfo.TryGetValue(scanType.Key, out var expectedScanCount))
                     {
                         var isValid = scanType.Value == expectedScanCount;
 
@@ -559,12 +549,12 @@ namespace RawFileReaderTests
                 Console.WriteLine("Scan info for {0}", dataFile.Name);
                 Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18} {19}",
                                   "Scan", "MSLevel", "Event",
-                                  "NumPeaks", "RetentionTime", 
+                                  "NumPeaks", "RetentionTime",
                                   "LowMass", "HighMass", "TotalIonCurrent",
                                   "BasePeakMZ", "BasePeakIntensity",
                                   "ParentIonMZ", "ActivationType", "CollisionMode",
-                                  "IonMode", "IsCentroided", "IsFTMS", 
-                                  "ScanEvents.Count", "StatusLog.Count", 
+                                  "IonMode", "IsCentroided", "IsFTMS",
+                                  "ScanEvents.Count", "StatusLog.Count",
                                   "IonInjectionTime" ,"FilterText");
 
                 var scanCountMS1 = 0;
@@ -572,15 +562,13 @@ namespace RawFileReaderTests
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    clsScanInfo scanInfo;
-                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
-                    string injectionTimeText;
                     double ionInjectionTime;
 
-                    if (scanInfo.TryGetScanEvent("Ion Injection Time (ms)", out injectionTimeText, true))
+                    if (scanInfo.TryGetScanEvent("Ion Injection Time (ms)", out var injectionTimeText, true))
                     {
                         double.TryParse(injectionTimeText, out ionInjectionTime);
                     }
@@ -610,14 +598,12 @@ namespace RawFileReaderTests
                     else
                         scanCountMS1++;
 
-                    Dictionary<int, string> expectedDataThisFile;
-                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                     {
                         Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                     }
 
-                    string expectedScanSummary;
-                    if (expectedDataThisFile.TryGetValue(scanNumber, out expectedScanSummary))
+                    if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
                     {
                         Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
                                         "Scan summary mismatch, scan " + scanNumber);
@@ -656,20 +642,18 @@ namespace RawFileReaderTests
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    clsScanInfo scanInfo;
-                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
                     foreach (var mrmRange in scanInfo.MRMInfo.MRMMassList)
                     {
-                        var mrmRangeKey = 
-                            mrmRange.StartMass.ToString("0.0") + "_" + 
-                            mrmRange.CentralMass.ToString("0.0") + "_" + 
+                        var mrmRangeKey =
+                            mrmRange.StartMass.ToString("0.0") + "_" +
+                            mrmRange.CentralMass.ToString("0.0") + "_" +
                             mrmRange.EndMass.ToString("0.0");
 
-                        int observedScanCount;
-                        if (mrmRangeCountsActual.TryGetValue(mrmRangeKey, out observedScanCount))
+                        if (mrmRangeCountsActual.TryGetValue(mrmRangeKey, out var observedScanCount))
                         {
                             mrmRangeCountsActual[mrmRangeKey] = observedScanCount + 1;
                         }
@@ -682,12 +666,11 @@ namespace RawFileReaderTests
                     Assert.IsTrue(mrmRangeCountsActual.Count == 1, "Found {0} MRM scan ranges; espected to only find 1", mrmRangeCountsActual.Count);
                 }
 
-                KeyValuePair<string, int> expectedMRMInfo;
-                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedMRMInfo))
+                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedMRMInfo))
                 {
                     Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                 }
-                
+
                 Console.WriteLine("{0,-5} {1,-5} {2}", "Valid", "Count", "MRMScanRange");
 
                 var mrmRangeActual = mrmRangeCountsActual.First();
@@ -705,10 +688,10 @@ namespace RawFileReaderTests
                     Console.WriteLine("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
                     Assert.Fail("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
                 }
-                
+
             }
         }
-        
+
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
         public void TestGetScanInfoStruct(string rawFileName, int scanStart, int scanEnd)
@@ -723,14 +706,12 @@ namespace RawFileReaderTests
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    clsScanInfo scanInfo;
-                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
 #pragma warning disable 618
-                    udtScanHeaderInfoType scanInfoStruct;
-                    success = reader.GetScanInfo(scanNumber, out scanInfoStruct);
+                    success = reader.GetScanInfo(scanNumber, out udtScanHeaderInfoType scanInfoStruct);
 #pragma warning restore 618
                     Assert.IsTrue(success, "GetScanInfo (struct) returned false for scan {0}", scanNumber);
 
@@ -753,13 +734,13 @@ namespace RawFileReaderTests
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
 
             // Keys in this dictionary are the scan number of data being retrieved
-            var file1Data = new Dictionary<int, Dictionary<string, string>> 
+            var file1Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {1513, new Dictionary<string, string>()},
                 {1514, new Dictionary<string, string>()},
                 {1515, new Dictionary<string, string>()},
                 {1516, new Dictionary<string, string>()},
-                {1517, new Dictionary<string, string>()}            
+                {1517, new Dictionary<string, string>()}
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -790,14 +771,14 @@ namespace RawFileReaderTests
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
 
-            var file2Data = new Dictionary<int, Dictionary<string, string>> 
+            var file2Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {16121, new Dictionary<string, string>()},
                 {16122, new Dictionary<string, string>()},
                 {16126, new Dictionary<string, string>()},
                 {16131, new Dictionary<string, string>()},
                 {16133, new Dictionary<string, string>()},
-                {16141, new Dictionary<string, string>()}            
+                {16141, new Dictionary<string, string>()}
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -872,11 +853,7 @@ namespace RawFileReaderTests
 
                     for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                     {
-
-                        double[] mzList;
-                        double[] intensityList;
-
-                        var dataPointsRead = reader.GetScanData(scanNumber, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
+                        var dataPointsRead = reader.GetScanData(scanNumber, out var mzList, out var intensityList, maxNumberOfPeaks, centroidData);
 
                         Assert.IsTrue(dataPointsRead > 0, "GetScanData returned 0 for scan {0}", scanNumber);
 
@@ -884,8 +861,7 @@ namespace RawFileReaderTests
 
                         var midPoint = (int)(intensityList.Length / 2f);
 
-                        clsScanInfo scanInfo;
-                        var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                        var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                         Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -900,23 +876,20 @@ namespace RawFileReaderTests
 
                         Console.WriteLine(scanSummary);
 
-                        Dictionary<int, Dictionary<string, string>> expectedDataThisFile;
-                        if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                        if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                         {
                             Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                         }
 
-                        Dictionary<string, string> expectedDataByType;
-                        if (expectedDataThisFile.TryGetValue(scanNumber, out expectedDataByType))
+                        if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedDataByType))
                         {
                             var keySpec = maxNumberOfPeaks + "_" + centroidData;
-                            string expectedDataDetails;
-                            if (expectedDataByType.TryGetValue(keySpec, out expectedDataDetails))
+                            if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                             {
                                 Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
                                                 "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
                             }
-                        }                        
+                        }
                     }
                 }
             }
@@ -931,10 +904,10 @@ namespace RawFileReaderTests
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
 
             // Keys in this dictionary are the scan number of data being retrieved
-            var file1Data = new Dictionary<int, Dictionary<string, string>> 
+            var file1Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {1513, new Dictionary<string, string>()},
-                {1514, new Dictionary<string, string>()}            
+                {1514, new Dictionary<string, string>()}
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -950,10 +923,10 @@ namespace RawFileReaderTests
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
 
-            var file2Data = new Dictionary<int, Dictionary<string, string>> 
+            var file2Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {16121, new Dictionary<string, string>()},
-                {16122, new Dictionary<string, string>()}            
+                {16122, new Dictionary<string, string>()}
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -975,7 +948,7 @@ namespace RawFileReaderTests
             {
                 Console.WriteLine("Scan data for {0}", dataFile.Name);
                 Console.WriteLine("{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
-                                "Scan", "Max#", "Centroid", "DataCount", 
+                                "Scan", "Max#", "Centroid", "DataCount",
                                 "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
 
                 for (var iteration = 1; iteration <= 4; iteration++)
@@ -1005,15 +978,11 @@ namespace RawFileReaderTests
 
                     for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                     {
-
-                        double[,] massIntensityPairs;
-
-                        var dataPointsRead = reader.GetScanData2D(scanNumber, out massIntensityPairs, maxNumberOfPeaks, centroidData);
+                        var dataPointsRead = reader.GetScanData2D(scanNumber, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
 
                         Assert.IsTrue(dataPointsRead > 0, "GetScanData2D returned 0 for scan {0}", scanNumber);
 
-                        clsScanInfo scanInfo;
-                        var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                        var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                         Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -1074,18 +1043,15 @@ namespace RawFileReaderTests
 
                         Console.WriteLine(scanSummary);
 
-                        Dictionary<int, Dictionary<string, string>> expectedDataThisFile;
-                        if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                        if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                         {
                             Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                         }
-                        
-                        Dictionary<string, string> expectedDataByType;
-                        if (expectedDataThisFile.TryGetValue(scanNumber, out expectedDataByType))
+
+                        if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedDataByType))
                         {
                             var keySpec = maxNumberOfPeaks + "_" + centroidData;
-                            string expectedDataDetails;
-                            if (expectedDataByType.TryGetValue(keySpec, out expectedDataDetails))
+                            if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                             {
                                 Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
                                                 "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
@@ -1105,9 +1071,9 @@ namespace RawFileReaderTests
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
 
             // Keys in this dictionary are the start scan for summing
-            var file1Data = new Dictionary<int, Dictionary<string, string>> 
+            var file1Data = new Dictionary<int, Dictionary<string, string>>
             {
-                {1513, new Dictionary<string, string>()}        
+                {1513, new Dictionary<string, string>()}
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
@@ -1118,7 +1084,7 @@ namespace RawFileReaderTests
 
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-            var file2Data = new Dictionary<int, Dictionary<string, string>> 
+            var file2Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {16121, new Dictionary<string, string>()}
             };
@@ -1166,14 +1132,11 @@ namespace RawFileReaderTests
                             break;
                     }
 
-                    double[,] massIntensityPairs;
-
-                    var dataPointsRead = reader.GetScanDataSumScans(scanStart, scanEnd, out massIntensityPairs, maxNumberOfPeaks, centroidData);
+                    var dataPointsRead = reader.GetScanDataSumScans(scanStart, scanEnd, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
 
                     Assert.IsTrue(dataPointsRead > 0, string.Format("GetScanDataSumScans returned 0 summing scans {0} to {1}", scanStart, scanEnd));
 
-                    clsScanInfo scanInfo;
-                    var success = reader.GetScanInfo(scanStart, out scanInfo);
+                    var success = reader.GetScanInfo(scanStart, out clsScanInfo scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
@@ -1219,18 +1182,15 @@ namespace RawFileReaderTests
                             scanInfo.FilterText);
 
 
-                    Dictionary<int, Dictionary<string, string>> expectedDataThisFile;
-                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                     {
                         Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                     }
 
-                    Dictionary<string, string> expectedDataByType;
-                    if (expectedDataThisFile.TryGetValue(scanStart, out expectedDataByType))
+                    if (expectedDataThisFile.TryGetValue(scanStart, out var expectedDataByType))
                     {
                         var keySpec = maxNumberOfPeaks + "_" + centroidData;
-                        string expectedDataDetails;
-                        if (expectedDataByType.TryGetValue(keySpec, out expectedDataDetails))
+                        if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                         {
                             Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
                                             "Scan details mismatch, scan " + scanStart + ", keySpec " + keySpec);
@@ -1253,14 +1213,14 @@ namespace RawFileReaderTests
 
             var noMatch = "  0                                                        ";
 
-            var file1Data = new Dictionary<int, string> 
+            var file1Data = new Dictionary<int, string>
             {
                 {1513, noMatch + "+ c ESI Full ms [400.00-2000.00]"},
-                {1514, noMatch + "+ c d Full ms2 884.41@cid45.00 [230.00-1780.00]"}               
+                {1514, noMatch + "+ c d Full ms2 884.41@cid45.00 [230.00-1780.00]"}
             };
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-            var file2Data = new Dictionary<int, string> 
+            var file2Data = new Dictionary<int, string>
             {
                 {16121, "833  712.813   2.9E+5 22100.000 5705.175 159099.000        0  FTMS + p NSI Full ms [350.0000-1550.0000]"},
                 {16122, noMatch + "ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]"},
@@ -1301,17 +1261,15 @@ namespace RawFileReaderTests
                 {
 
                     // List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point
-                    udtFTLabelInfoType[] ftLabelData;
 
-                    var dataPointsRead = reader.GetScanLabelData(scanNumber, out ftLabelData);
+                    var dataPointsRead = reader.GetScanLabelData(scanNumber, out var ftLabelData);
 
                     if (dataPointsRead == -1)
                         Assert.AreEqual(0, ftLabelData.Length, "Data count mismatch vs. function return value");
                     else
                         Assert.AreEqual(dataPointsRead, ftLabelData.Length, "Data count mismatch vs. function return value");
 
-                    clsScanInfo scanInfo;
-                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
@@ -1350,14 +1308,12 @@ namespace RawFileReaderTests
                                 scanInfo.FilterText);
                     }
 
-                    Dictionary<int, string> expectedDataThisFile;
-                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                     {
                         Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                     }
-                    
-                    string expectedScanSummary;
-                    if (expectedDataThisFile.TryGetValue(scanNumber, out expectedScanSummary))
+
+                    if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
                     {
                         Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
                                         "Scan summary mismatch, scan " + scanNumber);
@@ -1377,14 +1333,14 @@ namespace RawFileReaderTests
 
             var noMatch = "  0                                               ";
 
-            var file1Data = new Dictionary<int, string> 
+            var file1Data = new Dictionary<int, string>
             {
                 {1513, noMatch + "+ c ESI Full ms [400.00-2000.00]"},
-                {1514, noMatch + "+ c d Full ms2 884.41@cid45.00 [230.00-1780.00]"}               
+                {1514, noMatch + "+ c d Full ms2 884.41@cid45.00 [230.00-1780.00]"}
             };
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-            var file2Data = new Dictionary<int, string> 
+            var file2Data = new Dictionary<int, string>
             {
                 {16121, "833  712.813   2.9E+5 22100.000    2.138    3.000  FTMS + p NSI Full ms [350.0000-1550.0000]"},
                 {16122, noMatch + "ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]"},
@@ -1425,23 +1381,21 @@ namespace RawFileReaderTests
                 {
 
                     // List of Intensity, Mass, AccuracyMMU, AccuracyPPM, and Resolution for each data point
-                    udtMassPrecisionInfoType[] massResolutionData;
 
-                    var dataPointsRead = reader.GetScanPrecisionData(scanNumber, out massResolutionData);
-                    
+                    var dataPointsRead = reader.GetScanPrecisionData(scanNumber, out var massResolutionData);
+
                     if (dataPointsRead == -1)
                         Assert.AreEqual(0, massResolutionData.Length, "Data count mismatch vs. function return value");
                     else
                         Assert.AreEqual(dataPointsRead, massResolutionData.Length, "Data count mismatch vs. function return value");
 
-                    clsScanInfo scanInfo;
-                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
                     if (massResolutionData.Length == 0 && scanInfo.IsFTMS)
                     {
-                        Assert.Fail("GetScanPrecisionData returned no data for FTMS scan " + scanNumber);                        
+                        Assert.Fail("GetScanPrecisionData returned no data for FTMS scan " + scanNumber);
                     }
 
                     string scanSummary;
@@ -1472,14 +1426,12 @@ namespace RawFileReaderTests
                                 scanInfo.FilterText);
                     }
 
-                    Dictionary<int, string> expectedDataThisFile;
-                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedDataThisFile))
+                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                     {
                         Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                     }
-                    
-                    string expectedScanSummary;
-                    if (expectedDataThisFile.TryGetValue(scanNumber, out expectedScanSummary))
+
+                    if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
                     {
                         Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
                                         "Scan summary mismatch, scan " + scanNumber);
@@ -1516,32 +1468,28 @@ namespace RawFileReaderTests
 
             var dataFile = GetRawDataFile(rawFileName);
 
-            Dictionary<Tuple<string, string>, int> expectedEventsThisFile;
-            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out expectedEventsThisFile))
+            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedEventsThisFile))
             {
                 Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
             }
 
             var eventsToCheck = (from item in expectedEventsThisFile select item.Key.Item1).Distinct().ToList();
             var eventCountsActual = new Dictionary<Tuple<string, string>, int>();
- 
+
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    clsScanInfo scanInfo;
-                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
                     foreach (var eventName in eventsToCheck)
                     {
-                        string eventValue;
-                        scanInfo.TryGetScanEvent(eventName, out eventValue);
+                        scanInfo.TryGetScanEvent(eventName, out var eventValue);
 
                         var eventKey = new Tuple<string, string>(eventName, eventValue);
-                        int scanCount;
-                        if (eventCountsActual.TryGetValue(eventKey, out scanCount))
+                        if (eventCountsActual.TryGetValue(eventKey, out var scanCount))
                         {
                             eventCountsActual[eventKey] = scanCount + 1;
                         }
@@ -1557,8 +1505,7 @@ namespace RawFileReaderTests
 
                 foreach (var observedEvent in (from item in eventCountsActual orderby item.Key select item))
                 {
-                    int expectedScanCount;
-                    if (expectedEventsThisFile.TryGetValue(observedEvent.Key, out expectedScanCount))                 
+                    if (expectedEventsThisFile.TryGetValue(observedEvent.Key, out var expectedScanCount))
                     {
                         var isValid = observedEvent.Value == expectedScanCount;
 
@@ -1592,8 +1539,7 @@ namespace RawFileReaderTests
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    clsScanInfo scanInfo;
-                    var success = reader.GetScanInfo(scanNumber, out scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -1667,9 +1613,7 @@ namespace RawFileReaderTests
             string tupleKey2,
             int scanCount)
         {
-
-            Dictionary<Tuple<string, string>, int> expectedScanInfo;
-            if (!expectedData.TryGetValue(fileName, out expectedScanInfo))
+            if (!expectedData.TryGetValue(fileName, out var expectedScanInfo))
             {
                 expectedScanInfo = new Dictionary<Tuple<string, string>, int>();
                 expectedData.Add(fileName, expectedScanInfo);
