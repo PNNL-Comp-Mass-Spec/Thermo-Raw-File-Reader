@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using FileProcessor;
 using PRISM;
 using ThermoRawFileReader;
 
