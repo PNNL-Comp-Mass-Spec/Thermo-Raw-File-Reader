@@ -410,11 +410,11 @@ namespace ThermoRawFileReader
 
                 if (replaceTabsInValues && values[i].Contains("\t"))
                 {
-                    targetList.Add(new KeyValuePair<string, string>(names[i], values[i].Replace("\t", " ")));
+                    targetList.Add(new KeyValuePair<string, string>(names[i], values[i].Replace("\t", " ").TrimEnd(' ')));
                 }
                 else
                 {
-                    targetList.Add(new KeyValuePair<string, string>(names[i], values[i]));
+                    targetList.Add(new KeyValuePair<string, string>(names[i], values[i].TrimEnd(' ')));
                 }
             }
 
