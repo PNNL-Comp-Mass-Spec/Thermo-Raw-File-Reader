@@ -2497,6 +2497,44 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
+        /// Get the MSLevel (aka MS order) for a given scan
+        /// </summary>
+        /// <param name="scan"></param>
+        /// <returns>The MSOrder, or 0 if an error</returns>
+        /// <remarks>
+        /// MS1 spectra will return 1, MS2 spectra will return 2, etc.
+        /// Other, specialized scan types:
+        ///   Neutral gain:   -3
+        ///   Neutral loss:   -2
+        ///   Parent scan:    -1
+        /// </remarks>
+        public int GetMSLevel(int scan)
+        {
+            try
+            {
+                if (mXRawFile == null)
+                    return 0;
+
+                // Make sure the MS controller is selected
+                if (!SetMSController())
+                    return 0;
+
+                var msOrder = 0;
+
+                mXRawFile.GetMSOrderForScanNum(scan, ref msOrder);
+
+                return msOrder;
+            }
+            catch (Exception ex)
+            {
+                var strError = "Unable to determine the MS Level for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                RaiseErrorMessage(strError);
+                return 0;
+            }
+
+        }
+
+        /// <summary>
         /// Gets scan precision data for FTMS data (resolution of each data point)
         /// </summary>
         /// <param name="scan"></param>
