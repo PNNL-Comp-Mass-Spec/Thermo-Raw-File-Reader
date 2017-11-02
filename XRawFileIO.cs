@@ -209,8 +209,8 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Event handler delegate for reporting error messages
         /// </summary>
-        /// <param name="strMessage"></param>
-        public delegate void ReportErrorEventHandler(string strMessage);
+        /// <param name="message"></param>
+        public delegate void ReportErrorEventHandler(string message);
 
         /// <summary>
         /// Event handler for reporting warning messages
@@ -220,8 +220,8 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Event handler delegate for reporting warning messages
         /// </summary>
-        /// <param name="strMessage"></param>
-        public delegate void ReportWarningEventHandler(string strMessage);
+        /// <param name="message"></param>
+        public delegate void ReportWarningEventHandler(string message);
 
         /// <summary>
         /// Report an error message to the error event handler
@@ -229,7 +229,17 @@ namespace ThermoRawFileReader
         /// <param name="message"></param>
         protected void RaiseErrorMessage(string message)
         {
-            ReportError?.Invoke(message);
+
+            if (ReportError == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Error: " + message);
+                Console.ResetColor();
+            }
+            else
+            {
+                ReportError.Invoke(message);
+            }
         }
 
         /// <summary>
@@ -238,7 +248,17 @@ namespace ThermoRawFileReader
         /// <param name="message"></param>
         protected void RaiseWarningMessage(string message)
         {
-            ReportWarning?.Invoke(message);
+            if (ReportWarning == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Warning: " + message);
+                Console.ResetColor();
+            }
+            else
+            {
+                ReportWarning.Invoke(message);
+            }
+
         }
         #endregion
 
