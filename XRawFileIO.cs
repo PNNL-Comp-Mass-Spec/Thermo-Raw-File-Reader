@@ -2543,11 +2543,11 @@ namespace ThermoRawFileReader
                 if (!SetMSController())
                     return 0;
 
-                var msOrder = 0;
+                var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
 
-                mXRawFile.GetMSOrderForScanNum(scan, ref msOrder);
+                var msOrder = scanFilter.MSOrder;
 
-                return msOrder;
+                return (int)msOrder;
             }
             catch (Exception ex)
             {
