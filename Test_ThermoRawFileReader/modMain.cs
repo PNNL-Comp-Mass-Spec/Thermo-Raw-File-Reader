@@ -26,6 +26,7 @@ namespace Test_ThermoRawFileReader
         private static bool mGetScanEvents;
         private static bool mLoadCollisionEnergies;
         private static bool mOnlyLoadMSLevelInfo;
+        private static bool mTestScanFilters;
 
         public static void Main()
         {
@@ -68,7 +69,10 @@ namespace Test_ThermoRawFileReader
                 return;
             }
 
-            TestScanFilterParsing();
+            if (mTestScanFilters)
+            {
+                TestScanFilterParsing();
+            }
 
             TestReader(fiSourceFile.FullName, mCentroid, mTestSumming, mStartScan, mEndScan);
 
@@ -293,10 +297,9 @@ namespace Test_ThermoRawFileReader
                 mLoadCollisionEnergies = false;
             }
 
-            if (commandLineParser.IsParameterPresent("MSLevelOnly"))
-            {
-                mOnlyLoadMSLevelInfo = true;
-            }
+            mOnlyLoadMSLevelInfo = commandLineParser.IsParameterPresent("MSLevelOnly");
+
+            mTestScanFilters = commandLineParser.IsParameterPresent("TestFilters");
 
         }
 
@@ -339,6 +342,7 @@ namespace Test_ThermoRawFileReader
             Console.WriteLine("Use /NoCE to skip trying to determine collision energies");
             Console.WriteLine();
             Console.WriteLine("Use /MSLevelOnly to only load MS levels using GetMSLevel");
+            Console.WriteLine("Use /TestFilters to test the parsing of a set of standard scan filters");
 
         }
 
