@@ -2839,51 +2839,39 @@ namespace ThermoRawFileReader
                 CloseRawFile();
 
                 mCachedScanInfo.Clear();
+                mCachedFileName = string.Empty;
 
                 mXRawFile = RawFileReaderAdapter.FileFactory(filePath);
                 mXRawFileHeader = mXRawFile.FileHeader;
 
-                if (!mXRawFile.IsError)
+                if (mXRawFile.IsError)
                 {
-                    mCachedFileName = filePath;
-                    if (FillFileInfo())
-                    {
-
-                        if (mFileInfo.ScanStart == 0 && mFileInfo.ScanEnd == 0 && mFileInfo.VersionNumber == 0 && Math.Abs(mFileInfo.MassResolution - 0) < double.Epsilon && mFileInfo.InstModel == null)
-                        {
-                            // File actually didn't load correctly, since these shouldn't all be blank
-                            success = false;
-                            mFileInfo.CorruptFile = true;
-                        }
-                        else
-                        {
-                            success = true;
-                        }
-                    }
-                    else
-                    {
-                        success = false;
-                    }
-                }
-                else
-                {
-                    success = false;
+                    return false;
                 }
 
+                mCachedFileName = filePath;
+                if (!FillFileInfo())
+                {
+                    mCachedFileName = string.Empty;
+                    return false;
+                }
+
+                if (mFileInfo.ScanStart == 0 && mFileInfo.ScanEnd == 0 && mFileInfo.VersionNumber == 0 &&
+                    Math.Abs(mFileInfo.MassResolution - 0) < double.Epsilon && mFileInfo.InstModel == null)
+                {
+                    // File actually didn't load correctly, since these shouldn't all be blank
+                    mFileInfo.CorruptFile = true;
+                    mCachedFileName = string.Empty;
+                    return false;
+                }
+
+                return true;
             }
             catch (Exception)
             {
-                success = false;
+                mCachedFileName = string.Empty;
+                return false;
             }
-            finally
-            {
-                if (!success)
-                {
-                    mCachedFileName = string.Empty;
-                }
-            }
-
-            return success;
 
         }
 
