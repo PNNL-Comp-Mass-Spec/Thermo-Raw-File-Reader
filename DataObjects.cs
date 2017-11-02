@@ -343,7 +343,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Event Number: 1 for parent-ion scan, >1 for fragmentation scans (in order)
         /// </summary>
-        public int EventNumber;     // 1 for parent-ion scan; 2 for 1st frag scan, 3 for 2nd frag scan, etc.		
+        public int EventNumber;     // 1 for parent-ion scan; 2 for 1st frag scan, 3 for 2nd frag scan, etc.
 
         /// <summary>
         /// If this is a Selected Ion Monitoring scan
@@ -353,7 +353,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// MRM Scan Type
         /// </summary>
-        public MRMScanTypeConstants MRMScanType;        // 1 or 2 if this is a multiple reaction monitoring scan (MRMQMS or SRM)	
+        public MRMScanTypeConstants MRMScanType;        // 1 or 2 if this is a multiple reaction monitoring scan (MRMQMS or SRM)
 
         /// <summary>
         /// If this is a zoom scan
@@ -475,10 +475,8 @@ namespace ThermoRawFileReader
             {
                 return "Generic udtScanHeaderInfoType";
             }
-            else
-            {
-                return FilterText;
-            }
+
+            return FilterText;
         }
     }
 
@@ -560,10 +558,8 @@ namespace ThermoRawFileReader
             {
                 return "ms" + MSLevel + " " + ParentIonMZ.ToString("0.0#");
             }
-            else
-            {
-                return "ms" + MSLevel + " " + ParentIonMZ.ToString("0.0#") + "@" + CollisionMode + CollisionEnergy.ToString("0.00");
-            }
+
+            return "ms" + MSLevel + " " + ParentIonMZ.ToString("0.0#") + "@" + CollisionMode + CollisionEnergy.ToString("0.00");
         }
 
     }

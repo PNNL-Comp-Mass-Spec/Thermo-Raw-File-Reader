@@ -26,11 +26,13 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Scan event data
         /// </summary>
+        /// <remarks>Ignores scan events with a blank or null event name</remarks>
         protected readonly List<KeyValuePair<string, string>> mScanEvents;
 
         /// <summary>
         /// Status Log data
         /// </summary>
+        /// <remarks>Includes blank events that separate log sections</remarks>
         protected readonly List<KeyValuePair<string, string>> mStatusLog;
         #endregion
 
@@ -42,9 +44,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>Used for determining which cached scan info can be discarded if too many scans become cached</remarks>
-        public DateTime CacheDateUTC {
-            get { return mCacheDateUTC; }
-        }
+        public DateTime CacheDateUTC => mCacheDateUTC;
 
         /// <summary>
         /// Scan number
@@ -52,9 +52,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public int ScanNumber {
-            get { return mScanNumber; }
-        }
+        public int ScanNumber => mScanNumber;
 
         /// <summary>
         /// MS Level
@@ -294,9 +292,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns>List of key/value pairs</returns>
         /// <remarks></remarks>
-        public List<KeyValuePair<string, string>> ScanEvents {
-            get { return mScanEvents; }
-        }
+        public List<KeyValuePair<string, string>> ScanEvents => mScanEvents;
 
         /// <summary>
         /// Status log data
@@ -304,9 +300,8 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns>List of key/value pairs</returns>
         /// <remarks></remarks>
-        public List<KeyValuePair<string, string>> StatusLog {
-            get { return mStatusLog; }
-        }
+        public List<KeyValuePair<string, string>> StatusLog => mStatusLog;
+
         #endregion
 
         #region "Constructor and public methods"
@@ -327,7 +322,6 @@ namespace ThermoRawFileReader
 
             mScanEvents = new List<KeyValuePair<string, string>>();
             mStatusLog = new List<KeyValuePair<string, string>>();
-
         }
 
         /// <summary>
@@ -341,18 +335,18 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Store this scan's scan events using a parallel string arrays
+        /// Store this scan's scan events using parallel string arrays
         /// </summary>
         /// <param name="eventNames"></param>
         /// <param name="eventValues"></param>
         /// <remarks></remarks>
         public void StoreScanEvents(string[] eventNames, string[] eventValues)
         {
-            StoreParallelStrings(mScanEvents, eventNames, eventValues);
+            StoreParallelStrings(mScanEvents, eventNames, eventValues, true, true);
         }
 
         /// <summary>
-        /// Store this scan's scan events using a parallel string arrays
+        /// Store this scan's log messages using parallel string arrays
         /// </summary>
         /// <param name="logNames"></param>
         /// <param name="logValues"></param>
@@ -400,9 +394,9 @@ namespace ThermoRawFileReader
         {
             if (string.IsNullOrWhiteSpace(FilterText)) {
                 return "Scan " + ScanNumber + ": Generic ScanHeaderInfo";
-            } else {
-                return "Scan " + ScanNumber + ": " + FilterText;
             }
+
+            return "Scan " + ScanNumber + ": " + FilterText;
         }
 
         #endregion
@@ -445,13 +439,31 @@ namespace ThermoRawFileReader
 
         }
 
-
-        private void StoreParallelStrings(ICollection<KeyValuePair<string, string>> targetList, IList<string> names, IList<string> values)
+        private void StoreParallelStrings(
+            ICollection<KeyValuePair<string, string>> targetList,
+            IList<string> names,
+            IList<string> values,
+            bool skipEmptyNames = false,
+            bool replaceTabsInValues = false)
         {
             targetList.Clear();
 
-            for (var i = 0; i <= names.Count - 1; i++) {
-                targetList.Add(new KeyValuePair<string, string>(names[i], values[i]));
+            for (var i = 0; i <= names.Count - 1; i++)
+            {
+                if (skipEmptyNames && (string.IsNullOrWhiteSpace(names[i]) || names[i] == "\u0001"))
+                {
+                    // Name is empty or null
+                    continue;
+                }
+
+                if (replaceTabsInValues && values[i].Contains("\t"))
+                {
+                    targetList.Add(new KeyValuePair<string, string>(names[i], values[i].Replace("\t", " ").TrimEnd(' ')));
+                }
+                else
+                {
+                    targetList.Add(new KeyValuePair<string, string>(names[i], values[i].TrimEnd(' ')));
+                }
             }
 
         }

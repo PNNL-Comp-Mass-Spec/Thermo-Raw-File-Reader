@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using ThermoRawFileReader;
@@ -73,10 +72,8 @@ namespace RawFileReaderTests
         [TestCase("ITMS + c NSI SIM ms [286.50-289.50]                                  ", "286.50-289.50")]
         public void ExtractMRMMasses(string filterText, string expectedMassList)
         {
-            MRMInfo udtMRMInfo;
-
             var mrmScanType = XRawFileIO.DetermineMRMScanType(filterText);
-            XRawFileIO.ExtractMRMMasses(filterText, mrmScanType, out udtMRMInfo);
+            XRawFileIO.ExtractMRMMasses(filterText, mrmScanType, out var udtMRMInfo);
 
             Console.WriteLine(filterText + " -- " + udtMRMInfo.MRMMassList.Count + " mass ranges");
 
@@ -121,11 +118,7 @@ namespace RawFileReaderTests
 
         public void ExtractMSLevel(string filterText, int expectedMSLevel, string expectedMzText)
         {
-
-            string parentIonMZ;
-            int msLevel;
-
-            var success = XRawFileIO.ExtractMSLevel(filterText, out msLevel, out parentIonMZ);
+            var success = XRawFileIO.ExtractMSLevel(filterText, out var msLevel, out var parentIonMZ);
 
             Console.WriteLine(filterText + " -- ms" + msLevel + ", " + parentIonMZ);
 
@@ -309,13 +302,7 @@ namespace RawFileReaderTests
         [TestCase("ITMS + p NSI Full ms2 1155.10@cid10.00 [315.00-2000.00]                                                                      ", "1155.10", 2, "cid")]
         public void ExtractParentIonMZFromFilterText(string filterText, string expectedParentIons, int expectedMSLevel, string expectedCollisionMode)
         {
-
-            double parentIonMZ;
-            int msLevel;
-            string collisionMode;
-            List<udtParentIonInfoType> actualParentIons;
-
-            var success = XRawFileIO.ExtractParentIonMZFromFilterText(filterText, out parentIonMZ, out msLevel, out collisionMode, out actualParentIons);
+            var success = XRawFileIO.ExtractParentIonMZFromFilterText(filterText, out var parentIonMZ, out var msLevel, out var collisionMode, out var actualParentIons);
 
             Console.WriteLine(filterText + " -- ms" + msLevel + ", " + parentIonMZ.ToString("0.00") + " " + collisionMode);
 
@@ -522,11 +509,10 @@ namespace RawFileReaderTests
         [TestCase("ITMS + p NSI Full ms2 1155.10@cid10.00 [315.00-2000.00]                                                                      ", "1155.10", 2, "cid")]
         public void ExtractParentIonMZOnlyFromFilterText(string filterText, string expectedParentIons, int expectedMSLevel, string expectedCollisionMode)
         {
-            double parentIonMZ;
             var msLevel = 0;
             var collisionMode = string.Empty;
 
-            var success = XRawFileIO.ExtractParentIonMZFromFilterText(filterText, out parentIonMZ);
+            XRawFileIO.ExtractParentIonMZFromFilterText(filterText, out var parentIonMZ);
             Console.WriteLine(filterText + " -- ms" + msLevel + ", " + parentIonMZ.ToString("0.00") + " " + collisionMode);
 
             var expectedParentIonList = expectedParentIons.Split(',');
@@ -668,12 +654,7 @@ namespace RawFileReaderTests
             MRMScanTypeConstants expectedMRMScanType,
             bool expectedIsZoomScan)
         {
-            int msLevel;
-            bool isSIMScan;
-            MRMScanTypeConstants mrmScanType;
-            bool zoomScan;
-
-            var isValid = XRawFileIO.ValidateMSScan(filterText, out msLevel, out isSIMScan, out mrmScanType, out zoomScan);
+            var isValid = XRawFileIO.ValidateMSScan(filterText, out var msLevel, out var isSIMScan, out var mrmScanType, out var zoomScan);
 
             Console.WriteLine(filterText + "  -- ms" + msLevel + "; SIM=" + isSIMScan + "; MRMScanType=" + mrmScanType);
 

@@ -157,18 +157,15 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Get FileInfo about the currently loaded .raw file
         /// </summary>
-        public RawFileInfo FileInfo
-        {
-            get { return mFileInfo; }
-        }
+        public RawFileInfo FileInfo => mFileInfo;
 
         /// <summary>
         /// MS Method information
         /// </summary>
         public bool LoadMSMethodInfo
         {
-            get { return mLoadMSMethodInfo; }
-            set { mLoadMSMethodInfo = value; }
+            get => mLoadMSMethodInfo;
+            set => mLoadMSMethodInfo = value;
         }
 
         /// <summary>
@@ -176,8 +173,8 @@ namespace ThermoRawFileReader
         /// </summary>
         public bool LoadMSTuneInfo
         {
-            get { return mLoadMSTuneInfo; }
-            set { mLoadMSTuneInfo = value; }
+            get => mLoadMSTuneInfo;
+            set => mLoadMSTuneInfo = value;
         }
 
         /// <summary>
@@ -185,7 +182,7 @@ namespace ThermoRawFileReader
         /// </summary>
         public int ScanInfoCacheMaxSize
         {
-            get { return mMaxScansToCacheInfo; }
+            get => mMaxScansToCacheInfo;
             set
             {
                 mMaxScansToCacheInfo = value;
@@ -239,10 +236,7 @@ namespace ThermoRawFileReader
         /// <param name="message"></param>
         protected void RaiseErrorMessage(string message)
         {
-            if (ReportError != null)
-            {
-                ReportError(message);
-            }
+            ReportError?.Invoke(message);
         }
 
         /// <summary>
@@ -251,10 +245,7 @@ namespace ThermoRawFileReader
         /// <param name="message"></param>
         protected void RaiseWarningMessage(string message)
         {
-            if (ReportWarning != null)
-            {
-                ReportWarning(message);
-            }
+            ReportWarning?.Invoke(message);
         }
         #endregion
 
@@ -344,8 +335,7 @@ namespace ThermoRawFileReader
         // ReSharper disable once InconsistentNaming
         public bool IsMSFileReaderInstalled()
         {
-            var error = "";
-            var result = IsMSFileReaderInstalled(out error);
+            var result = IsMSFileReaderInstalled(out var error);
             if (!string.IsNullOrWhiteSpace(error))
             {
                 RaiseErrorMessage(error);
@@ -680,8 +670,7 @@ namespace ThermoRawFileReader
         /// <remarks>If multiple parent ion m/z values are listed then parentIonMz will have the last one.  However, if the filter text contains "Full msx" then parentIonMz will have the first parent ion listed</remarks>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz, out int msLevel, out string collisionMode)
         {
-            List<udtParentIonInfoType> parentIons;
-            return ExtractParentIonMZFromFilterText(filterText, out parentIonMz, out msLevel, out collisionMode, out parentIons);
+            return ExtractParentIonMZFromFilterText(filterText, out parentIonMz, out msLevel, out collisionMode, out _);
         }
 
         /// <summary>
@@ -735,8 +724,7 @@ namespace ThermoRawFileReader
 
                 var multiplexedMSnEnabled = mFindFullMSx.IsMatch(filterText);
 
-                string mzText;
-                var success = ExtractMSLevel(filterText, out msLevel, out mzText);
+                var success = ExtractMSLevel(filterText, out msLevel, out var mzText);
 
                 if (!success)
                 {
@@ -1128,12 +1116,9 @@ namespace ThermoRawFileReader
         {
             var capturedValue = reMatch.Groups[captureGroupName];
 
-            if ((capturedValue != null))
+            if (!string.IsNullOrWhiteSpace(capturedValue?.Value))
             {
-                if (!string.IsNullOrWhiteSpace(capturedValue.Value))
-                {
-                    return capturedValue.Value;
-                }
+                return capturedValue.Value;
             }
 
             return string.Empty;
@@ -1155,15 +1140,9 @@ namespace ThermoRawFileReader
                 if (mXRawFile == null)
                     return collisionEnergies;
 
-                clsScanInfo scanInfo;
-                GetScanInfo(scan, out scanInfo);
+                GetScanInfo(scan, out clsScanInfo scanInfo);
 
-                double parentIonMZ;
-                int msLevel;
-                string collisionMode;
-                List<udtParentIonInfoType> parentIons;
-
-                ExtractParentIonMZFromFilterText(scanInfo.FilterText, out parentIonMZ, out msLevel, out collisionMode, out parentIons);
+                ExtractParentIonMZFromFilterText(scanInfo.FilterText, out _, out _, out _, out var parentIons);
 
                 foreach (var parentIon in parentIons)
                 {
@@ -1211,7 +1190,6 @@ namespace ThermoRawFileReader
 
                 var errorCode = mXRawFile.IsError;
 
-                // Unfortunately, .IsError() always returns 0, even if an error occurred
                 if (!errorCode)
                 {
                     return scanCount;
@@ -1284,7 +1262,6 @@ namespace ThermoRawFileReader
             }
 
             scanInfo = new clsScanInfo(scan);
-
 
             try
             {
@@ -1430,11 +1407,9 @@ namespace ThermoRawFileReader
 
                 if (scanInfo.EventNumber <= 1)
                 {
-                    int msLevel;
 
                     // XRaw periodically mislabels a scan as .EventNumber = 1 when it's really an MS/MS scan; check for this
-                    string mzText;
-                    if (ExtractMSLevel(scanInfo.FilterText, out msLevel, out mzText))
+                    if (ExtractMSLevel(scanInfo.FilterText, out var msLevel, out _))
                     {
                         scanInfo.EventNumber = msLevel;
                     }
@@ -1460,12 +1435,9 @@ namespace ThermoRawFileReader
                     }
                     else
                     {
-                        double parentIonMz;
-                        int msLevel;
-                        string collisionMode;
 
                         // Parse out the parent ion and collision energy from .FilterText
-                        if (ExtractParentIonMZFromFilterText(scanInfo.FilterText, out parentIonMz, out msLevel, out collisionMode))
+                        if (ExtractParentIonMZFromFilterText(scanInfo.FilterText, out var parentIonMz, out var msLevel, out var collisionMode))
                         {
                             scanInfo.ParentIonMZ = parentIonMz;
                             scanInfo.CollisionMode = collisionMode;
@@ -1480,14 +1452,8 @@ namespace ThermoRawFileReader
                         }
                         else
                         {
-                            // Could not find "Full ms2" in .FilterText
-                            // XRaw periodically mislabels a scan as .EventNumber > 1 when it's really an MS scan; check for this
 
-                            bool simScan;
-                            MRMScanTypeConstants eMRMScanType;
-                            bool zoomScan;
-
-                            if (ValidateMSScan(scanInfo.FilterText, out msLevel, out simScan, out eMRMScanType, out zoomScan))
+                            if (ValidateMSScan(scanInfo.FilterText, out msLevel, out var simScan, out var eMRMScanType, out var zoomScan))
                             {
                                 // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                                 scanInfo.MSLevel = msLevel;
@@ -1521,12 +1487,7 @@ namespace ThermoRawFileReader
                     else
                     {
 
-                        int msLevel;
-                        bool simScan;
-                        MRMScanTypeConstants eMRMScanType;
-                        bool zoomScan;
-
-                        if (ValidateMSScan(scanInfo.FilterText, out msLevel, out simScan, out eMRMScanType, out zoomScan))
+                        if (ValidateMSScan(scanInfo.FilterText, out var msLevel, out var simScan, out var eMRMScanType, out var zoomScan))
                         {
                             // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                             scanInfo.MSLevel = msLevel;
@@ -1692,7 +1653,6 @@ namespace ThermoRawFileReader
             try
             {
                 var validScanFilter = true;
-                int msLevel;
                 var collisionMode = string.Empty;
                 MRMScanTypeConstants eMRMScanType;
                 var simScan = false;
@@ -1704,9 +1664,8 @@ namespace ThermoRawFileReader
                     return scanTypeName;
                 }
 
-                string mzText;
 
-                if (!ExtractMSLevel(filterText, out msLevel, out mzText))
+                if (!ExtractMSLevel(filterText, out var msLevel, out _))
                 {
                     // Assume this is an MS scan
                     msLevel = 1;
@@ -1716,8 +1675,7 @@ namespace ThermoRawFileReader
                 {
                     // Parse out the parent ion and collision energy from filterText
 
-                    double parentIonMz;
-                    if (ExtractParentIonMZFromFilterText(filterText, out parentIonMz, out msLevel, out collisionMode))
+                    if (ExtractParentIonMZFromFilterText(filterText, out _, out msLevel, out collisionMode))
                     {
                         // Check whether this is an SRM MS2 scan
                         eMRMScanType = DetermineMRMScanType(filterText);
@@ -2089,7 +2047,6 @@ namespace ThermoRawFileReader
                 mCorruptMemoryEncountered = true;
             }
 
-            // Unfortunately, .IsError() always returns 0, even if an error occurred
             return hasMsData;
         }
 
@@ -2173,8 +2130,7 @@ namespace ThermoRawFileReader
                     msLevel = 2;
                     return true;
                 default:
-                    string mzText;
-                    ExtractMSLevel(filterText, out msLevel, out mzText);
+                    ExtractMSLevel(filterText, out msLevel, out _);
                     return false;
             }
 
@@ -2224,9 +2180,8 @@ namespace ThermoRawFileReader
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks, bool centroidData)
         {
 
-            double[,] massIntensityPairs;
 
-            var dataCount = GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks, centroidData);
+            var dataCount = GetScanData2D(scan, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
 
             try
             {
@@ -2334,9 +2289,7 @@ namespace ThermoRawFileReader
                 scan = mFileInfo.ScanEnd;
             }
 
-            clsScanInfo scanInfo;
-
-            if (!GetScanInfo(scan, out scanInfo))
+            if (!GetScanInfo(scan, out clsScanInfo scanInfo))
             {
                 throw new Exception("Cannot retrieve ScanInfo from cache for scan " + scan + "; cannot retrieve scan data");
             }
@@ -2498,9 +2451,8 @@ namespace ThermoRawFileReader
                 scan = mFileInfo.ScanEnd;
             }
 
-            clsScanInfo scanInfo;
 
-            if (!GetScanInfo(scan, out scanInfo))
+            if (!GetScanInfo(scan, out clsScanInfo scanInfo))
             {
                 throw new Exception("Cannot retrieve ScanInfo from cache for scan " + scan + "; cannot retrieve scan data");
             }
@@ -2580,6 +2532,44 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
+        /// Get the MSLevel (aka MS order) for a given scan
+        /// </summary>
+        /// <param name="scan"></param>
+        /// <returns>The MSOrder, or 0 if an error</returns>
+        /// <remarks>
+        /// MS1 spectra will return 1, MS2 spectra will return 2, etc.
+        /// Other, specialized scan types:
+        ///   Neutral gain:   -3
+        ///   Neutral loss:   -2
+        ///   Parent scan:    -1
+        /// </remarks>
+        public int GetMSLevel(int scan)
+        {
+            try
+            {
+                if (mXRawFile == null)
+                    return 0;
+
+                // Make sure the MS controller is selected
+                if (!SetMSController())
+                    return 0;
+
+                var msOrder = 0;
+
+                mXRawFile.GetMSOrderForScanNum(scan, ref msOrder);
+
+                return msOrder;
+            }
+            catch (Exception ex)
+            {
+                var strError = "Unable to determine the MS Level for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                RaiseErrorMessage(strError);
+                return 0;
+            }
+
+        }
+
+        /// <summary>
         /// Gets scan precision data for FTMS data (resolution of each data point)
         /// </summary>
         /// <param name="scan"></param>
@@ -2604,9 +2594,8 @@ namespace ThermoRawFileReader
                 scan = mFileInfo.ScanEnd;
             }
 
-            clsScanInfo scanInfo;
 
-            if (!GetScanInfo(scan, out scanInfo))
+            if (!GetScanInfo(scan, out clsScanInfo scanInfo))
             {
                 throw new Exception("Cannot retrieve ScanInfo from cache for scan " + scan + "; cannot retrieve scan data");
             }
@@ -2846,7 +2835,6 @@ namespace ThermoRawFileReader
         /// <returns></returns>
         public bool OpenRawFile(string filePath)
         {
-            var success = false;
 
             try
             {
@@ -2857,7 +2845,6 @@ namespace ThermoRawFileReader
 
                 mXRawFile = RawFileReaderAdapter.FileFactory(filePath);
                 mXRawFileHeader = mXRawFile.FileHeader;
-                // Unfortunately, .IsError() always returns 0, even if an error occurred
 
                 if (!mXRawFile.IsError)
                 {
@@ -3013,8 +3000,7 @@ namespace ThermoRawFileReader
         public bool GetScanInfo(int scan, out udtScanHeaderInfoType udtScanInfo)
         {
 
-            clsScanInfo scanInfo;
-            var success = GetScanInfo(scan, out scanInfo);
+            var success = GetScanInfo(scan, out clsScanInfo scanInfo);
 
             if (success)
             {

@@ -1,5 +1,9 @@
 ThermoRawFileReader Change Log
 
+Version 2.0.6507; October 25, 2017
+	- Skip scan events with an empty or null name
+	- Trim trailing whitespace from scan event values
+
 Version 2.0.6225; January 16, 2017
 	- Add property SignalToNoise to udtFTLabelInfoType
 
