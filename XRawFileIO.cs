@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ThermoFisher.CommonCore.Data;
@@ -2845,13 +2846,20 @@ namespace ThermoRawFileReader
         {
             try
             {
+                var dataFile = new FileInfo(filePath);
+                if (!dataFile.Exists)
+                {
+                    RaiseErrorMessage(string.Format("File not found: {0}", filePath));
+                    return false;
+                }
+
                 // Make sure any existing open files are closed
                 CloseRawFile();
 
                 mCachedScanInfo.Clear();
                 mCachedFileName = string.Empty;
 
-                mXRawFile = RawFileReaderAdapter.FileFactory(filePath);
+                mXRawFile = RawFileReaderAdapter.FileFactory(dataFile.FullName);
                 mXRawFileHeader = mXRawFile.FileHeader;
 
                 if (mXRawFile.IsError)
