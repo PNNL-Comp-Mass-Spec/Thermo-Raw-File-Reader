@@ -1000,19 +1000,15 @@ namespace ThermoRawFileReader
 
                 if (mLoadMSMethodInfo)
                 {
-
-                    var methodCount = 0;
-                    methodCount = mXRawFile.InstrumentMethodsCount;
+                    var methodCount = mXRawFile.InstrumentMethodsCount;
 
                     for (var methodIndex = 0; methodIndex < methodCount; methodIndex++)
                     {
-                        string methodText = null;
-                        methodText = mXRawFile.GetInstrumentMethod(methodIndex);
+                        var methodText = mXRawFile.GetInstrumentMethod(methodIndex);
                         if (!string.IsNullOrWhiteSpace(methodText))
                         {
                             mFileInfo.InstMethods.Add(methodText);
                         }
-
                     }
                 }
 
@@ -1179,11 +1175,9 @@ namespace ThermoRawFileReader
                 if (mXRawFile == null)
                     return -1;
 
-                var scanCount = 0;
-
                 var runData = mXRawFile.RunHeaderEx;
 
-                scanCount = runData.SpectraCount;
+                var scanCount = runData.SpectraCount;
 
                 var errorCode = mXRawFile.IsError;
 
@@ -1391,8 +1385,7 @@ namespace ThermoRawFileReader
                 // Lookup the filter text for this scan
                 // Parse out the parent ion m/z for fragmentation scans
                 // Must set filterText to Nothing prior to calling .GetFilterForScanNum()
-                string filterText = null;
-                filterText = mXRawFile.GetFilterForScanNumber(scan).ToString();
+                var filterText = mXRawFile.GetFilterForScanNumber(scan).ToString();
                 // TODO: Verify: mXRawFile.GetFilterForScanNum(scan, ref filterText);
 
                 scanInfo.FilterText = string.Copy(filterText);
@@ -2275,8 +2268,6 @@ namespace ThermoRawFileReader
             // Note that we're using function attribute HandleProcessCorruptedStateExceptions
             // to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
-            var dataCount = 0;
-
             if (scan < mFileInfo.ScanStart)
             {
                 scan = mFileInfo.ScanStart;
@@ -2318,6 +2309,7 @@ namespace ThermoRawFileReader
                     centroidData = false;
                 }
 
+                int dataCount;
                 if (centroidData && scanInfo.IsFTMS)
                 {
                     // Centroiding is enabled, and the dataset was acquired on an Orbitrap, Exactive, or FTMS instrument
@@ -2688,7 +2680,6 @@ namespace ThermoRawFileReader
 
 #pragma warning disable 219
             double centroidPeakWidth = 0;
-            var dataCount = 0;
 
             try
             {
@@ -2772,7 +2763,7 @@ namespace ThermoRawFileReader
                 data.PreferCentroids = centroidData;
 
                 var masses = data.PreferredMasses;
-                dataCount = masses.Length;
+                var dataCount = masses.Length;
 
                 if (maxNumberOfPeaks > 0)
                 {
@@ -2939,8 +2930,6 @@ namespace ThermoRawFileReader
         [Obsolete("The collision energies reported by mXRawFile.GetCollisionEnergyForScanNum are not normalized and are thus not very useful")]
         public List<double> GetCollisionEnergyUnnormalized(int scan)
         {
-
-            var numMsOrders = 0;
             var collisionEnergies = new List<double>();
 
             try
@@ -2950,14 +2939,13 @@ namespace ThermoRawFileReader
 
                 var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
 
-                numMsOrders = (int)scanFilter.MSOrder;
+                var numMsOrders = (int)scanFilter.MSOrder;
 
                 for (var msOrder = 1; msOrder <= numMsOrders; msOrder++)
                 {
-                    double collisionEnergy = 0;
-                    collisionEnergy = scanFilter.GetEnergy(msOrder);
+                    var collisionEnergy = scanFilter.GetEnergy(msOrder);
 
-                    if ((collisionEnergy > 0))
+                    if (collisionEnergy > 0)
                     {
                         collisionEnergies.Add(collisionEnergy);
                     }
