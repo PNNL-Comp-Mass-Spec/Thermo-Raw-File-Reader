@@ -346,17 +346,33 @@ namespace Test_ThermoRawFileReader
 
         }
 
+        private static FileInfo ResolveDataFile(string rawFilePath)
+        {
+            var rawFile = new FileInfo(rawFilePath);
+
+            if (rawFile.Exists)
+                return rawFile;
+
+            // File not found via the full path; check in the local directory
+            if (File.Exists(rawFile.Name))
+            {
+                return new FileInfo(rawFile.Name);
+            }
+
+            Console.WriteLine("File not found: " + rawFilePath);
+            return null;
+        }
+
         private static void TestReader(string rawFilePath, bool centroid = false, bool testSumming = false, int scanStart = 0, int scanEnd = 0)
         {
             try
             {
-                if (!File.Exists(rawFilePath))
-                {
-                    Console.WriteLine("File not found, skipping: " + rawFilePath);
-                    return;
-                }
 
-                using (var oReader = new XRawFileIO(rawFilePath))
+                var rawFile = ResolveDataFile(rawFilePath);
+                if (rawFile == null)
+                    return;
+
+                using (var oReader = new XRawFileIO(rawFile.FullName))
                 {
 
                     foreach (var method in oReader.FileInfo.InstMethods)
@@ -414,12 +430,10 @@ namespace Test_ThermoRawFileReader
                             continue;
                         }
 
-
                         var success = oReader.GetScanInfo(scanNum, out clsScanInfo oScanInfo);
 
                         if (!success)
                             continue;
-
 
                         if (mScanInfoInterval <= 0 || scanNum % mScanInfoInterval == 0)
                             Console.WriteLine("Scan " + scanNum + " at " + oScanInfo.RetentionTime.ToString("0.00") + " minutes: " + oScanInfo.FilterText);
@@ -571,14 +585,12 @@ namespace Test_ThermoRawFileReader
         {
             try
             {
-                if (!File.Exists(rawFilePath))
-                {
-                    Console.WriteLine("File not found, skipping: " + rawFilePath);
+                var rawFile = ResolveDataFile(rawFilePath);
+                if (rawFile == null)
                     return;
-                }
 
                 Console.WriteLine();
-                Console.WriteLine("Opening " + rawFilePath);
+                Console.WriteLine("Opening " + rawFile.FullName);
 
                 // Keys in this dictionary are event names
                 // Values are dictionaries tracking all of the values for each event (key is value, value is occurrence of that value)
@@ -588,7 +600,7 @@ namespace Test_ThermoRawFileReader
                 var scansRead = 0;
 
 
-                using (var oReader = new XRawFileIO(rawFilePath))
+                using (var oReader = new XRawFileIO(rawFile.FullName))
                 {
                     var scanCount = oReader.GetNumScans();
 
