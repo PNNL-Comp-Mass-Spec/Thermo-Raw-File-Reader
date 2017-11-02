@@ -102,9 +102,9 @@ namespace ThermoRawFileReader
         protected int mMaxScansToCacheInfo = 50000;
 
         /// <summary>
-        /// The currently loaded .raw file
+        /// The the full path to the currently loaded .raw file
         /// </summary>
-        protected string mCachedFileName;
+        protected string mCachedFilePath;
 
         /// <summary>
         /// The scan info cache
@@ -440,7 +440,7 @@ namespace ThermoRawFileReader
             finally
             {
                 mXRawFile = null;
-                mCachedFileName = string.Empty;
+                mCachedFilePath = string.Empty;
                 mFileInfo.Clear();
             }
 
@@ -2857,7 +2857,7 @@ namespace ThermoRawFileReader
                 CloseRawFile();
 
                 mCachedScanInfo.Clear();
-                mCachedFileName = string.Empty;
+                mCachedFilePath = string.Empty;
 
                 mXRawFile = RawFileReaderAdapter.FileFactory(dataFile.FullName);
                 mXRawFileHeader = mXRawFile.FileHeader;
@@ -2867,10 +2867,10 @@ namespace ThermoRawFileReader
                     return false;
                 }
 
-                mCachedFileName = filePath;
+                mCachedFilePath = dataFile.FullName;
                 if (!FillFileInfo())
                 {
-                    mCachedFileName = string.Empty;
+                    mCachedFilePath = string.Empty;
                     return false;
                 }
 
@@ -2879,7 +2879,7 @@ namespace ThermoRawFileReader
                 {
                     // File actually didn't load correctly, since these shouldn't all be blank
                     mFileInfo.CorruptFile = true;
-                    mCachedFileName = string.Empty;
+                    mCachedFilePath = string.Empty;
                     return false;
                 }
 
@@ -2887,7 +2887,7 @@ namespace ThermoRawFileReader
             }
             catch (Exception)
             {
-                mCachedFileName = string.Empty;
+                mCachedFilePath = string.Empty;
                 return false;
             }
 
