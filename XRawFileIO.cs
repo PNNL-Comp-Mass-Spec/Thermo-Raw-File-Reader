@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MSFileReaderLib;
@@ -2787,6 +2788,13 @@ namespace ThermoRawFileReader
 
             try
             {
+                var dataFile = new FileInfo(filePath);
+                if (!dataFile.Exists)
+                {
+                    RaiseErrorMessage(string.Format("File not found: {0}", filePath));
+                    return false;
+                }
+
                 // Make sure any existing open files are closed
                 CloseRawFile();
 
@@ -2803,14 +2811,14 @@ namespace ThermoRawFileReader
                     throw new Exception("Could not instantiate an instance of MSFileReader_XRawfile");
                 }
 
-                mXRawFile.Open(filePath);
+                mXRawFile.Open(dataFile.FullName);
                 mXRawFile.IsError(ref intResult);
                 // Unfortunately, .IsError() always returns 0, even if an error occurred
 
                 if (intResult != 0)
                     return false;
 
-                mCachedFileName = filePath;
+                mCachedFileName = dataFile.FullName;
                 if (!FillFileInfo())
                     return false;
 
