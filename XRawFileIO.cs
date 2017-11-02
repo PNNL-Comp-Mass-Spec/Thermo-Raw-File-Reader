@@ -96,9 +96,9 @@ namespace ThermoRawFileReader
         protected int mMaxScansToCacheInfo = 50000;
 
         /// <summary>
-        /// The currently loaded .raw file
+        /// The the full path to the currently loaded .raw file
         /// </summary>
-        protected string mCachedFileName;
+        protected string mCachedFilePath;
 
         /// <summary>
         /// The scan info cache
@@ -433,7 +433,7 @@ namespace ThermoRawFileReader
             finally
             {
                 mXRawFile = null;
-                mCachedFileName = string.Empty;
+                mCachedFilePath = string.Empty;
                 mFileInfo.Clear();
             }
 
@@ -2799,7 +2799,7 @@ namespace ThermoRawFileReader
                 CloseRawFile();
 
                 mCachedScanInfo.Clear();
-
+                mCachedFilePath = string.Empty;
                 if (mXRawFile == null)
                 {
                     // ReSharper disable once SuspiciousTypeConversion.Global
@@ -2818,22 +2818,25 @@ namespace ThermoRawFileReader
                 if (intResult != 0)
                     return false;
 
-                mCachedFileName = dataFile.FullName;
+                mCachedFilePath = filePath;
                 if (!FillFileInfo())
+                    mCachedFilePath = string.Empty;
                     return false;
 
                 if (mFileInfo.ScanStart == 0 && mFileInfo.ScanEnd == 0 && mFileInfo.VersionNumber == 0 && Math.Abs(mFileInfo.MassResolution - 0) < double.Epsilon && mFileInfo.InstModel == null)
                 {
                     // File actually didn't load correctly, since these shouldn't all be blank
                     mFileInfo.CorruptFile = true;
+                    mCachedFilePath = string.Empty;
                     return false;
                 }
 
-                mCachedFileName = string.Empty;
+                mCachedFilePath = string.Empty;
                 return true;
             }
             catch (Exception)
             {
+                mCachedFilePath = string.Empty;
                 return false;
             }
 
