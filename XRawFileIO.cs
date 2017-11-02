@@ -404,10 +404,7 @@ namespace ThermoRawFileReader
         {
             try
             {
-                if ((mXRawFile != null))
-                {
-                    mXRawFile.Dispose();
-                }
+                mXRawFile?.Dispose();
                 mCorruptMemoryEncountered = false;
 
             }
