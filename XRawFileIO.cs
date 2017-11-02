@@ -2274,8 +2274,8 @@ namespace ThermoRawFileReader
                     return -1;
                 }
 
-                var strFilter = string.Empty;
                 // Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
+                var strFilter = string.Empty;
                 var intIntensityCutoffValue = 0;
 
                 if (maxNumberOfPeaks < 0)
@@ -2705,13 +2705,13 @@ namespace ThermoRawFileReader
                 int intCentroidResult;
                 if (centroidData)
                 {
-                    intCentroidResult = 1;
                     // Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
+                    intCentroidResult = 1;
                 }
                 else
                 {
-                    intCentroidResult = 0;
                     // Return the data as-is
+                    intCentroidResult = 0;
                 }
 
                 var backgroundScan1First = 0;
