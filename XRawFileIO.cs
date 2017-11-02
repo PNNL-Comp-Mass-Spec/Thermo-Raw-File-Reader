@@ -2820,8 +2820,10 @@ namespace ThermoRawFileReader
 
                 mCachedFilePath = filePath;
                 if (!FillFileInfo())
+                {
                     mCachedFilePath = string.Empty;
                     return false;
+                }
 
                 if (mFileInfo.ScanStart == 0 && mFileInfo.ScanEnd == 0 && mFileInfo.VersionNumber == 0 && Math.Abs(mFileInfo.MassResolution - 0) < double.Epsilon && mFileInfo.InstModel == null)
                 {
