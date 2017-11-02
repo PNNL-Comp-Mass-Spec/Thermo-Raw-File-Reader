@@ -2885,8 +2885,9 @@ namespace ThermoRawFileReader
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                RaiseErrorMessage(string.Format("Exception opening {0}: {1}", filePath, ex.Message));
                 mCachedFilePath = string.Empty;
                 return false;
             }
