@@ -374,6 +374,7 @@ namespace Test_ThermoRawFileReader
 
                 using (var oReader = new XRawFileIO(rawFile.FullName))
                 {
+                    RegisterEvents(oReader);
 
                     foreach (var method in oReader.FileInfo.InstMethods)
                     {
@@ -784,6 +785,22 @@ namespace Test_ThermoRawFileReader
                 ShowError("Error loading the MS Method: " + ex.Message, ex);
             }
 
+        }
+
+        private static void RegisterEvents(XRawFileIO oReader)
+        {
+            oReader.ReportError += XRawFileIO_ErrorHandler;
+            oReader.ReportWarning += XRawFileIO_WarningHandler;
+        }
+
+        private static void XRawFileIO_ErrorHandler(string message)
+        {
+            ConsoleMsgUtils.ShowError(message);
+        }
+
+        private static void XRawFileIO_WarningHandler(string message)
+        {
+            ConsoleMsgUtils.ShowWarning(message);
         }
 
     }
