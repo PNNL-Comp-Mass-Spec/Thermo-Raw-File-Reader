@@ -1068,7 +1068,7 @@ namespace ThermoRawFileReader
 
         }
 
-        private ActivationTypeConstants GetActivationType(int scan, int msLevel)
+        private ActivationTypeConstants GetActivationType(int scan)
         {
             try
             {
@@ -1500,7 +1500,7 @@ namespace ThermoRawFileReader
                 // Now that we know MSLevel we can lookup the activation type (aka activation method)
                 if (scanInfo.MSLevel > 1)
                 {
-                    scanInfo.ActivationType = GetActivationType(scan, scanInfo.MSLevel);
+                    scanInfo.ActivationType = GetActivationType(scan);
                 }
                 else
                 {
