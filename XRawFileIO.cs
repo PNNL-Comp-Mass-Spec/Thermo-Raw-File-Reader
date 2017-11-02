@@ -2882,7 +2882,7 @@ namespace ThermoRawFileReader
         /// <remarks></remarks>
         public XRawFileIO(string rawFilePath)
         {
-            if (!(string.IsNullOrWhiteSpace(rawFilePath)))
+            if (!string.IsNullOrWhiteSpace(rawFilePath))
             {
                 OpenRawFile(rawFilePath);
             }
