@@ -44,7 +44,6 @@
     <Compile Include="Enums.cs" />
     <Compile Include="XRawFileIO.cs" />
     <Compile Include="clsScanInfo.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="MSFileReaderLib">
@@ -56,6 +55,9 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
