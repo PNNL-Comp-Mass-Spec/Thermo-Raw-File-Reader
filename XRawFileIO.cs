@@ -1009,12 +1009,21 @@ namespace ThermoRawFileReader
                 mFileInfo.CreationDate = DateTime.MinValue;
                 mXRawFile.GetCreationDate(ref mFileInfo.CreationDate);
 
+                if (TraceMode)
+                    OnDebugEvent("Checking mXRawFile.IsError");
+
                 var errorCode = 0;
                 mXRawFile.IsError(ref errorCode);
 
                 // Unfortunately, .IsError() always returns 0, even if an error occurred
                 if (errorCode != 0)
                     return false;
+
+                if (TraceMode)
+                    OnDebugEvent("mXRawFile.IsError is non-zero");
+
+                if (TraceMode)
+                    OnDebugEvent("Accessing mXRawFile.GetCreatorID");
 
                 mFileInfo.CreatorID = null;
                 mXRawFile.GetCreatorID(ref mFileInfo.CreatorID);
@@ -1032,12 +1041,20 @@ namespace ThermoRawFileReader
 
                 if (mLoadMSMethodInfo)
                 {
+                    if (TraceMode)
+                        OnDebugEvent("Accessing mXRawFile.GetNumInstMethods");
 
                     var methodCount = 0;
                     mXRawFile.GetNumInstMethods(ref methodCount);
 
+                    if (TraceMode)
+                        OnDebugEvent(string.Format("File has {0} methods", methodCount));
+
                     for (var methodIndex = 0; methodIndex < methodCount; methodIndex++)
                     {
+                        if (TraceMode)
+                            OnDebugEvent("Retrieving method from index " + methodIndex);
+
                         string methodText = null;
                         mXRawFile.GetInstMethod(methodIndex, ref methodText);
                         if (!string.IsNullOrWhiteSpace(methodText))
@@ -1047,6 +1064,9 @@ namespace ThermoRawFileReader
 
                     }
                 }
+
+                if (TraceMode)
+                    OnDebugEvent("Defining the model, name, description, and serial number");
 
                 mFileInfo.InstModel = null;
                 mFileInfo.InstName = null;
@@ -2814,6 +2834,9 @@ namespace ThermoRawFileReader
                 mCachedFilePath = string.Empty;
                 if (mXRawFile == null)
                 {
+                    if (TraceMode)
+                        OnDebugEvent("Initializing mXRawFile as IXRawfile5");
+
                     // ReSharper disable once SuspiciousTypeConversion.Global
                     mXRawFile = new MSFileReader_XRawfile() as IXRawfile5;
                 }
@@ -2822,6 +2845,9 @@ namespace ThermoRawFileReader
                 {
                     throw new Exception("Could not instantiate an instance of MSFileReader_XRawfile");
                 }
+
+                if (TraceMode)
+                    OnDebugEvent("Opening " + dataFile.FullName);
 
                 mXRawFile.Open(dataFile.FullName);
                 mXRawFile.IsError(ref intResult);

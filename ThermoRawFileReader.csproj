@@ -31,9 +31,6 @@
     <DocumentationFile>bin\Release\ThermoRawFileReader.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PRISM, Version=2.4.40.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\PRISM-Library.2.4.40\lib\net45\PRISM.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -61,6 +58,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="PRISM-Library">
+      <Version>2.4.40</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
