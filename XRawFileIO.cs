@@ -1135,13 +1135,15 @@ namespace ThermoRawFileReader
             {
                 var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
                 var reactions = scanFilter.MassCount;
-                var adj = 1; // Subtract 1 to be within range
-                if (scanFilter.GetIsMultipleActivation(reactions - adj))
+
+                var index = reactions - 1;
+                if (index > 0 && scanFilter.GetIsMultipleActivation(index))
                 {
-                    adj++; // Subtract 2 (instead of 1), since the last activation is part of a ETciD/EThcD pair
+                    // The last activation is part of a ETciD/EThcD pair
+                    index--;
                 }
 
-                var activationTypeCode = scanFilter.GetActivation(reactions - adj);
+                var activationTypeCode = scanFilter.GetActivation(index);
 
                 ActivationTypeConstants activationType;
 
