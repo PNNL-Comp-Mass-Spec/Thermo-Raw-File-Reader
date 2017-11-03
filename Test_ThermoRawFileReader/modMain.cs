@@ -803,12 +803,12 @@ namespace Test_ThermoRawFileReader
 
         }
 
-
         private static void ShowMethod(XRawFileIO oReader)
         {
 
             try
             {
+
                 foreach (var method in oReader.FileInfo.InstMethods)
                 {
                     Console.WriteLine();
@@ -818,7 +818,13 @@ namespace Test_ThermoRawFileReader
                     Console.WriteLine("Instrument serial number: " + oReader.FileInfo.InstSerialNumber);
                     Console.WriteLine();
 
-                    Console.WriteLine(method);
+                    if (string.IsNullOrWhiteSpace(method))
+                        continue;
+
+                    if (method.Length > 500)
+                        Console.WriteLine(method.Substring(0, 500) + " ...");
+                    else
+                        Console.WriteLine(method);
 
                 }
 
