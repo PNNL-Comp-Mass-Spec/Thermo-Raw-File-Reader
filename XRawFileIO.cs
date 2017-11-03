@@ -1102,13 +1102,11 @@ namespace ThermoRawFileReader
         private ActivationTypeConstants GetActivationType(int scan, int msLevel)
         {
 
-
             try
             {
                 var activationTypeCode = 0;
 
                 mXRawFile.GetActivationTypeForScanNum(scan, msLevel, ref activationTypeCode);
-
 
                 if (!Enum.TryParse(activationTypeCode.ToString(), out ActivationTypeConstants activationType))
                 {
