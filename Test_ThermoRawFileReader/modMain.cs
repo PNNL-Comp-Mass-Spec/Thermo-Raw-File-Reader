@@ -635,7 +635,7 @@ namespace Test_ThermoRawFileReader
 
                 var lastProgress = DateTime.UtcNow;
                 var scansRead = 0;
-
+                var scansReadSinceLastProgress = 0;
 
                 using (var oReader = new XRawFileIO(rawFile.FullName))
                 {
@@ -670,12 +670,21 @@ namespace Test_ThermoRawFileReader
                         }
 
                         scansRead++;
-                        if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds > 3 && scansRead % 100 == 0)
-                        {
-                            lastProgress = DateTime.UtcNow;
-                            var percentComplete = scansRead / (double)scanCount * 100;
-                            Console.WriteLine("Reading scan events; {0:F1}% complete ({1} / {2} scans)", percentComplete, scansRead, scanCount);
-                        }
+                        scansReadSinceLastProgress++;
+
+                        var elapsedSeconds = DateTime.UtcNow.Subtract(lastProgress).TotalSeconds;
+                        if (!(elapsedSeconds > 3) || scansRead % 100 != 0)
+                            continue;
+
+                        lastProgress = DateTime.UtcNow;
+                        var percentComplete = scansRead / (double)scanCount * 100;
+
+                        var scansPerSecond = scansReadSinceLastProgress / elapsedSeconds;
+
+                        Console.WriteLine("Reading scan events; {0:F1}% complete ({1} / {2} scans); {3:F0} scans/second",
+                                          percentComplete, scansRead, scanCount, scansPerSecond);
+
+                        scansReadSinceLastProgress = 0;
                     }
 
                 }
