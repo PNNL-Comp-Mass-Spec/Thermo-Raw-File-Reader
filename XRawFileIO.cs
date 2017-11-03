@@ -199,6 +199,11 @@ namespace ThermoRawFileReader
             }
         }
 
+        /// <summary>
+        /// When true, additional messages are reported via Debug events
+        /// </summary>
+        public bool TraceMode { get; set; }
+
         #endregion
 
         #region "Events"
@@ -2888,9 +2893,12 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <remarks></remarks>
-        public XRawFileIO(string rawFilePath)
+        /// <param name="rawFilePath">Optional .raw file to open</param>
+        /// <param name="traceMode">When true, additional messages are reported via Debug events</param>
+        public XRawFileIO(string rawFilePath, bool traceMode = false)
         {
+            TraceMode = traceMode;
+
             if (!string.IsNullOrWhiteSpace(rawFilePath))
             {
                 OpenRawFile(rawFilePath);
