@@ -247,16 +247,7 @@ namespace ThermoRawFileReader
             OnErrorEvent(message, ex);
 
 #pragma warning disable 618
-            if (ReportError == null)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: " + message);
-                Console.ResetColor();
-            }
-            else
-            {
-                ReportError.Invoke(message);
-            }
+            ReportError?.Invoke(message);
 #pragma warning restore 618
         }
 
@@ -269,16 +260,7 @@ namespace ThermoRawFileReader
             OnWarningEvent(message);
 
 #pragma warning disable 618
-            if (ReportWarning == null)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Warning: " + message);
-                Console.ResetColor();
-            }
-            else
-            {
-                ReportWarning.Invoke(message);
-            }
+            ReportWarning?.Invoke(message);           
 #pragma warning restore 618
         }
 
@@ -389,12 +371,14 @@ namespace ThermoRawFileReader
         {
             var typeAvailable = false;
             var canInstantiateType = false;
+
             error = "";
             var bitness = "x86";
             if (Environment.Is64BitProcess)
             {
                 bitness = "x64";
             }
+
             try
             {
                 //Assembly.Load("Interop.MSFileReaderLib"); // by name; is a COM library
