@@ -519,7 +519,6 @@ namespace ThermoRawFileReader
             // Determine the ion mode by simply looking for the first + or - sign
             var ionMode = IonModeConstants.Unknown;
 
-
             if (string.IsNullOrWhiteSpace(filterText))
             {
                 return ionMode;
@@ -937,13 +936,13 @@ namespace ThermoRawFileReader
         /// <param name="filterText"></param>
         /// <param name="msLevel"></param>
         /// <param name="mzText"></param>
-        /// <returns></returns>
+        /// <returns>True if found and False if no match</returns>
+        /// <remarks>
+        /// Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in filterText
+        /// Populates msLevel with the number after "ms" and mzText with the text after "ms2"
+        /// </remarks>
         public static bool ExtractMSLevel(string filterText, out int msLevel, out string mzText)
         {
-            // Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in filterText
-            // Returns True if found and False if no match
-
-            // Populates msLevel with the number after "ms" and mzText with the text after "ms2"
 
             var intMatchTextLength = 0;
 
@@ -973,11 +972,9 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Populate mFileInfo
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True if no error, False if an error</returns>
         protected bool FillFileInfo()
         {
-            // Populates the mFileInfo structure
-            // Function returns True if no error, False if an error
 
             try
             {
@@ -1191,9 +1188,8 @@ namespace ThermoRawFileReader
         /// Number of scans in the .raw file
         /// </summary>
         /// <returns>the number of scans, or -1 if an error</returns>
-        public  int GetNumScans()
+        public int GetNumScans()
         {
-            // Returns the number of scans, or -1 if an error
 
             try
             {
@@ -2190,7 +2186,6 @@ namespace ThermoRawFileReader
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks, bool centroidData)
         {
-
 
             var dataCount = GetScanData2D(scan, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
 
