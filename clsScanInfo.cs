@@ -167,6 +167,54 @@ namespace ThermoRawFileReader
         public double ParentIonMZ { get; set; }
 
         /// <summary>
+        /// The monoisotopic parent ion m/z, as determined by the thermo software
+        /// </summary>
+        public double ParentIonMonoisotopicMZ
+        {
+            get
+            {
+                string value;
+                if (TryGetScanEvent("Monoisotopic M/Z:", out value))
+                {
+                    return Convert.ToDouble(value);
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// The monoisotopic parent ion m/z, as determined by the thermo software
+        /// </summary>
+        public double IsolationWindowTargetMZ
+        {
+            get
+            {
+                string value;
+                if (TryGetScanEvent("MS2 Isolation Width:", out value))
+                {
+                    return Convert.ToDouble(value);
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// The parent ion charge state, as determined by the thermo software
+        /// </summary>
+        public int ChargeState
+        {
+            get
+            {
+                string value;
+                if (TryGetScanEvent("Charge State:", out value))
+                {
+                    return Convert.ToInt32(value);
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>
         /// Activation type (aka activation method) as reported by the reader
         /// </summary>
         /// <value></value>
