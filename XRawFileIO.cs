@@ -133,8 +133,14 @@ namespace ThermoRawFileReader
         /// </summary>
         protected bool mLoadMSTuneInfo = true;
 
-        // Cached XRawFile object, for faster accessing
+        /// <summary>
+        /// Cached XRawFile object
+        /// </summary>
         private IRawDataPlus mXRawFile;
+
+        /// <summary>
+        /// Cached XRawFile.FileHeader object
+        /// </summary>
         private IFileHeader mXRawFileHeader;
 
         private bool mCorruptMemoryEncountered;
@@ -1228,7 +1234,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Number of scans in the .raw file
         /// </summary>
-        /// <returns>the number of scans, or -1 if an error</returns>
+        /// <returns>The number of scans, or -1 if an error</returns>
         public int GetNumScans()
         {
 
@@ -1350,9 +1356,7 @@ namespace ThermoRawFileReader
                 scanInfo.NumChannels = scanStats.NumberOfChannels;
                 scanInfo.Frequency = scanStats.Frequency;
 
-
                 var errorCode = mXRawFile.IsError;
-                // Unfortunately, .IsError() always returns 0, even if an error occurred
 
                 if (errorCode)
                 {
