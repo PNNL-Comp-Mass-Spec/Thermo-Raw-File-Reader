@@ -838,21 +838,37 @@ namespace Test_ThermoRawFileReader
 
         }
 
-        private static void RegisterEvents(XRawFileIO oReader)
+        #region "clsEventNotifier events"
+
+        private static void RegisterEvents(clsEventNotifier oProcessingClass)
         {
-            oReader.ReportError += XRawFileIO_ErrorHandler;
-            oReader.ReportWarning += XRawFileIO_WarningHandler;
+            oProcessingClass.DebugEvent += DebugEventHandler;
+            oProcessingClass.StatusEvent += StatusEventHandler;
+            oProcessingClass.ErrorEvent += ErrorEventHandler;
+            oProcessingClass.WarningEvent += WarningEventHandler;
         }
 
-        private static void XRawFileIO_ErrorHandler(string message)
+        private static void DebugEventHandler(string message)
         {
-            ConsoleMsgUtils.ShowError(message);
+            ConsoleMsgUtils.ShowDebug(message);
         }
 
-        private static void XRawFileIO_WarningHandler(string message)
+        private static void StatusEventHandler(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        private static void ErrorEventHandler(string message, Exception ex)
+        {
+            ConsoleMsgUtils.ShowError(message, ex);
+        }
+
+        private static void WarningEventHandler(string message)
         {
             ConsoleMsgUtils.ShowWarning(message);
         }
+
+        #endregion
 
     }
 }
