@@ -206,13 +206,14 @@ namespace RawFileReaderTests
 
                 using (var reader = new XRawFileIO(dataFile.FullName))
                 {
+
                     var scanCount = reader.GetNumScans();
                     Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
 
                     if (expectedMS1 + expectedMS2 == 0)
                     {
                         Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
-                        Assert.IsTrue(scanCount == 0, "ScanCount is non-zero, while we expected it to be 0");
+                        Assert.IsTrue(scanCount <= 0, "ScanCount is non-zero, while we expected it to be 0");
                     }
                     else
                     {
