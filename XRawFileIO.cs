@@ -1057,11 +1057,6 @@ namespace ThermoRawFileReader
                 if (TraceMode)
                     OnDebugEvent("Defining the model, name, description, and serial number");
 
-                mFileInfo.InstModel = null;
-                mFileInfo.InstName = null;
-                mFileInfo.InstrumentDescription = null;
-                mFileInfo.InstSerialNumber = null;
-
                 mFileInfo.InstModel = instData.Model;
                 mFileInfo.InstName = instData.Name;
                 mFileInfo.InstrumentDescription = mXRawFileHeader.FileDescription;
@@ -1079,18 +1074,13 @@ namespace ThermoRawFileReader
                 mFileInfo.ScanStart = runData.FirstSpectrum;
                 mFileInfo.ScanEnd = runData.LastSpectrum;
 
-                mFileInfo.AcquisitionDate = null;
-                mFileInfo.AcquisitionFilename = null;
-                mFileInfo.Comment1 = null;
-                mFileInfo.Comment2 = null;
-                mFileInfo.SampleName = null;
-                mFileInfo.SampleComment = null;
+                mFileInfo.AcquisitionFilename = string.Empty;
 
                 // Note that the following are typically blank
                 mFileInfo.AcquisitionDate = mXRawFileHeader.CreationDate.ToString(CultureInfo.InvariantCulture);
                 //mXRawFile.GetAcquisitionFileName(mFileInfo.AcquisitionFilename); // DEPRECATED
-                //TODO: WHERE?: mFileInfo.Comment1 = mXRawFileHeader.Comment1;
-                //TODO: WHERE?: mFileInfo.Comment2 = mXRawFileHeader.Comment2;
+                mFileInfo.Comment1 = runData.Comment1;
+                mFileInfo.Comment2 = runData.Comment2;
 
                 var sampleInfo = mXRawFile.SampleInformation;
 
