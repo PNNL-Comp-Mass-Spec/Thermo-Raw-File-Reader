@@ -173,8 +173,7 @@ namespace ThermoRawFileReader
         {
             get
             {
-                string value;
-                if (TryGetScanEvent("Monoisotopic M/Z:", out value))
+                if (TryGetScanEvent("Monoisotopic M/Z:", out var value))
                 {
                     return Convert.ToDouble(value);
                 }
@@ -189,8 +188,7 @@ namespace ThermoRawFileReader
         {
             get
             {
-                string value;
-                if (TryGetScanEvent("MS2 Isolation Width:", out value))
+                if (TryGetScanEvent("MS2 Isolation Width:", out var value))
                 {
                     return Convert.ToDouble(value);
                 }
@@ -205,8 +203,7 @@ namespace ThermoRawFileReader
         {
             get
             {
-                string value;
-                if (TryGetScanEvent("Charge State:", out value))
+                if (TryGetScanEvent("Charge State:", out var value))
                 {
                     return Convert.ToInt32(value);
                 }
@@ -219,7 +216,7 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <value></value>
         /// <returns></returns>
-        /// <remarks></remarks>
+        /// <remarks>Not applicable for MS1 scans (though will report 0=CID, which should be disregarded)</remarks>
         public ActivationTypeConstants ActivationType { get; set; }
 
         /// <summary>
