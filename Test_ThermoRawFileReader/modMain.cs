@@ -86,15 +86,14 @@ namespace Test_ThermoRawFileReader
                 TestReader(fiSourceFile.FullName, false, mTestSumming, mStartScan, mEndScan);
             }
 
-            // Uncomment the following to test the GetCollisionEnergy() function
-            // TestReader(@"..\EDRN_ERG_Spop_ETV1_50fmolHeavy_0p5ugB53A_Frac48_3Oct12_Gandalf_W33A1_16a.raw");
-
             if (mGetScanEvents)
             {
-                TestGetAllScanEvents(@"\\proto-2\UnitTest_Files\ThermoRawFileReader\QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01.raw");
+                TestGetAllScanEvents(fiSourceFile.FullName);
             }
 
             Console.WriteLine("Done");
+
+            System.Threading.Thread.Sleep(1500);
 
         }
 
@@ -643,6 +642,7 @@ namespace Test_ThermoRawFileReader
 
                     for (var scanNum = 1; scanNum <= scanCount; scanNum++)
                     {
+
                         var success = oReader.GetScanInfo(scanNum, out clsScanInfo oScanInfo);
 
                         if (!success)
@@ -689,6 +689,7 @@ namespace Test_ThermoRawFileReader
 
                 }
 
+                Console.WriteLine();
                 Console.WriteLine("{0,-38} {1,-10} {2,-20} {3}", "Event name", "Values", "Most Common Value", "Occurrence count");
                 foreach (var eventInfo in scanEventStats)
                 {
