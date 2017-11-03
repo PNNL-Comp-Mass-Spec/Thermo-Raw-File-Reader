@@ -1039,13 +1039,10 @@ namespace ThermoRawFileReader
 
                 var instData = mXRawFile.GetInstrumentData();
 
-                mFileInfo.InstFlags = null;
                 mFileInfo.InstFlags = instData.Flags;
 
-                mFileInfo.InstHardwareVersion = null;
                 mFileInfo.InstHardwareVersion = instData.HardwareVersion;
 
-                mFileInfo.InstSoftwareVersion = null;
                 mFileInfo.InstSoftwareVersion = instData.SoftwareVersion;
 
                 mFileInfo.InstMethods.Clear();
