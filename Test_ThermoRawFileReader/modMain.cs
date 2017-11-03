@@ -382,11 +382,6 @@ namespace Test_ThermoRawFileReader
                 {
                     RegisterEvents(oReader);
 
-                    foreach (var method in oReader.FileInfo.InstMethods)
-                    {
-                        Console.WriteLine(method);
-                    }
-
                     var numScans = oReader.GetNumScans();
 
                     var strCollisionEnergies = string.Empty;
