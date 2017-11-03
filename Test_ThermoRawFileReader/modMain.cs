@@ -442,6 +442,8 @@ namespace Test_ThermoRawFileReader
 
                     var msLevelStats = new Dictionary<int, int>();
 
+                    Console.WriteLine();
+                    Console.WriteLine("Reading data for scans {0} to {1}, step {2}", scanStart, scanEnd, scanStep);
 
                     for (var scanNum = scanStart; scanNum <= scanEnd; scanNum += scanStep)
                     {
@@ -599,12 +601,14 @@ namespace Test_ThermoRawFileReader
                         }
                     }
 
-
-                    Console.WriteLine();
-                    Console.WriteLine("{0,-10} {1}", "MSLevel", "Scans");
-                    foreach (var item in msLevelStats)
+                    if (mOnlyLoadMSLevelInfo)
                     {
-                        Console.WriteLine("{0, -10} {1}", item.Key, item.Value);
+                        Console.WriteLine();
+                        Console.WriteLine("{0,-10} {1}", "MSLevel", "Scans");
+                        foreach (var item in msLevelStats)
+                        {
+                            Console.WriteLine("{0, -10} {1}", item.Key, item.Value);
+                        }
                     }
                 }
 
@@ -800,7 +804,7 @@ namespace Test_ThermoRawFileReader
             {
                 foreach (var method in oReader.FileInfo.InstMethods)
                 {
-
+                    Console.WriteLine();
                     Console.WriteLine("Instrument model: " + oReader.FileInfo.InstModel);
                     Console.WriteLine("Instrument name: " + oReader.FileInfo.InstName);
                     Console.WriteLine("Instrument description: " + oReader.FileInfo.InstrumentDescription);
