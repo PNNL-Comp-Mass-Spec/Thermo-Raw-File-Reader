@@ -113,10 +113,10 @@ namespace ThermoRawFileReader
         protected readonly Dictionary<int, clsScanInfo> mCachedScanInfo = new Dictionary<int, clsScanInfo>();
 
         /// <summary>
-        /// This queue tracks the scan numbers stored in mCachedScanInfo,
+        /// This linked list tracks the scan numbers stored in mCachedScanInfo,
         /// allowing for quickly determining the oldest scan added to the cache when the cache limit is reached
         /// </summary>
-        protected readonly Queue<int> mCachedScans = new Queue<int>();
+        protected readonly LinkedList<int> mCachedScans = new LinkedList<int>();
 
         /// <summary>
         /// File info for the currently loaded .raw file
@@ -300,26 +300,13 @@ namespace ThermoRawFileReader
             {
                 // Updating an existing item
                 mCachedScanInfo.Remove(scan);
-
-                // We must fully regenerate the scan queue
-                var queuedScans = new List<int>();
-                while (mCachedScans.Count > 0)
-                {
-                    var queuedScan = mCachedScans.Dequeue();
-                    if (queuedScan != scan)
-                        queuedScans.Add(queuedScan);
-                }
-
-                foreach (var queuedScan in queuedScans)
-                {
-                    mCachedScans.Enqueue(queuedScan);
-                }
+                mCachedScans.Remove(scan);
             }
 
             RemoveCachedScanInfoOverLimit(mMaxScansToCacheInfo - 1);
 
             mCachedScanInfo.Add(scan, scanInfo);
-            mCachedScans.Enqueue(scan);
+            mCachedScans.AddLast(scan);
         }
 
         private void RemoveCachedScanInfoOverLimit(int limit)
@@ -330,7 +317,8 @@ namespace ThermoRawFileReader
             // Remove the oldest entry/entries in mCachedScanInfo
             while (mCachedScanInfo.Count > limit)
             {
-                var scan = mCachedScans.Dequeue();
+                var scan = mCachedScans.First();
+                mCachedScans.RemoveFirst();
 
                 if (mCachedScanInfo.ContainsKey(scan))
                 {
