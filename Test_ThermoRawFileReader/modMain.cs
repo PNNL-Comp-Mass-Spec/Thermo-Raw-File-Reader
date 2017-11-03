@@ -46,7 +46,10 @@ namespace Test_ThermoRawFileReader
                 return;
             }
 
-            mSourceFilePath = DEFAULT_FILE_PATH;
+            if (Path.DirectorySeparatorChar == '/')
+                mSourceFilePath = DEFAULT_FILE_PATH.Replace('\\', '/');
+            else
+                mSourceFilePath = DEFAULT_FILE_PATH;
 
             ParseCommandLineParameters(commandLineParser);
 
@@ -354,7 +357,33 @@ namespace Test_ThermoRawFileReader
 
         private static FileInfo ResolveDataFile(string rawFilePath)
         {
+            if (Path.DirectorySeparatorChar == '/')
+            {
+                if (rawFilePath.StartsWith(@"\\"))
+                {
+                    // Remove the server name from the path
+                    // For example, switch
+                    // from: \\proto-2\UnitTest_Files\ThermoRawFileReader\QC_Mam_16_01_1
+                    // to    \UnitTest_Files\ThermoRawFileReader\QC_Mam_16_01_1
+                    var slashIndex = rawFilePath.IndexOf('\\', 2);
+                    if (slashIndex > 2)
+                    {
+                        rawFilePath = rawFilePath.Substring(slashIndex).Replace('\\', '/');
+                    }
+                    else
+                    {
+                        rawFilePath = rawFilePath.Replace('\\', '/');
+                    }
+
+                }
+                else
+                {
+                    rawFilePath = rawFilePath.Replace('\\', '/');
+                }
+            }
+
             var rawFile = new FileInfo(rawFilePath);
+
 
             if (rawFile.Exists)
                 return rawFile;
@@ -366,6 +395,8 @@ namespace Test_ThermoRawFileReader
             }
 
             Console.WriteLine("File not found: " + rawFilePath);
+            Console.WriteLine("Also considered " + new FileInfo(rawFile.Name).FullName);
+
             return null;
         }
 
