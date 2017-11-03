@@ -1020,12 +1020,22 @@ namespace ThermoRawFileReader
                 mFileInfo.CreationDate = DateTime.MinValue;
                 mFileInfo.CreationDate = mXRawFileHeader.CreationDate;
 
-                // Unfortunately, .IsError() always returns 0, even if an error occurred
+                if (TraceMode)
+                    OnDebugEvent("Checking mXRawFile.IsError");
+
                 if (mXRawFile.IsError)
                     return false;
 
-                mFileInfo.CreatorID = null;
+                if (TraceMode)
+                    OnDebugEvent("mXRawFile.IsError reports true");
+
+                if (TraceMode)
+                    OnDebugEvent("Accessing mXRawFileHeader.WhoCreatedId");
+
                 mFileInfo.CreatorID = mXRawFileHeader.WhoCreatedId;
+
+                if (TraceMode)
+                    OnDebugEvent("Accessing mXRawFile.GetInstrumentData");
 
                 var instData = mXRawFile.GetInstrumentData();
 
@@ -1042,10 +1052,19 @@ namespace ThermoRawFileReader
 
                 if (mLoadMSMethodInfo)
                 {
+                    if (TraceMode)
+                        OnDebugEvent("Accessing mXRawFile.InstrumentMethodsCount");
+
                     var methodCount = mXRawFile.InstrumentMethodsCount;
+
+                    if (TraceMode)
+                        OnDebugEvent(string.Format("File has {0} methods", methodCount));
 
                     for (var methodIndex = 0; methodIndex < methodCount; methodIndex++)
                     {
+                        if (TraceMode)
+                            OnDebugEvent("Retrieving method from index " + methodIndex);
+
                         var methodText = mXRawFile.GetInstrumentMethod(methodIndex);
                         if (!string.IsNullOrWhiteSpace(methodText))
                         {
@@ -1053,6 +1072,9 @@ namespace ThermoRawFileReader
                         }
                     }
                 }
+
+                if (TraceMode)
+                    OnDebugEvent("Defining the model, name, description, and serial number");
 
                 mFileInfo.InstModel = null;
                 mFileInfo.InstName = null;
@@ -1065,6 +1087,9 @@ namespace ThermoRawFileReader
                 mFileInfo.InstSerialNumber = instData.SerialNumber;
 
                 mFileInfo.VersionNumber = mXRawFileHeader.Revision;
+
+                if (TraceMode)
+                    OnDebugEvent("Accessing mXRawFile.RunHeaderEx");
 
                 var runData = mXRawFile.RunHeaderEx;
 
@@ -2858,6 +2883,7 @@ namespace ThermoRawFileReader
         /// <returns></returns>
         public bool OpenRawFile(string filePath)
         {
+
             try
             {
                 var dataFile = new FileInfo(filePath);
@@ -2873,7 +2899,14 @@ namespace ThermoRawFileReader
                 mCachedScanInfo.Clear();
                 mCachedFilePath = string.Empty;
 
+                if (TraceMode)
+                    OnDebugEvent("Initializing RawFileReaderAdapter.FileFactory for " + dataFile.FullName);
+
                 mXRawFile = RawFileReaderAdapter.FileFactory(dataFile.FullName);
+
+                if (TraceMode)
+                    OnDebugEvent("Accessing mXRawFile.FileHeader");
+
                 mXRawFileHeader = mXRawFile.FileHeader;
 
                 if (mXRawFile.IsError)
