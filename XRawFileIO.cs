@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using PRISM;
 using ThermoFisher.CommonCore.Data;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoFisher.CommonCore.Data.Interfaces;
@@ -33,7 +34,7 @@ namespace ThermoRawFileReader
     /// Class for reading Thermo Finnigan .raw files, using the IXRawfile5 interface
     /// </summary>
     [CLSCompliant(true)]
-    public class XRawFileIO : IDisposable
+    public class XRawFileIO : clsEventNotifier, IDisposable
     {
         #region "Constants"
 
@@ -209,35 +210,45 @@ namespace ThermoRawFileReader
 
         #region "Events"
 
+#pragma warning disable 618
         /// <summary>
         /// Event handler for reporting error messages
         /// </summary>
+        [Obsolete("Subscribe to ErrorEvent")]
         public event ReportErrorEventHandler ReportError;
 
         /// <summary>
         /// Event handler delegate for reporting error messages
         /// </summary>
         /// <param name="message"></param>
+        [Obsolete("Used by obsolete event ReportError")]
         public delegate void ReportErrorEventHandler(string message);
 
         /// <summary>
         /// Event handler for reporting warning messages
         /// </summary>
+        [Obsolete("Subscribe to WarningEvent")]
         public event ReportWarningEventHandler ReportWarning;
 
         /// <summary>
         /// Event handler delegate for reporting warning messages
         /// </summary>
         /// <param name="message"></param>
+        [Obsolete("Used by obsolete event ReportWarning")]
         public delegate void ReportWarningEventHandler(string message);
+#pragma warning restore 618
 
         /// <summary>
         /// Report an error message to the error event handler
         /// </summary>
         /// <param name="message"></param>
-        protected void RaiseErrorMessage(string message)
+        /// <param name="ex">Optional exception</param>
+        protected void RaiseErrorMessage(string message, Exception ex = null)
         {
 
+            OnErrorEvent(message, ex);
+
+#pragma warning disable 618
             if (ReportError == null)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -248,6 +259,7 @@ namespace ThermoRawFileReader
             {
                 ReportError.Invoke(message);
             }
+#pragma warning restore 618
         }
 
         /// <summary>
@@ -256,6 +268,9 @@ namespace ThermoRawFileReader
         /// <param name="message"></param>
         protected void RaiseWarningMessage(string message)
         {
+            OnWarningEvent(message);
+
+#pragma warning disable 618
             if (ReportWarning == null)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -266,8 +281,9 @@ namespace ThermoRawFileReader
             {
                 ReportWarning.Invoke(message);
             }
-
+#pragma warning restore 618
         }
+
         #endregion
 
         private void CacheScanInfo(int scan, clsScanInfo scanInfo)
@@ -1081,7 +1097,7 @@ namespace ThermoRawFileReader
             catch (Exception ex)
             {
                 var msg = "Error: Exception in FillFileInfo: " + ex.Message;
-                RaiseErrorMessage(msg);
+                RaiseErrorMessage(msg, ex);
                 return false;
             }
 
@@ -1176,7 +1192,7 @@ namespace ThermoRawFileReader
             catch (Exception ex)
             {
                 var msg = "Error: Exception in GetCollisionEnergy: " + ex.Message;
-                RaiseErrorMessage(msg);
+                RaiseErrorMessage(msg, ex);
             }
 
             return collisionEnergies;
@@ -2424,13 +2440,13 @@ namespace ThermoRawFileReader
             }
             catch (AccessViolationException)
             {
-                var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
-                RaiseWarningMessage(strError);
+                var msg = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
+                RaiseWarningMessage(msg);
             }
             catch (Exception ex)
             {
-                var strError = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(strError);
+                var msg = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                RaiseErrorMessage(msg, ex);
             }
 
             massIntensityPairs = new double[0, 0];
@@ -2524,16 +2540,13 @@ namespace ThermoRawFileReader
             }
             catch (AccessViolationException)
             {
-                var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
-                RaiseWarningMessage(strError);
-
-
+                var msg = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
+                RaiseWarningMessage(msg);
             }
             catch (Exception ex)
             {
-                var strError = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(strError);
-
+                var msg = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                RaiseErrorMessage(msg, ex);
             }
 
             ftLabelData = new udtFTLabelInfoType[0];
@@ -2572,8 +2585,8 @@ namespace ThermoRawFileReader
             }
             catch (Exception ex)
             {
-                var strError = "Unable to determine the MS Level for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(strError);
+                var msg = "Unable to determine the MS Level for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                RaiseErrorMessage(msg, ex);
                 return 0;
             }
 
@@ -2666,14 +2679,13 @@ namespace ThermoRawFileReader
             }
             catch (AccessViolationException)
             {
-                var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
-                RaiseWarningMessage(strError);
+                var msg = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
+                RaiseWarningMessage(msg);
             }
             catch (Exception ex)
             {
-                var strError = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(strError);
-
+                var msg = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                RaiseErrorMessage(msg, ex);
             }
 
             massResolutionData = new udtMassPrecisionInfoType[0];
@@ -2820,16 +2832,13 @@ namespace ThermoRawFileReader
             }
             catch (AccessViolationException)
             {
-                var strError = "Unable to load data summing scans " + scanFirst + " to " + scanLast + "; possibly a corrupt .Raw file";
-                RaiseWarningMessage(strError);
-
-
+                var msg = "Unable to load data summing scans " + scanFirst + " to " + scanLast + "; possibly a corrupt .Raw file";
+                RaiseWarningMessage(msg);
             }
             catch (Exception ex)
             {
-                var strError = "Unable to load data summing scans " + scanFirst + " to " + scanLast + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(strError);
-
+                var msg = "Unable to load data summing scans " + scanFirst + " to " + scanLast + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                RaiseErrorMessage(msg, ex);
             }
 
             massIntensityPairs = new double[0, 0];
@@ -2887,7 +2896,7 @@ namespace ThermoRawFileReader
             }
             catch (Exception ex)
             {
-                RaiseErrorMessage(string.Format("Exception opening {0}: {1}", filePath, ex.Message));
+                RaiseErrorMessage(string.Format("Exception opening {0}: {1}", filePath, ex.Message), ex);
                 mCachedFilePath = string.Empty;
                 return false;
             }
@@ -2983,7 +2992,7 @@ namespace ThermoRawFileReader
             catch (Exception ex)
             {
                 var msg = "Error: Exception in GetCollisionEnergyUnnormalized: " + ex.Message;
-                RaiseErrorMessage(msg);
+                RaiseErrorMessage(msg, ex);
             }
 
             return collisionEnergies;

@@ -1,0 +1,17 @@
+1) Create folder C:\NuPkg
+2) Copy the desired .nupkg file to that folder, for example:
+	4.0.26\Windows_MacOS\ThermoFisher.CommonCore.RawFileReader.4.0.26.nupkg
+3) In visual studio, go to Tools->NuGet Package Manager->Package Manager Settings
+4) Choose Package Sources
+5) Click the green Plus sign to add a new source
+6) Name it "Local Packages" and define the source as C:\NuPkg
+7) Click Update 
+8) Click OK to close the dialog
+
+In the solution that you want to use this local package
+1) Choose Tools->NuGet Package Manager->Manage Packages for Solution
+2) Change the package source to Local Packages
+3) The package reference must be stored in file packages.config
+	- It cannot be stored in the .csproj file
+
+
