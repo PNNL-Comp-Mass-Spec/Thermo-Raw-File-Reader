@@ -260,7 +260,7 @@ namespace ThermoRawFileReader
             OnWarningEvent(message);
 
 #pragma warning disable 618
-            ReportWarning?.Invoke(message);           
+            ReportWarning?.Invoke(message);
 #pragma warning restore 618
         }
 
@@ -304,12 +304,12 @@ namespace ThermoRawFileReader
         private static string CapitalizeCollisionMode(string collisionMode)
         {
 
-            if ((string.Equals(collisionMode, "EThcD", StringComparison.InvariantCultureIgnoreCase)))
+            if (string.Equals(collisionMode, "EThcD", StringComparison.InvariantCultureIgnoreCase))
             {
                 return "EThcD";
             }
 
-            if ((string.Equals(collisionMode, "ETciD", StringComparison.InvariantCultureIgnoreCase)))
+            if (string.Equals(collisionMode, "ETciD", StringComparison.InvariantCultureIgnoreCase))
             {
                 return "ETciD";
             }
@@ -841,7 +841,7 @@ namespace ThermoRawFileReader
 
                     parentIons.Add(parentIonInfo);
 
-                    if (!multiplexedMSnEnabled || (parentIons.Count == 1))
+                    if (!multiplexedMSnEnabled || parentIons.Count == 1)
                     {
                         bestParentIon = parentIonInfo;
                     }
@@ -2221,7 +2221,7 @@ namespace ThermoRawFileReader
                     // we have observed a few cases in certain scans of certain datasets that points with
                     // similar m/z values are swapped and ths slightly out of order
                     // The following if statement checks for this
-                    if ((intIndex > 0 && mzList[intIndex] < mzList[intIndex - 1]))
+                    if (intIndex > 0 && mzList[intIndex] < mzList[intIndex - 1])
                     {
                         sortRequired = true;
                     }
