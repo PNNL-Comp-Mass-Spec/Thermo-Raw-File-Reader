@@ -127,7 +127,9 @@ namespace ThermoRawFileReader
         /// </summary>
         protected bool mLoadMSTuneInfo = true;
 
-        // Cached XRawFile object, for faster accessing
+        /// <summary>
+        /// Cached XRawFile object, for faster accessing
+        /// </summary>
         private IXRawfile5 mXRawFile;
 
         private bool mCorruptMemoryEncountered;
@@ -1211,7 +1213,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Number of scans in the .raw file
         /// </summary>
-        /// <returns>the number of scans, or -1 if an error</returns>
+        /// <returns>The number of scans, or -1 if an error</returns>
         public int GetNumScans()
         {
 
@@ -1348,8 +1350,8 @@ namespace ThermoRawFileReader
                 scanInfo.Frequency = frequency;
 
                 mXRawFile.IsError(ref errorCode);
-                // Unfortunately, .IsError() always returns 0, even if an error occurred
 
+                // Unfortunately, .IsError() always returns 0, even if an error occurred
                 if (errorCode != 0)
                 {
                     CacheScanInfo(scan, scanInfo);
@@ -2072,13 +2074,13 @@ namespace ThermoRawFileReader
             // A controller is typically the MS, UV, analog, etc.
             // See ControllerTypeConstants
 
-            var intResult = 0;
+            var errorCode = 0;
 
             mXRawFile.SetCurrentController((int)ControllerTypeConstants.MS, 1);
-            mXRawFile.IsError(ref intResult);
-            // Unfortunately, .IsError() always returns 0, even if an error occurred
+            mXRawFile.IsError(ref errorCode);
 
-            return intResult == 0;
+            // Unfortunately, .IsError() always returns 0, even if an error occurred
+            return errorCode == 0;
         }
 
         /// <summary>
@@ -2819,7 +2821,6 @@ namespace ThermoRawFileReader
         /// <returns></returns>
         public bool OpenRawFile(string filePath)
         {
-            var intResult = 0;
 
             try
             {
@@ -2854,10 +2855,12 @@ namespace ThermoRawFileReader
                     OnDebugEvent("Opening " + dataFile.FullName);
 
                 mXRawFile.Open(dataFile.FullName);
-                mXRawFile.IsError(ref intResult);
-                // Unfortunately, .IsError() always returns 0, even if an error occurred
 
-                if (intResult != 0)
+                var errorCode = 0;
+                mXRawFile.IsError(ref errorCode);
+
+                // Unfortunately, .IsError() always returns 0, even if an error occurred
+                if (errorCode != 0)
                     return false;
 
                 mCachedFilePath = filePath;
