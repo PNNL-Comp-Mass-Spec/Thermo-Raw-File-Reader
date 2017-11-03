@@ -27,6 +27,7 @@ namespace Test_ThermoRawFileReader
         private static bool mLoadCollisionEnergies;
         private static bool mOnlyLoadMSLevelInfo;
         private static bool mTestScanFilters;
+        private static bool mTraceMode;
 
         public static void Main()
         {
@@ -301,6 +302,8 @@ namespace Test_ThermoRawFileReader
 
             mTestScanFilters = commandLineParser.IsParameterPresent("TestFilters");
 
+            mTraceMode = commandLineParser.IsParameterPresent("Trace");
+
         }
 
         private static void ShowError(string message, Exception ex = null)
@@ -320,6 +323,7 @@ namespace Test_ThermoRawFileReader
             Console.WriteLine("Program syntax:" + Environment.NewLine + Path.GetFileName(assemblyNameLocation));
             Console.WriteLine(" InputFilePath.raw [/GetFilters] [/Centroid] [/Sum] [/Start:Scan] [/End:Scan]");
             Console.WriteLine(" [/ScanInfo:IntervalScans] [/NoScanData] [/NoScanEvents] [/NoCE] [/MSLevelOnly]");
+            Console.WriteLine(" [/Trace]");
 
             Console.WriteLine("Running this program without any parameters it will process file " + DEFAULT_FILE_PATH);
             Console.WriteLine();
@@ -343,6 +347,8 @@ namespace Test_ThermoRawFileReader
             Console.WriteLine();
             Console.WriteLine("Use /MSLevelOnly to only load MS levels using GetMSLevel");
             Console.WriteLine("Use /TestFilters to test the parsing of a set of standard scan filters");
+            Console.WriteLine();
+            Console.WriteLine("Use /Trace to display additional debug messages");
 
         }
 
@@ -372,7 +378,7 @@ namespace Test_ThermoRawFileReader
                 if (rawFile == null)
                     return;
 
-                using (var oReader = new XRawFileIO(rawFile.FullName))
+                using (var oReader = new XRawFileIO(rawFile.FullName, mTraceMode))
                 {
                     RegisterEvents(oReader);
 
