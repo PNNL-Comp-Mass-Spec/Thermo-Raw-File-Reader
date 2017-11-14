@@ -2861,7 +2861,7 @@ namespace ThermoRawFileReader
                 if (mFileInfo.ScanStart == 0 && mFileInfo.ScanEnd == 0 && mFileInfo.VersionNumber == 0 &&
                     Math.Abs(mFileInfo.MassResolution) < double.Epsilon && string.IsNullOrWhiteSpace(mFileInfo.InstModel))
                 {
-                    OnWarningEvent("File did not load correctly; ScanStart, ScanEnd, VersionNumber, and MassResolution are all 0");
+                    OnErrorEvent("File did not load correctly; ScanStart, ScanEnd, VersionNumber, and MassResolution are all 0");
                     mFileInfo.CorruptFile = true;
                     mCachedFilePath = string.Empty;
                     return false;
