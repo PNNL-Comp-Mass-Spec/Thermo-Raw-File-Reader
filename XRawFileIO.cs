@@ -2222,11 +2222,12 @@ namespace ThermoRawFileReader
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks, bool centroidData)
         {
-
-            var dataCount = GetScanData2D(scan, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
+            var dataCount = 0;
 
             try
             {
+                var data = ReadScanData(scan, maxNumberOfPeaks, centroidData);
+                dataCount = data.Masses.Length;
                 if (dataCount <= 0)
                 {
                     mzList = new double[0];
@@ -2234,49 +2235,22 @@ namespace ThermoRawFileReader
                     return 0;
                 }
 
-                if (massIntensityPairs.GetUpperBound(1) + 1 < dataCount)
-                {
-                    dataCount = massIntensityPairs.GetUpperBound(1) + 1;
-                }
+                mzList = data.Masses;
+                intensityList = data.Intensities;
 
-                mzList = new double[dataCount];
-                intensityList = new double[dataCount];
-                var sortRequired = false;
-
-                for (var intIndex = 0; intIndex <= dataCount - 1; intIndex++)
-                {
-                    mzList[intIndex] = massIntensityPairs[0, intIndex];
-                    intensityList[intIndex] = massIntensityPairs[1, intIndex];
-
-                    // Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z,
-                    // we have observed a few cases in certain scans of certain datasets that points with
-                    // similar m/z values are swapped and ths slightly out of order
-                    // The following if statement checks for this
-                    if (intIndex > 0 && mzList[intIndex] < mzList[intIndex - 1])
-                    {
-                        sortRequired = true;
-                    }
-
-                }
-
-                if (sortRequired)
-                {
-                    Array.Sort(mzList, intensityList);
-                }
-
+                return dataCount;
             }
             catch
             {
                 mzList = new double[0];
                 intensityList = new double[0];
-                dataCount = -1;
+                dataCount = 0;
 
                 var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
                 RaiseWarningMessage(strError);
             }
 
             return dataCount;
-
         }
 
         /// <summary>
@@ -2316,6 +2290,54 @@ namespace ThermoRawFileReader
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public int GetScanData2D(int scan, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
+            var dataCount = 0;
+
+            try
+            {
+                var data = ReadScanData(scan, maxNumberOfPeaks, centroidData);
+                dataCount = data.Masses.Length;
+                if (dataCount <= 0)
+                {
+                    massIntensityPairs = new double[0, 0];
+                    return 0;
+                }
+
+                massIntensityPairs = new double[2, dataCount];
+                /*
+                // A more "black magic" version of doing the below array copy:
+                Buffer.BlockCopy(data.Masses, 0, massIntensityPairs, 0, dataCount * sizeof(double));
+                Buffer.BlockCopy(data.Intensities, 0, massIntensityPairs, dataCount * sizeof(double), dataCount * sizeof(double));
+                 */
+                for (var i = 0; i < dataCount; i++)
+                {
+                    // m/z
+                    massIntensityPairs[0, i] = data.Masses[i];
+                    // Intensity
+                    massIntensityPairs[1, i] = data.Intensities[i];
+                }
+
+                return dataCount;
+            }
+            catch (Exception ex)
+            {
+                var msg = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                RaiseErrorMessage(msg, ex);
+            }
+
+            massIntensityPairs = new double[0, 0];
+            return 0;
+        }
+
+        /// <summary>
+        /// Obtain the mass and intensity for the specified scan
+        /// </summary>
+        /// <param name="scan"></param>
+        /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
+        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
+        /// <returns>The scan data container, or null if an error</returns>
+        [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
+        private ISimpleScanAccess ReadScanData(int scan, int maxNumberOfPeaks, bool centroidData)
+        {
 
             // Note that we're using function attribute HandleProcessCorruptedStateExceptions
             // to force .NET to properly catch critical errors thrown by the XRawfile DLL
@@ -2338,22 +2360,14 @@ namespace ThermoRawFileReader
             {
                 if (mXRawFile == null)
                 {
-                    massIntensityPairs = new double[0, 0];
-                    return -1;
+                    return null;
                 }
 
                 // Make sure the MS controller is selected
                 if (!SetMSController())
                 {
-                    massIntensityPairs = new double[0, 0];
-                    return -1;
+                    return null;
                 }
-
-                // Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
-                var strFilter = string.Empty;
-
-                if (maxNumberOfPeaks < 0)
-                    maxNumberOfPeaks = 0;
 
                 if (centroidData && scanInfo.IsCentroided)
                 {
@@ -2361,44 +2375,10 @@ namespace ThermoRawFileReader
                     centroidData = false;
                 }
 
-                int dataCount;
                 if (centroidData && scanInfo.IsFTMS)
                 {
                     // Centroiding is enabled, and the dataset was acquired on an Orbitrap, Exactive, or FTMS instrument
-                    var data = mXRawFile.GetSimplifiedCentroids(scan);
-
-                    dataCount = data.Masses.Length;
-                    //if (maxNumberOfPeaks > 0)
-                    //{
-                    //    dataCount = Math.Min(dataCount, maxNumberOfPeaks);
-                    //}
-
-                    if (dataCount > 0)
-                    {
-                        massIntensityPairs = new double[2, dataCount];
-                        var masses = data.Masses;
-                        var intensities = data.Intensities;
-
-                        //if (maxNumberOfPeaks > 0)
-                        //{
-                        //    Array.Sort(intensities, masses);
-                        //    Array.Reverse(intensities);
-                        //    Array.Reverse(masses);
-                        //    Array.Sort(masses, intensities, 0, dataCount);
-                        //}
-
-                        for (var i = 0; i < dataCount; i++)
-                        {
-                            // m/z
-                            massIntensityPairs[0, i] = masses[i];
-                            // Intensity
-                            massIntensityPairs[1, i] = intensities[i];
-                        }
-                    }
-                    else
-                    {
-                        massIntensityPairs = new double[0, 0];
-                    }
+                    return mXRawFile.GetSimplifiedCentroids(scan);
                 }
                 else
                 {
@@ -2414,44 +2394,32 @@ namespace ThermoRawFileReader
 
                     // TODO: Can we get centroided Ion trap data? does it matter?: mXRawFile.GetMassListFromScanNum(ref scan, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, maxNumberOfPeaks, centroidResultFlag, centroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
                     var data = mXRawFile.GetSimplifiedScan(scan);
-
-                    dataCount = data.Masses.Length;
                     if (maxNumberOfPeaks > 0)
                     {
-                        dataCount = Math.Min(dataCount, maxNumberOfPeaks);
-                    }
+                        // Takes the maxNumberOfPeaks highest intensities from scan, and sorts them (and their respective mass) by mass into the first maxNumberOfPeaks positions in the arrays.
+                        var sortCount = Math.Min(maxNumberOfPeaks, data.Masses.Length);
+                        Array.Sort(data.Intensities, data.Masses);
+                        Array.Reverse(data.Intensities);
+                        Array.Reverse(data.Masses);
+                        Array.Sort(data.Masses, data.Intensities, 0, sortCount);
 
-                    if (dataCount > 0)
-                    {
-                        massIntensityPairs = new double[2, dataCount];
-                        var masses = data.Masses;
-                        var intensities = data.Intensities;
-
-                        if (maxNumberOfPeaks > 0)
-                        {
-                            Array.Sort(intensities, masses);
-                            Array.Reverse(intensities);
-                            Array.Reverse(masses);
-                            Array.Sort(masses, intensities, 0, dataCount);
-                        }
-
-                        for (var i = 0; i < dataCount; i++)
-                        {
-                            // m/z
-                            massIntensityPairs[0, i] = masses[i];
-                            // Intensity
-                            massIntensityPairs[1, i] = intensities[i];
-                        }
+                        var masses = new double[sortCount];
+                        var intensities = new double[sortCount];
+                        Array.Copy(data.Masses, masses, sortCount);
+                        Array.Copy(data.Intensities, intensities, sortCount);
+                        data = new SimpleScanAccessTruncated(masses, intensities);
                     }
                     else
                     {
-                        massIntensityPairs = new double[0, 0];
+                        // Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z,
+                        // we have observed a few cases in certain scans of certain datasets that points with
+                        // similar m/z values are swapped and ths slightly out of order
+
+                        Array.Sort(data.Masses, data.Intensities);
                     }
 
+                    return data;
                 }
-
-                return dataCount;
-
             }
             catch (AccessViolationException)
             {
@@ -2464,9 +2432,19 @@ namespace ThermoRawFileReader
                 RaiseErrorMessage(msg, ex);
             }
 
-            massIntensityPairs = new double[0, 0];
-            return -1;
+            return null;
+        }
 
+        private class SimpleScanAccessTruncated : ISimpleScanAccess
+        {
+            public double[] Masses { get; }
+            public double[] Intensities { get; }
+
+            public SimpleScanAccessTruncated(double[] masses, double[] intensities)
+            {
+                Masses = masses;
+                Intensities = intensities;
+            }
         }
 
         /// <summary>
