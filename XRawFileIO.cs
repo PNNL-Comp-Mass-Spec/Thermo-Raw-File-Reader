@@ -1364,7 +1364,6 @@ namespace ThermoRawFileReader
                     if (!mCorruptMemoryEncountered)
                     {
                         // Retrieve the additional parameters for this scan (including Scan Event)
-                        // TODO: Verify: mXRawFile.GetTrailerExtraForScanNum(scan, ref objLabels, ref objValues, ref arrayCount);
                         var data = mXRawFile.GetTrailerExtraInformation(scan);
                         arrayCount = data.Length;
                         objLabels = data.Labels;
@@ -1439,7 +1438,6 @@ namespace ThermoRawFileReader
                 // Parse out the parent ion m/z for fragmentation scans
                 // Must set filterText to Nothing prior to calling .GetFilterForScanNum()
                 var filterText = mXRawFile.GetFilterForScanNumber(scan).ToString();
-                // TODO: Verify: mXRawFile.GetFilterForScanNum(scan, ref filterText);
 
                 scanInfo.FilterText = string.Copy(filterText);
 
@@ -2633,7 +2631,6 @@ namespace ThermoRawFileReader
                 }
 
                 //object massResolutionDataList = null;
-                // TODO: Verify: mXRawFile.GetMassPrecisionEstimate(scan, ref massResolutionDataList, ref dataCount);
                 var mpe = new PrecisionEstimate
                 {
                     Rawfile = mXRawFile,
