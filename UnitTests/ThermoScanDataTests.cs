@@ -1110,7 +1110,6 @@ namespace RawFileReaderTests
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165)]
         public void TestGetScanDataSumScans(string rawFileName, int scanStart, int scanEnd)
         {
-            Assert.Ignore();
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
 
             // Keys in this dictionary are the start scan for summing
@@ -1134,9 +1133,11 @@ namespace RawFileReaderTests
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
             file2Data[16121].Add("0_False",  "26057  346.518   0.0E+0  753.312   8.7E+0  FTMS + p NSI Full ms [350.0000-1550.0000]");
-            file2Data[16121].Add("0_True",   "  818  351.230   3.2E+5  820.778   2.3E+5  FTMS + p NSI Full ms [350.0000-1550.0000]");
+          //file2Data[16121].Add("0_True",   "  818  351.230   3.2E+5  820.778   2.3E+5  FTMS + p NSI Full ms [350.0000-1550.0000]"); // MSFileReader number; bad centroids
+            file2Data[16121].Add("0_True",   " 1786  351.231   9.5E+4  758.261   1.4E+5  FTMS + p NSI Full ms [350.0000-1550.0000]");
             file2Data[16121].Add("50_False", "   50  503.553   1.2E+7  521.201   1.6E+7  FTMS + p NSI Full ms [350.0000-1550.0000]");
-            file2Data[16121].Add("50_True",  "   50  371.885   2.6E+7  650.717   9.8E+6  FTMS + p NSI Full ms [350.0000-1550.0000]");
+          //file2Data[16121].Add("50_True",  "   50  371.885   2.6E+7  650.717   9.8E+6  FTMS + p NSI Full ms [350.0000-1550.0000]"); // MSFileReader number; bad centroids
+            file2Data[16121].Add("50_True",  "   50  371.733   4.4E+6  691.981   9.9E+6  FTMS + p NSI Full ms [350.0000-1550.0000]");
 
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
 

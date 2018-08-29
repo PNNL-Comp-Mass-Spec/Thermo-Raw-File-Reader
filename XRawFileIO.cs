@@ -2719,15 +2719,11 @@ namespace ThermoRawFileReader
         /// <returns>The number of data points</returns>
         /// <remarks></remarks>
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
-        [Obsolete("Not used internally, and can't get comparable results from the NuGet Thermo DLLs")]
         public int GetScanDataSumScans(int scanFirst, int scanLast, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
 
             // Note that we're using function attribute HandleProcessCorruptedStateExceptions
             // to force .NET to properly catch critical errors thrown by the XRawfile DLL
-
-#pragma warning disable 219
-            double centroidPeakWidth = 0;
 
             try
             {
@@ -2774,40 +2770,14 @@ namespace ThermoRawFileReader
                     scanLast = mFileInfo.ScanEnd;
                 }
 
-                var strFilter = string.Empty;
-
-                // Could use this to filter the data returned from the scan; must use one of the filters defined in the file (see .GetFilters())
-
                 if (maxNumberOfPeaks < 0)
                     maxNumberOfPeaks = 0;
 
-                // Warning: the masses reported by GetAverageMassList when centroiding are not properly calibrated and thus could be off by 0.3 m/z or more
-                // For an example, see function GetScanData2D above
+                // Filter scans to only average/sum scans with filter strings similar to the first scan
+                // Without this, AverageScansInScanRange averages/sums all scans in the range, regardless of it being appropriate (i.e., it will sum MS1 and MS2 scans together)
+                var filter = mXRawFile.GetFilterForScanNumber(scanFirst);
 
-                int intCentroidResult;
-                if (centroidData)
-                {
-                    // Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
-                    intCentroidResult = 1;
-                }
-                else
-                {
-                    // Return the data as-is
-                    intCentroidResult = 0;
-                }
-
-                var backgroundScan1First = 0;
-                var backgroundScan1Last = 0;
-                var backgroundScan2First = 0;
-                var backgroundScan2Last = 0;
-
-                object massIntensityPairsList = null;
-                object peakList = null;
-
-                // TODO: Verify: mXRawFile.GetAverageMassList(ref scanFirst, ref scanLast, ref backgroundScan1First, ref backgroundScan1Last, ref backgroundScan2First, ref backgroundScan2Last, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, maxNumberOfPeaks,
-                // TODO: Verify:         intCentroidResult, ref centroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
-
-                var data = mXRawFile.AverageScansInScanRange(scanFirst, scanLast, strFilter, null, new FtAverageOptions());
+                var data = mXRawFile.AverageScansInScanRange(scanFirst, scanLast, filter);
                 data.PreferCentroids = centroidData;
 
                 var masses = data.PreferredMasses;
@@ -2827,11 +2797,11 @@ namespace ThermoRawFileReader
                         Array.Sort(intensities, masses);
                         Array.Reverse(intensities);
                         Array.Reverse(masses);
-                        Array.Sort(masses, intensities, 0, maxNumberOfPeaks);
+                        Array.Sort(masses, intensities, 0, dataCount);
                     }
 
                     massIntensityPairs = new double[2, dataCount];
-                    for (var i = 0; i < masses.Length; i++)
+                    for (var i = 0; i < dataCount; i++)
                     {
                         massIntensityPairs[0, i] = masses[i];
                         massIntensityPairs[1, i] = intensities[i];
@@ -2858,7 +2828,6 @@ namespace ThermoRawFileReader
 
             massIntensityPairs = new double[0, 0];
             return -1;
-#pragma warning restore 219
         }
 
         /// <summary>
