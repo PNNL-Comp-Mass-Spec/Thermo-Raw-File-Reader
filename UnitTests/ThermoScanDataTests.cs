@@ -300,6 +300,106 @@ namespace RawFileReaderTests
 
         }
 
+
+        [Test]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1, 5000, 23)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 1, 75000, 127)]
+        [TestCase("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08.raw", 1, 8000, 29)]
+        [TestCase("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 1, 8000, 27)]
+        [TestCase("Lewy2_19Ct1_2Nov13_Samwise_13-07-28.raw", 1, 44000, 127)]
+        public void TestDataIsSortedByMz(string rawFileName, int scanStart, int scanEnd, int scanStep)
+        {
+
+            var dataFile = GetRawDataFile(rawFileName);
+
+            using (var reader = new XRawFileIO(dataFile.FullName))
+            {
+
+                for (var iteration = 1; iteration <= 4; iteration++)
+                {
+                    int maxNumberOfPeaks;
+                    bool centroidData;
+
+                    switch (iteration)
+                    {
+                        case 1:
+                            maxNumberOfPeaks = 0;
+                            centroidData = false;
+                            break;
+                        case 2:
+                            maxNumberOfPeaks = 0;
+                            centroidData = true;
+                            break;
+                        case 3:
+                            maxNumberOfPeaks = 50;
+                            centroidData = false;
+                            break;
+                        default:
+                            maxNumberOfPeaks = 50;
+                            centroidData = true;
+                            break;
+                    }
+
+                    if (iteration == 1)
+                    {
+                        Console.WriteLine("Scan data for {0}", dataFile.Name);
+                        Console.WriteLine("{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10} {6,-8} {7,-10} {8,-8}  {9}",
+                                          "Scan", "Max#", "Centroid", "MzCount", "IntCount",
+                                          "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+                    }
+
+                    if (scanEnd > reader.FileInfo.ScanEnd)
+                        scanEnd = reader.FileInfo.ScanEnd;
+
+                    if (scanStep < 1)
+                        scanStep = 1;
+
+                    var statsInterval = (int)Math.Floor((scanEnd - scanStart) / (double)scanStep / 10);
+                    var scansProcessed = 0;
+
+                    for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber += scanStep)
+                    {
+
+                        var dataPointsRead = reader.GetScanData(scanNumber, out var mzList, out var intensityList, maxNumberOfPeaks, centroidData);
+
+                        var unsortedMzValues = 0;
+
+                        for (var i = 0; i < dataPointsRead - 1; i++)
+                        {
+                            if (mzList[i] > mzList[i + 1])
+                                unsortedMzValues++;
+                        }
+
+                        Assert.AreEqual(0, unsortedMzValues, "Scan {0} has {1} m/z values not sorted properly", scanNumber, unsortedMzValues);
+
+                        scansProcessed++;
+                        if (scansProcessed % statsInterval == 0)
+                        {
+                            reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+
+                            if (mzList.Length > 0)
+                            {
+                                var midIndex = (int)Math.Floor(mzList.Length / 2.0);
+
+                                Console.WriteLine("{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10:0.0000} {6,-8:0.0} {7,-10:0.0000} {8,-8:0.0}  {9}",
+                                                  scanNumber, maxNumberOfPeaks, centroidData, mzList.Length, intensityList.Length,
+                                                  mzList[0], intensityList[0], mzList[midIndex], intensityList[midIndex], scanInfo.FilterText);
+                            }
+                            else
+                            {
+                                Console.WriteLine("{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10} {6,-8} {7,-10} {8,-8}  {9}",
+                                                  scanNumber, maxNumberOfPeaks, centroidData, mzList.Length, intensityList.Length,
+                                                  "n/a", "n/a", "n/a", "n/a", scanInfo.FilterText);
+                            }
+                        }
+
+                    }
+
+                }
+            }
+
+        }
+
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 3316)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 71147)]
@@ -1747,6 +1847,14 @@ namespace RawFileReaderTests
                 }
             }
 
+        }
+
+        private void AddEmptyDictionaries(IDictionary<int, Dictionary<string, string>> fileData, int scanStart, int scanEnd)
+        {
+            for (var scanNum = scanStart; scanNum <= scanEnd; scanNum++)
+            {
+                fileData.Add(scanNum, new Dictionary<string, string>());
+            }
         }
 
         private void AddExpectedTupleAndCount(
