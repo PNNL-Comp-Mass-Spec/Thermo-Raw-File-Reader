@@ -14,25 +14,41 @@ using ThermoFisher.CommonCore.RawFileReader;
 using ThermoFisher.CommonCore.BackgroundSubtraction;
 using ThermoFisher.CommonCore.Data.FilterEnums;
 
-// These functions utilize MSFileReader.XRawfile2.dll to extract scan header info and
-// raw mass spectrum info from Finnigan LCQ, LTQ, and LTQ-FT files
+// The methods in this class use ThermoFisher.CommonCore.Data.dll
+// and related DLLs to extract scan header info and mass spec data (m/z and intensity lists)
+// from Thermo .Raw files (LTQ, LTQ-FT, Orbitrap, Exactive, TSQ, etc.)
 //
-// Required Dlls: fileio.dll, fregistry.dll, and MSFileReader.XRawfile2.dll
-// DLLs obtained from: Thermo software named "MSFileReader2.2"
-// Download link: http://sjsupport.thermofinnigan.com/public/detail.asp?id=703
+// Required DLLs:
+//   ThermoFisher.CommonCore.BackgroundSubtraction.dll
+//   ThermoFisher.CommonCore.Data.dll
+//   ThermoFisher.CommonCore.MassPrecisionEstimator.dll
+//   ThermoFisher.CommonCore.RawFileReader.dll
 //
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
-// Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
+// As described at http://planetorbitrap.com/rawfilereader#.W5BAoOhKjdM,
+// the DLLs can be obtained by contacting Jim Shofstahl via email (jim.Shofstahl@thermofisher.com)
 //
-// Switched from XRawFile2.dll to MSFileReader.XRawfile2.dll in March 2012 (that DLL comes with ProteoWizard)
-//
-// If having troubles reading files, install MS File Reader 3.0 SP3
-// Download link: https://thermo.flexnetoperations.com/control/thmo/login
 
+// -------------------------------------------------------------------------------
+// Written by Matthew Monroe and Bryson Gibbons for the Department of Energy (PNNL, Richland, WA)
+// Originally used XRawfile2.dll (in November 2004)
+// Switched to MSFileReader.XRawfile2.dll in March 2012
+// Switched to ThermoFisher.CommonCore DLLs in 2018
+//
+// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
+// Website: https://omics.pnl.gov/ or https://www.pnnl.gov/sysbio/ or https://panomics.pnnl.gov/
+// -------------------------------------------------------------------------------
+//
+// Licensed under the 2-Clause BSD License; you may not use this file except
+// in compliance with the License.  You may obtain a copy of the License at
+// https://opensource.org/licenses/BSD-2-Clause
+//
+// Copyright 2018 Battelle Memorial Institute
+
+// ReSharper disable UnusedMember.Global
 namespace ThermoRawFileReader
 {
     /// <summary>
-    /// Class for reading Thermo Finnigan .raw files, using the IXRawfile5 interface
+    /// Class for reading Thermo .raw files
     /// </summary>
     [CLSCompliant(true)]
     public class XRawFileIO : clsEventNotifier, IDisposable
@@ -135,12 +151,12 @@ namespace ThermoRawFileReader
         protected bool mLoadMSTuneInfo = true;
 
         /// <summary>
-        /// Cached XRawFile object
+        /// Reader that implements ThermoFisher.CommonCore.Data.Interfaces.IRawDataPlus
         /// </summary>
         private IRawDataPlus mXRawFile;
 
         /// <summary>
-        /// Cached XRawFile.FileHeader object
+        /// Cached file header
         /// </summary>
         private IFileHeader mXRawFileHeader;
 
@@ -2930,11 +2946,11 @@ namespace ThermoRawFileReader
         #region "Obsolete Functions"
 
         /// <summary>
-        /// Return un-normalized collision energies via call mXRawFile.GetCollisionEnergyForScanNum
+        /// Return un-normalized collision energies via call IScanFilter.GetEnergy
         /// </summary>
         /// <param name="scan"></param>
         /// <returns></returns>
-        [Obsolete("The collision energies reported by mXRawFile.GetCollisionEnergyForScanNum are not normalized and are thus not very useful")]
+        [Obsolete("The collision energies reported by IScanFilter.GetEnergy are not normalized and are thus not very useful")]
         public List<double> GetCollisionEnergyUnnormalized(int scan)
         {
             var collisionEnergies = new List<double>();
