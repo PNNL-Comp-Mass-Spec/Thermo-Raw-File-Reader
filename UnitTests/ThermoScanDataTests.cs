@@ -771,6 +771,8 @@ namespace RawFileReaderTests
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165)]
+        [TestCase("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08.raw", 3101, 3102)]
+        [TestCase("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 4371, 4373)]
         public void TestGetScanData(string rawFileName, int scanStart, int scanEnd)
         {
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
@@ -786,29 +788,29 @@ namespace RawFileReaderTests
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
-            file1Data[1513].Add("0_False",  " 851      851  409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
-            file1Data[1514].Add("0_False",  " 109      109  281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
-            file1Data[1515].Add("0_False",  " 290      290  335.798   3.8E+4 1034.194   1.6E+4  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
-            file1Data[1516].Add("0_False",  " 154      154  461.889   7.3E+3 1203.274   2.6E+3  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
-            file1Data[1517].Add("0_False",  " 887      887  420.016   9.7E+5 1232.206   8.0E+5  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1513].Add("0_False",  "  851      851  409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("0_False",  "  109      109  281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1515].Add("0_False",  "  290      290  335.798   3.8E+4 1034.194   1.6E+4  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
+            file1Data[1516].Add("0_False",  "  154      154  461.889   7.3E+3 1203.274   2.6E+3  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
+            file1Data[1517].Add("0_False",  "  887      887  420.016   9.7E+5 1232.206   8.0E+5  + c ESI Full ms [400.00-2000.00]");
 
-            file1Data[1513].Add("0_True",   " 851      851  409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
-            file1Data[1514].Add("0_True",   " 109      109  281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
-            file1Data[1515].Add("0_True",   " 290      290  335.798   3.8E+4 1034.194   1.6E+4  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
-            file1Data[1516].Add("0_True",   " 154      154  461.889   7.3E+3 1203.274   2.6E+3  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
-            file1Data[1517].Add("0_True",   " 887      887  420.016   9.7E+5 1232.206   8.0E+5  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1513].Add("0_True",   "  851      851  409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("0_True",   "  109      109  281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1515].Add("0_True",   "  290      290  335.798   3.8E+4 1034.194   1.6E+4  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
+            file1Data[1516].Add("0_True",   "  154      154  461.889   7.3E+3 1203.274   2.6E+3  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
+            file1Data[1517].Add("0_True",   "  887      887  420.016   9.7E+5 1232.206   8.0E+5  + c ESI Full ms [400.00-2000.00]");
 
-            file1Data[1513].Add("50_False", "  50       50  747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
-            file1Data[1514].Add("50_False", "  50       50  281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
-            file1Data[1515].Add("50_False", "  50       50  353.590   9.7E+4 1157.949   3.6E+5  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
-            file1Data[1516].Add("50_False", "  50       50  461.889   7.3E+3 1146.341   1.4E+4  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
-            file1Data[1517].Add("50_False", "  50       50  883.347   8.9E+6 1206.792   5.5E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1513].Add("50_False", "   50       50  747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("50_False", "   50       50  281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1515].Add("50_False", "   50       50  353.590   9.7E+4 1157.949   3.6E+5  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
+            file1Data[1516].Add("50_False", "   50       50  461.889   7.3E+3 1146.341   1.4E+4  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
+            file1Data[1517].Add("50_False", "   50       50  883.347   8.9E+6 1206.792   5.5E+6  + c ESI Full ms [400.00-2000.00]");
 
-            file1Data[1513].Add("50_True",  "  50       50  747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
-            file1Data[1514].Add("50_True",  "  50       50  281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
-            file1Data[1515].Add("50_True",  "  50       50  353.590   9.7E+4 1157.949   3.6E+5  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
-            file1Data[1516].Add("50_True",  "  50       50  461.889   7.3E+3 1146.341   1.4E+4  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
-            file1Data[1517].Add("50_True",  "  50       50  883.347   8.9E+6 1206.792   5.5E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1513].Add("50_True",  "   50       50  747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("50_True",  "   50       50  281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1515].Add("50_True",  "   50       50  353.590   9.7E+4 1157.949   3.6E+5  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
+            file1Data[1516].Add("50_True",  "   50       50  461.889   7.3E+3 1146.341   1.4E+4  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
+            file1Data[1517].Add("50_True",  "   50       50  883.347   8.9E+6 1206.792   5.5E+6  + c ESI Full ms [400.00-2000.00]");
 
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
@@ -845,7 +847,7 @@ namespace RawFileReaderTests
             file2Data[16133].Add("50_False", "   50       50  356.206   7.5E+1  795.543   1.3E+2  ITMS + c NSI r d sa Full ms2 421.2619@etd120.55@cid20.00 [120.0000-853.0000]");
             file2Data[16141].Add("50_False", "   50       50  853.937   5.6E+1 1705.974   9.8E+1  ITMS + c NSI r d sa Full ms2 874.8397@etd120.55@hcd20.00 [120.0000-1760.0000]");
 
-            file2Data[16121].Add("50_True", "  833      833  351.231   2.9E+5  712.813   2.9E+5  FTMS + p NSI Full ms [350.0000-1550.0000]");
+            file2Data[16121].Add("50_True", "   50       50  371.733   6.2E+6  681.010   6.2E+6  FTMS + p NSI Full ms [350.0000-1550.0000]");
             file2Data[16122].Add("50_True", "   50       50  157.049   2.0E+4  385.181   6.0E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
             file2Data[16126].Add("50_True", "   50       50  535.311   2.5E+3  798.982   1.3E+3  ITMS + c NSI r d sa Full ms2 538.8400@etd53.58@cid20.00 [120.0000-1627.0000]");
             file2Data[16131].Add("50_True", "   29       29  984.504   9.5E+3 1931.917   2.4E+1  ITMS + c NSI r d Full ms2 987.8934@etd120.55 [120.0000-1986.0000]");
@@ -853,6 +855,53 @@ namespace RawFileReaderTests
             file2Data[16141].Add("50_True", "   50       50  853.937   5.6E+1 1705.974   9.8E+1  ITMS + c NSI r d sa Full ms2 874.8397@etd120.55@hcd20.00 [120.0000-1760.0000]");
 
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
+
+
+            var file3Data = new Dictionary<int, Dictionary<string, string>>
+            {
+                {3101, new Dictionary<string, string>()},
+                {3102, new Dictionary<string, string>()},
+                {16126, new Dictionary<string, string>()},
+                {16131, new Dictionary<string, string>()},
+                {16133, new Dictionary<string, string>()},
+                {16141, new Dictionary<string, string>()}
+            };
+
+            // The KeySpec for each dictionary entry is MaxDataCount_Centroid
+            file3Data[3101].Add("0_False",  "19200    19200  400.083   1.7E+3 1200.083  5.2E-23  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("0_False",  "  329      329  147.123   4.3E+2  550.548   1.0E+1  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+            file3Data[3101].Add("0_True",   "  906      906  400.389   1.5E+4  760.724   3.9E+4  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("0_True",   "  329      329  147.123   4.3E+2  550.548   1.0E+1  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+            file3Data[3101].Add("50_False", "   50       50  500.333   4.8E+4  555.250   4.2E+4  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("50_False", "   50       50  147.123   4.3E+2  545.401   1.4E+3  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+            file3Data[3101].Add("50_True",  "   50       50  423.593   1.1E+5  596.215   9.5E+4  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("50_True",  "   50       50  147.123   4.3E+2  545.401   1.4E+3  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+
+            expectedData.Add("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08", file3Data);
+
+
+            var file4Data = new Dictionary<int, Dictionary<string, string>>
+            {
+                {4371, new Dictionary<string, string>()},
+                {4372, new Dictionary<string, string>()},
+                {4373, new Dictionary<string, string>()}
+            };
+
+            // The KeySpec for each dictionary entry is MaxDataCount_Centroid
+            file4Data[4371].Add("0_False",  " 9271     9271  200.000   0.0E+0  597.504   0.0E+0  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("0_False",  "   23       23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4373].Add("0_False",  "   97       97   95.192   6.9E+0  337.598   7.2E+0  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
+            file4Data[4371].Add("0_True",   "  691      691  200.052   4.7E+2  600.505   7.1E+2  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("0_True",   "   23       23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4373].Add("0_True",   "   97       97   95.192   6.9E+0  337.598   7.2E+0  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
+            file4Data[4371].Add("50_False", "   50       50  324.984   4.3E+4  447.116   8.4E+4  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("50_False", "   23       23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4373].Add("50_False", "   50       50  122.133   2.0E+1  377.493   1.7E+1  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
+            file4Data[4371].Add("50_True",  "   50       50  217.018   4.9E+3  449.337   1.3E+4  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("50_True",  "   23       23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4373].Add("50_True",  "   50       50  122.133   2.0E+1  377.493   1.7E+1  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
+
+            expectedData.Add("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925", file4Data);
 
 
             var dataFile = GetRawDataFile(rawFileName);
@@ -888,7 +937,7 @@ namespace RawFileReaderTests
                     if (iteration == 1)
                     {
                         Console.WriteLine("Scan data for {0}", dataFile.Name);
-                        Console.WriteLine("{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8} {8,-8}  {9}",
+                        Console.WriteLine("{0,5} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8} {8,-8}  {9}",
                                           "Scan", "Max#", "Centroid", "MzCount", "IntCount",
                                           "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
                     }
@@ -909,7 +958,7 @@ namespace RawFileReaderTests
 
                         var scanSummary =
                             string.Format(
-                                "{0} {1,3} {2,8} {3,8} {4,8} {5,8:F3} {6,8:0.0E+0} {7,8:F3} {8,8:0.0E+0}  {9}",
+                                "{0,5} {1,3} {2,8} {3,8} {4,8} {5,8:F3} {6,8:0.0E+0} {7,8:F3} {8,8:0.0E+0}  {9}",
                                 scanNumber, maxNumberOfPeaks, centroidData,
                                 mzList.Length, intensityList.Length,
                                 mzList[0], intensityList[0],
@@ -942,6 +991,7 @@ namespace RawFileReaderTests
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1514)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16122)]
         [TestCase("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08.raw", 3101, 3102)]
+        [TestCase("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 4371, 4372)]
         public void TestGetScanData2D(string rawFileName, int scanStart, int scanEnd)
         {
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
@@ -954,14 +1004,14 @@ namespace RawFileReaderTests
             };
 
             // The KeySpec for each dictionary entry is MaxDataCount_Centroid
-            file1Data[1513].Add("0_False",   " 851  409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
-            file1Data[1514].Add("0_False",   " 109  281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
-            file1Data[1513].Add("0_True",    " 851  409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
-            file1Data[1514].Add("0_True",    " 109  281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
-            file1Data[1513].Add("50_False",  "  50  747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
-            file1Data[1514].Add("50_False",  "  50  281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
-            file1Data[1513].Add("50_True",   "  50  747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
-            file1Data[1514].Add("50_True",   "  50  281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1513].Add("0_False",   "  851  409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("0_False",   "  109  281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1513].Add("0_True",    "  851  409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("0_True",    "  109  281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1513].Add("50_False",  "   50  747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("50_False",  "   50  281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1513].Add("50_True",   "   50  747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("50_True",   "   50  281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
 
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
@@ -979,7 +1029,7 @@ namespace RawFileReaderTests
             file2Data[16122].Add("0_True",   "  490  116.232   7.0E+1  403.932   1.1E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
             file2Data[16121].Add("50_False", "   50  503.553   2.0E+7  504.571   2.1E+7  FTMS + p NSI Full ms [350.0000-1550.0000]");
             file2Data[16122].Add("50_False", "   50  157.049   2.0E+4  385.181   6.0E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
-            file2Data[16121].Add("50_True",  "  833  351.231   2.9E+5  712.813   2.9E+5  FTMS + p NSI Full ms [350.0000-1550.0000]");
+            file2Data[16121].Add("50_True",  "   50  371.733   6.2E+6  681.010   6.2E+6  FTMS + p NSI Full ms [350.0000-1550.0000]");
             file2Data[16122].Add("50_True",  "   50  157.049   2.0E+4  385.181   6.0E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
 
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
@@ -1004,12 +1054,31 @@ namespace RawFileReaderTests
             expectedData.Add("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08", file2Data);
 
 
+            var file4Data = new Dictionary<int, Dictionary<string, string>>
+            {
+                {4371, new Dictionary<string, string>()},
+                {4372, new Dictionary<string, string>()}
+            };
+
+            // The KeySpec for each dictionary entry is MaxDataCount_Centroid
+            file4Data[4371].Add("0_False",  " 9271  200.000   0.0E+0  597.504   0.0E+0  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("0_False",  "   23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4371].Add("0_True",   "  691  200.052   4.7E+2  600.505   7.1E+2  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("0_True",   "   23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4371].Add("50_False", "   50  324.984   4.3E+4  447.116   8.4E+4  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("50_False", "   23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4371].Add("50_True",  "   50  217.018   4.9E+3  449.337   1.3E+4  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("50_True",  "   23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+
+            expectedData.Add("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925", file4Data);
+
+
             var dataFile = GetRawDataFile(rawFileName);
 
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
                 Console.WriteLine("Scan data for {0}", dataFile.Name);
-                Console.WriteLine("{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
+                Console.WriteLine("{0,5} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
                                 "Scan", "Max#", "Centroid", "DataCount",
                                 "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
 
@@ -1054,34 +1123,25 @@ namespace RawFileReaderTests
 
                         if (maxNumberOfPeaks > 0)
                         {
-
-                            if (centroidData && scanInfo.IsFTMS)
+                            dataCount = maxNumberOfPeaks;
+                            if (dataPointsRead < maxNumberOfPeaks)
                             {
-                                // When centroiding FTMS data, the maxNumberOfPeaks value is ignored
-                                dataCount = lastIndex + 1;
-
-                                var pointToCheck = maxNumberOfPeaks + (int)((lastIndex - maxNumberOfPeaks) / 2f);
-
-                                Assert.IsTrue(massIntensityPairs[0, pointToCheck] > 50, "m/z value in 2D array is unexpectedly less than 50");
+                                dataCount = dataPointsRead;
                             }
-                            else
+
+                            // Make sure the 2D array has values of 0 for mass and intensity beyond index maxNumberOfPeaks
+                            for (var dataIndex = maxNumberOfPeaks; dataIndex < lastIndex; dataIndex++)
                             {
-                                dataCount = maxNumberOfPeaks;
-
-                                // Make sure the 2D array has values of 0 for mass and intensity beyond index maxNumberOfPeaks
-                                for (var dataIndex = maxNumberOfPeaks; dataIndex < lastIndex; dataIndex++)
+                                if (massIntensityPairs[0, dataIndex] > 0)
                                 {
-                                    if (massIntensityPairs[0, dataIndex] > 0)
-                                    {
-                                        Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanNumber);
-                                        Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
-                                    }
+                                    Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanNumber);
+                                    Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
+                                }
 
-                                    if (massIntensityPairs[1, dataIndex] > 0)
-                                    {
-                                        Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanNumber);
-                                        Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
-                                    }
+                                if (massIntensityPairs[1, dataIndex] > 0)
+                                {
+                                    Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanNumber);
+                                    Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
                                 }
                             }
                         }
@@ -1096,7 +1156,7 @@ namespace RawFileReaderTests
 
                         var scanSummary =
                             string.Format(
-                                "{0} {1,3} {2,8} {3,8} {4,8:F3} {5,8:0.0E+0} {6,8:F3} {7,8:0.0E+0}  {8}",
+                                "{0,5} {1,3} {2,8} {3,8} {4,8:F3} {5,8:0.0E+0} {6,8:F3} {7,8:0.0E+0}  {8}",
                                 scanNumber, maxNumberOfPeaks, centroidData,
                                 dataCount,
                                 massIntensityPairs[0, 0], massIntensityPairs[1,0],
