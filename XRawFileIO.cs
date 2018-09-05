@@ -2378,6 +2378,37 @@ namespace ThermoRawFileReader
                     // Centroiding is enabled, and the dataset was acquired on an Orbitrap, Exactive, or FTMS instrument
                     return mXRawFile.GetSimplifiedCentroids(scan);
                 }
+                else if (centroidData)
+                {
+                    // Centroiding for profile-mode ion trap data...
+                    var scanProf = Scan.FromFile(mXRawFile, scan);
+                    var centroided = Scan.ToCentroid(scanProf);
+                    var data = new SimpleScanAccessTruncated(centroided.PreferredMasses, centroided.PreferredIntensities);
+                    if (maxNumberOfPeaks > 0)
+                    {
+                        // Takes the maxNumberOfPeaks highest intensities from scan, and sorts them (and their respective mass) by mass into the first maxNumberOfPeaks positions in the arrays.
+                        var sortCount = Math.Min(maxNumberOfPeaks, data.Masses.Length);
+                        Array.Sort(data.Intensities, data.Masses);
+                        Array.Reverse(data.Intensities);
+                        Array.Reverse(data.Masses);
+                        Array.Sort(data.Masses, data.Intensities, 0, sortCount);
+
+                        var masses = new double[sortCount];
+                        var intensities = new double[sortCount];
+                        Array.Copy(data.Masses, masses, sortCount);
+                        Array.Copy(data.Intensities, intensities, sortCount);
+                        data = new SimpleScanAccessTruncated(masses, intensities);
+                    }
+                    else
+                    {
+                        // Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z,
+                        // we have observed a few cases in certain scans of certain datasets that points with
+                        // similar m/z values are swapped and ths slightly out of order
+
+                        Array.Sort(data.Masses, data.Intensities);
+                    }
+                    return data;
+                }
                 else
                 {
                     // Warning: The masses reported by GetMassListFromScanNum when centroiding are not properly calibrated and thus could be off by 0.3 m/z or more
@@ -2390,7 +2421,6 @@ namespace ThermoRawFileReader
                     //			1032.56495			1032.6863		118
                     //			1513.7252			1513.9168		127
 
-                    // TODO: Can we get centroided Ion trap data? does it matter?: mXRawFile.GetMassListFromScanNum(ref scan, strFilter, (int)IntensityCutoffTypeConstants.None, intIntensityCutoffValue, maxNumberOfPeaks, centroidResultFlag, centroidPeakWidth, ref massIntensityPairsList, ref peakList, ref dataCount);
                     var data = mXRawFile.GetSimplifiedScan(scan);
                     if (maxNumberOfPeaks > 0)
                     {
