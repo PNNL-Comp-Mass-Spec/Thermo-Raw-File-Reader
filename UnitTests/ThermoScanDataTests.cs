@@ -847,7 +847,7 @@ namespace RawFileReaderTests
             file2Data[16133].Add("50_False", "   50       50  356.206   7.5E+1  795.543   1.3E+2  ITMS + c NSI r d sa Full ms2 421.2619@etd120.55@cid20.00 [120.0000-853.0000]");
             file2Data[16141].Add("50_False", "   50       50  853.937   5.6E+1 1705.974   9.8E+1  ITMS + c NSI r d sa Full ms2 874.8397@etd120.55@hcd20.00 [120.0000-1760.0000]");
 
-            file2Data[16121].Add("50_True", "  833      833  351.231   2.9E+5  712.813   2.9E+5  FTMS + p NSI Full ms [350.0000-1550.0000]");
+            file2Data[16121].Add("50_True", "   50       50  371.733   6.2E+6  681.010   6.2E+6  FTMS + p NSI Full ms [350.0000-1550.0000]");
             file2Data[16122].Add("50_True", "   50       50  157.049   2.0E+4  385.181   6.0E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
             file2Data[16126].Add("50_True", "   50       50  535.311   2.5E+3  798.982   1.3E+3  ITMS + c NSI r d sa Full ms2 538.8400@etd53.58@cid20.00 [120.0000-1627.0000]");
             file2Data[16131].Add("50_True", "   29       29  984.504   9.5E+3 1931.917   2.4E+1  ITMS + c NSI r d Full ms2 987.8934@etd120.55 [120.0000-1986.0000]");
@@ -897,7 +897,7 @@ namespace RawFileReaderTests
             file4Data[4371].Add("50_False", "   50       50  324.984   4.3E+4  447.116   8.4E+4  FTMS + p ESI Full ms [200.00-2000.00]");
             file4Data[4372].Add("50_False", "   23       23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
             file4Data[4373].Add("50_False", "   50       50  122.133   2.0E+1  377.493   1.7E+1  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
-            file4Data[4371].Add("50_True",  "  691      691  200.052   4.7E+2  600.505   7.1E+2  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4371].Add("50_True",  "   50       50  217.018   4.9E+3  449.337   1.3E+4  FTMS + p ESI Full ms [200.00-2000.00]");
             file4Data[4372].Add("50_True",  "   23       23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
             file4Data[4373].Add("50_True",  "   50       50  122.133   2.0E+1  377.493   1.7E+1  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
 
@@ -1029,7 +1029,7 @@ namespace RawFileReaderTests
             file2Data[16122].Add("0_True",   "  490  116.232   7.0E+1  403.932   1.1E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
             file2Data[16121].Add("50_False", "   50  503.553   2.0E+7  504.571   2.1E+7  FTMS + p NSI Full ms [350.0000-1550.0000]");
             file2Data[16122].Add("50_False", "   50  157.049   2.0E+4  385.181   6.0E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
-            file2Data[16121].Add("50_True",  "  833  351.231   2.9E+5  712.813   2.9E+5  FTMS + p NSI Full ms [350.0000-1550.0000]");
+            file2Data[16121].Add("50_True",  "   50  371.733   6.2E+6  681.010   6.2E+6  FTMS + p NSI Full ms [350.0000-1550.0000]");
             file2Data[16122].Add("50_True",  "   50  157.049   2.0E+4  385.181   6.0E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
 
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
@@ -1067,7 +1067,7 @@ namespace RawFileReaderTests
             file4Data[4372].Add("0_True",   "   23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
             file4Data[4371].Add("50_False", "   50  324.984   4.3E+4  447.116   8.4E+4  FTMS + p ESI Full ms [200.00-2000.00]");
             file4Data[4372].Add("50_False", "   23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
-            file4Data[4371].Add("50_True",  "  691  200.052   4.7E+2  600.505   7.1E+2  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4371].Add("50_True",  "   50  217.018   4.9E+3  449.337   1.3E+4  FTMS + p ESI Full ms [200.00-2000.00]");
             file4Data[4372].Add("50_True",  "   23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
 
             expectedData.Add("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925", file4Data);
@@ -1123,38 +1123,25 @@ namespace RawFileReaderTests
 
                         if (maxNumberOfPeaks > 0)
                         {
-
-                            if (centroidData && scanInfo.IsFTMS && !scanInfo.IsCentroided)
+                            dataCount = maxNumberOfPeaks;
+                            if (dataPointsRead < maxNumberOfPeaks)
                             {
-                                // When centroiding FTMS data, the maxNumberOfPeaks value is ignored
-                                dataCount = lastIndex + 1;
-
-                                var pointToCheck = maxNumberOfPeaks + (int)((lastIndex - maxNumberOfPeaks) / 2f);
-
-                                Assert.IsTrue(massIntensityPairs[0, pointToCheck] > 50, "m/z value in 2D array is unexpectedly less than 50");
+                                dataCount = dataPointsRead;
                             }
-                            else
+
+                            // Make sure the 2D array has values of 0 for mass and intensity beyond index maxNumberOfPeaks
+                            for (var dataIndex = maxNumberOfPeaks; dataIndex < lastIndex; dataIndex++)
                             {
-                                dataCount = maxNumberOfPeaks;
-                                if (dataPointsRead < maxNumberOfPeaks)
+                                if (massIntensityPairs[0, dataIndex] > 0)
                                 {
-                                    dataCount = dataPointsRead;
+                                    Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanNumber);
+                                    Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
                                 }
 
-                                // Make sure the 2D array has values of 0 for mass and intensity beyond index maxNumberOfPeaks
-                                for (var dataIndex = maxNumberOfPeaks; dataIndex < lastIndex; dataIndex++)
+                                if (massIntensityPairs[1, dataIndex] > 0)
                                 {
-                                    if (massIntensityPairs[0, dataIndex] > 0)
-                                    {
-                                        Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanNumber);
-                                        Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
-                                    }
-
-                                    if (massIntensityPairs[1, dataIndex] > 0)
-                                    {
-                                        Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanNumber);
-                                        Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
-                                    }
+                                    Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanNumber);
+                                    Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
                                 }
                             }
                         }

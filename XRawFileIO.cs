@@ -2357,16 +2357,48 @@ namespace ThermoRawFileReader
 
                     if (dataCount > 0)
                     {
-                        massIntensityPairs = new double[2, dataCount];
-
-                        for (var i = 0; i <= dataCount - 1; i++)
+                        if (maxNumberOfPeaks > 0 && maxNumberOfPeaks < dataCount)
                         {
-                            // m/z
-                            massIntensityPairs[0, i] = massIntensityLabels[0, i];
-                            // Intensity
-                            massIntensityPairs[1, i] = massIntensityLabels[1, i];
-                        }
+                            var masses = new double[dataCount];
+                            var intensities = new double[dataCount];
 
+                            for (var i = 0; i <= dataCount - 1; i++)
+                            {
+                                // m/z
+                                masses[i] = massIntensityLabels[0, i];
+                                // Intensity
+                                intensities[i] = massIntensityLabels[1, i];
+                            }
+
+                            Array.Sort(intensities, masses);
+                            Array.Reverse(intensities);
+                            Array.Reverse(masses);
+                            Array.Sort(masses, intensities, 0, maxNumberOfPeaks);
+
+                            dataCount = maxNumberOfPeaks;
+
+                            massIntensityPairs = new double[2, dataCount];
+
+                            for (var i = 0; i <= dataCount - 1; i++)
+                            {
+                                // m/z
+                                massIntensityPairs[0, i] = masses[i];
+                                // Intensity
+                                massIntensityPairs[1, i] = intensities[i];
+                            }
+                        }
+                        else
+                        {
+                            massIntensityPairs = new double[2, dataCount];
+
+                            for (var i = 0; i <= dataCount - 1; i++)
+                            {
+                                // m/z
+                                massIntensityPairs[0, i] = massIntensityLabels[0, i];
+                                // Intensity
+                                massIntensityPairs[1, i] = massIntensityLabels[1, i];
+                            }
+                        }
                     }
                     else
                     {
