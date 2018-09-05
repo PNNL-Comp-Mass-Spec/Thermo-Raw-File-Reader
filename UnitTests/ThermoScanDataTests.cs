@@ -941,6 +941,7 @@ namespace RawFileReaderTests
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1514)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16122)]
+        [TestCase("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08.raw", 3101, 3102)]
         public void TestGetScanData2D(string rawFileName, int scanStart, int scanEnd)
         {
             var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
@@ -982,6 +983,25 @@ namespace RawFileReaderTests
             file2Data[16122].Add("50_True",  "   50  157.049   2.0E+4  385.181   6.0E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
 
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
+
+
+            var file3Data = new Dictionary<int, Dictionary<string, string>>
+            {
+                {3101, new Dictionary<string, string>()},
+                {3102, new Dictionary<string, string>()}
+            };
+
+            // The KeySpec for each dictionary entry is MaxDataCount_Centroid
+            file3Data[3101].Add("0_False",  "19200  400.083   1.7E+3 1200.083  5.2E-23  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("0_False",  "  329  147.123   4.3E+2  550.548   1.0E+1  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+            file3Data[3101].Add("0_True",   "  906  400.389   1.5E+4  760.724   3.9E+4  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("0_True",   "  329  147.123   4.3E+2  550.548   1.0E+1  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+            file3Data[3101].Add("50_False", "   50  500.333   4.8E+4  555.250   4.2E+4  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("50_False", "   50  147.123   4.3E+2  545.401   1.4E+3  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+            file3Data[3101].Add("50_True",  "   50  423.593   1.1E+5  596.215   9.5E+4  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("50_True",  "   50  147.123   4.3E+2  545.401   1.4E+3  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+
+            expectedData.Add("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08", file2Data);
 
 
             var dataFile = GetRawDataFile(rawFileName);
