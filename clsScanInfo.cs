@@ -276,7 +276,7 @@ namespace ThermoRawFileReader
         public bool IsCentroided { get; set; }
 
         /// <summary>
-        /// FTMS flag
+        /// FTMS flag (or Orbitrap, Q-Exactive, Lumos, or any other high resolution instrument)
         /// </summary>
         /// <value></value>
         /// <returns>True if acquired on a high resolution mass analyzer (for example, on an Orbitrap or Q-Exactive)</returns>
@@ -364,16 +364,16 @@ namespace ThermoRawFileReader
         public bool TryGetScanEvent(string eventName, out string eventValue, bool partialMatchToStart = false)
         {
 
-            IEnumerable<KeyValuePair<string, string>> lstResults;
+            IEnumerable<KeyValuePair<string, string>> results;
 
             if (partialMatchToStart) {
                 // Partial match
-                lstResults = from item in mScanEvents where item.Key.ToLower().StartsWith(eventName.ToLower()) select item;
+                results = from item in mScanEvents where item.Key.ToLower().StartsWith(eventName.ToLower()) select item;
             } else {
-                lstResults = from item in mScanEvents where string.Equals(item.Key, eventName, StringComparison.InvariantCultureIgnoreCase) select item;
+                results = from item in mScanEvents where string.Equals(item.Key, eventName, StringComparison.InvariantCultureIgnoreCase) select item;
             }
 
-            foreach (var item in lstResults) {
+            foreach (var item in results) {
                 eventValue = item.Value;
                 return true;
             }

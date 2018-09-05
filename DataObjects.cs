@@ -320,9 +320,9 @@ namespace ThermoRawFileReader
         /// Get an initialized MRMInfo object
         /// </summary>
         /// <param name="udtMRMInfo"></param>
-        /// <param name="intInitialMassCountCapacity"></param>
+        /// <param name="initialMassCountCapacity"></param>
         [Obsolete("Use parameterless function InitializeMRMInfo instead")]
-        public static void InitializeMRMInfo(out MRMInfo udtMRMInfo, int intInitialMassCountCapacity)
+        public static void InitializeMRMInfo(out MRMInfo udtMRMInfo, int initialMassCountCapacity)
         {
             udtMRMInfo = InitializeMRMInfo();
         }
