@@ -67,24 +67,24 @@ namespace ThermoRawFileReader
         // It also matches Full msx ms2 (multiplexed parent ion selection, introduced with the Q-Exactive)
         private const string MS2_REGEX = "(?<ScanMode> p|Full|SRM|CRM|Full msx) ms(?<MSLevel>[2-9]|[1-9][0-9]) ";
 
-        private const string IONMODE_REGEX = "[+-]";
+        private const string ION_MODE_REGEX = "[+-]";
 
-        private const string MASSLIST_REGEX = "\\[[0-9.]+-[0-9.]+.*\\]";
+        private const string MASS_LIST_REGEX = "\\[[0-9.]+-[0-9.]+.*\\]";
 
-        private const string MASSRANGES_REGEX = "(?<StartMass>[0-9.]+)-(?<EndMass>[0-9.]+)";
+        private const string MASS_RANGES_REGEX = "(?<StartMass>[0-9.]+)-(?<EndMass>[0-9.]+)";
 
         // This RegEx matches text like 1312.95@45.00 or 756.98@cid35.00 or 902.5721@etd120.55@cid20.00
-        private const string PARENTION_REGEX = "(?<ParentMZ>[0-9.]+)@(?<CollisionMode1>[a-z]*)(?<CollisionEnergy1>[0-9.]+)(@(?<CollisionMode2>[a-z]+)(?<CollisionEnergy2>[0-9.]+))?";
+        private const string PARENT_ION_REGEX = "(?<ParentMZ>[0-9.]+)@(?<CollisionMode1>[a-z]*)(?<CollisionEnergy1>[0-9.]+)(@(?<CollisionMode2>[a-z]+)(?<CollisionEnergy2>[0-9.]+))?";
 
         // This RegEx is used to extract parent ion m/z from a filter string that does not contain msx
         // ${ParentMZ} will hold the last parent ion m/z found
         // For example, 756.71 in FTMS + p NSI d Full ms3 850.70@cid35.00 756.71@cid35.00 [195.00-2000.00]
-        private const string PARENTION_ONLY_NONMSX_REGEX = @"[Mm][Ss]\d*[^\[\r\n]* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*(\[[^\]\r\n]\])?";
+        private const string PARENT_ION_ONLY_NON_MSX_REGEX = @"[Mm][Ss]\d*[^\[\r\n]* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*(\[[^\]\r\n]\])?";
 
         // This RegEx is used to extract parent ion m/z from a filter string that does contain msx
         // ${ParentMZ} will hold the first parent ion m/z found (the first parent ion m/z corresponds to the highest peak)
         // For example, 636.04 in FTMS + p NSI Full msx ms2 636.04@hcd28.00 641.04@hcd28.00 654.05@hcd28.00 [88.00-1355.00]
-        private const string PARENTION_ONLY_MSX_REGEX = @"[Mm][Ss]\d* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*[^\[\r\n]*(\[[^\]\r\n]+\])?";
+        private const string PARENT_ION_ONLY_MSX_REGEX = @"[Mm][Ss]\d* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*[^\[\r\n]*(\[[^\]\r\n]+\])?";
 
         // This RegEx looks for "sa" prior to Full ms"
         private const string SA_REGEX = " sa Full ms";
@@ -148,15 +148,15 @@ namespace ThermoRawFileReader
 
         private static readonly Regex mFindMS = new Regex(MS2_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private static readonly Regex mIonMode = new Regex(IONMODE_REGEX, RegexOptions.Compiled);
+        private static readonly Regex mIonMode = new Regex(ION_MODE_REGEX, RegexOptions.Compiled);
 
-        private static readonly Regex mMassList = new Regex(MASSLIST_REGEX, RegexOptions.Compiled);
+        private static readonly Regex mMassList = new Regex(MASS_LIST_REGEX, RegexOptions.Compiled);
 
-        private static readonly Regex mMassRanges = new Regex(MASSRANGES_REGEX, RegexOptions.Compiled);
+        private static readonly Regex mMassRanges = new Regex(MASS_RANGES_REGEX, RegexOptions.Compiled);
 
-        private static readonly Regex mFindParentIon = new Regex(PARENTION_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex mFindParentIonOnlyNonMsx = new Regex(PARENTION_ONLY_NONMSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex mFindParentIonOnlyMsx = new Regex(PARENTION_ONLY_MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindParentIon = new Regex(PARENT_ION_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindParentIonOnlyNonMsx = new Regex(PARENT_ION_ONLY_NON_MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindParentIonOnlyMsx = new Regex(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private static readonly Regex mFindSAFullMS = new Regex(SA_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -672,9 +672,9 @@ namespace ThermoRawFileReader
         /// <remarks>
         /// This was created for use in other programs that only need the parent ion m/z, and no other functions from ThermoRawFileReader.
         /// Other projects that use this:
-        ///      PHRPReader
+        ///      PHRPReader (https://github.com/PNNL-Comp-Mass-Spec/PHRP)
         ///
-        /// To copy this, take the code from this function, plus the regex strings <see cref="PARENTION_ONLY_NONMSX_REGEX"/> and <see cref="PARENTION_ONLY_MSX_REGEX"/>,
+        /// To copy this, take the code from this function, plus the regex strings <see cref="PARENT_ION_ONLY_NON_MSX_REGEX"/> and <see cref="PARENT_ION_ONLY_MSX_REGEX"/>,
         /// with their uses in <see cref="mFindParentIonOnlyNonMsx"/> and <see cref="mFindParentIonOnlyMsx"/>
         /// </remarks>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz)
@@ -877,7 +877,7 @@ namespace ThermoRawFileReader
 
                 if (matchFound)
                 {
-                    // Update the output values using udtBestParentIon
+                    // Update the output values using bestParentIon
                     msLevel = bestParentIon.MSLevel;
                     parentIonMz = bestParentIon.ParentIonMZ;
                     collisionMode = bestParentIon.CollisionMode;
@@ -972,7 +972,7 @@ namespace ThermoRawFileReader
         public static bool ExtractMSLevel(string filterText, out int msLevel, out string mzText)
         {
 
-            var intMatchTextLength = 0;
+            var matchTextLength = 0;
 
             msLevel = 1;
             var charIndex = 0;
@@ -983,13 +983,13 @@ namespace ThermoRawFileReader
             {
                 msLevel = Convert.ToInt32(reMatchMS.Groups["MSLevel"].Value);
                 charIndex = filterText.IndexOf(reMatchMS.ToString(), StringComparison.InvariantCultureIgnoreCase);
-                intMatchTextLength = reMatchMS.Length;
+                matchTextLength = reMatchMS.Length;
             }
 
             if (charIndex > 0)
             {
                 // Copy the text after "Full ms2" or "Full ms3" in filterText to mzText
-                mzText = filterText.Substring(charIndex + intMatchTextLength).Trim();
+                mzText = filterText.Substring(charIndex + matchTextLength).Trim();
                 return true;
             }
 
@@ -1974,7 +1974,7 @@ namespace ThermoRawFileReader
                     mFileInfo.TuneMethods.Add(newTuneMethod);
                 else
                 {
-                    // Compare this tune method to the previous one; if identical, then don't keep it
+                    // Compare this tune method to the previous one; if identical, don't keep it
                     if (!TuneMethodsMatch(mFileInfo.TuneMethods.Last(), newTuneMethod))
                     {
                         mFileInfo.TuneMethods.Add(newTuneMethod);
@@ -2185,12 +2185,12 @@ namespace ThermoRawFileReader
         /// <param name="mzList">Output array of mass values</param>
         /// <param name="intensityList">Output array of intensity values (parallel to mzList)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData(int scanNumber, out double[] mzList, out double[] intensityList)
         {
-            const int intMaxNumberOfPeaks = 0;
+            const int maxNumberOfPeaks = 0;
             const bool centroidData = false;
-            return GetScanData(scanNumber, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
+            return GetScanData(scanNumber, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
         }
 
         /// <summary>
@@ -2201,7 +2201,7 @@ namespace ThermoRawFileReader
         /// <param name="intensityList">Output array of intensity values (parallel to mzList)</param>
         /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData(int scanNumber, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks)
         {
             const bool centroid = false;
@@ -2217,11 +2217,11 @@ namespace ThermoRawFileReader
         /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative),  returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks, bool centroidData)
         {
-            var dataCount = 0;
+            int dataCount;
 
             try
             {
@@ -2245,8 +2245,8 @@ namespace ThermoRawFileReader
                 intensityList = new double[0];
                 dataCount = 0;
 
-                var strError = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
-                RaiseWarningMessage(strError);
+                var error = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
+                RaiseWarningMessage(error);
             }
 
             return dataCount;
@@ -2258,7 +2258,7 @@ namespace ThermoRawFileReader
         /// <param name="scan"></param>
         /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData2D(int scan, out double[,] massIntensityPairs)
         {
             return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks: 0, centroidData: false);
@@ -2271,7 +2271,7 @@ namespace ThermoRawFileReader
         /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
         /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData2D(int scan, out double[,] massIntensityPairs, int maxNumberOfPeaks)
         {
             return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks, centroidData: false);
@@ -2285,16 +2285,14 @@ namespace ThermoRawFileReader
         /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData2D(int scan, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
-            var dataCount = 0;
-
             try
             {
                 var data = ReadScanData(scan, maxNumberOfPeaks, centroidData);
-                dataCount = data.Masses.Length;
+                var dataCount = data.Masses.Length;
                 if (dataCount <= 0)
                 {
                     massIntensityPairs = new double[0, 0];
@@ -3055,13 +3053,12 @@ namespace ThermoRawFileReader
         /// <param name="intensityList"></param>
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo)
         {
-            const int intMaxNumberOfPeaks = 0;
+            const int maxNumberOfPeaks = 0;
             const bool centroidData = false;
-            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
+            return GetScanData(scan, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
         }
 
         /// <summary>
@@ -3073,12 +3070,11 @@ namespace ThermoRawFileReader
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo, bool centroidData)
         {
-            const int intMaxNumberOfPeaks = 0;
-            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
+            const int maxNumberOfPeaks = 0;
+            return GetScanData(scan, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
         }
 
         /// <summary>
@@ -3088,15 +3084,15 @@ namespace ThermoRawFileReader
         /// <param name="mzList"></param>
         /// <param name="intensityList"></param>
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
+        /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks)
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks)
         {
             const bool centroidData = false;
             udtScanInfo = new udtScanHeaderInfoType();
-            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
+            return GetScanData(scan, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
         }
 
         /// <summary>
@@ -3106,15 +3102,15 @@ namespace ThermoRawFileReader
         /// <param name="mzList"></param>
         /// <param name="intensityList"></param>
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="intMaxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
+        /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int intMaxNumberOfPeaks, bool centroidData)
+        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks, bool centroidData)
         {
             udtScanInfo = new udtScanHeaderInfoType();
-            return GetScanData(scan, out mzList, out intensityList, intMaxNumberOfPeaks, centroidData);
+            return GetScanData(scan, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
         }
 
         /// <summary>
@@ -3125,7 +3121,7 @@ namespace ThermoRawFileReader
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
         /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         [Obsolete("This method is deprecated, use GetScanData2D that does not use udtScanHeaderInfo")]
         public int GetScanData2D(int scan, out double[,] massIntensityPairs, ref udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks)
         {
