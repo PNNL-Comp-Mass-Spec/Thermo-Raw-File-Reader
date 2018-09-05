@@ -374,19 +374,7 @@ namespace ThermoRawFileReader
                 return false;
             }
 
-            // I have a feeling this doesn't actually work, and will always return True
-            try
-            {
-                // ReSharper disable once UnusedVariable
-                //var objXRawFile = new MSFileReader_XRawfile();
-
-                // If we get here, all is fine
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return true;
         }
 
         /// <summary>
@@ -394,6 +382,7 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <returns></returns>
         // ReSharper disable once InconsistentNaming
+        [Obsolete("This method checks for MSFileReader.XRawFile, but we now use ThermoFisher.CommonCore.Data.dll, so this method always returns true")]
         public bool IsMSFileReaderInstalled()
         {
             var result = IsMSFileReaderInstalled(out var error);
@@ -411,12 +400,16 @@ namespace ThermoRawFileReader
         /// <param name="error">Reason for failure</param>
         /// <returns></returns>
         // ReSharper disable once InconsistentNaming
+        [Obsolete("This method checks for MSFileReader.XRawFile, but we now use ThermoFisher.CommonCore.Data.dll, so this method always returns true")]
         public static bool IsMSFileReaderInstalled(out string error)
         {
+
+            error = "";
+            return true;
+
             var typeAvailable = false;
             var canInstantiateType = false;
 
-            error = "";
             var bitness = "x86";
             if (Environment.Is64BitProcess)
             {
