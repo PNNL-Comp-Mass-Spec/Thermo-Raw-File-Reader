@@ -12,6 +12,7 @@ using ThermoFisher.CommonCore.Data.Interfaces;
 using ThermoFisher.CommonCore.MassPrecisionEstimator;
 using ThermoFisher.CommonCore.RawFileReader;
 using ThermoFisher.CommonCore.BackgroundSubtraction;
+using ThermoFisher.CommonCore.Data.FilterEnums;
 
 // These functions utilize MSFileReader.XRawfile2.dll to extract scan header info and
 // raw mass spectrum info from Finnigan LCQ, LTQ, and LTQ-FT files
@@ -1436,12 +1437,12 @@ namespace ThermoRawFileReader
 
                 // Lookup the filter text for this scan
                 // Parse out the parent ion m/z for fragmentation scans
-                // Must set filterText to Nothing prior to calling .GetFilterForScanNum()
-                var filterText = mXRawFile.GetFilterForScanNumber(scan).ToString();
+                var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
+                var filterText = scanFilter.ToString();
 
                 scanInfo.FilterText = string.Copy(filterText);
 
-                scanInfo.IsFTMS = ScanIsFTMS(filterText);
+                scanInfo.IsFTMS = scanFilter.MassAnalyzer == MassAnalyzerType.MassAnalyzerFTMS;
 
                 if (string.IsNullOrWhiteSpace(scanInfo.FilterText))
                     scanInfo.FilterText = string.Empty;
@@ -2367,87 +2368,57 @@ namespace ThermoRawFileReader
                     return null;
                 }
 
-                if (centroidData && scanInfo.IsCentroided)
-                {
-                    // The scan data is already centroided; don't try to re-centroid
-                    centroidData = false;
-                }
+                ISimpleScanAccess data = null;
 
-                if (centroidData && scanInfo.IsFTMS)
+                if (centroidData && !scanInfo.IsCentroided)
                 {
-                    // Centroiding is enabled, and the dataset was acquired on an Orbitrap, Exactive, or FTMS instrument
-                    return mXRawFile.GetSimplifiedCentroids(scan);
-                }
-                else if (centroidData)
-                {
-                    // Centroiding for profile-mode ion trap data...
-                    var scanProf = Scan.FromFile(mXRawFile, scan);
-                    var centroided = Scan.ToCentroid(scanProf);
-                    var data = new SimpleScanAccessTruncated(centroided.PreferredMasses, centroided.PreferredIntensities);
-                    if (maxNumberOfPeaks > 0)
+                    // If the scan is already centroided, these methods of getting the data either won't work, or will cause centroided data to be re-centroided.
+
+                    // Dataset was acquired on an Orbitrap, Exactive, or FTMS instrument, and the scan type includes additional peak information by default, including centroids: fastest access
+                    // Scan was acquired on an ion trap, so those don't exist: quick, reliable check.
+                    //data = mXRawFile.GetSimplifiedCentroids(scan); // This internally calls the same function as GetCentroidStream, and then copies data to new arrays.
+                    data = mXRawFile.GetCentroidStream(scan, false);
+
+                    if (data == null || data.Masses == null || data.Masses.Length <= 0)
                     {
-                        // Takes the maxNumberOfPeaks highest intensities from scan, and sorts them (and their respective mass) by mass into the first maxNumberOfPeaks positions in the arrays.
-                        var sortCount = Math.Min(maxNumberOfPeaks, data.Masses.Length);
-                        Array.Sort(data.Intensities, data.Masses);
-                        Array.Reverse(data.Intensities);
-                        Array.Reverse(data.Masses);
-                        Array.Sort(data.Masses, data.Intensities, 0, sortCount);
-
-                        var masses = new double[sortCount];
-                        var intensities = new double[sortCount];
-                        Array.Copy(data.Masses, masses, sortCount);
-                        Array.Copy(data.Intensities, intensities, sortCount);
-                        data = new SimpleScanAccessTruncated(masses, intensities);
+                        // Centroiding for profile-mode ion trap data, or for other scan types that don't include a centroid stream
+                        var scanProf = Scan.FromFile(mXRawFile, scan);
+                        var centroided = Scan.ToCentroid(scanProf);
+                        data = new SimpleScanAccessTruncated(centroided.PreferredMasses, centroided.PreferredIntensities);
                     }
-                    else
-                    {
-                        // Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z,
-                        // we have observed a few cases in certain scans of certain datasets that points with
-                        // similar m/z values are swapped and ths slightly out of order
-
-                        Array.Sort(data.Masses, data.Intensities);
-                    }
-                    return data;
                 }
                 else
                 {
-                    // Warning: The masses reported by GetMassListFromScanNum when centroiding are not properly calibrated and thus could be off by 0.3 m/z or more
-                    //          That is why we use mXRawFile.GetLabelData() when centroiding profile-mode FTMS data (see ~25 lines above this comment)
-                    //
-                    //          For example, in scan 8101 of dataset RAW_Franc_Salm_IMAC_0h_R1A_18Jul13_Frodo_13-04-15, we see these values:
-                    //          Profile m/z         Centroid m/z	Delta_PPM
-                    //			112.051 			112.077			232
-                    //			652.3752			652.4645		137
-                    //			1032.56495			1032.6863		118
-                    //			1513.7252			1513.9168		127
-
-                    var data = mXRawFile.GetSimplifiedScan(scan);
-                    if (maxNumberOfPeaks > 0)
-                    {
-                        // Takes the maxNumberOfPeaks highest intensities from scan, and sorts them (and their respective mass) by mass into the first maxNumberOfPeaks positions in the arrays.
-                        var sortCount = Math.Min(maxNumberOfPeaks, data.Masses.Length);
-                        Array.Sort(data.Intensities, data.Masses);
-                        Array.Reverse(data.Intensities);
-                        Array.Reverse(data.Masses);
-                        Array.Sort(data.Masses, data.Intensities, 0, sortCount);
-
-                        var masses = new double[sortCount];
-                        var intensities = new double[sortCount];
-                        Array.Copy(data.Masses, masses, sortCount);
-                        Array.Copy(data.Intensities, intensities, sortCount);
-                        data = new SimpleScanAccessTruncated(masses, intensities);
-                    }
-                    else
-                    {
-                        // Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z,
-                        // we have observed a few cases in certain scans of certain datasets that points with
-                        // similar m/z values are swapped and ths slightly out of order
-
-                        Array.Sort(data.Masses, data.Intensities);
-                    }
-
-                    return data;
+                    //data = mXRawFile.GetSimplifiedScan(scan); // This internally calls the same function as GetSegmentedScanFromScanNumber, and then copies data to new arrays.
+                    var scanData = mXRawFile.GetSegmentedScanFromScanNumber(scan, null);
+                    data = new SimpleScanAccessTruncated(scanData.Positions, scanData.Intensities);
                 }
+
+                if (maxNumberOfPeaks > 0)
+                {
+                    // Takes the maxNumberOfPeaks highest intensities from scan, and sorts them (and their respective mass) by mass into the first maxNumberOfPeaks positions in the arrays.
+                    var sortCount = Math.Min(maxNumberOfPeaks, data.Masses.Length);
+                    Array.Sort(data.Intensities, data.Masses);
+                    Array.Reverse(data.Intensities);
+                    Array.Reverse(data.Masses);
+                    Array.Sort(data.Masses, data.Intensities, 0, sortCount);
+
+                    var masses = new double[sortCount];
+                    var intensities = new double[sortCount];
+                    Array.Copy(data.Masses, masses, sortCount);
+                    Array.Copy(data.Intensities, intensities, sortCount);
+                    data = new SimpleScanAccessTruncated(masses, intensities);
+                }
+                else
+                {
+                    // Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z,
+                    // we have observed a few cases in certain scans of certain datasets that points with
+                    // similar m/z values are swapped and ths slightly out of order
+
+                    //Array.Sort(data.Masses, data.Intensities);
+                }
+
+                return data;
             }
             catch (AccessViolationException)
             {
