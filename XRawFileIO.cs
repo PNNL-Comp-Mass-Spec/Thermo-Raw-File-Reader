@@ -2375,18 +2375,25 @@ namespace ThermoRawFileReader
                     return null;
                 }
 
-                ISimpleScanAccess data = null;
+                ISimpleScanAccess data;
+
+                // If the scan is already centroided, Scan.FromFile and Scan.ToCentroid either won't work,
+                // or will cause centroided data to be re-centroided.
+                // Thus, use GetSegmentedScanFromScanNumber if centroidData is false or if .IsCentroided is true
 
                 if (centroidData && !scanInfo.IsCentroided)
                 {
-                    // If the scan is already centroided, these methods of getting the data either won't work, or will cause centroided data to be re-centroided.
 
-                    // Dataset was acquired on an Orbitrap, Exactive, or FTMS instrument, and the scan type includes additional peak information by default, including centroids: fastest access
-                    // Scan was acquired on an ion trap, so those don't exist: quick, reliable check.
-                    //data = mXRawFile.GetSimplifiedCentroids(scan); // This internally calls the same function as GetCentroidStream, and then copies data to new arrays.
+                    // Dataset was acquired on an Orbitrap, Exactive, or FTMS instrument, and the scan type
+                    // includes additional peak information by default, including centroids: fastest access
+
+                    // Option 1: data = mXRawFile.GetSimplifiedCentroids(scan);
+                    //           This internally calls the same function as GetCentroidStream, and then copies data to new arrays.
+                    // Option 2: Directly call GetCentroidStream
+
                     data = mXRawFile.GetCentroidStream(scan, false);
 
-                    if (data == null || data.Masses == null || data.Masses.Length <= 0)
+                    if (data?.Masses == null || data.Masses.Length <= 0)
                     {
                         // Centroiding for profile-mode ion trap data, or for other scan types that don't include a centroid stream
                         var scanProf = Scan.FromFile(mXRawFile, scan);
@@ -2396,7 +2403,10 @@ namespace ThermoRawFileReader
                 }
                 else
                 {
-                    //data = mXRawFile.GetSimplifiedScan(scan); // This internally calls the same function as GetSegmentedScanFromScanNumber, and then copies data to new arrays.
+                    // Option 1: var scanData = mXRawFile.GetSimplifiedScan(scan);
+                    //           This internally calls the same function as GetSegmentedScanFromScanNumber, and then copies data to new arrays.
+                    // Option 2: Directly call GetSegmentedScanFromScanNumber
+
                     var scanData = mXRawFile.GetSegmentedScanFromScanNumber(scan, null);
                     data = new SimpleScanAccessTruncated(scanData.Positions, scanData.Intensities);
                 }
@@ -2418,11 +2428,21 @@ namespace ThermoRawFileReader
                 }
                 else
                 {
+
                     // Although the data returned by mXRawFile.GetMassListFromScanNum is generally sorted by m/z,
                     // we have observed a few cases in certain scans of certain datasets that points with
-                    // similar m/z values are swapped and ths slightly out of order
+                    // similar m/z values are swapped and thus slightly out of order
 
-                    //Array.Sort(data.Masses, data.Intensities);
+                    // Prior to September 2018, we assured the data was sorted using Array.Sort(data.Masses, data.Intensities);
+                    // However, we now leave the data as-is for efficiency purposes
+
+                    // ReSharper disable CommentTypo
+
+                    // If the calling application requires that the data be sorted by m/z, it will need to verify the sort
+                    // DeconTools does this in DeconTools.Backend.Runs.XCaliburRun2.GetMassSpectrum
+
+                    // ReSharper restore CommentTypo
+
                 }
 
                 return data;
