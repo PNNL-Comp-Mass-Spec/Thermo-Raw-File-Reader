@@ -837,9 +837,9 @@ namespace Test_ThermoRawFileReader
 
         }
 
-        #region "clsEventNotifier events"
+        #region "EventNotifier events"
 
-        private static void RegisterEvents(clsEventNotifier oProcessingClass)
+        private static void RegisterEvents(EventNotifier oProcessingClass)
         {
             oProcessingClass.DebugEvent += DebugEventHandler;
             oProcessingClass.StatusEvent += StatusEventHandler;
