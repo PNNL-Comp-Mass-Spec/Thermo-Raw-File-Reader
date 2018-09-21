@@ -51,7 +51,7 @@ namespace ThermoRawFileReader
     /// Class for reading Thermo .raw files
     /// </summary>
     [CLSCompliant(true)]
-    public class XRawFileIO : clsEventNotifier, IDisposable
+    public class XRawFileIO : EventNotifier, IDisposable
     {
         #region "Constants"
 
