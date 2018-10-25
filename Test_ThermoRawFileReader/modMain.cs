@@ -12,7 +12,7 @@ namespace Test_ThermoRawFileReader
     {
         private const string PROGRAM_DATE = "October 25, 2018";
 
-        private const string DEFAULT_FILE_PATH = @"..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW";
+        private const string DEFAULT_FILE_PATH = @"..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw";
 
         private static string mSourceFilePath;
         private static int mStartScan;
@@ -100,6 +100,10 @@ namespace Test_ThermoRawFileReader
 
         }
 
+        /// <summary>
+        /// Parse scan filters in one or more _ScanStatsEx.txt files
+        /// </summary>
+        /// <param name="directoryToScan"></param>
         private static void ExtractScanFilters(string directoryToScan)
         {
             var reParentIonMZ = new Regex("[0-9.]+@", RegexOptions.Compiled);
@@ -124,12 +128,31 @@ namespace Test_ThermoRawFileReader
             // Values are a tuple of <ScanFilter, Observation Count, First Dataset>
             var scanFilters = new Dictionary<string, Tuple<string, int, string>>();
 
-            // Find the Masic _ScanStatsEx.txt files in the source folder
-            var scanStatsFiles = diWorkingDirectory.GetFiles("*_ScanStatsEx.txt");
+            // Find the MASIC _ScanStatsEx.txt files in the source directory
+            var scanStatsFiles = workingDirectory.GetFiles("*_ScanStatsEx.txt").ToList();
 
-            if (scanStatsFiles.Length == 0)
+            if (scanStatsFiles.Count > 0)
             {
-                Console.WriteLine("No _ScanStatsEx.txt files were found in folder " + diWorkingDirectory.FullName);
+                Console.WriteLine("Parsing _ScanStatsEx.txt files in directory " + PathUtils.CompactPathString(workingDirectory.FullName, 75));
+            }
+            else
+            {
+                // Look instead in the directory that has DEFAULT_FILE_PATH
+                var defaultFile = new FileInfo(DEFAULT_FILE_PATH);
+                if (defaultFile.Directory != null && defaultFile.Directory.Exists)
+                {
+                    var alternateScanStatsFiles = defaultFile.Directory.GetFiles("*_ScanStatsEx.txt").ToList();
+                    if (alternateScanStatsFiles.Count > 0)
+                    {
+                        scanStatsFiles.AddRange(alternateScanStatsFiles);
+                        Console.WriteLine("Parsing _ScanStatsEx.txt files in directory " + PathUtils.CompactPathString(defaultFile.Directory.FullName, 75));
+                    }
+                }
+            }
+
+            if (scanStatsFiles.Count == 0)
+            {
+                Console.WriteLine("No _ScanStatsEx.txt files were found in directory " + workingDirectory.FullName);
                 return;
             }
 
@@ -245,6 +268,10 @@ namespace Test_ThermoRawFileReader
                     writer.WriteLine("{0}\t{1}\t{2}\t{3}", filter.Key, filter.Value.Item1, filter.Value.Item2, filter.Value.Item3);
                 }
             }
+
+            Console.WriteLine();
+            Console.WriteLine("Scan filters written to file " + PathUtils.CompactPathString(outputFilePath, 95));
+        }
 
         private static string GetAppVersion()
         {
