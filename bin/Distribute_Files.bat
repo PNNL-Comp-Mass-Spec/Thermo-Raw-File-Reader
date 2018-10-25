@@ -109,5 +109,9 @@ xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\KevinCrowell\LipidT
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\KevinCrowell\LipidTools\LipidTools\bin\x86\Debug" /Y
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\KevinCrowell\LipidTools\LipidToolsTest\bin\x86\Debug" /Y
 
+xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\Bryson_Gibbons\Thermo-Raw-Metadata-Plotter\Lib" /y
+xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\Bryson_Gibbons\Thermo-Raw-Metadata-Plotter\ThermoRawMetadataPlotter\bin\Debug" /y
+
+
 @echo off
 pause
