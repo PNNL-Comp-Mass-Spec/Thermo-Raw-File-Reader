@@ -403,6 +403,11 @@ namespace RawFileReaderTests
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 3316)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 71147)]
+        [TestCase("Angiotensin_325-CID.raw", 10)]
+        [TestCase("Angiotensin_325-ETciD-15.raw", 10)]
+        [TestCase("Angiotensin_325-ETD.raw", 10)]
+        [TestCase("Angiotensin_325-HCD.raw", 10)]
+        [TestCase("Angiotensin_AllScans.raw", 1775)]
         public void TestGetNumScans(string rawFileName, int expectedResult)
         {
             var dataFile = GetRawDataFile(rawFileName);
@@ -412,7 +417,8 @@ namespace RawFileReaderTests
                 var scanCount = reader.GetNumScans();
 
                 Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
-                Assert.AreEqual(expectedResult, scanCount, "Scan count mismatch");
+                if (expectedResult >= 0)
+                    Assert.AreEqual(expectedResult, scanCount, "Scan count mismatch");
             }
         }
 
@@ -430,6 +436,11 @@ namespace RawFileReaderTests
         [TestCase("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw", 25200, 25600, 20, 381, 39157)]
         [TestCase("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 5900, 6000, 8, 93, 7906)]
         [TestCase("IPA-blank-07_25Oct13_Gimli.raw", 1750, 1850, 101, 0, 3085)]
+        [TestCase("Angiotensin_325-CID.raw", 1, 10, 0, 10, 10)]
+        [TestCase("Angiotensin_325-ETciD-15.raw", 1, 10, 0, 10, 10)]
+        [TestCase("Angiotensin_325-ETD.raw", 1, 10, 0, 10, 10)]
+        [TestCase("Angiotensin_325-HCD.raw", 1, 10, 0, 10, 10)]
+        [TestCase("Angiotensin_AllScans.raw", 1000, 1200, 10, 191, 1775)]
         public void TestGetScanCountsByScanType(
             string rawFileName,
             int scanStart,
@@ -507,7 +518,24 @@ namespace RawFileReaderTests
             AddExpectedTupleAndCount(expectedData, file12, "HCD-HMSn", "FTMS + c ESI d Full ms2 0@hcd30.00", 38);
             AddExpectedTupleAndCount(expectedData, file12, "HCD-HMSn", "FTMS + c ESI d Full ms2 0@hcd35.00", 8);
 
+            const string file13 = "Angiotensin_AllScans";
+            AddExpectedTupleAndCount(expectedData, file13, "ETD-HMSn", "FTMS + c ESI d Full ms2 0@etd121.47", 28);
+            AddExpectedTupleAndCount(expectedData, file13, "ETD-HMSn", "FTMS + c ESI d Full ms2 0@etd53.99", 20);
+            AddExpectedTupleAndCount(expectedData, file13, "HCD-HMSn", "FTMS + c ESI d Full ms2 0@hcd30.00", 47);
+            AddExpectedTupleAndCount(expectedData, file13, "HMS", "FTMS + p ESI Full ms", 10);
+            AddExpectedTupleAndCount(expectedData, file13, "SA_CID-HMSn", "FTMS + c ESI d sa Full ms2 0@etd121.47 0@cid30.00", 28);
+            AddExpectedTupleAndCount(expectedData, file13, "SA_CID-HMSn", "FTMS + c ESI d sa Full ms2 0@etd53.99 0@cid30.00", 20);
+            AddExpectedTupleAndCount(expectedData, file13, "SA_HCD-HMSn", "FTMS + c ESI d sa Full ms2 0@etd121.47 0@hcd30.00", 28);
+            AddExpectedTupleAndCount(expectedData, file13, "SA_HCD-HMSn", "FTMS + c ESI d sa Full ms2 0@etd53.99 0@hcd30.00", 20);
+
+
             AddExpectedTupleAndCount(expectedData, "IPA-blank-07_25Oct13_Gimli", "Zoom-MS", "ITMS + p NSI Z ms", 101);
+
+            AddExpectedTupleAndCount(expectedData, "Angiotensin_325-CID", "CID-HMSn", "FTMS + p ESI Full ms2 0@cid35.00", 10);
+
+            AddExpectedTupleAndCount(expectedData, "Angiotensin_325-ETciD-15", "SA_CID-HMSn", "FTMS + p ESI sa Full ms2 0@etd50.00 0@cid15.00", 10);
+            AddExpectedTupleAndCount(expectedData, "Angiotensin_325-ETD", "SA_CID-HMSn", "FTMS + p ESI sa Full ms2 0@etd50.00 0@cid15.00", 10);
+            AddExpectedTupleAndCount(expectedData, "Angiotensin_325-HCD", "HCD-HMSn", "FTMS + p ESI Full ms2 0@hcd30.00", 10);
 
 
             var dataFile = GetRawDataFile(rawFileName);
@@ -555,25 +583,36 @@ namespace RawFileReaderTests
                 Console.WriteLine("scanCountMS1={0}", scanCountMS1);
                 Console.WriteLine("scanCountMS2={0}", scanCountMS2);
 
-                Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
-                Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+                if (expectedMS1 >= 0)
+                    Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+
+                if (expectedMS2 >= 0)
+                    Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
 
                 if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedScanInfo))
                 {
-                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                    // Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                    expectedScanInfo = new Dictionary<Tuple<string, string>, int>();
                 }
 
                 Console.WriteLine("{0,-5} {1,5} {2}", "Valid", "Count", "ScanType");
 
                 foreach (var scanType in (from item in scanTypeCountsActual orderby item.Key select item))
                 {
+                    if (expectedScanInfo.Count == 0)
+                    {
+                        Console.WriteLine("{0,5} {1}", scanType.Value, scanType.Key);
+                        continue;
+                    }
+
                     if (expectedScanInfo.TryGetValue(scanType.Key, out var expectedScanCount))
                     {
                         var isValid = scanType.Value == expectedScanCount;
 
                         Console.WriteLine("{0,-5} {1,5} {2}", isValid, scanType.Value, scanType.Key);
 
-                        Assert.AreEqual(expectedScanCount, scanType.Value, "Scan type count mismatch");
+                        if (expectedScanCount >= 0)
+                            Assert.AreEqual(expectedScanCount, scanType.Value, "Scan type count mismatch");
                     }
                     else
                     {
