@@ -290,8 +290,8 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Duplicate the MRM info
         /// </summary>
-        /// <param name="udtSource"></param>
-        /// <param name="udtTarget"></param>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
         public static void DuplicateMRMInfo(MRMInfo source, out MRMInfo target)
         {
             target = new MRMInfo();
@@ -386,7 +386,7 @@ namespace ThermoRawFileReader
         public double TotalIonCurrent;
 
         /// <summary>
-        /// Mase Peak m/z
+        /// Base Peak m/z
         /// </summary>
         public double BasePeakMZ;
 
