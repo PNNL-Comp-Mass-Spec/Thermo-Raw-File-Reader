@@ -292,14 +292,14 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="udtSource"></param>
         /// <param name="udtTarget"></param>
-        public static void DuplicateMRMInfo(MRMInfo udtSource, out MRMInfo udtTarget)
+        public static void DuplicateMRMInfo(MRMInfo source, out MRMInfo target)
         {
-            udtTarget = new MRMInfo();
-            udtTarget.Clear();
+            target = new MRMInfo();
+            target.Clear();
 
-            foreach (var item in udtSource.MRMMassList)
+            foreach (var item in source.MRMMassList)
             {
-                udtTarget.MRMMassList.Add(item);
+                target.MRMMassList.Add(item);
             }
         }
 
@@ -310,21 +310,21 @@ namespace ThermoRawFileReader
         [Obsolete("Use parameterless constructor instead")]
         public static MRMInfo InitializeMRMInfo()
         {
-            var udtMRMInfo = new MRMInfo();
-            udtMRMInfo.Clear();
+            var mrmInfo = new MRMInfo();
+            mrmInfo.Clear();
 
-            return udtMRMInfo;
+            return mrmInfo;
         }
 
         /// <summary>
         /// Get an initialized MRMInfo object
         /// </summary>
-        /// <param name="udtMRMInfo"></param>
+        /// <param name="mrmInfo"></param>
         /// <param name="initialMassCountCapacity"></param>
         [Obsolete("Use parameterless function InitializeMRMInfo instead")]
-        public static void InitializeMRMInfo(out MRMInfo udtMRMInfo, int initialMassCountCapacity)
+        public static void InitializeMRMInfo(out MRMInfo mrmInfo, int initialMassCountCapacity)
         {
-            udtMRMInfo = InitializeMRMInfo();
+            mrmInfo = InitializeMRMInfo();
         }
     }
 
