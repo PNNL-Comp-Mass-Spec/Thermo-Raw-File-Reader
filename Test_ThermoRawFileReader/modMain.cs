@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
+using System.Linq;
 using System.Text.RegularExpressions;
 using PRISM;
 using ThermoRawFileReader;
 
 namespace Test_ThermoRawFileReader
 {
-    static class modMain
+    static class Program
     {
+        private const string PROGRAM_DATE = "October 25, 2018";
 
         private const string DEFAULT_FILE_PATH = @"..\Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW";
 
@@ -62,6 +63,7 @@ namespace Test_ThermoRawFileReader
                     workingDirectory = commandLineParser.RetrieveNonSwitchParameter(0);
                 }
                 ExtractScanFilters(workingDirectory);
+                System.Threading.Thread.Sleep(1500);
                 return;
             }
 
@@ -243,6 +245,10 @@ namespace Test_ThermoRawFileReader
                     writer.WriteLine("{0}\t{1}\t{2}\t{3}", filter.Key, filter.Value.Item1, filter.Value.Item2, filter.Value.Item3);
                 }
             }
+
+        private static string GetAppVersion()
+        {
+            return PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
         }
 
         private static void ParseCommandLineParameters(clsParseCommandLine commandLineParser)
@@ -320,25 +326,30 @@ namespace Test_ThermoRawFileReader
 
         private static void ShowProgramHelp()
         {
-            var assemblyNameLocation = Assembly.GetExecutingAssembly().Location;
+            var exePath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppPath();
 
-            Console.WriteLine("Program syntax:" + Environment.NewLine + Path.GetFileName(assemblyNameLocation));
-            Console.WriteLine(" InputFilePath.raw [/GetFilters] [/Centroid] [/Sum] [/Start:Scan] [/End:Scan]");
-            Console.WriteLine(" [/ScanInfo:IntervalScans] [/NoScanData] [/NoScanEvents] [/NoCE] [/MSLevelOnly]");
-            Console.WriteLine(" [/Trace]");
+            Console.WriteLine("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath));
+            Console.WriteLine("  InputFilePath.raw [/GetFilters] [/Centroid] [/Sum] [/Start:Scan] [/End:Scan]");
+            Console.WriteLine("  [/ScanInfo:IntervalScans] [/NoScanData] [/NoScanEvents] [/NoCE] [/MSLevelOnly]");
+            Console.WriteLine("  [/Trace]");
 
-            Console.WriteLine("Running this program without any parameters it will process file " + DEFAULT_FILE_PATH);
+            Console.WriteLine();
+            Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                  "Running this program without any parameters it will process file " + DEFAULT_FILE_PATH));
             Console.WriteLine();
             Console.WriteLine("The first parameter specifies the file to read");
             Console.WriteLine();
-            Console.WriteLine("Use /GetFilters to compile a list of scan filters in the file, then exit");
+            Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                  "Use /GetFilters to compile and display a list of scan filters in any MASIC _ScanStatsEx.txt files in the working directory"));
             Console.WriteLine();
             Console.WriteLine("Without /GetFilters, data is read from the file, either from all scans, or a scan range");
             Console.WriteLine("Use /Start and /End to limit the scan range to process");
             Console.WriteLine("If /Start and /End are not provided, will read every 21 scans");
             Console.WriteLine();
             Console.WriteLine("Use /Centroid to centroid the data when reading");
-            Console.WriteLine("Use /Sum to test summing the data across 15 scans (each spectrum will be shown twice; once with summing and once without)");
+            Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                  "Use /Sum to test summing the data across 15 scans " +
+                                  "(each spectrum will be shown twice; once with summing and once without)"));
             Console.WriteLine();
             Console.WriteLine("While reading data, the scan number and elution time is displayed for each scan.");
             Console.WriteLine("To show this info every 5 scans, use /ScanInfo:5");
@@ -351,6 +362,18 @@ namespace Test_ThermoRawFileReader
             Console.WriteLine("Use /TestFilters to test the parsing of a set of standard scan filters");
             Console.WriteLine();
             Console.WriteLine("Use /Trace to display additional debug messages");
+            Console.WriteLine();
+            Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012");
+            Console.WriteLine("Version: " + GetAppVersion());
+            Console.WriteLine();
+
+            Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov");
+            Console.WriteLine("Website: https://omics.pnl.gov or https://panomics.pnnl.gov/");
+            Console.WriteLine();
+
+
+            // Delay for 1.5 seconds in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
+            System.Threading.Thread.Sleep(1500);
 
         }
 
