@@ -1,45 +1,83 @@
-The Thermo Raw File Reader is a .NET DLL that demonstrates how to read 
-Thermo-Finnigan .Raw files using Thermo's MS File Reader, which is 
-available on Thermo's website at http://sjsupport.thermofinnigan.com/public/detail.asp?id=703
+# Overview
 
-The Thermo Raw File Reader DLL provides several methods for parsing the information returned by MSFileReader, including:
-- Determining the parent ion m/z and fragmentation mode in a given scan filter
-- Determining the Ionization mode from a given scan filter
-- Extracting MRM masses listed in a given scan filter
-- Reporting the number of spectra in the .Raw file
-- Returning details on a specific spectrum
-- Obtaining the raw m/z and intensity values for a given spectrum
+The Thermo Raw File Reader is a .NET DLL that can be used to 
+extract data from Thermo .Raw files.  Prior to October 2018, 
+in order to use ThermoRawFileReader.dll you needed to either 
+download and install MSFileReader, or use batch file registerFiles.bat 
+in the lib directory to register MSFileReader.XRawfile2.dll
 
-The Test_ThermoRawFileReader folder contains a .NET command-line application 
-that illustrates how to interface with ThermoRawFileReaderDLL.dll
+Newer versions of ThermoRawFileReader.dll use NuGet package
+ThermoFisher.CommonCore.RawFileReader
 
-Prior to using ThermoRawFileReaderDLL.dll you must either download and install the MSFileReader,
-or use batch file registerFiles.bat in the lib folder to register MSFileReader.XRawfile2.dll
+## Details
 
--------------------------------------------------------------------------------
-Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+The Thermo Raw File Reader DLL provides several methods for parsing the information 
+returned by MSFileReader or ThermoFisher.CommonCore.RawFileReader, including:
+* Determining the parent ion m/z and fragmentation mode in a given scan filter
+* Determining the Ionization mode from a given scan filter
+* Extracting MRM masses listed in a given scan filter
+* Reporting the number of spectra in the .Raw file
+* Returning details on a specific spectrum
+* Obtaining the raw m/z and intensity values for a given spectrum
 
-E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
-Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
--------------------------------------------------------------------------------
+The Test_ThermoRawFileReader directory contains a .NET command-line application 
+that illustrates how to interface with ThermoRawFileReader.dll
 
-Licensed under the Apache License, Version 2.0; you may not use this file except 
+## Console Switches
+
+Test_ThermoRawFileReader is a command line application.  Syntax:
+
+```
+Test_ThermoRawFileReader.exe
+  InputFilePath.raw [/GetFilters] [/Centroid] [/Sum] [/Start:Scan] [/End:Scan]
+  [/ScanInfo:IntervalScans] [/NoScanData] [/NoScanEvents] [/NoCE] [/MSLevelOnly]
+  [/Trace]
+```
+
+Running this program without any parameters it will process file
+`..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw`
+
+The first parameter specifies the file to read
+
+Use /GetFilters to compile and display a list of scan filters in any MASIC
+_ScanStatsEx.txt files in the working directory
+
+Without /GetFilters, data is read from the file, either from all scans, or a scan range
+
+Use /Start and /End to limit the scan range to process\
+
+If /Start and /End are not provided, will read every 21 scans
+
+Use /Centroid to centroid the data when reading
+
+Use /Sum to test summing the data across 15 scans (each spectrum will 
+be shown twice; once with summing and once without)
+
+While reading data, the scan number and elution time is displayed for each scan.
+To show this info every 5 scans, use /ScanInfo:5
+
+Use /NoScanData to skip loading any scan data
+
+Use /NoScanEvents to skip loading any scan events
+
+Use /NoCE to skip trying to determine collision energies
+
+Use /MSLevelOnly to only load MS levels using GetMSLevel
+
+Use /TestFilters to test the parsing of a set of standard scan filters
+
+Use /Trace to display additional debug messages
+
+## Contacts
+
+Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) \
+E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov \
+Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
+
+## License
+
+Licensed under the 2-Clause BSD License; you may not use this file except 
 in compliance with the License.  You may obtain a copy of the License at 
-http://www.apache.org/licenses/LICENSE-2.0
+https://opensource.org/licenses/BSD-2-Clause
 
-All publications that result from the use of this software should include 
-the following acknowledgment statement:
- Portions of this research were supported by the W.R. Wiley Environmental 
- Molecular Science Laboratory, a national scientific user facility sponsored 
- by the U.S. Department of Energy's Office of Biological and Environmental 
- Research and located at PNNL.  PNNL is operated by Battelle Memorial Institute 
- for the U.S. Department of Energy under contract DE-AC05-76RL0 1830.
-
-Notice: This computer software was prepared by Battelle Memorial Institute, 
-hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the 
-Department of Energy (DOE).  All rights in the computer software are reserved 
-by DOE on behalf of the United States Government and the Contractor as 
-provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY 
-WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
-SOFTWARE.  This notice including this sentence must appear on any copies of 
-this computer software.
+Copyright 2018 Battelle Memorial Institute
