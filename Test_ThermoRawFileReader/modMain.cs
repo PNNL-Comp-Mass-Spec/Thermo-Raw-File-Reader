@@ -65,11 +65,12 @@ namespace Test_ThermoRawFileReader
                 return;
             }
 
-            var fiSourceFile = new FileInfo(mSourceFilePath);
+            var sourceFile = new FileInfo(mSourceFilePath);
 
-            if (!fiSourceFile.Exists)
+            if (!sourceFile.Exists)
             {
-                Console.WriteLine("File not found: " + fiSourceFile.FullName);
+                Console.WriteLine("File not found: " + sourceFile.FullName);
+                System.Threading.Thread.Sleep(1500);
                 return;
             }
 
@@ -78,17 +79,17 @@ namespace Test_ThermoRawFileReader
                 TestScanFilterParsing();
             }
 
-            TestReader(fiSourceFile.FullName, mCentroid, mTestSumming, mStartScan, mEndScan);
+            TestReader(sourceFile.FullName, mCentroid, mTestSumming, mStartScan, mEndScan);
 
             if (mCentroid)
             {
                 // Also process the file with centroiding off
-                TestReader(fiSourceFile.FullName, false, mTestSumming, mStartScan, mEndScan);
+                TestReader(sourceFile.FullName, false, mTestSumming, mStartScan, mEndScan);
             }
 
             if (mGetScanEvents)
             {
-                TestGetAllScanEvents(fiSourceFile.FullName);
+                TestGetAllScanEvents(sourceFile.FullName);
             }
 
             Console.WriteLine("Done");
@@ -110,16 +111,16 @@ namespace Test_ThermoRawFileReader
             var reSID = new Regex("sid=[0-9.]+", RegexOptions.Compiled);
 
 
-            var diWorkingDirectory = new DirectoryInfo(directoryToScan);
-            if (!diWorkingDirectory.Exists)
+            var workingDirectory = new DirectoryInfo(directoryToScan);
+            if (!workingDirectory.Exists)
             {
-                Console.WriteLine("Folder not found: " + diWorkingDirectory.FullName);
+                Console.WriteLine("Directory not found: " + workingDirectory.FullName);
                 return;
             }
 
             // Keys in this dictionary are generic scan filters
             // Values are a tuple of <ScanFilter, Observation Count, First Dataset>
-            var lstFilters = new Dictionary<string, Tuple<string, int, string>>();
+            var scanFilters = new Dictionary<string, Tuple<string, int, string>>();
 
             // Find the Masic _ScanStatsEx.txt files in the source folder
             var scanStatsFiles = diWorkingDirectory.GetFiles("*_ScanStatsEx.txt");
@@ -130,8 +131,7 @@ namespace Test_ThermoRawFileReader
                 return;
             }
 
-            Console.WriteLine("Parsing _ScanStatsEx.txt files in folder " + diWorkingDirectory.Name);
-            var dtLastProgress = DateTime.UtcNow;
+            var lastProgress = DateTime.UtcNow;
 
             var filesProcessed = 0;
             foreach (var dataFile in scanStatsFiles)
@@ -205,16 +205,16 @@ namespace Test_ThermoRawFileReader
                             scanFilterGeneric = scanFilterGeneric.Replace(match.Value, match.Groups[1].Value + "00.00");
                         }
 
-                        if (lstFilters.TryGetValue(scanFilterGeneric, out var filterStats))
+                        if (scanFilters.TryGetValue(scanFilterGeneric, out var filterStats))
                         {
-                            lstFilters[scanFilterGeneric] = new Tuple<string, int, string>(
+                            scanFilters[scanFilterGeneric] = new Tuple<string, int, string>(
                                 filterStats.Item1,
                                 filterStats.Item2 + 1,
                                 filterStats.Item3);
                         }
                         else
                         {
-                            lstFilters.Add(scanFilterGeneric, new Tuple<string, int, string>(scanFilter, 1, dataFile.Name));
+                            scanFilters.Add(scanFilterGeneric, new Tuple<string, int, string>(scanFilter, 1, dataFile.Name));
                         }
 
                     }
@@ -222,23 +222,23 @@ namespace Test_ThermoRawFileReader
 
                 filesProcessed++;
 
-                if (DateTime.UtcNow.Subtract(dtLastProgress).TotalSeconds >= 2)
+                if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds >= 2)
                 {
-                    dtLastProgress = DateTime.UtcNow;
-                    var percentComplete = filesProcessed / (float)scanStatsFiles.Length * 100.0;
+                    lastProgress = DateTime.UtcNow;
+                    var percentComplete = filesProcessed / (float)scanStatsFiles.Count * 100.0;
                     Console.WriteLine(percentComplete.ToString("0.0") + "% complete");
                 }
 
             }
 
             // Write the cached scan filters
-            var outputFilePath = Path.Combine(diWorkingDirectory.FullName, "ScanFiltersFound.txt");
+            var outputFilePath = Path.Combine(workingDirectory.FullName, "ScanFiltersFound.txt");
 
             using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
             {
                 writer.WriteLine("{0}\t{1}\t{2}\t{3}", "Generic_Filter", "Example_Filter", "Count", "First_Dataset");
 
-                foreach (var filter in lstFilters)
+                foreach (var filter in scanFilters)
                 {
                     writer.WriteLine("{0}\t{1}\t{2}\t{3}", filter.Key, filter.Value.Item1, filter.Value.Item2, filter.Value.Item3);
                 }
@@ -414,7 +414,7 @@ namespace Test_ThermoRawFileReader
 
                     var numScans = oReader.GetNumScans();
 
-                    var strCollisionEnergies = string.Empty;
+                    var collisionEnergyList = string.Empty;
 
                     ShowMethod(oReader);
 
@@ -474,32 +474,32 @@ namespace Test_ThermoRawFileReader
 
                         if (mLoadCollisionEnergies)
                         {
-                            var lstCollisionEnergies = oReader.GetCollisionEnergy(scanNum);
+                            var collisionEnergies = oReader.GetCollisionEnergy(scanNum);
 
-                            if (lstCollisionEnergies.Count == 0)
+                            if (collisionEnergies.Count == 0)
                             {
-                                strCollisionEnergies = string.Empty;
+                                collisionEnergyList = string.Empty;
                             }
-                            else if (lstCollisionEnergies.Count >= 1)
+                            else if (collisionEnergies.Count >= 1)
                             {
-                                strCollisionEnergies = lstCollisionEnergies[0].ToString("0.0");
+                                collisionEnergyList = collisionEnergies[0].ToString("0.0");
 
-                                if (lstCollisionEnergies.Count > 1)
+                                if (collisionEnergies.Count > 1)
                                 {
-                                    for (var intIndex = 1; intIndex <= lstCollisionEnergies.Count - 1; intIndex++)
+                                    for (var index = 1; index <= collisionEnergies.Count - 1; index++)
                                     {
-                                        strCollisionEnergies += ", " + lstCollisionEnergies[intIndex].ToString("0.0");
+                                        collisionEnergyList += ", " + collisionEnergies[index].ToString("0.0");
                                     }
                                 }
                             }
 
-                            if (string.IsNullOrEmpty(strCollisionEnergies))
+                            if (string.IsNullOrEmpty(collisionEnergyList))
                             {
                                 Console.WriteLine();
                             }
                             else
                             {
-                                Console.WriteLine("; CE " + strCollisionEnergies);
+                                Console.WriteLine("; CE " + collisionEnergyList);
                             }
                         }
 
@@ -529,7 +529,7 @@ namespace Test_ThermoRawFileReader
                         Console.WriteLine();
                         Console.WriteLine("Spectrum for scan " + scanNum);
 
-                        oReader.GetScanData(scanNum, out var dblMzList, out var dblIntensityList, 0, centroid);
+                        oReader.GetScanData(scanNum, out var mzList, out var intensityList, 0, centroid);
 
                         var mzDisplayStepSize = 50;
                         if (centroid)
@@ -537,9 +537,9 @@ namespace Test_ThermoRawFileReader
                             mzDisplayStepSize = 1;
                         }
 
-                        for (var iDataPoint = 0; iDataPoint <= dblMzList.Length - 1; iDataPoint += mzDisplayStepSize)
+                        for (var i = 0; i <= mzList.Length - 1; i += mzDisplayStepSize)
                         {
-                            Console.WriteLine("  " + dblMzList[iDataPoint].ToString("0.000") + " mz   " + dblIntensityList[iDataPoint].ToString("0"));
+                            Console.WriteLine("  " + mzList[i].ToString("0.000") + " mz   " + intensityList[i].ToString("0"));
                         }
                         Console.WriteLine();
 
@@ -549,14 +549,16 @@ namespace Test_ThermoRawFileReader
                         {
                             // Get the data for scan scanNum through scanNum + 15
 
-                            oReader.GetScanDataSumScans(scanNum, scanNum + scansToSum, out var dblMassIntensityPairs, 0, centroid);
+#pragma warning disable 618
+                            oReader.GetScanDataSumScans(scanNum, scanNum + scansToSum, out var massIntensityPairs, 0, centroid);
+#pragma warning restore 618
 
                             Console.WriteLine("Summed spectrum, scans " + scanNum + " through " + (scanNum + scansToSum));
 
-                            for (var iDataPoint = 0; iDataPoint <= dblMassIntensityPairs.GetLength(1) - 1; iDataPoint += 50)
+                            for (var i = 0; i <= massIntensityPairs.GetLength(1) - 1; i += 50)
                             {
-                                Console.WriteLine("  " + dblMassIntensityPairs[0, iDataPoint].ToString("0.000") + " mz   " +
-                                                  dblMassIntensityPairs[1, iDataPoint].ToString("0"));
+                                Console.WriteLine("  " + massIntensityPairs[0, i].ToString("0.000") + " mz   " +
+                                                  massIntensityPairs[1, i].ToString("0"));
                             }
 
                             Console.WriteLine();
@@ -571,15 +573,15 @@ namespace Test_ThermoRawFileReader
                         Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", "Mass", "Intensity", "Resolution", "Baseline", "Noise", "Charge");
 
 
-                        for (var iDataPoint = 0; iDataPoint <= dataCount - 1; iDataPoint += 50)
+                        for (var i = 0; i <= dataCount - 1; i += 50)
                         {
                             Console.WriteLine("{0,12:F3}{1,12:0}{2,12:0}{3,12:F1}{4,12:0}{5,12:0}",
-                                              ftLabelData[iDataPoint].Mass,
-                                              ftLabelData[iDataPoint].Intensity,
-                                              ftLabelData[iDataPoint].Resolution,
-                                              ftLabelData[iDataPoint].Baseline,
-                                              ftLabelData[iDataPoint].Noise,
-                                              ftLabelData[iDataPoint].Charge);
+                                              ftLabelData[i].Mass,
+                                              ftLabelData[i].Intensity,
+                                              ftLabelData[i].Resolution,
+                                              ftLabelData[i].Baseline,
+                                              ftLabelData[i].Noise,
+                                              ftLabelData[i].Charge);
                         }
 
                         dataCount = oReader.GetScanPrecisionData(scanNum, out var ftPrecisionData);
@@ -588,13 +590,13 @@ namespace Test_ThermoRawFileReader
                         Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}", "Mass", "Intensity", "AccuracyMMU", "AccuracyPPM", "Resolution");
 
 
-                        for (var iDataPoint = 0; iDataPoint <= dataCount - 1; iDataPoint += 50)
+                        for (var i = 0; i <= dataCount - 1; i += 50)
                         {
                             Console.WriteLine("{0,12:F3}{1,12:0}{2,12:F3}{3,12:F3}{4,12:0}",
-                                              ftPrecisionData[iDataPoint].Mass,
-                                              ftPrecisionData[iDataPoint].Intensity, ftPrecisionData[iDataPoint].AccuracyMMU,
-                                              ftPrecisionData[iDataPoint].AccuracyPPM,
-                                              ftPrecisionData[iDataPoint].Resolution);
+                                              ftPrecisionData[i].Mass,
+                                              ftPrecisionData[i].Intensity, ftPrecisionData[i].AccuracyMMU,
+                                              ftPrecisionData[i].AccuracyPPM,
+                                              ftPrecisionData[i].Resolution);
                         }
                     }
 
@@ -758,7 +760,6 @@ namespace Test_ThermoRawFileReader
                 "FTMS + p NSI d SIM ms"
             };
 
-
             foreach (var filterItem in filterList)
             {
                 var genericFilter = XRawFileIO.MakeGenericFinniganScanFilter(filterItem);
@@ -767,25 +768,25 @@ namespace Test_ThermoRawFileReader
                 Console.WriteLine(filterItem);
                 Console.WriteLine("  {0,-12} {1}", scanType, genericFilter);
 
-                var validMS1Scan = XRawFileIO.ValidateMSScan(filterItem, out var intMSLevel, out var blnSIMScan, out var eMRMScanType, out var blnZoomScan);
+                var validMS1Scan = XRawFileIO.ValidateMSScan(filterItem, out var msLevel, out var simScan, out var mrmScanType, out var zoomScan);
 
                 if (validMS1Scan)
                 {
-                    if (eMRMScanType == MRMScanTypeConstants.NotMRM)
+                    if (mrmScanType == MRMScanTypeConstants.NotMRM)
                     {
-                        Console.Write("  MSLevel={0}", intMSLevel);
+                        Console.Write("  MSLevel={0}", msLevel);
                     }
                     else
                     {
-                        Console.Write("  MSLevel={0}, MRMScanType={1}", intMSLevel, eMRMScanType);
+                        Console.Write("  MSLevel={0}, MRMScanType={1}", msLevel, mrmScanType);
                     }
 
-                    if (blnSIMScan)
+                    if (simScan)
                     {
                         Console.Write(", SIM Scan");
                     }
 
-                    if (blnZoomScan)
+                    if (zoomScan)
                     {
                         Console.Write(", Zoom Scan");
                     }
@@ -839,12 +840,12 @@ namespace Test_ThermoRawFileReader
 
         #region "EventNotifier events"
 
-        private static void RegisterEvents(EventNotifier oProcessingClass)
+        private static void RegisterEvents(EventNotifier processingClass)
         {
-            oProcessingClass.DebugEvent += DebugEventHandler;
-            oProcessingClass.StatusEvent += StatusEventHandler;
-            oProcessingClass.ErrorEvent += ErrorEventHandler;
-            oProcessingClass.WarningEvent += WarningEventHandler;
+            processingClass.DebugEvent += DebugEventHandler;
+            processingClass.StatusEvent += StatusEventHandler;
+            processingClass.ErrorEvent += ErrorEventHandler;
+            processingClass.WarningEvent += WarningEventHandler;
         }
 
         private static void DebugEventHandler(string message)

@@ -921,12 +921,12 @@ namespace ThermoRawFileReader
                             parentIonMz = double.Parse(mzText.Substring(0, charIndex + 1));
                             matchFound = true;
 
-                            var udtParentIonMzOnly = new udtParentIonInfoType();
-                            udtParentIonMzOnly.Clear();
-                            udtParentIonMzOnly.MSLevel = msLevel;
-                            udtParentIonMzOnly.ParentIonMZ = parentIonMz;
+                            var parentIonMzOnly = new udtParentIonInfoType();
+                            parentIonMzOnly.Clear();
+                            parentIonMzOnly.MSLevel = msLevel;
+                            parentIonMzOnly.ParentIonMZ = parentIonMz;
 
-                            parentIons.Add(udtParentIonMzOnly);
+                            parentIons.Add(parentIonMzOnly);
 
                         }
                         catch (Exception)
@@ -1400,7 +1400,7 @@ namespace ThermoRawFileReader
 
                     scanInfo.StoreScanEvents(scanEventNames, scanEventValues);
 
-                    // Look for the entry in strLabels named "Scan Event:"
+                    // Look for the entry in scanInfo.ScanEvents named "Scan Event:"
                     // Entries for the LCQ are:
                     //   Wideband Activation
                     //   Micro Scan Count
@@ -2911,20 +2911,20 @@ namespace ThermoRawFileReader
 
         }
 
-        private bool TuneMethodsMatch(TuneMethod udtMethod1, TuneMethod udtMethod2)
+        private bool TuneMethodsMatch(TuneMethod method1, TuneMethod method2)
         {
 
-            if (udtMethod1.Settings.Count != udtMethod2.Settings.Count)
+            if (method1.Settings.Count != method2.Settings.Count)
             {
                 // Different segment number of setting count; the methods don't match
                 return false;
             }
 
-            for (var intIndex = 0; intIndex <= udtMethod1.Settings.Count - 1; intIndex++)
+            for (var index = 0; index <= method1.Settings.Count - 1; index++)
             {
-                if (udtMethod1.Settings[intIndex].Category != udtMethod2.Settings[intIndex].Category ||
-                    udtMethod1.Settings[intIndex].Name != udtMethod2.Settings[intIndex].Name ||
-                    udtMethod1.Settings[intIndex].Value != udtMethod2.Settings[intIndex].Value)
+                if (method1.Settings[index].Category != method2.Settings[index].Category ||
+                    method1.Settings[index].Name != method2.Settings[index].Name ||
+                    method1.Settings[index].Value != method2.Settings[index].Value)
                 {
                     // Different segment data; the methods don't match
                     return false;
