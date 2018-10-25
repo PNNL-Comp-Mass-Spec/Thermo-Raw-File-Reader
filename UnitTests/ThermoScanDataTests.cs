@@ -10,7 +10,6 @@ namespace RawFileReaderTests
     [TestFixture]
     public class ThermoScanDataTests
     {
-        private const bool USE_REMOTE_PATHS = true;
 
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")]
@@ -1895,27 +1894,29 @@ namespace RawFileReaderTests
 
         private FileInfo GetRawDataFile(string rawFileName)
         {
-            FileInfo dataFile;
+            var localDirPath = Path.Combine("..", "..", "Docs");
+            var remoteDirPath = @"\\proto-2\UnitTest_Files\ThermoRawFileReader";
 
-#pragma warning disable 0162
-            if (USE_REMOTE_PATHS)
-            {
-                dataFile = new FileInfo(Path.Combine(@"\\proto-2\UnitTest_Files\ThermoRawFileReader", rawFileName));
-            }
-            else
-            {
-                dataFile = new FileInfo(Path.Combine(@"F:\MSData\UnitTestFiles", rawFileName));
-            }
-#pragma warning restore 0162
+            var localFile = new FileInfo(Path.Combine(localDirPath, rawFileName));
 
-            if (!dataFile.Exists)
+            if (localFile.Exists)
             {
-                var msg = "File not found: " + dataFile.FullName;
-                Console.WriteLine(msg);
-                Assert.Fail(msg);
+                return localFile;
             }
 
-            return dataFile;
+            // Look for the file on Proto-2
+            var remoteFile = new FileInfo(Path.Combine(remoteDirPath, rawFileName));
+            if (remoteFile.Exists)
+            {
+                return remoteFile;
+            }
+
+            var msg = string.Format("File not found: {0}; checked in both {1} and {2}", rawFileName, localDirPath, remoteDirPath);
+
+            Console.WriteLine(msg);
+            Assert.Fail(msg);
+
+            return null;
         }
     }
 }
