@@ -32,11 +32,12 @@
     <DocumentationFile>bin\Release\ThermoRawFileReader.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PRISM, Version=2.5.10.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\PRISM-Library.2.5.10\lib\net45\PRISM.dll</HintPath>
+    <Reference Include="PRISM, Version=2.5.11.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PRISM-Library.2.5.11\lib\net45\PRISM.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />

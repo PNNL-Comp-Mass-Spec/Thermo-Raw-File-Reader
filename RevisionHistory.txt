@@ -1,5 +1,11 @@
 ThermoRawFileReader Change Log
 
+Version 3.0.6991; February 21, 2019
+	- Updated version of PRISM.dll that does not depend on System.IO.Compression
+
+Verison 3.0.6943; January 4, 2019
+	- Use ThermoFisher.CommonCore C# DLLs instead of MSFileReader.XRawfile2.dll
+
 Version 2.0.6507; October 25, 2017
 	- Skip scan events with an empty or null name
 	- Trim trailing whitespace from scan event values
