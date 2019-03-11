@@ -16,8 +16,6 @@ xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\BrianLaMarche\MultiAl
 
 xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\DLLLibrary\" /Y /D
 
-xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\SangtaeKim\InformedProteomics\lib\" /Y /D
-
 xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\KevinCrowell\IMSDemultiplexer\IMSDemultiplexer\lib\" /Y /D
 pause
 
