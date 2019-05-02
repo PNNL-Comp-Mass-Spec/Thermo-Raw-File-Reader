@@ -14,19 +14,14 @@ using ThermoFisher.CommonCore.RawFileReader;
 using ThermoFisher.CommonCore.BackgroundSubtraction;
 using ThermoFisher.CommonCore.Data.FilterEnums;
 
-// The methods in this class use ThermoFisher.CommonCore.Data.dll
+// The methods in this class use ThermoFisher.CommonCore.RawFileReader.dll
 // and related DLLs to extract scan header info and mass spec data (m/z and intensity lists)
 // from Thermo .Raw files (LTQ, LTQ-FT, Orbitrap, Exactive, TSQ, etc.)
 //
-// Required DLLs:
-//   ThermoFisher.CommonCore.BackgroundSubtraction.dll
-//   ThermoFisher.CommonCore.Data.dll
-//   ThermoFisher.CommonCore.MassPrecisionEstimator.dll
-//   ThermoFisher.CommonCore.RawFileReader.dll
-//
-// As described at http://planetorbitrap.com/rawfilereader#.W5BAoOhKjdM,
-// the DLLs can be obtained by contacting Jim Shofstahl via email (jim.Shofstahl@thermofisher.com)
-//
+// For more information about the ThermoFisher.CommonCore DLLs,
+// see the RawFileReaderLicense.doc file in the lib directory;
+// see also http://planetorbitrap.com/rawfilereader#.W5BAoOhKjdM
+// For questions, contact Jim Shofstahl at ThermoFisher.com
 
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe and Bryson Gibbons for the Department of Energy (PNNL, Richland, WA)
