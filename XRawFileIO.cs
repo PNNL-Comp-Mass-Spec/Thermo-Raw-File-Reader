@@ -453,7 +453,6 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Close the .raw file
         /// </summary>
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public void CloseRawFile()
         {
             try
@@ -1264,7 +1263,6 @@ namespace ThermoRawFileReader
         /// <param name="scan">Scan number</param>
         /// <param name="retentionTime">retention time</param>
         /// <returns>True if no error, False if an error</returns>
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
         public bool GetRetentionTime(int scan, out double retentionTime)
         {
             retentionTime = 0;
@@ -1296,7 +1294,6 @@ namespace ThermoRawFileReader
         /// <param name="scanInfo">Scan header info class</param>
         /// <returns>True if no error, False if an error</returns>
         /// <remarks></remarks>
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public bool GetScanInfo(int scan, out clsScanInfo scanInfo)
         {
 
@@ -1860,7 +1857,6 @@ namespace ThermoRawFileReader
 
         }
 
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         private void GetTuneData()
         {
             var numTuneData = mXRawFile.GetTuneDataCount();
@@ -2225,7 +2221,6 @@ namespace ThermoRawFileReader
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If maxNumberOfPeaks is 0 (or negative),  returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks, bool centroidData)
         {
             int dataCount;
@@ -2293,7 +2288,6 @@ namespace ThermoRawFileReader
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public int GetScanData2D(int scan, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
             try
@@ -2339,7 +2333,6 @@ namespace ThermoRawFileReader
         /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The scan data container, or null if an error</returns>
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         private ISimpleScanAccess ReadScanData(int scan, int maxNumberOfPeaks, bool centroidData)
         {
 
@@ -2478,7 +2471,6 @@ namespace ThermoRawFileReader
         /// <param name="ftLabelData">List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks></remarks>
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public int GetScanLabelData(int scan, out udtFTLabelInfoType[] ftLabelData)
         {
 
@@ -2616,7 +2608,6 @@ namespace ThermoRawFileReader
         /// <param name="massResolutionData">List of Intensity, Mass, AccuracyMMU, AccuracyPPM, and Resolution for each data point</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>This returns a subset of the data thatGetScanLabelData does, but with 2 additional fields.</remarks>
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public int GetScanPrecisionData(int scan, out udtMassPrecisionInfoType[] massResolutionData)
         {
 
@@ -2719,7 +2710,6 @@ namespace ThermoRawFileReader
         /// <param name="centroidData"></param>
         /// <returns>The number of data points</returns>
         /// <remarks></remarks>
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         public int GetScanDataSumScans(int scanFirst, int scanLast, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
 
@@ -3002,7 +2992,6 @@ namespace ThermoRawFileReader
         /// <param name="udtScanInfo">Scan header info struct</param>
         /// <returns>True if no error, False if an error</returns>
         /// <remarks></remarks>
-        // ToDo: remove this [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions()]
         [Obsolete("Use GetScanInfo that returns a class")]
         public bool GetScanInfo(int scan, out udtScanHeaderInfoType udtScanInfo)
         {
