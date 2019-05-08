@@ -2336,9 +2336,6 @@ namespace ThermoRawFileReader
         private ISimpleScanAccess ReadScanData(int scan, int maxNumberOfPeaks, bool centroidData)
         {
 
-            // Note that we're using function attribute HandleProcessCorruptedStateExceptions
-            // to force .NET to properly catch critical errors thrown by the XRawfile DLL
-
             if (scan < mFileInfo.ScanStart)
             {
                 scan = mFileInfo.ScanStart;
@@ -2474,9 +2471,6 @@ namespace ThermoRawFileReader
         public int GetScanLabelData(int scan, out udtFTLabelInfoType[] ftLabelData)
         {
 
-            // Note that we're using function attribute HandleProcessCorruptedStateExceptions
-            // to force .NET to properly catch critical errors thrown by the XRawfile DLL
-
             if (scan < mFileInfo.ScanStart)
             {
                 scan = mFileInfo.ScanStart;
@@ -2611,9 +2605,6 @@ namespace ThermoRawFileReader
         public int GetScanPrecisionData(int scan, out udtMassPrecisionInfoType[] massResolutionData)
         {
 
-            // Note that we're using function attribute HandleProcessCorruptedStateExceptions
-            // to force .NET to properly catch critical errors thrown by the XRawfile DLL
-
             var dataCount = 0;
 
             if (scan < mFileInfo.ScanStart)
@@ -2712,9 +2703,6 @@ namespace ThermoRawFileReader
         /// <remarks></remarks>
         public int GetScanDataSumScans(int scanFirst, int scanLast, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
-
-            // Note that we're using function attribute HandleProcessCorruptedStateExceptions
-            // to force .NET to properly catch critical errors thrown by the XRawfile DLL
 
             try
             {
