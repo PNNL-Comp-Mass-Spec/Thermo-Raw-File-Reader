@@ -1,4 +1,10 @@
 @echo off
+echo.
+echo Be sure to compile in Release mode before continuing
+echo.
+
+pause
+
 echo Copy the DLL, PDF, and XML to Lib directories
 @echo on
 xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /Y /D
