@@ -10,7 +10,7 @@ namespace Test_ThermoRawFileReader
 {
     static class Program
     {
-        private const string PROGRAM_DATE = "October 25, 2018";
+        private const string PROGRAM_DATE = "May 9, 2019";
 
         private const string DEFAULT_FILE_PATH = @"..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw";
 
