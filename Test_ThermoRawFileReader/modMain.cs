@@ -417,10 +417,10 @@ namespace Test_ThermoRawFileReader
             {
                 if (rawFilePath.StartsWith(@"\\"))
                 {
-                    // Remove the server name from the path
+                    // Remove the server name from the path and change to forward slashes
                     // For example, switch
                     // from: \\proto-2\UnitTest_Files\ThermoRawFileReader\QC_Mam_16_01_1
-                    // to    \UnitTest_Files\ThermoRawFileReader\QC_Mam_16_01_1
+                    // to    /UnitTest_Files/ThermoRawFileReader/QC_Mam_16_01_1
                     var slashIndex = rawFilePath.IndexOf('\\', 2);
                     if (slashIndex > 2)
                     {
@@ -440,18 +440,19 @@ namespace Test_ThermoRawFileReader
 
             var rawFile = new FileInfo(rawFilePath);
 
-
             if (rawFile.Exists)
                 return rawFile;
 
             // File not found via the full path; check in the local directory
-            if (File.Exists(rawFile.Name))
+            var alternateFile = new FileInfo(rawFile.Name);
+
+            if (alternateFile.Exists)
             {
-                return new FileInfo(rawFile.Name);
+                return alternateFile;
             }
 
             Console.WriteLine("File not found: " + rawFilePath);
-            Console.WriteLine("Also considered " + new FileInfo(rawFile.Name).FullName);
+            Console.WriteLine("Also considered " + alternateFile.FullName);
 
             return null;
         }
