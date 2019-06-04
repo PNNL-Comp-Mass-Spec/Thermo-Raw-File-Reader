@@ -1113,7 +1113,7 @@ namespace ThermoRawFileReader
 
                 try
                 {
-                    activationType = (ActivationTypeConstants) (int) activationTypeCode;
+                    activationType = (ActivationTypeConstants)(int)activationTypeCode;
                 }
                 catch
                 {
@@ -2912,9 +2912,19 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Constructor
+        /// Constructor with an options parameter
         /// </summary>
-        /// <param name="rawFilePath">Optional .raw file to open</param>
+        /// <param name="options">Thermo reader options</param>
+        /// <remarks></remarks>
+        public XRawFileIO(ThermoReaderOptions options)
+            : this(string.Empty, options)
+        {
+        }
+
+        /// <summary>
+        /// Constructor with a file path parameter
+        /// </summary>
+        /// <param name="rawFilePath">Thermo .raw file to open (empty string to not open a file)</param>
         /// <param name="traceMode">When true, additional messages are reported via Debug events</param>
         public XRawFileIO(string rawFilePath, bool traceMode = false)
             : this(rawFilePath, new ThermoReaderOptions(), traceMode)
@@ -2922,9 +2932,9 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Constructor
+        /// Constructor with file path, options, and optionally a trace flag
         /// </summary>
-        /// <param name="rawFilePath">Optional .raw file to open</param>
+        /// <param name="rawFilePath">Thermo .raw file to open (empty string to not open a file)</param>
         /// <param name="options">Thermo reader options</param>
         /// <param name="traceMode">When true, additional messages are reported via Debug events</param>
         public XRawFileIO(string rawFilePath, ThermoReaderOptions options, bool traceMode = false)
