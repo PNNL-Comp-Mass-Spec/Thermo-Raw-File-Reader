@@ -2892,8 +2892,20 @@ namespace ThermoRawFileReader
         /// <param name="rawFilePath">Optional .raw file to open</param>
         /// <param name="traceMode">When true, additional messages are reported via Debug events</param>
         public XRawFileIO(string rawFilePath, bool traceMode = false)
+            : this(rawFilePath, new ThermoReaderOptions(), traceMode)
+        {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="rawFilePath">Optional .raw file to open</param>
+        /// <param name="options">Thermo reader options</param>
+        /// <param name="traceMode">When true, additional messages are reported via Debug events</param>
+        public XRawFileIO(string rawFilePath, ThermoReaderOptions options, bool traceMode = false)
         {
             TraceMode = traceMode;
+            Options = options;
 
             if (!string.IsNullOrWhiteSpace(rawFilePath))
             {
