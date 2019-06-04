@@ -32,9 +32,6 @@
     <DocumentationFile>bin\Release\ThermoRawFileReader.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PRISM, Version=2.5.11.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\PRISM-Library.2.5.11\lib\net45\PRISM.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
@@ -44,18 +41,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="ThermoFisher.CommonCore.BackgroundSubtraction">
-      <HintPath>packages\ThermoFisher.CommonCore.RawFileReader.4.0.26\lib\Windows\ThermoFisher.CommonCore.BackgroundSubtraction.dll</HintPath>
-    </Reference>
-    <Reference Include="ThermoFisher.CommonCore.Data">
-      <HintPath>packages\ThermoFisher.CommonCore.RawFileReader.4.0.26\lib\Windows\ThermoFisher.CommonCore.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="ThermoFisher.CommonCore.MassPrecisionEstimator">
-      <HintPath>packages\ThermoFisher.CommonCore.RawFileReader.4.0.26\lib\Windows\ThermoFisher.CommonCore.MassPrecisionEstimator.dll</HintPath>
-    </Reference>
-    <Reference Include="ThermoFisher.CommonCore.RawFileReader">
-      <HintPath>packages\ThermoFisher.CommonCore.RawFileReader.4.0.26\lib\Windows\ThermoFisher.CommonCore.RawFileReader.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataObjects.cs" />
@@ -65,7 +50,24 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="PRISM-Library">
+      <Version>2.5.20</Version>
+    </PackageReference>
+    <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction">
+      <Version>4.0.89</Version>
+    </PackageReference>
+    <PackageReference Include="ThermoFisher.CommonCore.Data">
+      <Version>4.0.89</Version>
+    </PackageReference>
+    <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator">
+      <Version>4.0.89</Version>
+    </PackageReference>
+    <PackageReference Include="ThermoFisher.CommonCore.RawFileReader">
+      <Version>4.0.89</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
