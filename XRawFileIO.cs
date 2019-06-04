@@ -208,6 +208,16 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
+        /// First scan number in the .Raw file
+        /// </summary>
+        public int ScanStart => FileInfo.ScanStart;
+
+        /// <summary>
+        /// Last scan number in the .Raw file
+        /// </summary>
+        public int ScanEnd => FileInfo.ScanEnd;
+
+        /// <summary>
         /// When true, additional messages are reported via Debug events
         /// </summary>
         public bool TraceMode { get; set; }
