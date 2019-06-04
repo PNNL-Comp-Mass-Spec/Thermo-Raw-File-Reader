@@ -135,15 +135,6 @@ namespace ThermoRawFileReader
         /// </summary>
         protected readonly RawFileInfo mFileInfo = new RawFileInfo();
 
-        /// <summary>
-        /// MS Method Information
-        /// </summary>
-        protected bool mLoadMSMethodInfo = true;
-
-        /// <summary>
-        /// MS Tune Information
-        /// </summary>
-        protected bool mLoadMSTuneInfo = true;
 
         /// <summary>
         /// Reader that implements ThermoFisher.CommonCore.Data.Interfaces.IRawDataPlus
@@ -186,22 +177,9 @@ namespace ThermoRawFileReader
         public RawFileInfo FileInfo => mFileInfo;
 
         /// <summary>
-        /// MS Method information
+        /// Thermo reader options
         /// </summary>
-        public bool LoadMSMethodInfo
-        {
-            get => mLoadMSMethodInfo;
-            set => mLoadMSMethodInfo = value;
-        }
-
-        /// <summary>
-        /// MS Tune Info
-        /// </summary>
-        public bool LoadMSTuneInfo
-        {
-            get => mLoadMSTuneInfo;
-            set => mLoadMSTuneInfo = value;
-        }
+        public ThermoReaderOptions Options { get; }
 
         /// <summary>
         /// Maximum number of scan metadata cached; defaults to 50000
