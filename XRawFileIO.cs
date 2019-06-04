@@ -1030,25 +1030,7 @@ namespace ThermoRawFileReader
 
                 if (Options.LoadMSMethodInfo)
                 {
-                    if (TraceMode)
-                        OnDebugEvent("Accessing mXRawFile.InstrumentMethodsCount");
-
-                    var methodCount = mXRawFile.InstrumentMethodsCount;
-
-                    if (TraceMode)
-                        OnDebugEvent(string.Format("File has {0} methods", methodCount));
-
-                    for (var methodIndex = 0; methodIndex < methodCount; methodIndex++)
-                    {
-                        if (TraceMode)
-                            OnDebugEvent("Retrieving method from index " + methodIndex);
-
-                        var methodText = mXRawFile.GetInstrumentMethod(methodIndex);
-                        if (!string.IsNullOrWhiteSpace(methodText))
-                        {
-                            mFileInfo.InstMethods.Add(methodText);
-                        }
-                    }
+                    LoadMethodInfo();
                 }
 
                 if (TraceMode)
@@ -1958,6 +1940,45 @@ namespace ThermoRawFileReader
                 }
             }
 
+        }
+
+        private void LoadMethodInfo()
+        {
+            if (TraceMode)
+                OnDebugEvent("Accessing mXRawFile.InstrumentMethodsCount");
+            try
+            {
+
+                var methodCount = mXRawFile.InstrumentMethodsCount;
+
+                if (TraceMode)
+                    OnDebugEvent(string.Format("File has {0} methods", methodCount));
+
+                for (var methodIndex = 0; methodIndex < methodCount; methodIndex++)
+                {
+                    if (TraceMode)
+                        OnDebugEvent("Retrieving method from index " + methodIndex);
+
+                    var methodText = mXRawFile.GetInstrumentMethod(methodIndex);
+                    if (!string.IsNullOrWhiteSpace(methodText))
+                    {
+                        FileInfo.InstMethods.Add(methodText);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Path.DirectorySeparatorChar == '/')
+                {
+                    RaiseWarningMessage("Error while reading the method info: " + ex.Message);
+                }
+                else
+                {
+                    RaiseErrorMessage("Error while reading the method info: " + ex.Message);
+                }
+
+                RaiseWarningMessage("Consider instantiating the XRawFileIO class with a ThermoReaderOptions object that has LoadMSMethodInfo = false");
+            }
         }
 
         /// <summary>
