@@ -112,24 +112,23 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Maximum size of the scan info cache
         /// </summary>
-        protected int mMaxScansToCacheInfo = 50000;
+        private int mMaxScansToCacheInfo = 50000;
 
         /// <summary>
         /// The the full path to the currently loaded .raw file
         /// </summary>
-        protected string mCachedFilePath;
+        private string mCachedFilePath;
 
         /// <summary>
         /// The scan info cache
         /// </summary>
-        protected readonly Dictionary<int, clsScanInfo> mCachedScanInfo = new Dictionary<int, clsScanInfo>();
+        private readonly Dictionary<int, clsScanInfo> mCachedScanInfo = new Dictionary<int, clsScanInfo>();
 
         /// <summary>
         /// This linked list tracks the scan numbers stored in mCachedScanInfo,
         /// allowing for quickly determining the oldest scan added to the cache when the cache limit is reached
         /// </summary>
-        protected readonly LinkedList<int> mCachedScans = new LinkedList<int>();
-
+        private readonly LinkedList<int> mCachedScans = new LinkedList<int>();
 
         /// <summary>
         /// Reader that implements ThermoFisher.CommonCore.Data.Interfaces.IRawDataPlus
@@ -162,6 +161,7 @@ namespace ThermoRawFileReader
         private static readonly Regex mCollisionSpecs = new Regex(COLLISION_SPEC_REGEX, RegexOptions.Compiled);
 
         private static readonly Regex mMzWithoutCE = new Regex(MZ_WITHOUT_COLLISION_ENERGY, RegexOptions.Compiled);
+
         #endregion
 
         #region "Properties"
@@ -249,7 +249,7 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="message"></param>
         /// <param name="ex">Optional exception</param>
-        protected void RaiseErrorMessage(string message, Exception ex = null)
+        private void RaiseErrorMessage(string message, Exception ex = null)
         {
 
             OnErrorEvent(message, ex);
@@ -263,7 +263,7 @@ namespace ThermoRawFileReader
         /// Report a warning message to the warning event handler
         /// </summary>
         /// <param name="message"></param>
-        protected void RaiseWarningMessage(string message)
+        private void RaiseWarningMessage(string message)
         {
             OnWarningEvent(message);
 
@@ -980,7 +980,7 @@ namespace ThermoRawFileReader
         /// Populate mFileInfo
         /// </summary>
         /// <returns>True if no error, False if an error</returns>
-        protected bool FillFileInfo()
+        private bool FillFileInfo()
         {
 
             try
