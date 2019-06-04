@@ -144,6 +144,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// The monoisotopic parent ion m/z, as determined by the thermo software
         /// </summary>
+        [Obsolete("Unused")]
         public double ParentIonMonoisotopicMZ
         {
             get
@@ -157,8 +158,9 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// The monoisotopic parent ion m/z, as determined by the thermo software
+        /// The monoisotopic parent ion m/z, as determined by the Thermo software
         /// </summary>
+        [Obsolete("Unused")]
         public double IsolationWindowTargetMZ
         {
             get
@@ -172,8 +174,9 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// The parent ion charge state, as determined by the thermo software
+        /// The parent ion charge state, as determined by the Thermo software
         /// </summary>
+        [Obsolete("Unused")]
         public int ChargeState
         {
             get
