@@ -1086,8 +1086,7 @@ namespace ThermoRawFileReader
             }
             catch (Exception ex)
             {
-                var msg = "Error: Exception in FillFileInfo: " + ex.Message;
-                RaiseErrorMessage(msg, ex);
+                RaiseErrorMessage("Error: Exception in FillFileInfo: ", ex);
                 return false;
             }
 
