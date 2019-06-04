@@ -465,7 +465,11 @@ namespace Test_ThermoRawFileReader
                 if (rawFile == null)
                     return;
 
-                using (var oReader = new XRawFileIO(rawFile.FullName, mTraceMode))
+                var options = new ThermoReaderOptions {
+                    LoadMSMethodInfo = mLoadMethods
+                };
+
+                using (var reader = new XRawFileIO(rawFile.FullName, options, mTraceMode))
                 {
                     RegisterEvents(reader);
 
@@ -503,6 +507,12 @@ namespace Test_ThermoRawFileReader
 
                     for (var scanNum = scanStart; scanNum <= scanEnd; scanNum += scanStep)
                     {
+                        if (scanNum > reader.ScanEnd)
+                        {
+                            ConsoleMsgUtils.ShowWarning("Exiting for loop since scan number {0} is greater than the max scan number, {1}", scanNum, reader.ScanEnd);
+                            break;
+                        }
+
                         if (mOnlyLoadMSLevelInfo)
                         {
                             var msLevel = reader.GetMSLevel(scanNum);
@@ -695,7 +705,12 @@ namespace Test_ThermoRawFileReader
                 var scansRead = 0;
                 var scansReadSinceLastProgress = 0;
 
-                using (var oReader = new XRawFileIO(rawFile.FullName))
+                var options = new ThermoReaderOptions
+                {
+                    LoadMSMethodInfo = mLoadMethods
+                };
+
+                using (var reader = new XRawFileIO(rawFile.FullName, options))
                 {
                     var scanCount = reader.GetNumScans();
 
