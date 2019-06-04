@@ -185,8 +185,8 @@ namespace RawFileReaderTests
 
         [Test]
         [TestCase("blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900, 190, 211, 0, 0)]
-        [TestCase("Corrupt_Qc_Shew_13_04_pt1_a_5Sep13_Cougar_13-06-14.raw", 500, 600, 0, 0, 500, 600)]
-        [TestCase("Corrupt_QC_Shew_07_03_pt25_e_6Apr08_Falcon_Fst-75-1.raw", 500, 600, 0, 0, 500, 600)]
+        [TestCase("Corrupt_Qc_Shew_13_04_pt1_a_5Sep13_Cougar_13-06-14.raw", 0, -1, -1, 0, 0, 0)]
+        [TestCase("Corrupt_QC_Shew_07_03_pt25_e_6Apr08_Falcon_Fst-75-1.raw", 0, -1, -1, 0, 0, 0)]
         // When using XRawfile, this dataset caused .NET to become unstable and abort the unit tests
         // In contrast, ThermoFisher.CommonCore.RawFileReader can open this file
         [TestCase("Corrupt_Scans6920-7021_AID_STM_013_101104_06_LTQ_16Nov04_Earth_0904-8.raw", 6900, 7050, 25, 126, 6920, 7021)]
@@ -210,7 +210,12 @@ namespace RawFileReaderTests
                     var scanCount = reader.GetNumScans();
                     Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
 
-                    if (expectedMS1 + expectedMS2 == 0)
+                    if (expectedMS1 == -1 && expectedMS2 == 0)
+                    {
+                        Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
+                        Assert.IsTrue(scanCount == -1, "ScanCount is not -1");
+                    }
+                    else if (expectedMS1 + expectedMS2 == 0)
                     {
                         Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
                         Assert.IsTrue(scanCount <= 0, "ScanCount is non-zero, while we expected it to be 0");
@@ -286,8 +291,11 @@ namespace RawFileReaderTests
                     Console.WriteLine("scanCountMS1={0}", scanCountMS1);
                     Console.WriteLine("scanCountMS2={0}", scanCountMS2);
 
-                    Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
-                    Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+                    if (expectedMS1 >= 0)
+                        Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+
+                    if (expectedMS2 >= 0)
+                        Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
 
                 }
             }
@@ -738,7 +746,7 @@ namespace RawFileReaderTests
                                   "ParentIonMZ", "ActivationType", "CollisionMode",
                                   "IonMode", "IsCentroided", "IsFTMS",
                                   "ScanEvents.Count", "StatusLog.Count",
-                                  "IonInjectionTime" ,"FilterText");
+                                  "IonInjectionTime", "FilterText");
 
                 var scanCountMS1 = 0;
                 var scanCountMS2 = 0;
