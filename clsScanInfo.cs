@@ -11,31 +11,6 @@ namespace ThermoRawFileReader
     public class clsScanInfo
     {
 
-        #region "Member variables"
-
-        /// <summary>
-        /// UTC Time that this scan info was cached
-        /// </summary>
-        protected readonly DateTime mCacheDateUTC;
-
-        /// <summary>
-        /// Scan number
-        /// </summary>
-        protected readonly int mScanNumber;
-
-        /// <summary>
-        /// Scan event data
-        /// </summary>
-        /// <remarks>Ignores scan events with a blank or null event name</remarks>
-        protected readonly List<KeyValuePair<string, string>> mScanEvents;
-
-        /// <summary>
-        /// Status Log data
-        /// </summary>
-        /// <remarks>Includes blank events that separate log sections</remarks>
-        protected readonly List<KeyValuePair<string, string>> mStatusLog;
-        #endregion
-
         #region "Properties"
 
         /// <summary>
@@ -44,7 +19,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>Used for determining which cached scan info can be discarded if too many scans become cached</remarks>
-        public DateTime CacheDateUTC => mCacheDateUTC;
+        public DateTime CacheDateUTC { get; }
 
         /// <summary>
         /// Scan number
@@ -52,7 +27,7 @@ namespace ThermoRawFileReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public int ScanNumber => mScanNumber;
+        public int ScanNumber { get; }
 
         /// <summary>
         /// MS Level
@@ -288,16 +263,16 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <value></value>
         /// <returns>List of key/value pairs</returns>
-        /// <remarks></remarks>
-        public List<KeyValuePair<string, string>> ScanEvents => mScanEvents;
+        /// <remarks>Ignores scan events with a blank or null event name</remarks>
+        public List<KeyValuePair<string, string>> ScanEvents { get; }
 
         /// <summary>
         /// Status log data
         /// </summary>
         /// <value></value>
         /// <returns>List of key/value pairs</returns>
-        /// <remarks></remarks>
-        public List<KeyValuePair<string, string>> StatusLog => mStatusLog;
+        /// <remarks>Includes blank events that separate log sections</remarks>
+        public List<KeyValuePair<string, string>> StatusLog { get; }
 
         #endregion
 
@@ -310,15 +285,15 @@ namespace ThermoRawFileReader
         public clsScanInfo(int scan)
         {
             NumPeaks = -1;
-            mScanNumber = scan;
-            mCacheDateUTC = DateTime.UtcNow;
+            ScanNumber = scan;
+            CacheDateUTC = DateTime.UtcNow;
 
             FilterText = string.Empty;
             CollisionMode = string.Empty;
             ActivationType = ActivationTypeConstants.Unknown;
 
-            mScanEvents = new List<KeyValuePair<string, string>>();
-            mStatusLog = new List<KeyValuePair<string, string>>();
+            ScanEvents = new List<KeyValuePair<string, string>>();
+            StatusLog = new List<KeyValuePair<string, string>>();
         }
 
         /// <summary>
@@ -339,7 +314,7 @@ namespace ThermoRawFileReader
         /// <remarks></remarks>
         public void StoreScanEvents(string[] eventNames, string[] eventValues)
         {
-            StoreParallelStrings(mScanEvents, eventNames, eventValues, true, true);
+            StoreParallelStrings(ScanEvents, eventNames, eventValues, true, true);
         }
 
         /// <summary>
@@ -350,7 +325,7 @@ namespace ThermoRawFileReader
         /// <remarks></remarks>
         public void StoreStatusLog(string[] logNames, string[] logValues)
         {
-            StoreParallelStrings(mStatusLog, logNames, logValues);
+            StoreParallelStrings(StatusLog, logNames, logValues);
         }
 
         /// <summary>
@@ -368,9 +343,9 @@ namespace ThermoRawFileReader
 
             if (partialMatchToStart) {
                 // Partial match
-                results = from item in mScanEvents where item.Key.ToLower().StartsWith(eventName.ToLower()) select item;
+                results = from item in ScanEvents where item.Key.ToLower().StartsWith(eventName.ToLower()) select item;
             } else {
-                results = from item in mScanEvents where string.Equals(item.Key, eventName, StringComparison.InvariantCultureIgnoreCase) select item;
+                results = from item in ScanEvents where string.Equals(item.Key, eventName, StringComparison.InvariantCultureIgnoreCase) select item;
             }
 
             foreach (var item in results) {

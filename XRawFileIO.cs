@@ -130,11 +130,6 @@ namespace ThermoRawFileReader
         /// </summary>
         protected readonly LinkedList<int> mCachedScans = new LinkedList<int>();
 
-        /// <summary>
-        /// File info for the currently loaded .raw file
-        /// </summary>
-        protected readonly RawFileInfo mFileInfo = new RawFileInfo();
-
 
         /// <summary>
         /// Reader that implements ThermoFisher.CommonCore.Data.Interfaces.IRawDataPlus
@@ -172,9 +167,9 @@ namespace ThermoRawFileReader
         #region "Properties"
 
         /// <summary>
-        /// Get FileInfo about the currently loaded .raw file
+        /// File info for the currently loaded .raw file
         /// </summary>
-        public RawFileInfo FileInfo => mFileInfo;
+        public RawFileInfo FileInfo { get; } = new RawFileInfo();
 
         /// <summary>
         /// Thermo reader options
@@ -451,7 +446,7 @@ namespace ThermoRawFileReader
             {
                 mXRawFile = null;
                 mCachedFilePath = string.Empty;
-                mFileInfo.Clear();
+                FileInfo.Clear();
             }
 
         }
@@ -996,15 +991,15 @@ namespace ThermoRawFileReader
                 // Make sure the MS controller is selected
                 if (!SetMSController())
                 {
-                    mFileInfo.Clear();
-                    mFileInfo.CorruptFile = true;
+                    FileInfo.Clear();
+                    FileInfo.CorruptFile = true;
                     return false;
                 }
 
-                mFileInfo.Clear();
+                FileInfo.Clear();
 
-                mFileInfo.CreationDate = DateTime.MinValue;
-                mFileInfo.CreationDate = mXRawFileHeader.CreationDate;
+                FileInfo.CreationDate = DateTime.MinValue;
+                FileInfo.CreationDate = mXRawFileHeader.CreationDate;
 
                 if (TraceMode)
                     OnDebugEvent("Checking mXRawFile.IsError");
@@ -1018,22 +1013,22 @@ namespace ThermoRawFileReader
                 if (TraceMode)
                     OnDebugEvent("Accessing mXRawFileHeader.WhoCreatedId");
 
-                mFileInfo.CreatorID = mXRawFileHeader.WhoCreatedId;
+                FileInfo.CreatorID = mXRawFileHeader.WhoCreatedId;
 
                 if (TraceMode)
                     OnDebugEvent("Accessing mXRawFile.GetInstrumentData");
 
                 var instData = mXRawFile.GetInstrumentData();
 
-                mFileInfo.InstFlags = instData.Flags;
+                FileInfo.InstFlags = instData.Flags;
 
-                mFileInfo.InstHardwareVersion = instData.HardwareVersion;
+                FileInfo.InstHardwareVersion = instData.HardwareVersion;
 
-                mFileInfo.InstSoftwareVersion = instData.SoftwareVersion;
+                FileInfo.InstSoftwareVersion = instData.SoftwareVersion;
 
-                mFileInfo.InstMethods.Clear();
+                FileInfo.InstMethods.Clear();
 
-                if (mLoadMSMethodInfo)
+                if (Options.LoadMSMethodInfo)
                 {
                     if (TraceMode)
                         OnDebugEvent("Accessing mXRawFile.InstrumentMethodsCount");
@@ -1059,39 +1054,39 @@ namespace ThermoRawFileReader
                 if (TraceMode)
                     OnDebugEvent("Defining the model, name, description, and serial number");
 
-                mFileInfo.InstModel = instData.Model;
-                mFileInfo.InstName = instData.Name;
-                mFileInfo.InstrumentDescription = mXRawFileHeader.FileDescription;
-                mFileInfo.InstSerialNumber = instData.SerialNumber;
+                FileInfo.InstModel = instData.Model;
+                FileInfo.InstName = instData.Name;
+                FileInfo.InstrumentDescription = mXRawFileHeader.FileDescription;
+                FileInfo.InstSerialNumber = instData.SerialNumber;
 
-                mFileInfo.VersionNumber = mXRawFileHeader.Revision;
+                FileInfo.VersionNumber = mXRawFileHeader.Revision;
 
                 if (TraceMode)
                     OnDebugEvent("Accessing mXRawFile.RunHeaderEx");
 
                 var runData = mXRawFile.RunHeaderEx;
 
-                mFileInfo.MassResolution = runData.MassResolution;
+                FileInfo.MassResolution = runData.MassResolution;
 
-                mFileInfo.ScanStart = runData.FirstSpectrum;
-                mFileInfo.ScanEnd = runData.LastSpectrum;
+                FileInfo.ScanStart = runData.FirstSpectrum;
+                FileInfo.ScanEnd = runData.LastSpectrum;
 
-                mFileInfo.AcquisitionFilename = string.Empty;
+                FileInfo.AcquisitionFilename = string.Empty;
 
                 // Note that the following are typically blank
-                mFileInfo.AcquisitionDate = mXRawFileHeader.CreationDate.ToString(CultureInfo.InvariantCulture);
+                FileInfo.AcquisitionDate = mXRawFileHeader.CreationDate.ToString(CultureInfo.InvariantCulture);
                 //mXRawFile.GetAcquisitionFileName(mFileInfo.AcquisitionFilename); // DEPRECATED
-                mFileInfo.Comment1 = runData.Comment1;
-                mFileInfo.Comment2 = runData.Comment2;
+                FileInfo.Comment1 = runData.Comment1;
+                FileInfo.Comment2 = runData.Comment2;
 
                 var sampleInfo = mXRawFile.SampleInformation;
 
-                mFileInfo.SampleName = sampleInfo.SampleName;
-                mFileInfo.SampleComment = sampleInfo.Comment;
+                FileInfo.SampleName = sampleInfo.SampleName;
+                FileInfo.SampleComment = sampleInfo.Comment;
 
-                mFileInfo.TuneMethods = new List<TuneMethod>();
+                FileInfo.TuneMethods = new List<TuneMethod>();
 
-                if (mLoadMSTuneInfo)
+                if (Options.LoadMSTuneInfo)
                 {
                     GetTuneData();
                 }
@@ -1281,13 +1276,13 @@ namespace ThermoRawFileReader
                 return true;
             }
 
-            if (scan < mFileInfo.ScanStart)
+            if (scan < FileInfo.ScanStart)
             {
-                scan = mFileInfo.ScanStart;
+                scan = FileInfo.ScanStart;
             }
-            else if (scan > mFileInfo.ScanEnd)
+            else if (scan > FileInfo.ScanEnd)
             {
-                scan = mFileInfo.ScanEnd;
+                scan = FileInfo.ScanEnd;
             }
 
             scanInfo = new clsScanInfo(scan);
@@ -1951,14 +1946,14 @@ namespace ThermoRawFileReader
 
                 }
 
-                if (mFileInfo.TuneMethods.Count == 0)
-                    mFileInfo.TuneMethods.Add(newTuneMethod);
+                if (FileInfo.TuneMethods.Count == 0)
+                    FileInfo.TuneMethods.Add(newTuneMethod);
                 else
                 {
                     // Compare this tune method to the previous one; if identical, don't keep it
-                    if (!TuneMethodsMatch(mFileInfo.TuneMethods.Last(), newTuneMethod))
+                    if (!TuneMethodsMatch(FileInfo.TuneMethods.Last(), newTuneMethod))
                     {
-                        mFileInfo.TuneMethods.Add(newTuneMethod);
+                        FileInfo.TuneMethods.Add(newTuneMethod);
                     }
                 }
             }
@@ -2314,13 +2309,13 @@ namespace ThermoRawFileReader
         private ISimpleScanAccess ReadScanData(int scan, int maxNumberOfPeaks, bool centroidData)
         {
 
-            if (scan < mFileInfo.ScanStart)
+            if (scan < FileInfo.ScanStart)
             {
-                scan = mFileInfo.ScanStart;
+                scan = FileInfo.ScanStart;
             }
-            else if (scan > mFileInfo.ScanEnd)
+            else if (scan > FileInfo.ScanEnd)
             {
-                scan = mFileInfo.ScanEnd;
+                scan = FileInfo.ScanEnd;
             }
 
             if (!GetScanInfo(scan, out clsScanInfo scanInfo))
@@ -2449,13 +2444,13 @@ namespace ThermoRawFileReader
         public int GetScanLabelData(int scan, out udtFTLabelInfoType[] ftLabelData)
         {
 
-            if (scan < mFileInfo.ScanStart)
+            if (scan < FileInfo.ScanStart)
             {
-                scan = mFileInfo.ScanStart;
+                scan = FileInfo.ScanStart;
             }
-            else if (scan > mFileInfo.ScanEnd)
+            else if (scan > FileInfo.ScanEnd)
             {
-                scan = mFileInfo.ScanEnd;
+                scan = FileInfo.ScanEnd;
             }
 
 
@@ -2585,13 +2580,13 @@ namespace ThermoRawFileReader
 
             var dataCount = 0;
 
-            if (scan < mFileInfo.ScanStart)
+            if (scan < FileInfo.ScanStart)
             {
-                scan = mFileInfo.ScanStart;
+                scan = FileInfo.ScanStart;
             }
-            else if (scan > mFileInfo.ScanEnd)
+            else if (scan > FileInfo.ScanEnd)
             {
-                scan = mFileInfo.ScanEnd;
+                scan = FileInfo.ScanEnd;
             }
 
 
@@ -2706,25 +2701,25 @@ namespace ThermoRawFileReader
                     return -1;
                 }
 
-                if (scanFirst < mFileInfo.ScanStart)
+                if (scanFirst < FileInfo.ScanStart)
                 {
-                    scanFirst = mFileInfo.ScanStart;
+                    scanFirst = FileInfo.ScanStart;
                 }
-                else if (scanFirst > mFileInfo.ScanEnd)
+                else if (scanFirst > FileInfo.ScanEnd)
                 {
-                    scanFirst = mFileInfo.ScanEnd;
+                    scanFirst = FileInfo.ScanEnd;
                 }
 
                 if (scanLast < scanFirst)
                     scanLast = scanFirst;
 
-                if (scanLast < mFileInfo.ScanStart)
+                if (scanLast < FileInfo.ScanStart)
                 {
-                    scanLast = mFileInfo.ScanStart;
+                    scanLast = FileInfo.ScanStart;
                 }
-                else if (scanLast > mFileInfo.ScanEnd)
+                else if (scanLast > FileInfo.ScanEnd)
                 {
-                    scanLast = mFileInfo.ScanEnd;
+                    scanLast = FileInfo.ScanEnd;
                 }
 
                 if (maxNumberOfPeaks < 0)
@@ -2833,11 +2828,11 @@ namespace ThermoRawFileReader
                     return false;
                 }
 
-                if (mFileInfo.ScanStart == 0 && mFileInfo.ScanEnd == 0 && mFileInfo.VersionNumber == 0 &&
-                    Math.Abs(mFileInfo.MassResolution) < double.Epsilon && string.IsNullOrWhiteSpace(mFileInfo.InstModel))
+                if (FileInfo.ScanStart == 0 && FileInfo.ScanEnd == 0 && FileInfo.VersionNumber == 0 &&
+                    Math.Abs(FileInfo.MassResolution) < double.Epsilon && string.IsNullOrWhiteSpace(FileInfo.InstModel))
                 {
-                    OnErrorEvent("File did not load correctly; ScanStart, ScanEnd, VersionNumber, and MassResolution are all 0");
-                    mFileInfo.CorruptFile = true;
+                    RaiseErrorMessage("File did not load correctly; ScanStart, ScanEnd, VersionNumber, and MassResolution are all 0 for " + mCachedFilePath);
+                    FileInfo.CorruptFile = true;
                     mCachedFilePath = string.Empty;
                     return false;
                 }
