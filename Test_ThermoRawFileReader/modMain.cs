@@ -23,6 +23,7 @@ namespace Test_ThermoRawFileReader
         private static bool mTestSumming;
 
         private static int mScanInfoInterval;
+        private static bool mLoadMethods;
         private static bool mLoadScanData;
         private static bool mGetScanEvents;
         private static bool mLoadCollisionEnergies;
@@ -33,6 +34,7 @@ namespace Test_ThermoRawFileReader
         public static void Main()
         {
             mScanInfoInterval = 1;
+            mLoadMethods = true;
             mLoadScanData = true;
             mGetScanEvents = true;
             mLoadCollisionEnergies = true;
@@ -96,7 +98,7 @@ namespace Test_ThermoRawFileReader
 
             Console.WriteLine("Done");
 
-            System.Threading.Thread.Sleep(1500);
+            System.Threading.Thread.Sleep(150);
 
         }
 
@@ -317,6 +319,11 @@ namespace Test_ThermoRawFileReader
                 }
             }
 
+            if (commandLineParser.IsParameterPresent("NoMethods"))
+            {
+                mLoadMethods = false;
+            }
+
             if (commandLineParser.IsParameterPresent("NoScanData"))
             {
                 mLoadScanData = false;
@@ -356,8 +363,8 @@ namespace Test_ThermoRawFileReader
 
             Console.WriteLine("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath));
             Console.WriteLine("  InputFilePath.raw [/GetFilters] [/Centroid] [/Sum] [/Start:Scan] [/End:Scan]");
-            Console.WriteLine("  [/ScanInfo:IntervalScans] [/NoScanData] [/NoScanEvents] [/NoCE] [/MSLevelOnly]");
-            Console.WriteLine("  [/Trace]");
+            Console.WriteLine("  [/ScanInfo:IntervalScans] [/NoScanData] [/NoScanEvents] [/NoCE]");
+            Console.WriteLine("  [/NoMethods] [/MSLevelOnly] [/Trace]");
 
             Console.WriteLine();
             Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
@@ -383,6 +390,7 @@ namespace Test_ThermoRawFileReader
             Console.WriteLine("Use /NoScanData to skip loading any scan data");
             Console.WriteLine("Use /NoScanEvents to skip loading any scan events");
             Console.WriteLine("Use /NoCE to skip trying to determine collision energies");
+            Console.WriteLine("Use /NoMethods to skip loading instrument methods");
             Console.WriteLine();
             Console.WriteLine("Use /MSLevelOnly to only load MS levels using GetMSLevel");
             Console.WriteLine("Use /TestFilters to test the parsing of a set of standard scan filters");
