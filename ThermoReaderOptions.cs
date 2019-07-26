@@ -1,6 +1,9 @@
 ﻿
 namespace ThermoRawFileReader
 {
+    /// <summary>
+    /// Thermo reader options
+    /// </summary>
     public class ThermoReaderOptions
     {
 
