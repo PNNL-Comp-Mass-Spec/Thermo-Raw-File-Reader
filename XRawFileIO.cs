@@ -948,15 +948,14 @@ namespace ThermoRawFileReader
                 if (mXRawFile == null)
                     return false;
 
+                FileInfo.Clear();
+
                 // Make sure the MS controller is selected
                 if (!SetMSController())
                 {
-                    FileInfo.Clear();
                     FileInfo.CorruptFile = true;
                     return false;
                 }
-
-                FileInfo.Clear();
 
                 FileInfo.CreationDate = DateTime.MinValue;
                 FileInfo.CreationDate = mXRawFileHeader.CreationDate;
@@ -1025,8 +1024,6 @@ namespace ThermoRawFileReader
 
                 FileInfo.SampleName = sampleInfo.SampleName;
                 FileInfo.SampleComment = sampleInfo.Comment;
-
-                FileInfo.TuneMethods = new List<TuneMethod>();
 
                 if (Options.LoadMSTuneInfo)
                 {

@@ -117,7 +117,7 @@ namespace ThermoRawFileReader
         /// Instrument Methods
         /// </summary>
         /// <remarks>Typically only have one instrument method; the length of this array defines the number of instrument methods</remarks>
-        public List<string> InstMethods;
+        public readonly List<string> InstMethods;
 
         /// <summary>
         /// Instrument Model
@@ -144,7 +144,7 @@ namespace ThermoRawFileReader
         /// Tune Methods
         /// </summary>
         /// <remarks>Typically have one or two tune methods; the length of this array defines the number of tune methods defined</remarks>
-        public List<TuneMethod> TuneMethods;
+        public readonly List<TuneMethod> TuneMethods;
 
         /// <summary>
         /// File format Version Number
@@ -189,12 +189,12 @@ namespace ThermoRawFileReader
             InstFlags = string.Empty;
             InstHardwareVersion = string.Empty;
             InstSoftwareVersion = string.Empty;
-            InstMethods = new List<string>();
+            InstMethods.Clear();
             InstModel = string.Empty;
             InstName = string.Empty;
             InstrumentDescription = string.Empty;
             InstSerialNumber = string.Empty;
-            TuneMethods = new List<TuneMethod>();
+            TuneMethods.Clear();
 
             VersionNumber = 0;
             MassResolution = 0;
