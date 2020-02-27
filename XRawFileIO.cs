@@ -950,6 +950,23 @@ namespace ThermoRawFileReader
 
                 FileInfo.Clear();
 
+                if (TraceMode)
+                    OnDebugEvent("Enumerating device data in the file");
+
+                // Discover the devices with data in the .raw file
+                foreach (var item in GetDeviceStats())
+                {
+                    if (item.Value == 0)
+                        continue;
+
+                    FileInfo.Devices.Add(item.Key, item.Value);
+                }
+
+                if (FileInfo.Devices.Count == 0)
+                {
+                    RaiseWarningMessage("File does not have data from any devices");
+                }
+
                 // Make sure the MS controller is selected
                 if (!SetMSController())
                 {
@@ -1132,7 +1149,35 @@ namespace ThermoRawFileReader
             }
 
             return collisionEnergies;
+        }
 
+        /// <summary>
+        /// Get a count of the number of instruments of each device type, as stored in the .raw file
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<Device, int> GetDeviceStats()
+        {
+            var devices = new Dictionary<Device, int>();
+
+            try
+            {
+                if (mXRawFile == null)
+                    return devices;
+
+                foreach (var deviceType in Enum.GetValues(typeof(Device)).Cast<Device>())
+                {
+                    var countForDevice = mXRawFile.GetInstrumentCountOfType(deviceType);
+                    devices.Add(deviceType, countForDevice);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                var msg = "Error: Exception in GetDeviceStats: " + ex.Message;
+                RaiseErrorMessage(msg, ex);
+            }
+
+            return devices;
         }
 
         /// <summary>

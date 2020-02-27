@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ThermoFisher.CommonCore.Data.Business;
 
 namespace ThermoRawFileReader
 {
@@ -98,6 +99,16 @@ namespace ThermoRawFileReader
         public string CreatorID;
 
         /// <summary>
+        /// Dictionary tracking the device data stored in the .raw file
+        /// Keys are Device type, values are the number of devices
+        /// </summary>
+        /// <remarks>
+        /// Typically a .raw file has a single device, of type Device.MS
+        /// Some .raw files also have LC information, stored as Device.Analog or Device.UV
+        /// </remarks>
+        public readonly Dictionary<Device, int> Devices;
+
+        /// <summary>
         /// Instrument Flags
         /// </summary>
         /// <remarks>Values should be one of the constants in InstFlags</remarks>
@@ -186,6 +197,7 @@ namespace ThermoRawFileReader
             CreationDate = DateTime.MinValue;
 
             CreatorID = string.Empty;
+            Devices.Clear();
             InstFlags = string.Empty;
             InstHardwareVersion = string.Empty;
             InstSoftwareVersion = string.Empty;
@@ -218,6 +230,7 @@ namespace ThermoRawFileReader
             CreationDate = DateTime.MinValue;
 
             CreatorID = string.Empty;
+            Devices = new Dictionary<Device, int>();
             InstFlags = string.Empty;
             InstHardwareVersion = string.Empty;
             InstSoftwareVersion = string.Empty;
