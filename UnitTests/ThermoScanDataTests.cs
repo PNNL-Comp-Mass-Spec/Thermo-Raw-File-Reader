@@ -567,8 +567,8 @@ namespace RawFileReaderTests
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
-                    var scanType = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(scanInfo.FilterText);
-                    var genericScanFilter = XRawFileIO.MakeGenericFinniganScanFilter(scanInfo.FilterText);
+                    var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText);
+                    var genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText);
 
                     var scanTypeKey = new Tuple<string, string>(scanType, genericScanFilter);
 

@@ -1753,7 +1753,18 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="filterText"></param>
         /// <returns></returns>
+        [Obsolete("Use GetScanTypeNameFromThermoScanFilterText")]
         public static string GetScanTypeNameFromFinniganScanFilterText(string filterText)
+        {
+            return GetScanTypeNameFromThermoScanFilterText(filterText);
+        }
+
+        /// <summary>
+        /// Parse the scan type name out of the scan filter string
+        /// </summary>
+        /// <param name="filterText"></param>
+        /// <returns>Scan type name, e.g. HMS or HCD-HMSn</returns>
+        public static string GetScanTypeNameFromThermoScanFilterText(string filterText)
         {
 
             // Examines filterText to determine what the scan type is
@@ -2122,7 +2133,18 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="filterText"></param>
         /// <returns></returns>
+        [Obsolete("Use MakeGenericThermoScanFilter")]
         public static string MakeGenericFinniganScanFilter(string filterText)
+        {
+            return MakeGenericThermoScanFilter(filterText);
+        }
+
+        /// <summary>
+        /// Remove scan-specific data from a scan filter string; primarily removes the parent ion m/z and the scan m/z range
+        /// </summary>
+        /// <param name="filterText"></param>
+        /// <returns>Generic filter text, e.g. FTMS + p NSI Full ms</returns>
+        public static string MakeGenericThermoScanFilter(string filterText)
         {
 
             // Will make a generic version of the FilterText in filterText

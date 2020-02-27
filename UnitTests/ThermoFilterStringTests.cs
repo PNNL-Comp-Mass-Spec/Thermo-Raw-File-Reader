@@ -552,7 +552,7 @@ namespace RawFileReaderTests
         [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", "+ c NSI SRM ms2")]
         public void TestGenericScanFilter(string filterText, string expectedResult)
         {
-            var genericFilterResult = XRawFileIO.MakeGenericFinniganScanFilter(filterText);
+            var genericFilterResult = XRawFileIO.MakeGenericThermoScanFilter(filterText);
 
             Console.WriteLine(filterText + " " + genericFilterResult);
 
@@ -591,7 +591,7 @@ namespace RawFileReaderTests
         [TestCase("FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]              ", "EThcD-HMSn")]
         public void TestScanTypeName(string filterText, string expectedResult)
         {
-            var scanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(filterText);
+            var scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterText);
 
             Console.WriteLine(filterText + " " + scanTypeName);
 

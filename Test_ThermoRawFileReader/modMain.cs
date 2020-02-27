@@ -928,8 +928,8 @@ namespace Test_ThermoRawFileReader
 
             foreach (var filterItem in filterList)
             {
-                var genericFilter = XRawFileIO.MakeGenericFinniganScanFilter(filterItem);
-                var scanType = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(filterItem);
+                var genericFilter = XRawFileIO.MakeGenericThermoScanFilter(filterItem);
+                var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterItem);
 
                 Console.WriteLine(filterItem);
                 Console.WriteLine("  {0,-12} {1}", scanType, genericFilter);
