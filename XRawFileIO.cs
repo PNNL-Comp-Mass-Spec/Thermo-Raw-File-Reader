@@ -384,53 +384,6 @@ namespace ThermoRawFileReader
         {
             error = "";
             return true;
-
-            // ReSharper disable once HeuristicUnreachableCode
-#pragma warning disable CS0162 // Unreachable code detected
-            var typeAvailable = false;
-            var canInstantiateType = false;
-
-            var bitness = "x86";
-            if (Environment.Is64BitProcess)
-            {
-                bitness = "x64";
-            }
-
-            try
-            {
-                //Assembly.Load("Interop.MSFileReaderLib"); // by name; is a COM library
-                // TypeLib CLSID GUID {F0C5F3E3-4F2A-443E-A74D-0AABE3237494}
-                // Class XRawfile CLSID GUID {1d23188d-53fe-4c25-b032-dc70acdbdc02}
-                //var type = Type.GetTypeFromCLSID(new Guid("{1d23188d-53fe-4c25-b032-dc70acdbdc02}"), true); // always returns a com object
-                var type = Type.GetTypeFromProgID("MSFileReader.XRawfile"); // Returns null if exact name isn't found.
-                if (type != null)
-                {
-                    typeAvailable = true;
-                    // Probably enough to just check for being able to get the type
-                    //return true;
-                    // This just becomes an extra sanity check
-                    var obj = Activator.CreateInstance(type);
-                    if (obj != null)
-                    {
-                        canInstantiateType = true;
-                        return true;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                if (typeAvailable && !canInstantiateType)
-                {
-                    error = "MSFileReader is installed, but not for this platform. Install MSFileReader " + bitness;
-                }
-                else
-                {
-                    error = "MSFileReader is not installed. Install MSFileReader " + bitness;
-                }
-                return false;
-            }
-            return false;
-#pragma warning restore CS0162 // Unreachable code detected
         }
 
         /// <summary>
