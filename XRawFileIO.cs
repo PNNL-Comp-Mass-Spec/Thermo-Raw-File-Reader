@@ -846,53 +846,54 @@ namespace ThermoRawFileReader
                         parentIonMz = 0;
                     }
 
+                    return matchFound;
                 }
-                else if (mzText.Length > 0)
+
+                if (mzText.Length <= 0)
+                    return false;
+
+                // Find the longest contiguous number that mzText starts with
+
+                var charIndex = -1;
+                while (charIndex < mzText.Length - 1)
                 {
-                    // Find the longest contiguous number that mzText starts with
-
-                    var charIndex = -1;
-                    while (charIndex < mzText.Length - 1)
+                    if (char.IsNumber(mzText[charIndex + 1]) || mzText[charIndex + 1] == '.')
                     {
-                        if (char.IsNumber(mzText[charIndex + 1]) || mzText[charIndex + 1] == '.')
-                        {
-                            charIndex += 1;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        charIndex += 1;
                     }
-
-                    if (charIndex >= 0)
+                    else
                     {
-                        try
-                        {
-                            parentIonMz = double.Parse(mzText.Substring(0, charIndex + 1));
-                            matchFound = true;
-
-                            var parentIonMzOnly = new udtParentIonInfoType();
-                            parentIonMzOnly.Clear();
-                            parentIonMzOnly.MSLevel = msLevel;
-                            parentIonMzOnly.ParentIonMZ = parentIonMz;
-
-                            parentIons.Add(parentIonMzOnly);
-
-                        }
-                        catch (Exception)
-                        {
-                            parentIonMz = 0;
-                        }
+                        break;
                     }
                 }
 
+                if (charIndex < 0)
+                    return false;
+
+                try
+                {
+                    parentIonMz = double.Parse(mzText.Substring(0, charIndex + 1));
+                    matchFound = true;
+
+                    var parentIonMzOnly = new udtParentIonInfoType();
+                    parentIonMzOnly.Clear();
+                    parentIonMzOnly.MSLevel = msLevel;
+                    parentIonMzOnly.ParentIonMZ = parentIonMz;
+
+                    parentIons.Add(parentIonMzOnly);
+
+                }
+                catch (Exception)
+                {
+                    parentIonMz = 0;
+                }
+
+                return matchFound;
             }
             catch (Exception)
             {
-                matchFound = false;
+                return false;
             }
-
-            return matchFound;
 
         }
 
@@ -1032,14 +1033,13 @@ namespace ThermoRawFileReader
                     GetTuneData();
                 }
 
+                return true;
             }
             catch (Exception ex)
             {
                 RaiseErrorMessage("Error: Exception in FillFileInfo: ", ex);
                 return false;
             }
-
-            return true;
 
         }
 
@@ -1667,97 +1667,89 @@ namespace ThermoRawFileReader
                     }
                 }
 
-
-                if (validScanFilter)
+                if (!validScanFilter)
                 {
-                    if (eMRMScanType == MRMScanTypeConstants.NotMRM ||
-                        eMRMScanType == MRMScanTypeConstants.SIM)
+                    return scanTypeName;
+                }
+
+                if (eMRMScanType == MRMScanTypeConstants.NotMRM ||
+                    eMRMScanType == MRMScanTypeConstants.SIM)
+                {
+                    if (simScan)
                     {
-                        if (simScan)
-                        {
-                            scanTypeName = SIM_MS_TEXT.Trim();
-                        }
-                        else if (zoomScan)
-                        {
-                            scanTypeName = "Zoom-MS";
-
-                        }
-                        else
-                        {
-                            // Normal, plain MS or MSn scan
-
-                            if (msLevel > 1)
-                            {
-                                scanTypeName = "MSn";
-                            }
-                            else
-                            {
-                                scanTypeName = "MS";
-                            }
-
-                            if (ScanIsFTMS(filterText))
-                            {
-                                // HMS or HMSn scan
-                                scanTypeName = "H" + scanTypeName;
-                            }
-
-                            if (msLevel > 1 && collisionMode.Length > 0)
-                            {
-                                scanTypeName = CapitalizeCollisionMode(collisionMode) + "-" + scanTypeName;
-                            }
-
-                        }
+                        scanTypeName = SIM_MS_TEXT.Trim();
+                    }
+                    else if (zoomScan)
+                    {
+                        scanTypeName = "Zoom-MS";
                     }
                     else
                     {
-                        // This is an MRM or SRM scan
+                        // Normal, plain MS or MSn scan
 
-                        switch (eMRMScanType)
+                        if (msLevel > 1)
                         {
-                            case MRMScanTypeConstants.MRMQMS:
-                                if (ContainsText(filterText, MRM_Q1MS_TEXT, 1))
-                                {
-                                    scanTypeName = MRM_Q1MS_TEXT.Trim();
-
-                                }
-                                else if (ContainsText(filterText, MRM_Q3MS_TEXT, 1))
-                                {
-                                    scanTypeName = MRM_Q3MS_TEXT.Trim();
-                                }
-                                else
-                                {
-                                    // Unknown QMS mode
-                                    scanTypeName = "MRM QMS";
-                                }
-
-                                break;
-                            case MRMScanTypeConstants.SRM:
-                                if (collisionMode.Length > 0)
-                                {
-                                    scanTypeName = collisionMode.ToUpper() + "-SRM";
-                                }
-                                else
-                                {
-                                    scanTypeName = "CID-SRM";
-                                }
-
-                                break;
-
-                            case MRMScanTypeConstants.FullNL:
-                                scanTypeName = "MRM_Full_NL";
-
-                                break;
-                            default:
-                                scanTypeName = "MRM";
-                                break;
+                            scanTypeName = "MSn";
+                        }
+                        else
+                        {
+                            scanTypeName = "MS";
                         }
 
+                        if (ScanIsFTMS(filterText))
+                        {
+                            // HMS or HMSn scan
+                            scanTypeName = "H" + scanTypeName;
+                        }
+
+                        if (msLevel > 1 && collisionMode.Length > 0)
+                        {
+                            scanTypeName = CapitalizeCollisionMode(collisionMode) + "-" + scanTypeName;
+                        }
                     }
 
-
+                    return scanTypeName;
                 }
 
+                // This is an MRM or SRM scan
+                switch (eMRMScanType)
+                {
+                    case MRMScanTypeConstants.MRMQMS:
+                        if (ContainsText(filterText, MRM_Q1MS_TEXT, 1))
+                        {
+                            scanTypeName = MRM_Q1MS_TEXT.Trim();
+                        }
+                        else if (ContainsText(filterText, MRM_Q3MS_TEXT, 1))
+                        {
+                            scanTypeName = MRM_Q3MS_TEXT.Trim();
+                        }
+                        else
+                        {
+                            // Unknown QMS mode
+                            scanTypeName = "MRM QMS";
+                        }
 
+                        break;
+                    case MRMScanTypeConstants.SRM:
+                        if (collisionMode.Length > 0)
+                        {
+                            scanTypeName = collisionMode.ToUpper() + "-SRM";
+                        }
+                        else
+                        {
+                            scanTypeName = "CID-SRM";
+                        }
+
+                        break;
+
+                    case MRMScanTypeConstants.FullNL:
+                        scanTypeName = "MRM_Full_NL";
+
+                        break;
+                    default:
+                        scanTypeName = "MRM";
+                        break;
+                }
             }
             catch (Exception)
             {
@@ -1970,45 +1962,45 @@ namespace ThermoRawFileReader
 
             try
             {
-                if (!string.IsNullOrWhiteSpace(filterText))
+                if (string.IsNullOrWhiteSpace(filterText))
                 {
+                    return genericScanFilterText;
+                }
 
-                    genericScanFilterText = string.Copy(filterText);
+                genericScanFilterText = string.Copy(filterText);
 
-                    // First look for and remove numbers between square brackets
-                    var bracketIndex = genericScanFilterText.IndexOf('[');
-                    if (bracketIndex > 0)
-                    {
-                        genericScanFilterText = genericScanFilterText.Substring(0, bracketIndex).TrimEnd(' ');
-                    }
-                    else
-                    {
-                        genericScanFilterText = genericScanFilterText.TrimEnd(' ');
-                    }
+                // First look for and remove numbers between square brackets
+                var bracketIndex = genericScanFilterText.IndexOf('[');
+                if (bracketIndex > 0)
+                {
+                    genericScanFilterText = genericScanFilterText.Substring(0, bracketIndex).TrimEnd(' ');
+                }
+                else
+                {
+                    genericScanFilterText = genericScanFilterText.TrimEnd(' ');
+                }
 
-                    var fullCnlCharIndex = genericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.InvariantCultureIgnoreCase);
-                    if (fullCnlCharIndex > 0)
-                    {
-                        // MRM neutral loss
-                        // Remove any text after MRM_FullNL_TEXT
-                        genericScanFilterText = genericScanFilterText.Substring(0, fullCnlCharIndex + MRM_FullNL_TEXT.Length).Trim();
-                        return genericScanFilterText;
-                    }
+                var fullCnlCharIndex = genericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.InvariantCultureIgnoreCase);
+                if (fullCnlCharIndex > 0)
+                {
+                    // MRM neutral loss
+                    // Remove any text after MRM_FullNL_TEXT
+                    genericScanFilterText = genericScanFilterText.Substring(0, fullCnlCharIndex + MRM_FullNL_TEXT.Length).Trim();
+                    return genericScanFilterText;
+                }
 
-                    // Replace any digits before any @ sign with a 0
-                    if (genericScanFilterText.IndexOf('@') > 0)
+                // Replace any digits before any @ sign with a 0
+                if (genericScanFilterText.IndexOf('@') > 0)
+                {
+                    genericScanFilterText = mCollisionSpecs.Replace(genericScanFilterText, " 0@");
+                }
+                else
+                {
+                    // No @ sign; look for text of the form "ms2 748.371"
+                    var reMatch = mMzWithoutCE.Match(genericScanFilterText);
+                    if (reMatch.Success)
                     {
-                        genericScanFilterText = mCollisionSpecs.Replace(genericScanFilterText, " 0@");
-                    }
-                    else
-                    {
-                        // No @ sign; look for text of the form "ms2 748.371"
-                        var reMatch = mMzWithoutCE.Match(genericScanFilterText);
-                        if (reMatch.Success)
-                        {
-                            genericScanFilterText = genericScanFilterText.Substring(0, reMatch.Groups["MzValue"].Index)
-                            ;
-                        }
+                        genericScanFilterText = genericScanFilterText.Substring(0, reMatch.Groups["MzValue"].Index);
                     }
                 }
             }
