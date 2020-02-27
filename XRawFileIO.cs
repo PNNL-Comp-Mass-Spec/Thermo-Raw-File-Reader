@@ -1105,7 +1105,145 @@ namespace ThermoRawFileReader
             }
 
             return string.Empty;
+        }
 
+        /// <summary>
+        /// Get the list of intensity values, by scan, for the given device
+        /// Use this method to retrieve scan-based values for LC devices stored in the .raw file
+        /// </summary>
+        /// <param name="deviceType">Device type</param>
+        /// <param name="deviceNumber">Device number (1 based)</param>
+        /// <param name="scanStart">Start scan, or 0 to use ScanStart</param>
+        /// <param name="scanEnd">End scan, or 0 to use ScanEnd</param>
+        /// <returns>Dictionary where keys are scan number and values are the intensity for the scan</returns>
+        /// <remarks>
+        /// If the scan has multiple intensity values, they are summed
+        /// Scans that have no data will still be present in the dictionary, but with an intensity of 0
+        /// </remarks>
+        public Dictionary<int, double> GetChromatogramData(Device deviceType, int deviceNumber = 1, int scanStart = 0, int scanEnd = 0)
+        {
+            var chromatogramData = new Dictionary<int, double>();
+
+            var chromatogramData2D = GetChromatogramData2D(deviceType, deviceNumber, scanStart, scanEnd);
+
+            if (chromatogramData2D.Count == 0)
+                return chromatogramData;
+
+            // Return the sum of the intensities for each scan
+            // LC data stored as an analog device will typically only have one data value per scan
+            foreach (var scanItem in chromatogramData2D)
+            {
+                if (scanItem.Value.Count == 0)
+                {
+                    chromatogramData.Add(scanItem.Key, 0);
+                }
+                else
+                {
+                    chromatogramData.Add(scanItem.Key, scanItem.Value.Sum());
+                }
+            }
+
+            return chromatogramData;
+        }
+
+        /// <summary>
+        /// Get the intensities, by scan, for the given device
+        /// </summary>
+        /// <param name="deviceType">Device type</param>
+        /// <param name="deviceNumber">Device number (1 based)</param>
+        /// <param name="scanStart">Start scan, or 0 to use ScanStart</param>
+        /// <param name="scanEnd">End scan, or 0 to use ScanEnd</param>
+        /// <returns>Dictionary where keys are scan number and values are the list of intensities for that scan</returns>
+        /// <remarks>Scans that have no data will still be present in the dictionary, but with an empty list of doubles</remarks>
+        public Dictionary<int, List<double>> GetChromatogramData2D(Device deviceType, int deviceNumber = 1, int scanStart = 0, int scanEnd = 0)
+        {
+            var chromatogramData = new Dictionary<int, List<double>>();
+
+            try
+            {
+                if (mXRawFile == null)
+                    return chromatogramData;
+
+                if (scanStart <= 0)
+                    scanStart = ScanStart;
+
+                if (scanEnd <= 0 || scanEnd < ScanStart)
+                    scanEnd = ScanEnd;
+
+                if (!FileInfo.Devices.TryGetValue(deviceType, out var deviceCount) || deviceCount == 0)
+                {
+                    RaiseWarningMessage(string.Format(
+                        ".raw file does not have have data from device type {0}; cannot load chromatogram data", deviceType));
+                    return chromatogramData;
+                }
+
+                if (deviceNumber > deviceCount)
+                {
+                    string validValues;
+                    if (deviceCount == 1)
+                    {
+                        validValues = string.Format("the file only has one entry for device type {0}; specify deviceNumber = 1", deviceType);
+                    }
+                    else
+                    {
+                        validValues = string.Format("valid device numbers for device type {0} are {1} through {2}", deviceType, 1, deviceCount);
+                    }
+
+                    RaiseWarningMessage(string.Format(
+                        "The specified device number, {0}, is out of range; {1}; cannot load chromatogram data", deviceType, validValues));
+                    return chromatogramData;
+                }
+
+                try
+                {
+                    mXRawFile.SelectInstrument(deviceType, deviceNumber);
+                }
+                catch (Exception e)
+                {
+                    RaiseWarningMessage(string.Format(
+                        "Unable to select {0} device #{1}; cannot load chromatogram data; exception {2}", deviceNumber, deviceType, e.Message));
+
+                    SetMSController();
+                    return chromatogramData;
+                }
+
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    try
+                    {
+                        var scanData = mXRawFile.GetSegmentedScanFromScanNumber(scanNumber, null);
+
+                        if (scanData.Intensities.Length > 0)
+                        {
+                            chromatogramData.Add(scanNumber, scanData.Intensities.ToList());
+                        }
+                        else
+                        {
+                            chromatogramData.Add(scanNumber, new List<double>());
+                        }
+
+                    }
+                    catch (AccessViolationException)
+                    {
+                        var msg = "Unable to load data for scan " + scanNumber + "; possibly a corrupt .Raw file";
+                        RaiseWarningMessage(msg);
+                    }
+                    catch (Exception ex)
+                    {
+                        var msg = "Unable to load data for scan " + scanNumber + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                        RaiseErrorMessage(msg, ex);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                var msg = "Error: Exception in GetChromatogramData: " + ex.Message;
+                RaiseErrorMessage(msg, ex);
+            }
+
+            SetMSController();
+            return chromatogramData;
         }
 
         /// <summary>
