@@ -1991,7 +1991,6 @@ namespace ThermoRawFileReader
                     }
                 }
 
-
                 if (tuneLabelCount > 0)
                 {
                     msg = string.Empty;
@@ -2022,7 +2021,6 @@ namespace ThermoRawFileReader
 
                 var newTuneMethod = new TuneMethod();
                 newTuneMethod.Clear();
-
 
                 var tuneSettingNames =
                     ((IEnumerable)objLabels).Cast<object>()
@@ -2065,7 +2063,9 @@ namespace ThermoRawFileReader
                 }
 
                 if (FileInfo.TuneMethods.Count == 0)
+                {
                     FileInfo.TuneMethods.Add(newTuneMethod);
+                }
                 else
                 {
                     // Compare this tune method to the previous one; if identical, don't keep it
