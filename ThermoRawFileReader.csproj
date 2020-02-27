@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataObjects.cs" />
+    <Compile Include="DeviceInfo.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="ThermoReaderOptions.cs" />
     <Compile Include="XRawFileIO.cs" />

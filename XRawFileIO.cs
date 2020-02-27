@@ -1260,6 +1260,45 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
+        /// Get the instrument information of the specified device
+        /// </summary>
+        public DeviceInfo GetDeviceInfo(Device deviceType, int deviceNumber)
+        {
+            var deviceInfo = new DeviceInfo(string.Empty);
+
+            try
+            {
+                var warningMessage = ValidateAndSelectDevice(deviceType, deviceNumber);
+                if (!string.IsNullOrEmpty(warningMessage))
+                {
+                    RaiseWarningMessage(warningMessage);
+                    return new DeviceInfo(string.Empty);
+                }
+
+                var instData = mXRawFile.GetInstrumentData();
+                var instrumentName = instData.Name;
+
+                deviceInfo.InstrumentName = instrumentName;
+                deviceInfo.Model = instData.Model ?? string.Empty;
+                deviceInfo.SerialNumber = instData.SerialNumber ?? string.Empty;
+                deviceInfo.SoftwareVersion = instData.SoftwareVersion ?? string.Empty;
+                deviceInfo.Units = instData.Units;
+
+                deviceInfo.AxisLabelX = instData.AxisLabelX ?? string.Empty;
+                deviceInfo.AxisLabelY = instData.AxisLabelY ?? string.Empty;
+
+            }
+            catch (Exception ex)
+            {
+                var msg = "Error: Exception in GetDeviceInfo: " + ex.Message;
+                RaiseErrorMessage(msg, ex);
+            }
+
+            SetMSController();
+            return deviceInfo;
+        }
+
+        /// <summary>
         /// Get a count of the number of instruments of each device type, as stored in the .raw file
         /// </summary>
         /// <returns></returns>
