@@ -1170,40 +1170,10 @@ namespace ThermoRawFileReader
                 if (scanEnd <= 0 || scanEnd < ScanStart)
                     scanEnd = ScanEnd;
 
-                if (!FileInfo.Devices.TryGetValue(deviceType, out var deviceCount) || deviceCount == 0)
+                var warningMessage = ValidateAndSelectDevice(deviceType, deviceNumber);
+                if (!string.IsNullOrEmpty(warningMessage))
                 {
-                    RaiseWarningMessage(string.Format(
-                        ".raw file does not have have data from device type {0}; cannot load chromatogram data", deviceType));
-                    return chromatogramData;
-                }
-
-                if (deviceNumber > deviceCount)
-                {
-                    string validValues;
-                    if (deviceCount == 1)
-                    {
-                        validValues = string.Format("the file only has one entry for device type {0}; specify deviceNumber = 1", deviceType);
-                    }
-                    else
-                    {
-                        validValues = string.Format("valid device numbers for device type {0} are {1} through {2}", deviceType, 1, deviceCount);
-                    }
-
-                    RaiseWarningMessage(string.Format(
-                        "The specified device number, {0}, is out of range; {1}; cannot load chromatogram data", deviceType, validValues));
-                    return chromatogramData;
-                }
-
-                try
-                {
-                    mXRawFile.SelectInstrument(deviceType, deviceNumber);
-                }
-                catch (Exception e)
-                {
-                    RaiseWarningMessage(string.Format(
-                        "Unable to select {0} device #{1}; cannot load chromatogram data; exception {2}", deviceNumber, deviceType, e.Message));
-
-                    SetMSController();
+                    RaiseWarningMessage(warningMessage + "; cannot load chromatogram data");
                     return chromatogramData;
                 }
 
@@ -3015,6 +2985,53 @@ namespace ThermoRawFileReader
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Validate that the .raw file has this device. If it does, select it using mXRawFile.SelectInstrument
+        /// If the device does not exist or there is an error, returns a message describing the problem
+        /// </summary>
+        /// <param name="deviceType"></param>
+        /// <param name="deviceNumber"></param>
+        /// <returns>Empty string if the device was successfully selected, otherwise an error message</returns>
+        private string ValidateAndSelectDevice(Device deviceType, int deviceNumber)
+        {
+            if (!FileInfo.Devices.TryGetValue(deviceType, out var deviceCount) || deviceCount == 0)
+            {
+                var message = string.Format(".raw file does not have have data from device type {0}", deviceType);
+                return message;
+            }
+
+            if (deviceNumber > deviceCount)
+            {
+                string validValues;
+                if (deviceCount == 1)
+                {
+                    validValues = string.Format("the file only has one entry for device type {0}; specify deviceNumber = 1", deviceType);
+                }
+                else
+                {
+                    validValues = string.Format("valid device numbers for device type {0} are {1} through {2}", deviceType, 1, deviceCount);
+                }
+
+                var message = string.Format("The specified device number, {0}, is out of range; {1}", deviceType, validValues);
+
+                return message;
+            }
+
+            try
+            {
+                mXRawFile.SelectInstrument(deviceType, deviceNumber);
+            }
+            catch (Exception ex)
+            {
+                var message = string.Format("Unable to select {0} device #{1}; exception {2}", deviceNumber, deviceType, ex.Message);
+
+                SetMSController();
+                return message;
+            }
+
+            return string.Empty;
         }
 
         /// <summary>
