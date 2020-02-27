@@ -90,6 +90,11 @@ namespace Test_ThermoRawFileReader
                 TestScanFilterParsing();
             }
 
+            if (mLoadChromatograms)
+            {
+                TestLoadChromatograms(sourceFile.FullName);
+            }
+
             TestReader(sourceFile.FullName, mCentroid, mTestSumming, mStartScan, mEndScan);
 
             if (mCentroid)
@@ -101,11 +106,6 @@ namespace Test_ThermoRawFileReader
             if (mGetScanEvents)
             {
                 TestGetAllScanEvents(sourceFile.FullName);
-            }
-
-            if (mLoadChromatograms)
-            {
-                TestLoadChromatograms(sourceFile.FullName);
             }
 
             Console.WriteLine("Done");
@@ -703,7 +703,6 @@ namespace Test_ThermoRawFileReader
         }
 
         private static void TestLoadChromatograms(string rawFilePath)
-
         {
 
             try
@@ -724,11 +723,11 @@ namespace Test_ThermoRawFileReader
                 {
                     RegisterEvents(reader);
 
-                    var deviceInfo = reader.FileInfo.Devices;
+                    var deviceList = reader.FileInfo.Devices;
                     var nonMassSpecDevicesInFile = new Dictionary<Device, int>();
 
                     Console.WriteLine("{0,-15} {1}", "Device Type", "Count in .Raw file");
-                    foreach (var item in deviceInfo)
+                    foreach (var item in deviceList)
                     {
                         Console.WriteLine("{0,-15} {1}", item.Key, item.Value);
 
@@ -745,8 +744,18 @@ namespace Test_ThermoRawFileReader
                     {
                         for (var deviceNumber = 1; deviceNumber <= device.Value; deviceNumber++)
                         {
+                            var deviceInfo = reader.GetDeviceInfo(device.Key, deviceNumber);
+
                             var chromData = reader.GetChromatogramData(device.Key, deviceNumber);
 
+                            Console.WriteLine();
+
+                            Console.WriteLine("{0} device #{1}", device.Key, deviceNumber);
+
+                            Console.WriteLine("  Name: {0}", deviceInfo.InstrumentName);
+                            Console.WriteLine("  Model: {0}", deviceInfo.Model);
+                            Console.WriteLine("  Serial: {0}", deviceInfo.SerialNumber);
+                            Console.WriteLine("  YAxis: {0}, units {1}", deviceInfo.AxisLabelY, deviceInfo.Units);
                             Console.WriteLine();
                             Console.WriteLine("Data for {0} device #{1}", device.Key, deviceNumber);
                             Console.WriteLine("{0,-9} {1}", "Scan", "Intensity");
