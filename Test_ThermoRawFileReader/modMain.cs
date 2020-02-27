@@ -4,13 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using PRISM;
+using ThermoFisher.CommonCore.Data.Business;
 using ThermoRawFileReader;
 
 namespace Test_ThermoRawFileReader
 {
     static class Program
     {
-        private const string PROGRAM_DATE = "November 20, 2019";
+        private const string PROGRAM_DATE = "February 26, 2020";
 
         private const string DEFAULT_FILE_PATH = @"..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw";
 
@@ -23,6 +24,8 @@ namespace Test_ThermoRawFileReader
         private static bool mTestSumming;
 
         private static int mScanInfoInterval;
+
+        private static bool mLoadChromatograms;
         private static bool mLoadMethods;
         private static bool mLoadScanData;
         private static bool mGetScanEvents;
@@ -34,6 +37,8 @@ namespace Test_ThermoRawFileReader
         public static void Main()
         {
             mScanInfoInterval = 1;
+
+            mLoadChromatograms = false;
             mLoadMethods = true;
             mLoadScanData = true;
             mGetScanEvents = true;
@@ -78,6 +83,8 @@ namespace Test_ThermoRawFileReader
                 return;
             }
 
+            Console.WriteLine("Opening " + sourceFile.FullName);
+
             if (mTestScanFilters)
             {
                 TestScanFilterParsing();
@@ -94,6 +101,11 @@ namespace Test_ThermoRawFileReader
             if (mGetScanEvents)
             {
                 TestGetAllScanEvents(sourceFile.FullName);
+            }
+
+            if (mLoadChromatograms)
+            {
+                TestLoadChromatograms(sourceFile.FullName);
             }
 
             Console.WriteLine("Done");
@@ -339,6 +351,8 @@ namespace Test_ThermoRawFileReader
                 mLoadCollisionEnergies = false;
             }
 
+            mLoadChromatograms = commandLineParser.IsParameterPresent("Chrom") || commandLineParser.IsParameterPresent("Chromatogram");
+
             mOnlyLoadMSLevelInfo = commandLineParser.IsParameterPresent("MSLevelOnly");
 
             mTestScanFilters = commandLineParser.IsParameterPresent("TestFilters");
@@ -466,7 +480,8 @@ namespace Test_ThermoRawFileReader
                 if (rawFile == null)
                     return;
 
-                var options = new ThermoReaderOptions {
+                var options = new ThermoReaderOptions
+                {
                     LoadMSMethodInfo = mLoadMethods
                 };
 
@@ -680,6 +695,75 @@ namespace Test_ThermoRawFileReader
                 }
 
 
+            }
+            catch (Exception ex)
+            {
+                ShowError("Error in TestReader: " + ex.Message, ex);
+            }
+        }
+
+        private static void TestLoadChromatograms(string rawFilePath)
+
+        {
+
+            try
+            {
+
+                var rawFile = ResolveDataFile(rawFilePath);
+                if (rawFile == null)
+                    return;
+
+                var options = new ThermoReaderOptions
+                {
+                    LoadMSMethodInfo = mLoadMethods
+                };
+
+                Console.WriteLine("Opening " + rawFile.FullName);
+
+                using (var reader = new XRawFileIO(rawFile.FullName, options, mTraceMode))
+                {
+                    RegisterEvents(reader);
+
+                    var deviceInfo = reader.FileInfo.Devices;
+                    var nonMassSpecDevicesInFile = new Dictionary<Device, int>();
+
+                    Console.WriteLine("{0,-15} {1}", "Device Type", "Count in .Raw file");
+                    foreach (var item in deviceInfo)
+                    {
+                        Console.WriteLine("{0,-15} {1}", item.Key, item.Value);
+
+                        if (item.Value == 0)
+                            continue;
+
+                        if (item.Key != Device.MS && item.Key != Device.MSAnalog)
+                        {
+                            nonMassSpecDevicesInFile.Add(item.Key, item.Value);
+                        }
+                    }
+
+                    foreach (var device in nonMassSpecDevicesInFile)
+                    {
+                        for (var deviceNumber = 1; deviceNumber <= device.Value; deviceNumber++)
+                        {
+                            var chromData = reader.GetChromatogramData(device.Key, deviceNumber);
+
+                            Console.WriteLine();
+                            Console.WriteLine("Data for {0} device #{1}", device.Key, deviceNumber);
+                            Console.WriteLine("{0,-9} {1}", "Scan", "Intensity");
+
+                            var i = 0;
+                            foreach (var chromPoint in chromData)
+                            {
+                                i++;
+                                if (i % 100 != 0) continue;
+
+                                Console.WriteLine("{0,-9:N0} {1:F2}", chromPoint.Key, chromPoint.Value);
+                            }
+                        }
+
+                    }
+
+                }
             }
             catch (Exception ex)
             {
