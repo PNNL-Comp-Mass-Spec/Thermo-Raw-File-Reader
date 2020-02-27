@@ -2230,9 +2230,6 @@ namespace ThermoRawFileReader
 
         private bool SetMSController()
         {
-            // A controller is typically the MS, UV, analog, etc.
-            // See ControllerTypeConstants
-
             mXRawFile.SelectInstrument(Device.MS, 1);
             var hasMsData = mXRawFile.SelectMsData();
 

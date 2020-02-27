@@ -120,7 +120,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Instrument Flags
         /// </summary>
-        /// <remarks>Values should be one of the constants in InstFlags</remarks>
+        /// <remarks>Values should be one of the constants in the InstFlags class (file Enums.cs)</remarks>
         public string InstFlags;
 
         /// <summary>

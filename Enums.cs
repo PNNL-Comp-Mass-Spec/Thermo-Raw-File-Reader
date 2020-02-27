@@ -1,10 +1,12 @@
 ﻿using System;
 
+// ReSharper disable UnusedMember.Global
 namespace ThermoRawFileReader
 {
     /// <summary>
     /// Activation Types enum
     /// </summary>
+    /// <remarks>This enum mirrors ThermoFisher.CommonCore.Data.FilterEnums.ActivationType</remarks>
     [CLSCompliant(true)]
     public enum ActivationTypeConstants
     {
@@ -58,18 +60,20 @@ namespace ThermoRawFileReader
         /// </summary>
         PTR = 8,
 
+        // ReSharper disable once IdentifierTypo
         /// <summary>
         /// Negative Electron Transfer Dissociation
         /// </summary>
         NETD = 9,
 
+        // ReSharper disable once IdentifierTypo
         /// <summary>
-        /// Negative Photon Transfer Reaction
+        /// Negative Proton Transfer Reaction
         /// </summary>
         NPTR = 10,
 
         /// <summary>
-        /// Ultra Violet Photo Dissociation
+        /// Ultraviolet Photo Dissociation
         /// </summary>
         UVPD = 11,
 
