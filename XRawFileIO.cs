@@ -140,6 +140,10 @@ namespace ThermoRawFileReader
         /// </summary>
         private IFileHeader mXRawFileHeader;
 
+        /// <summary>
+        /// This is set to true if an exception is raised with the message "memory is corrupt"
+        /// It is also set to true if the .raw file does not have any MS data
+        /// </summary>
         private bool mCorruptMemoryEncountered;
 
         private static readonly Regex mFindMS = new Regex(MS2_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -261,7 +265,6 @@ namespace ThermoRawFileReader
         /// <param name="ex">Optional exception</param>
         private void RaiseErrorMessage(string message, Exception ex = null)
         {
-
             OnErrorEvent(message, ex);
 
 #pragma warning disable 618
@@ -325,7 +328,6 @@ namespace ThermoRawFileReader
 
         private static string CapitalizeCollisionMode(string collisionMode)
         {
-
             if (string.Equals(collisionMode, "EThcD", StringComparison.InvariantCultureIgnoreCase))
             {
                 return "EThcD";
@@ -337,7 +339,6 @@ namespace ThermoRawFileReader
             }
 
             return collisionMode.ToUpper();
-
         }
 
         /// <summary>
@@ -381,7 +382,6 @@ namespace ThermoRawFileReader
         [Obsolete("This method checks for MSFileReader.XRawFile, but we now use ThermoFisher.CommonCore.Data.dll, so this method always returns true")]
         public static bool IsMSFileReaderInstalled(out string error)
         {
-
             error = "";
             return true;
 
@@ -463,9 +463,7 @@ namespace ThermoRawFileReader
 
         private static bool ContainsAny(string stringToSearch, IEnumerable<string> itemsToFind, int indexSearchStart = 0)
         {
-
             return itemsToFind.Any(item => ContainsText(stringToSearch, item, indexSearchStart));
-
         }
 
         private static bool ContainsText(string stringToSearch, string textToFind, int indexSearchStart = 0)
@@ -478,7 +476,6 @@ namespace ThermoRawFileReader
             }
 
             return false;
-
         }
 
         /// <summary>
@@ -571,7 +568,6 @@ namespace ThermoRawFileReader
             }
 
             return ionMode;
-
         }
 
         /// <summary>
@@ -1608,7 +1604,6 @@ namespace ThermoRawFileReader
             CacheScanInfo(scan, scanInfo);
 
             return true;
-
         }
 
         /// <summary>
@@ -1673,7 +1668,6 @@ namespace ThermoRawFileReader
                     scanTypeName = "MS";
                     return scanTypeName;
                 }
-
 
                 if (!ExtractMSLevel(filterText, out var msLevel, out _))
                 {
@@ -1818,7 +1812,6 @@ namespace ThermoRawFileReader
             }
 
             return scanTypeName;
-
         }
 
         private void GetTuneData()
@@ -2072,14 +2065,11 @@ namespace ThermoRawFileReader
             }
 
             return genericScanFilterText;
-
         }
 
         private static bool ScanIsFTMS(string filterText)
         {
-
             return ContainsText(filterText, "FTMS");
-
         }
 
         private bool SetMSController()
@@ -2092,6 +2082,8 @@ namespace ThermoRawFileReader
 
             if (!hasMsData)
             {
+                // Either the file is corrupt, or it simply doesn't have Mass Spec data
+                // The ThermoRawFileReader is primarily intended for
                 mCorruptMemoryEncountered = true;
             }
 
@@ -2304,11 +2296,13 @@ namespace ThermoRawFileReader
                 }
 
                 massIntensityPairs = new double[2, dataCount];
+
                 /*
                 // A more "black magic" version of doing the below array copy:
                 Buffer.BlockCopy(data.Masses, 0, massIntensityPairs, 0, dataCount * sizeof(double));
                 Buffer.BlockCopy(data.Intensities, 0, massIntensityPairs, dataCount * sizeof(double), dataCount * sizeof(double));
                  */
+
                 for (var i = 0; i < dataCount; i++)
                 {
                     // m/z
@@ -2483,7 +2477,6 @@ namespace ThermoRawFileReader
                 scan = FileInfo.ScanEnd;
             }
 
-
             if (!GetScanInfo(scan, out clsScanInfo scanInfo))
             {
                 throw new Exception("Cannot retrieve ScanInfo from cache for scan " + scan + "; cannot retrieve scan data");
@@ -2557,7 +2550,6 @@ namespace ThermoRawFileReader
 
             ftLabelData = new udtFTLabelInfoType[0];
             return -1;
-
         }
 
         /// <summary>
@@ -2691,7 +2683,6 @@ namespace ThermoRawFileReader
 
             massResolutionData = new udtMassPrecisionInfoType[0];
             return -1;
-
         }
 
         /// <summary>
@@ -2899,7 +2890,6 @@ namespace ThermoRawFileReader
             }
 
             return true;
-
         }
 
         /// <summary>
@@ -3071,7 +3061,6 @@ namespace ThermoRawFileReader
             }
 
             return udtScanInfo;
-
         }
 
         /// <summary>
@@ -3082,7 +3071,7 @@ namespace ThermoRawFileReader
         /// <param name="intensityList"></param>
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
+        [Obsolete("This method is deprecated; use GetScanData that does not use udtScanHeaderInfo")]
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo)
         {
             const int maxNumberOfPeaks = 0;
@@ -3099,7 +3088,7 @@ namespace ThermoRawFileReader
         /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
+        [Obsolete("This method is deprecated; use GetScanData that does not use udtScanHeaderInfo")]
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo, bool centroidData)
         {
             const int maxNumberOfPeaks = 0;
@@ -3116,7 +3105,7 @@ namespace ThermoRawFileReader
         /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
+        [Obsolete("This method is deprecated; use GetScanData that does not use udtScanHeaderInfo")]
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks)
         {
             const bool centroidData = false;
@@ -3135,7 +3124,7 @@ namespace ThermoRawFileReader
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated, use GetScanData that does not use udtScanHeaderInfo")]
+        [Obsolete("This method is deprecated; use GetScanData that does not use udtScanHeaderInfo")]
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks, bool centroidData)
         {
             udtScanInfo = new udtScanHeaderInfoType();
@@ -3151,11 +3140,12 @@ namespace ThermoRawFileReader
         /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated, use GetScanData2D that does not use udtScanHeaderInfo")]
+        [Obsolete("This method is deprecated; use GetScanData2D that does not use udtScanHeaderInfo")]
         public int GetScanData2D(int scan, out double[,] massIntensityPairs, ref udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks)
         {
             return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks, centroidData: false);
         }
+
         #endregion
     }
 }
