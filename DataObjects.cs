@@ -44,6 +44,15 @@ namespace ThermoRawFileReader
         /// Tune value
         /// </summary>
         public string Value;
+
+        /// <summary>
+        /// Display the category, name, and value of this setting
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return string.Format("{0,-20}  {1,-40} = {2}", (Category ?? "Undefined") + ":", Name ?? "", Value ?? "");
+        }
     }
 
     /// <summary>
