@@ -753,9 +753,10 @@ namespace Test_ThermoRawFileReader
 
                             Console.WriteLine("{0} device #{1}", device.Key, deviceNumber);
 
-                            Console.WriteLine("  Name: {0}", deviceInfo.InstrumentName);
-                            Console.WriteLine("  Model: {0}", deviceInfo.Model);
-                            Console.WriteLine("  Serial: {0}", deviceInfo.SerialNumber);
+                            Console.WriteLine("  Name:       {0}", deviceInfo.InstrumentName);
+                            Console.WriteLine("  Model:      {0}", deviceInfo.Model);
+                            Console.WriteLine("  Serial:     {0}", deviceInfo.SerialNumber);
+                            Console.WriteLine("  SW Version: {0}", deviceInfo.SoftwareVersion);
                             Console.WriteLine("  YAxis: {0}, units {1}", deviceInfo.AxisLabelY, deviceInfo.Units);
                             Console.WriteLine();
                             Console.WriteLine("Data for {0} device #{1}", device.Key, deviceNumber);
