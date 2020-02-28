@@ -1264,7 +1264,7 @@ namespace ThermoRawFileReader
         /// </summary>
         public DeviceInfo GetDeviceInfo(Device deviceType, int deviceNumber)
         {
-            var deviceInfo = new DeviceInfo(string.Empty);
+            var deviceInfo = new DeviceInfo(deviceType, deviceNumber);
 
             try
             {
@@ -1272,13 +1272,12 @@ namespace ThermoRawFileReader
                 if (!string.IsNullOrEmpty(warningMessage))
                 {
                     RaiseWarningMessage(warningMessage);
-                    return new DeviceInfo(string.Empty);
+                    return new DeviceInfo(Device.None, 0);
                 }
 
                 var instData = mXRawFile.GetInstrumentData();
-                var instrumentName = instData.Name;
 
-                deviceInfo.InstrumentName = instrumentName;
+                deviceInfo.InstrumentName = instData.Name ?? string.Empty;
                 deviceInfo.Model = instData.Model ?? string.Empty;
                 deviceInfo.SerialNumber = instData.SerialNumber ?? string.Empty;
                 deviceInfo.SoftwareVersion = instData.SoftwareVersion ?? string.Empty;

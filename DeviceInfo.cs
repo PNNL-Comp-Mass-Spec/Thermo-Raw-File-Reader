@@ -9,6 +9,17 @@ namespace ThermoRawFileReader
     public class DeviceInfo
     {
         /// <summary>
+        /// Device type
+        /// </summary>
+        public Device DeviceType { get; }
+
+        /// <summary>
+        /// Device number (for this device type)
+        /// </summary>
+        /// <remarks>Each device type starts with device number 1</remarks>
+        public int DeviceNumber { get; }
+
+        /// <summary>
         /// Instrument name (device name)
         /// </summary>
         public string InstrumentName { get; set; }
@@ -46,10 +57,14 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="instrumentName"></param>
-        public DeviceInfo(string instrumentName)
+        /// <param name="deviceType">Device type</param>
+        /// <param name="deviceNumber">Device number (for this device type)</param>
+        public DeviceInfo(Device deviceType, int deviceNumber)
         {
-            InstrumentName = instrumentName;
+            DeviceType = deviceType;
+            DeviceNumber = deviceNumber;
+        }
+
         }
     }
 }
