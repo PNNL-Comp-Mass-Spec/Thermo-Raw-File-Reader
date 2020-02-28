@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using PRISM;
+using PRISM.Logging;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoRawFileReader;
 
@@ -1006,7 +1007,7 @@ namespace Test_ThermoRawFileReader
 
         #region "EventNotifier events"
 
-        private static void RegisterEvents(EventNotifier processingClass)
+        private static void RegisterEvents(IEventNotifier processingClass)
         {
             processingClass.DebugEvent += DebugEventHandler;
             processingClass.StatusEvent += StatusEventHandler;
