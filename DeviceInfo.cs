@@ -29,7 +29,7 @@ namespace ThermoRawFileReader
         public string SoftwareVersion { get; set; }
 
         /// <summary>
-        /// Units for stored intensity data
+        /// Units for stored intensity data for this device
         /// </summary>
         public DataUnits Units { get; set; }
 

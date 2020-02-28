@@ -109,7 +109,7 @@ namespace ThermoRawFileReader
 
         /// <summary>
         /// Dictionary tracking the device data stored in the .raw file
-        /// Keys are Device type, values are the number of devices
+        /// Keys are Device type, values are the number of devices of this type
         /// </summary>
         /// <remarks>
         /// Typically a .raw file has a single device, of type Device.MS
