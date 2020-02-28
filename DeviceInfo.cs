@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 using ThermoFisher.CommonCore.Data.Business;
 
 namespace ThermoRawFileReader
@@ -6,6 +6,7 @@ namespace ThermoRawFileReader
     /// <summary>
     /// Tracks information on the source device for data stored in a Thermo .raw file
     /// </summary>
+    [CLSCompliant(true)]
     public class DeviceInfo
     {
         /// <summary>
@@ -65,6 +66,19 @@ namespace ThermoRawFileReader
             DeviceNumber = deviceNumber;
         }
 
+        /// <summary>
+        /// Display the device type and instrument model or name
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            if (!string.IsNullOrWhiteSpace(Model))
+                return string.Format("{0}: {1}", DeviceType.ToString(), Model);
+
+            if (!string.IsNullOrWhiteSpace(InstrumentName))
+                return string.Format("{0}: {1}", DeviceType.ToString(), InstrumentName);
+
+            return string.Format("{0} device", DeviceType.ToString());
         }
     }
 }
