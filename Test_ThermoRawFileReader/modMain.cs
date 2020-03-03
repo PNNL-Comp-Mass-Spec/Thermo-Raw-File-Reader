@@ -751,7 +751,7 @@ namespace Test_ThermoRawFileReader
 
                             Console.WriteLine();
 
-                            Console.WriteLine("{0} device #{1}", device.Key, deviceNumber);
+                            Console.WriteLine(deviceInfo.DeviceDescription);
 
                             Console.WriteLine("  Name:       {0}", deviceInfo.InstrumentName);
                             Console.WriteLine("  Model:      {0}", deviceInfo.Model);
@@ -759,7 +759,7 @@ namespace Test_ThermoRawFileReader
                             Console.WriteLine("  SW Version: {0}", deviceInfo.SoftwareVersion);
                             Console.WriteLine("  YAxis: {0}, units {1}", deviceInfo.AxisLabelY, deviceInfo.Units);
                             Console.WriteLine();
-                            Console.WriteLine("Data for {0} device #{1}", device.Key, deviceNumber);
+                            Console.WriteLine("Data for {0}", deviceInfo.DeviceDescription);
                             Console.WriteLine("{0,-9} {1}", "Scan", "Intensity");
 
                             var i = 0;

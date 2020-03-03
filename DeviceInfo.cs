@@ -1,6 +1,8 @@
 ﻿using System;
 using ThermoFisher.CommonCore.Data.Business;
 
+// ReSharper disable UnusedMember.Global
+
 namespace ThermoRawFileReader
 {
     /// <summary>
@@ -19,6 +21,24 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <remarks>Each device type starts with device number 1</remarks>
         public int DeviceNumber { get; }
+
+        /// <summary>
+        /// Returns a human-readable description of the device
+        /// </summary>
+        /// <returns>
+        /// "Mass Spectrometer" if DeviceType is MS or MSAnalog
+        /// Otherwise, a description in the form "Analog Device #1"
+        /// </returns>
+        public string DeviceDescription
+        {
+            get
+            {
+                if (DeviceType == Device.MS || DeviceType == Device.MSAnalog)
+                    return "Mass Spectrometer";
+
+                return string.Format("{0} device #{1}", DeviceType.ToString(), DeviceNumber);
+            }
+        }
 
         /// <summary>
         /// Instrument name (device name)
@@ -54,6 +74,53 @@ namespace ThermoRawFileReader
         /// Y axis label for plotting data vs. scan
         /// </summary>
         public string AxisLabelY { get; set; }
+
+        /// <summary>
+        /// Y axis label, along with the units in parentheses
+        /// </summary>
+        public string YAxisLabelWithUnits
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(AxisLabelY))
+                    return string.Empty;
+
+                var isPressure = AxisLabelY.IndexOf("pressure", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                switch (Units)
+                {
+                    case DataUnits.AbsorbanceUnits:
+                        if (isPressure)
+                            return AxisLabelY;
+                        else
+                            return AxisLabelY + " (AU)";
+
+                    case DataUnits.MilliAbsorbanceUnits:
+                        if (isPressure)
+                            return AxisLabelY + " x1E-3";
+                        else
+                            return AxisLabelY + " (mAU)";
+
+                    case DataUnits.MicroAbsorbanceUnits:
+                        if (isPressure)
+                            return AxisLabelY + " x1E-6";
+                        else
+                            return AxisLabelY + " (μAU)";
+
+                    case DataUnits.Volts:
+                        return AxisLabelY + " (V)";
+                    case DataUnits.MilliVolts:
+                        return AxisLabelY + " (mV)";
+                    case DataUnits.MicroVolts:
+                        return AxisLabelY + " (μV)";
+                    case DataUnits.None:
+                        return AxisLabelY + " (counts)";
+                    default:
+                        return AxisLabelY;
+                }
+
+            }
+        }
 
         /// <summary>
         /// Constructor

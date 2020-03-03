@@ -100,7 +100,7 @@ xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTo
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x64\Release\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\IQ\bin\Debug\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\IQ\bin\Release\" /Y /D
-xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\Library\" /Y /D
+xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\Library\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\TestConsole1\bin\x86\Debug\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\TestConsole1\bin\x86\Release\" /Y /D
 
