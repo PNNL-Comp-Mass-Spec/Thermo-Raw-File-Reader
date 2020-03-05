@@ -2858,7 +2858,7 @@ namespace ThermoRawFileReader
         /// <param name="maxNumberOfPeaks"></param>
         /// <param name="centroidData"></param>
         /// <returns>The number of data points</returns>
-        /// <remarks></remarks>
+        /// <remarks>Uses the scan filter of the first scan to assure that we're only averaging similar scans</remarks>
         public int GetScanDataSumScans(int scanFirst, int scanLast, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
 
