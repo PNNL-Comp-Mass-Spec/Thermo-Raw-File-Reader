@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using MathNet.Numerics.Statistics;
 using PRISM;
 using PRISM.Logging;
 using ThermoFisher.CommonCore.Data.Business;
@@ -472,6 +473,21 @@ namespace Test_ThermoRawFileReader
             return null;
         }
 
+        private static void ShowIonInjectionStats(int msLevel, IReadOnlyCollection<double> ionInjectionTimes)
+        {
+
+            if (ionInjectionTimes.Count > 0)
+            {
+                Console.WriteLine("{0,-10} {1,-10:F3} {2,-10:F3} {3,-10:F3} {4,-10:F3}",
+                    msLevel,
+                    ionInjectionTimes.Average(),
+                    ionInjectionTimes.Median(),
+                    ionInjectionTimes.Min(),
+                    ionInjectionTimes.Max());
+            }
+
+        }
+
         private static void TestReader(string rawFilePath, bool centroid = false, bool testSumming = false, int scanStart = 0, int scanEnd = 0)
         {
             try
@@ -485,6 +501,9 @@ namespace Test_ThermoRawFileReader
                 {
                     LoadMSMethodInfo = mLoadMethods
                 };
+
+                var ionInjectionTimesMS1 = new List<double>();
+                var ionInjectionTimesMS2 = new List<double>();
 
                 using (var reader = new XRawFileIO(rawFile.FullName, options, mTraceMode))
                 {
@@ -555,6 +574,14 @@ namespace Test_ThermoRawFileReader
 
                         if (mScanInfoInterval <= 0 || scanNum % mScanInfoInterval == 0)
                             Console.WriteLine("Scan " + scanNum + " at " + scanInfo.RetentionTime.ToString("0.00") + " minutes: " + scanInfo.FilterText);
+
+                        if (scanInfo.MSLevel == 1)
+                        {
+                            ionInjectionTimesMS1.Add(scanInfo.IonInjectionTime);
+                        } else if (scanInfo.MSLevel == 2)
+                        {
+                            ionInjectionTimesMS2.Add(scanInfo.IonInjectionTime);
+                        }
 
                         if (mLoadCollisionEnergies)
                         {
@@ -693,6 +720,17 @@ namespace Test_ThermoRawFileReader
                             Console.WriteLine("{0, -10} {1}", item.Key, item.Value);
                         }
                     }
+
+                    Console.WriteLine();
+                    if ((ionInjectionTimesMS1.Count > 0 || ionInjectionTimesMS2.Count > 0))
+                    {
+                        Console.WriteLine("Ion injection time stats");
+                        Console.WriteLine("{0,-10} {1,-10} {2,-10} {3,-10} {4,-10}", "MS Level", "Average", "Median", "Minimum", "Maximum");
+
+                        ShowIonInjectionStats(1, ionInjectionTimesMS1);
+                        ShowIonInjectionStats(2, ionInjectionTimesMS2);
+                    }
+
                 }
 
 
