@@ -344,21 +344,24 @@ namespace ThermoRawFileReader
 
             IEnumerable<KeyValuePair<string, string>> results;
 
-            if (partialMatchToStart) {
+            if (partialMatchToStart)
+            {
                 // Partial match
                 results = from item in ScanEvents where item.Key.ToLower().StartsWith(eventName.ToLower()) select item;
-            } else {
+            }
+            else
+            {
                 results = from item in ScanEvents where string.Equals(item.Key, eventName, StringComparison.InvariantCultureIgnoreCase) select item;
             }
 
-            foreach (var item in results) {
+            foreach (var item in results)
+            {
                 eventValue = item.Value;
                 return true;
             }
 
             eventValue = string.Empty;
             return false;
-
         }
 
         /// <summary>
@@ -367,7 +370,8 @@ namespace ThermoRawFileReader
         /// <returns></returns>
         public override string ToString()
         {
-            if (string.IsNullOrWhiteSpace(FilterText)) {
+            if (string.IsNullOrWhiteSpace(FilterText))
+            {
                 return "Scan " + ScanNumber + ": Generic ScanHeaderInfo";
             }
 
