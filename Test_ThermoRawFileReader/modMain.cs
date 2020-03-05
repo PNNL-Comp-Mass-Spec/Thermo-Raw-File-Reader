@@ -333,7 +333,7 @@ namespace Test_ThermoRawFileReader
                 }
             }
 
-            if (commandLineParser.IsParameterPresent("NoMethods"))
+            if (commandLineParser.IsParameterPresent("NoMethods") || commandLineParser.IsParameterPresent("NoMethod"))
             {
                 mLoadMethods = false;
             }
