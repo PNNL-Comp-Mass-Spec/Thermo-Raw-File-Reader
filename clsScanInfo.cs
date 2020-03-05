@@ -246,6 +246,11 @@ namespace ThermoRawFileReader
         public double Frequency { get; set; }
 
         /// <summary>
+        /// Ion Injection Time (in milliseconds)
+        /// </summary>
+        public double IonInjectionTime;
+
+        /// <summary>
         /// Centroid scan flag
         /// </summary>
         /// <value></value>

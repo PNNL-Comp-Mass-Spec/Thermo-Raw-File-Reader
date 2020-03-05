@@ -1538,6 +1538,18 @@ namespace ThermoRawFileReader
                         break;
                     }
 
+                    foreach (var scanEvent in from item in scanInfo.ScanEvents where item.Key.ToLower().StartsWith("ion injection time (ms)") select item)
+                    {
+                        try
+                        {
+                            scanInfo.IonInjectionTime = Convert.ToDouble(scanEvent.Value);
+                        }
+                        catch (Exception)
+                        {
+                            // Ignore errors here
+                        }
+                        break;
+                    }
                 }
 
                 // Lookup the filter text for this scan
