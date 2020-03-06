@@ -16,10 +16,6 @@ xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\DataMining\MASIC\Lib\
 xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\" /Y /D
 xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\DataMining\MSGF_Runner\Lib\" /Y /D
 
-xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\BrianLaMarche\MultiAlign\lib\InformedProteomics\" /Y /D
-xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\BrianLaMarche\MultiAlign\src\MultiAlignRogue\bin\Debug\" /Y /D
-
-
 xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\DLLLibrary\" /Y /D
 
 xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\KevinCrowell\IMSDemultiplexer\IMSDemultiplexer\lib\" /Y /D
@@ -104,6 +100,8 @@ xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\GordonSlysz\DeconTool
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\TestConsole1\bin\x86\Debug\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\TestConsole1\bin\x86\Release\" /Y /D
 
+xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\SIPPER\Library" /Y /D
+
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DimethylLabelingIq\Library\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\IqTargetCreator\Library\" /Y /D
 pause
@@ -111,8 +109,6 @@ pause
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\JoshAldrich\InterferenceDetection\IDM_Console\bin\Debug\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\bin\Debug\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\bin\Release\" /Y /D
-
-rem xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\SangtaeKim\InformedProteomics\" /Y /D
 
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\KevinCrowell\LipidTools\lib\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\KevinCrowell\LipidTools\LipidTools\bin\x86\Debug\" /Y /D
