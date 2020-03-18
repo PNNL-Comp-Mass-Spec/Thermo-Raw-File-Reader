@@ -1423,9 +1423,7 @@ namespace RawFileReaderTests
                             break;
                     }
 
-#pragma warning disable 618
                     var dataPointsRead = reader.GetScanDataSumScans(scanStart, scanEnd, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
-#pragma warning restore 618
 
                     Assert.IsTrue(dataPointsRead > 0, string.Format("GetScanDataSumScans returned 0 summing scans {0} to {1}", scanStart, scanEnd));
 

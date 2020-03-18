@@ -659,10 +659,7 @@ namespace Test_ThermoRawFileReader
                         if (scanNum + scansToSum < numScans && testSumming)
                         {
                             // Get the data for scan scanNum through scanNum + 15
-
-#pragma warning disable 618
                             reader.GetScanDataSumScans(scanNum, scanNum + scansToSum, out var massIntensityPairs, 0, centroid);
-#pragma warning restore 618
 
                             Console.WriteLine("Summed spectrum, scans " + scanNum + " through " + (scanNum + scansToSum));
 
