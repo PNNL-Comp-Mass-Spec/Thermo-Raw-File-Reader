@@ -115,11 +115,6 @@ namespace ThermoRawFileReader
         private int mMaxScansToCacheInfo = 50000;
 
         /// <summary>
-        /// The the full path to the currently loaded .raw file
-        /// </summary>
-        private string mCachedFilePath;
-
-        /// <summary>
         /// The scan info cache
         /// </summary>
         private readonly Dictionary<int, clsScanInfo> mCachedScanInfo = new Dictionary<int, clsScanInfo>();
@@ -179,6 +174,12 @@ namespace ThermoRawFileReader
         /// Thermo reader options
         /// </summary>
         public ThermoReaderOptions Options { get; }
+
+        /// <summary>
+        /// The full path to the currently loaded .raw file
+        /// </summary>
+        /// <remarks>This is changed to an empty string once the file is closed</remarks>
+        public string RawFilePath { get; private set; }
 
         /// <summary>
         /// Maximum number of scan metadata cached; defaults to 50000
@@ -408,7 +409,7 @@ namespace ThermoRawFileReader
             finally
             {
                 mXRawFile = null;
-                mCachedFilePath = string.Empty;
+                RawFilePath = string.Empty;
                 FileInfo.Clear();
             }
 
@@ -2989,7 +2990,7 @@ namespace ThermoRawFileReader
 
                 mCachedScanInfo.Clear();
                 mCachedScans.Clear();
-                mCachedFilePath = string.Empty;
+                RawFilePath = string.Empty;
 
                 if (TraceMode)
                     OnDebugEvent("Initializing RawFileReaderAdapter.FileFactory for " + dataFile.FullName);
@@ -3006,19 +3007,20 @@ namespace ThermoRawFileReader
                     return false;
                 }
 
-                mCachedFilePath = dataFile.FullName;
+                RawFilePath = dataFile.FullName;
+
                 if (!FillFileInfo())
                 {
-                    mCachedFilePath = string.Empty;
+                    RawFilePath = string.Empty;
                     return false;
                 }
 
                 if (FileInfo.ScanStart == 0 && FileInfo.ScanEnd == 0 && FileInfo.VersionNumber == 0 &&
                     Math.Abs(FileInfo.MassResolution) < double.Epsilon && string.IsNullOrWhiteSpace(FileInfo.InstModel))
                 {
-                    RaiseErrorMessage("File did not load correctly; ScanStart, ScanEnd, VersionNumber, and MassResolution are all 0 for " + mCachedFilePath);
+                    RaiseErrorMessage("File did not load correctly; ScanStart, ScanEnd, VersionNumber, and MassResolution are all 0 for " + RawFilePath);
                     FileInfo.CorruptFile = true;
-                    mCachedFilePath = string.Empty;
+                    RawFilePath = string.Empty;
                     return false;
                 }
 
@@ -3027,7 +3029,7 @@ namespace ThermoRawFileReader
             catch (Exception ex)
             {
                 RaiseErrorMessage(string.Format("Exception opening {0}: {1}", filePath, ex.Message), ex);
-                mCachedFilePath = string.Empty;
+                RawFilePath = string.Empty;
                 return false;
             }
 
@@ -3140,6 +3142,7 @@ namespace ThermoRawFileReader
         /// <param name="traceMode">When true, additional messages are reported via Debug events</param>
         public XRawFileIO(string rawFilePath, ThermoReaderOptions options, bool traceMode = false)
         {
+            RawFilePath = string.Empty;
             TraceMode = traceMode;
             Options = options;
 
