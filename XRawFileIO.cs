@@ -1701,14 +1701,14 @@ namespace ThermoRawFileReader
                 {
                     if (!mCorruptMemoryEncountered)
                     {
-                        // TODO: Verify: mXRawFile.GetStatusLogForScanNum(scan, statusLogRT, ref objLabels, ref objValues, ref arrayCount);
+                        var retentionTime = mXRawFile.RetentionTimeFromScanNumber(scan);
 
-                        var rt = mXRawFile.RetentionTimeFromScanNumber(scan);
-                        var data = mXRawFile.GetStatusLogForRetentionTime(rt);
+                        // Get the status log nearest to a retention time.
+                        var statusLogEntry = mXRawFile.GetStatusLogForRetentionTime(retentionTime);
 
-                        arrayCount = data.Length;
-                        objLabels = data.Labels;
-                        objValues = data.Values;
+                        arrayCount = statusLogEntry.Length;
+                        objLabels = statusLogEntry.Labels;
+                        objValues = statusLogEntry.Values;
                     }
                 }
                 catch (AccessViolationException ex)
