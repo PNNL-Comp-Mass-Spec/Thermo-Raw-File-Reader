@@ -63,12 +63,16 @@ xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\DataMining\PEKtoCSV
 
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\DataMining\ProteowizardWrapper\UnitTests\lib\" /Y /D
 
+xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\DataMining\ThermoFAIMStoMzML\lib\" /Y /D
+
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\DataMining\ThermoPeakDataExporter\lib" /Y /D
 
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\DataMining\ThermoRawFileReader\Test_ThermoRawFileReader\bin\Debug\" /Y /D
 
 rem xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x64\Release\" /Y /D
 pause
+
+xcopy Release\ThermoRawFileReader.* "F:\Documents\Projects\GordonSlysz\DeconEngineV2\C#_Version\lib" /Y /D
 
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconConsole\bin\x86\Debug\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconConsole\bin\x86\Release\" /Y /D
