@@ -2865,13 +2865,23 @@ namespace ThermoRawFileReader
 
             try
             {
-                // TODO: This is a reference to try to encourage proper copying of DLLs.
-                var bgSub = new BackgroundSubtractor();
-                var info = bgSub.ToString();
-                if (string.IsNullOrWhiteSpace(info))
+                try
                 {
-                    massIntensityPairs = new double[0, 0];
-                    return -1;
+                    // Instantiate an instance of the BackgroundSubtractor to assure that file
+                    // ThermoFisher.CommonCore.BackgroundSubtraction.dll exists
+                    var bgSub = new BackgroundSubtractor();
+                    var info = bgSub.ToString();
+
+                    if (string.IsNullOrWhiteSpace(info))
+                    {
+                        massIntensityPairs = new double[0, 0];
+                        return -1;
+                    }
+                }
+                catch (Exception)
+                {
+                    var msg = "Unable to load data summing scans; file ThermoFisher.CommonCore.BackgroundSubtraction.dll is missing or corrupt";
+                    RaiseWarningMessage(msg);
                 }
 
                 if (mXRawFile == null)
