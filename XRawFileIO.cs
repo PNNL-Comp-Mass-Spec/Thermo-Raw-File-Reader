@@ -569,16 +569,16 @@ namespace ThermoRawFileReader
             }
 
             // Parse out the text between the square brackets
-            var reMatch = mMassList.Match(filterText);
+            var massListMatch = mMassList.Match(filterText);
 
-            if (!reMatch.Success)
+            if (!massListMatch.Success)
             {
                 return;
             }
 
-            reMatch = mMassRanges.Match(reMatch.Value);
+            var massRangeMatch = mMassRanges.Match(massListMatch.Value);
 
-            while (reMatch.Success)
+            while (massRangeMatch.Success)
             {
                 try
                 {
@@ -588,8 +588,8 @@ namespace ThermoRawFileReader
 
                     var mrmMassRange = new udtMRMMassRangeType
                     {
-                        StartMass = double.Parse(reMatch.Groups["StartMass"].Value),
-                        EndMass = double.Parse(reMatch.Groups["EndMass"].Value)
+                        StartMass = double.Parse(massRangeMatch.Groups["StartMass"].Value),
+                        EndMass = double.Parse(massRangeMatch.Groups["EndMass"].Value)
                     };
 
                     var centralMass = mrmMassRange.StartMass + (mrmMassRange.EndMass - mrmMassRange.StartMass) / 2;
@@ -603,7 +603,7 @@ namespace ThermoRawFileReader
                     // Error parsing out the mass values; skip this group
                 }
 
-                reMatch = reMatch.NextMatch();
+                massRangeMatch = massRangeMatch.NextMatch();
             }
         }
 
