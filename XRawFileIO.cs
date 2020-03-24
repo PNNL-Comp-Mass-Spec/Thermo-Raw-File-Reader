@@ -1071,6 +1071,13 @@ namespace ThermoRawFileReader
                 var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
                 var reactions = scanFilter.MassCount;
 
+                if (reactions <= 0)
+                {
+                    var msg = string.Format("Scan {0} has no precursor m/z values; this is unexpected for a MSn scan", scan);
+                    RaiseWarningMessage(msg);
+                    return ActivationTypeConstants.Unknown;
+                }
+
                 var index = reactions - 1;
                 if (index > 0 && scanFilter.GetIsMultipleActivation(index))
                 {
