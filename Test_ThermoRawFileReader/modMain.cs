@@ -13,7 +13,7 @@ namespace Test_ThermoRawFileReader
 {
     static class Program
     {
-        private const string PROGRAM_DATE = "March 18, 2020";
+        private const string PROGRAM_DATE = "March 23, 2020";
 
         private const string DEFAULT_FILE_PATH = @"..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw";
 
@@ -960,7 +960,8 @@ namespace Test_ThermoRawFileReader
                 "ITMS + p NSI SIM ms",
                 "ITMS + c NSI d SIM ms",
                 "FTMS + p NSI SIM ms",
-                "FTMS + p NSI d SIM ms"
+                "FTMS + p NSI d SIM ms",
+                "FTMS + p NSI SIM msx ms [575.0000-625.0000]"
             };
 
             foreach (var filterItem in filterList)

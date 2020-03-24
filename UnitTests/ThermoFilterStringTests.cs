@@ -34,6 +34,7 @@ namespace RawFileReaderTests
         [TestCase("+ c CI Q1MS [50.000-600.000]                                                      ", MRMScanTypeConstants.MRMQMS)]
         [TestCase("+ c EI Q1MS [50.000-600.000]                                                      ", MRMScanTypeConstants.MRMQMS)]
         [TestCase("c NSI Full cnl 162.053 [300.000-1200.000]                                         ", MRMScanTypeConstants.FullNL)]
+        [TestCase("FTMS + p NSI SIM msx ms [575.0000-625.0000]                                       ", MRMScanTypeConstants.SIM)]
         public void DetermineMRMScanType(string filterText, MRMScanTypeConstants expectedResult)
         {
             var mrmScanType = XRawFileIO.DetermineMRMScanType(filterText);
@@ -70,6 +71,7 @@ namespace RawFileReaderTests
         [TestCase("FTMS - p NSI w SIM ms [817.00-917.00]                                ", "817.00-917.00")]
         [TestCase("FTMS + c NSI d SIM ms [782.00-792.00]                                ", "782.00-792.00")]
         [TestCase("ITMS + c NSI SIM ms [286.50-289.50]                                  ", "286.50-289.50")]
+        [TestCase("FTMS + p NSI SIM msx ms [575.0000-625.0000]                          ", "575.00-625.00")]
         public void ExtractMRMMasses(string filterText, string expectedMassList)
         {
             var mrmScanType = XRawFileIO.DetermineMRMScanType(filterText);
@@ -550,6 +552,7 @@ namespace RawFileReaderTests
         [TestCase("+ p NSI SRM ms2 1025.250 [300.000-1500.00]                                     ", "+ p NSI SRM ms2")]
         [TestCase("+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]             ", "+ c NSI SRM ms2 0@cid15.00")]
         [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", "+ c NSI SRM ms2")]
+        [TestCase("FTMS + p NSI SIM msx ms [575.0000-625.0000]                                    ", "FTMS + p NSI SIM msx ms")]
         public void TestGenericScanFilter(string filterText, string expectedResult)
         {
             var genericFilterResult = XRawFileIO.MakeGenericThermoScanFilter(filterText);
@@ -589,6 +592,7 @@ namespace RawFileReaderTests
         [TestCase("FTMS + p NSI r d Full ms2 944.4316@hcd30.00 [100.0000-2000.0000]                            ", "HCD-HMSn")]
         [TestCase("FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]              ", "ETciD-HMSn")]
         [TestCase("FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]              ", "EThcD-HMSn")]
+        [TestCase("FTMS + p NSI SIM msx ms [575.0000-625.0000]                                                 ", "SIM ms")]
         public void TestScanTypeName(string filterText, string expectedResult)
         {
             var scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterText);
@@ -645,6 +649,7 @@ namespace RawFileReaderTests
         [TestCase("FTMS - p NSI w SIM ms [817.00-917.00]                                             ", true, 1, true, MRMScanTypeConstants.SIM, false)]
         [TestCase("FTMS + c NSI d SIM ms [782.00-792.00]                                             ", true, 1, true, MRMScanTypeConstants.SIM, false)]
         [TestCase("ITMS + c NSI SIM ms [286.50-289.50]                                               ", true, 1, true, MRMScanTypeConstants.SIM, false)]
+        [TestCase("FTMS + p NSI SIM msx ms [575.0000-625.0000]                                       ", true, 1, true, MRMScanTypeConstants.SIM, false)]
         public void ValidateMSScan(
             string filterText,
             bool expectedIsValidMS1orSIM,

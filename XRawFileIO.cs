@@ -55,21 +55,22 @@ namespace ThermoRawFileReader
         private const string MS_ONLY_P_TEXT = " p ms ";
 
         private const string MS_ONLY_P_NSI_TEXT = " p NSI ms ";
-        private const string MS_ONLY_PZ_TEXT = " p Z ms ";			// Likely a zoom scan
-        private const string MS_ONLY_DZ_TEXT = " d Z ms ";			// Dependent zoom scan
-        private const string MS_ONLY_PZ_MS2_TEXT = " d Z ms2 ";		// Dependent MS2 zoom scan
-        private const string MS_ONLY_Z_TEXT = " NSI Z ms ";			// Likely a zoom scan
+        private const string MS_ONLY_PZ_TEXT = " p Z ms ";          // Likely a zoom scan
+        private const string MS_ONLY_DZ_TEXT = " d Z ms ";          // Dependent zoom scan
+        private const string MS_ONLY_PZ_MS2_TEXT = " d Z ms2 ";     // Dependent MS2 zoom scan
+        private const string MS_ONLY_Z_TEXT = " NSI Z ms ";         // Likely a zoom scan
 
         private const string FULL_MS_TEXT = "Full ms ";
-        private const string FULL_PR_TEXT = "Full pr ";				// TSQ: Full Parent Scan, Product Mass
+        private const string FULL_PR_TEXT = "Full pr ";             // TSQ: Full Parent Scan, Product Mass
         private const string SIM_MS_TEXT = "SIM ms ";
-        private const string FULL_LOCK_MS_TEXT = "Full lock ms ";	// Lock mass scan
+        private const string FULL_LOCK_MS_TEXT = "Full lock ms ";   // Lock mass scan
 
         private const string MRM_Q1MS_TEXT = "Q1MS ";
         private const string MRM_Q3MS_TEXT = "Q3MS ";
         private const string MRM_SRM_TEXT = "SRM ms2";
-        private const string MRM_FullNL_TEXT = "Full cnl ";			// MRM neutral loss; yes, cnl starts with a c
-        private const string MRM_SIM_PR_TEXT = "SIM pr ";			// TSQ: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., Biofilm-1000pg-std-mix_06Dec14_Smeagol-3
+        private const string MRM_FullNL_TEXT = "Full cnl ";         // MRM neutral loss; yes, cnl starts with a c
+        private const string MRM_SIM_PR_TEXT = "SIM pr ";           // TSQ: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., Biofilm-1000pg-std-mix_06Dec14_Smeagol-3
+        private const string MRM_SIM_MSX_TEXT = "SIM msx ";         // Q-Exactive Plus: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., MM_unsorted_10ng_digestionTest_t-SIM_MDX_3_17Mar20_Oak_Jup-20-03-01
 
         // This RegEx matches Full ms2, Full ms3, ..., Full ms10, Full ms11, ...
         // It also matches p ms2
@@ -464,6 +465,10 @@ namespace ThermoRawFileReader
                 // This is not technically SRM, but the data looks very similar, so we'll track it like SRM data
                 eMRMScanType = MRMScanTypeConstants.SRM;
             }
+            else if (ContainsText(filterText, MRM_SIM_MSX_TEXT, 1))
+            {
+                eMRMScanType = MRMScanTypeConstants.SIM;
+            }
             else if (ContainsText(filterText, MRM_FullNL_TEXT, 1))
             {
                 eMRMScanType = MRMScanTypeConstants.FullNL;
@@ -537,6 +542,7 @@ namespace ThermoRawFileReader
             // It should be of the form
 
             // SIM:              p NSI SIM ms [330.00-380.00]
+            //                   p NSI SIM msx ms [475.0000-525.0000]
             // or
             // MRM_Q1MS_TEXT:    p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]
             // or
@@ -2169,6 +2175,8 @@ namespace ThermoRawFileReader
             // ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]              ITMS + c NSI d Full ms2 0@pqd27.00
             // FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]             FTMS + c NSI d Full ms2 0@hcd40.00
             // ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]          ITMS + c NSI d sa Full ms2 0@etd100.00
+
+            // FTMS + p NSI SIM msx ms [475.0000-525.0000]                          FTMS + p NSI SIM msx ms
 
             // + c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                       + c d Full ms2 0@45.00
             // + c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]          + c d Full ms3 0@45.00 0@45.00
