@@ -2,6 +2,8 @@
 echo.
 echo Be sure to compile in Release mode before continuing
 echo.
+echo Note that this batch file does NOT push the DLL to \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution
+echo.
 
 pause
 
