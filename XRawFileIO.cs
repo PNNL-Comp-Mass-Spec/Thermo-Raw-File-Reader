@@ -1197,15 +1197,12 @@ namespace ThermoRawFileReader
                     {
                         var scanData = mXRawFile.GetSegmentedScanFromScanNumber(scanNumber, null);
 
-                        if (scanData.Intensities.Length > 0)
+                        if (scanData.Intensities == null || scanData.Intensities.Length <= 0)
+                            continue;
                         {
-                            chromatogramData.Add(scanNumber, scanData.Intensities.ToList());
-                        }
-                        else
-                        {
-                            chromatogramData.Add(scanNumber, new List<double>());
                         }
 
+                        chromatogramData.Add(scanNumber, scanData.Intensities.ToList());
                     }
                     catch (AccessViolationException)
                     {
