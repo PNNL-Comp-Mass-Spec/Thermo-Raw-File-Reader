@@ -1191,6 +1191,8 @@ namespace ThermoRawFileReader
                     return chromatogramData;
                 }
 
+                var lastScanWithData = -1;
+
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
                     try
@@ -1199,10 +1201,18 @@ namespace ThermoRawFileReader
 
                         if (scanData.Intensities == null || scanData.Intensities.Length <= 0)
                             continue;
+
+                        if (lastScanWithData >= 0 && lastScanWithData < scanNumber - 1)
                         {
+                            // Insert empty lists for the scans that preceded this scan but did not have data
+                            for (var scanToAdd = lastScanWithData + 1; scanToAdd < scanNumber; scanToAdd++)
+                            {
+                                chromatogramData.Add(scanToAdd, new List<double>());
+                            }
                         }
 
                         chromatogramData.Add(scanNumber, scanData.Intensities.ToList());
+                        lastScanWithData = scanNumber;
                     }
                     catch (AccessViolationException)
                     {
