@@ -1114,7 +1114,7 @@ namespace RawFileReaderTests
 
                         Assert.IsTrue(dataPointsRead > 0, "GetScanData returned 0 for scan {0}", scanNumber);
 
-                        Assert.AreEqual(dataPointsRead, mzList.Length, "Data count mismatch vs. function return value");
+                        Assert.AreEqual(mzList.Length, dataPointsRead, "Data count mismatch vs. function return value");
 
                         var midPoint = (int)(intensityList.Length / 2f);
 
