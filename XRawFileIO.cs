@@ -230,7 +230,7 @@ namespace ThermoRawFileReader
 
         #endregion
 
-        #region "Events"
+        #region "Events and Event Handlers"
 
 #pragma warning disable 618
         /// <summary>
@@ -285,6 +285,11 @@ namespace ThermoRawFileReader
 #pragma warning disable 618
             ReportWarning?.Invoke(message);
 #pragma warning restore 618
+        }
+
+        private void Options_OptionsUpdatedEvent(object sender)
+        {
+            UpdateReaderOptions();
         }
 
         #endregion
@@ -996,6 +1001,7 @@ namespace ThermoRawFileReader
         /// Populate mFileInfo
         /// </summary>
         /// <returns>True if no error, False if an error</returns>
+        /// <remarks>Called from OpenRawFile</remarks>
         private bool FillFileInfo()
         {
 
@@ -3083,6 +3089,8 @@ namespace ThermoRawFileReader
 
                 mXRawFileHeader = mXRawFile.FileHeader;
 
+                UpdateReaderOptions();
+
                 if (mXRawFile.IsError)
                 {
                     return false;
@@ -3137,6 +3145,15 @@ namespace ThermoRawFileReader
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Update options in mXRawFile based on current values in the Options instance of ThermoReaderOptions
+        /// </summary>
+        /// <remarks>Called from OpenRawFile and whenever the Options class raises event OptionsUpdated</remarks>
+        private void UpdateReaderOptions()
+        {
+            mXRawFile.IncludeReferenceAndExceptionData = Options.IncludeReferenceAndExceptionData;
         }
 
         /// <summary>
