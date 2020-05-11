@@ -1532,8 +1532,8 @@ namespace ThermoRawFileReader
                 scanInfo.IsCentroided = scanStats.IsCentroidScan;
 
                 var arrayCount = 0;
-                object objLabels = null;
-                object objValues = null;
+                object scanEventLabels = null;
+                object scanEventValues = null;
 
                 try
                 {
@@ -1542,8 +1542,8 @@ namespace ThermoRawFileReader
                         // Retrieve the additional parameters for this scan (including Scan Event)
                         var data = mXRawFile.GetTrailerExtraInformation(scan);
                         arrayCount = data.Length;
-                        objLabels = data.Labels;
-                        objValues = data.Values;
+                        scanEventLabels = data.Labels;
+                        scanEventValues = data.Values;
                     }
                 }
                 catch (AccessViolationException ex)
@@ -1566,20 +1566,20 @@ namespace ThermoRawFileReader
                 }
 
                 scanInfo.EventNumber = 1;
-                if (arrayCount > 0 && objLabels != null && objValues != null)
+                if (arrayCount > 0 && scanEventLabels != null && scanEventValues != null)
                 {
 
-                    var scanEventNames =
-                        ((IEnumerable)objLabels).Cast<object>()
+                    var eventNames =
+                        ((IEnumerable)scanEventLabels).Cast<object>()
                             .Select(x => x.ToString())
                             .ToArray();
 
-                    var scanEventValues =
-                         ((IEnumerable)objValues).Cast<object>()
+                    var eventValues =
+                         ((IEnumerable)scanEventValues).Cast<object>()
                             .Select(x => x.ToString())
                             .ToArray();
 
-                    scanInfo.StoreScanEvents(scanEventNames, scanEventValues);
+                    scanInfo.StoreScanEvents(eventNames, eventValues);
 
                     // Look for the entry in scanInfo.ScanEvents named "Scan Event:"
                     // Entries for the LCQ are:
@@ -1763,8 +1763,8 @@ namespace ThermoRawFileReader
                 // Retrieve the Status Log for this scan using the following
                 // The Status Log includes numerous instrument parameters, including voltages, temperatures, pressures, turbo pump speeds, etc.
                 arrayCount = 0;
-                objLabels = null;
-                objValues = null;
+                scanEventLabels = null;
+                scanEventValues = null;
 
                 try
                 {
@@ -1776,8 +1776,8 @@ namespace ThermoRawFileReader
                         var statusLogEntry = mXRawFile.GetStatusLogForRetentionTime(retentionTime);
 
                         arrayCount = statusLogEntry.Length;
-                        objLabels = statusLogEntry.Labels;
-                        objValues = statusLogEntry.Values;
+                        scanEventLabels = statusLogEntry.Labels;
+                        scanEventValues = statusLogEntry.Values;
                     }
                 }
                 catch (AccessViolationException ex)
@@ -1802,12 +1802,12 @@ namespace ThermoRawFileReader
                 if (arrayCount > 0)
                 {
                     var logNames =
-                        ((IEnumerable)objLabels).Cast<object>()
+                        ((IEnumerable)scanEventLabels).Cast<object>()
                             .Select(x => x.ToString())
                             .ToArray();
 
                     var logValues =
-                         ((IEnumerable)objValues).Cast<object>()
+                         ((IEnumerable)scanEventValues).Cast<object>()
                             .Select(x => x.ToString())
                             .ToArray();
 
@@ -2047,8 +2047,8 @@ namespace ThermoRawFileReader
             for (var index = 0; index <= numTuneData - 1; index++)
             {
                 var tuneLabelCount = 0;
-                object objLabels = null;
-                object objValues = null;
+                object tuneDataLabels = null;
+                object tuneDataValues = null;
 
                 string msg;
                 try
@@ -2056,8 +2056,8 @@ namespace ThermoRawFileReader
                     if (!mCorruptMemoryEncountered)
                     {
                         var tuneData = mXRawFile.GetTuneData(index);
-                        objLabels = tuneData.Labels;
-                        objValues = tuneData.Values;
+                        tuneDataLabels = tuneData.Labels;
+                        tuneDataValues = tuneData.Values;
                         tuneLabelCount = tuneData.Length;
                     }
 
@@ -2086,14 +2086,14 @@ namespace ThermoRawFileReader
                 if (tuneLabelCount > 0)
                 {
                     msg = string.Empty;
-                    if (objLabels == null)
+                    if (tuneDataLabels == null)
                     {
                         // .GetTuneData returned a non-zero count, but no parameter names; unable to continue
                         msg = "Warning: the GetTuneData function returned a positive tune parameter count but no parameter names";
                     }
-                    else if (objValues == null)
+                    else if (tuneDataValues == null)
                     {
-                        // .GetTuneData returned parameter names, but objValues is nothing; unable to continue
+                        // .GetTuneData returned parameter names, but tuneDataValues is nothing; unable to continue
                         msg = "Warning: the GetTuneData function returned tune parameter names but no tune values";
                     }
 
@@ -2106,7 +2106,7 @@ namespace ThermoRawFileReader
 
                 }
 
-                if (tuneLabelCount <= 0 || objLabels == null || objValues == null)
+                if (tuneLabelCount <= 0 || tuneDataLabels == null || tuneDataValues == null)
                 {
                     continue;
                 }
@@ -2115,12 +2115,12 @@ namespace ThermoRawFileReader
                 newTuneMethod.Clear();
 
                 var tuneSettingNames =
-                    ((IEnumerable)objLabels).Cast<object>()
+                    ((IEnumerable)tuneDataLabels).Cast<object>()
                         .Select(x => x.ToString())
                         .ToArray();
 
                 var tuneSettingValues =
-                    ((IEnumerable)objValues).Cast<object>()
+                    ((IEnumerable)tuneDataValues).Cast<object>()
                         .Select(x => x.ToString())
                         .ToArray();
 
