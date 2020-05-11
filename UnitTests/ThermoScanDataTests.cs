@@ -305,7 +305,6 @@ namespace RawFileReaderTests
                 Console.WriteLine(msg);
                 Assert.Fail(msg);
             }
-
         }
 
 
@@ -317,7 +316,6 @@ namespace RawFileReaderTests
         [TestCase("Lewy2_19Ct1_2Nov13_Samwise_13-07-28.raw", 1, 44000, 127)]
         public void TestDataIsSortedByMz(string rawFileName, int scanStart, int scanEnd, int scanStep)
         {
-
             var dataFile = GetRawDataFile(rawFileName);
 
             using (var reader = new XRawFileIO(dataFile.FullName))
@@ -351,9 +349,10 @@ namespace RawFileReaderTests
                     if (iteration == 1)
                     {
                         Console.WriteLine("Scan data for {0}", dataFile.Name);
-                        Console.WriteLine("{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10} {6,-8} {7,-10} {8,-8}  {9}",
-                                          "Scan", "Max#", "Centroid", "MzCount", "IntCount",
-                                          "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+                        Console.WriteLine(
+                            "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10} {6,-8} {7,-10} {8,-8}  {9}",
+                            "Scan", "Max#", "Centroid", "MzCount", "IntCount",
+                            "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
                     }
 
                     if (scanEnd > reader.FileInfo.ScanEnd)
@@ -389,15 +388,17 @@ namespace RawFileReaderTests
                             {
                                 var midIndex = (int)Math.Floor(mzList.Length / 2.0);
 
-                                Console.WriteLine("{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10:0.0000} {6,-8:0.0} {7,-10:0.0000} {8,-8:0.0}  {9}",
-                                                  scanNumber, maxNumberOfPeaks, centroidData, mzList.Length, intensityList.Length,
-                                                  mzList[0], intensityList[0], mzList[midIndex], intensityList[midIndex], scanInfo.FilterText);
+                                Console.WriteLine(
+                                    "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10:0.0000} {6,-8:0.0} {7,-10:0.0000} {8,-8:0.0}  {9}",
+                                    scanNumber, maxNumberOfPeaks, centroidData, mzList.Length, intensityList.Length,
+                                    mzList[0], intensityList[0], mzList[midIndex], intensityList[midIndex], scanInfo.FilterText);
                             }
                             else
                             {
-                                Console.WriteLine("{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10} {6,-8} {7,-10} {8,-8}  {9}",
-                                                  scanNumber, maxNumberOfPeaks, centroidData, mzList.Length, intensityList.Length,
-                                                  "n/a", "n/a", "n/a", "n/a", scanInfo.FilterText);
+                                Console.WriteLine(
+                                    "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10} {6,-8} {7,-10} {8,-8}  {9}",
+                                    scanNumber, maxNumberOfPeaks, centroidData, mzList.Length, intensityList.Length,
+                                    "n/a", "n/a", "n/a", "n/a", scanInfo.FilterText);
                             }
                         }
 
@@ -738,15 +739,16 @@ namespace RawFileReaderTests
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
                 Console.WriteLine("Scan info for {0}", dataFile.Name);
-                Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18} {19}",
-                                  "Scan", "MSLevel", "Event",
-                                  "NumPeaks", "RetentionTime",
-                                  "LowMass", "HighMass", "TotalIonCurrent",
-                                  "BasePeakMZ", "BasePeakIntensity",
-                                  "ParentIonMZ", "ActivationType", "CollisionMode",
-                                  "IonMode", "IsCentroided", "IsFTMS",
-                                  "ScanEvents.Count", "StatusLog.Count",
-                                  "IonInjectionTime", "FilterText");
+                Console.WriteLine(
+                    "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18} {19}",
+                    "Scan", "MSLevel", "Event",
+                    "NumPeaks", "RetentionTime",
+                    "LowMass", "HighMass", "TotalIonCurrent",
+                    "BasePeakMZ", "BasePeakIntensity",
+                    "ParentIonMZ", "ActivationType", "CollisionMode",
+                    "IonMode", "IsCentroided", "IsFTMS",
+                    "ScanEvents.Count", "StatusLog.Count",
+                    "IonInjectionTime", "FilterText");
 
                 var scanCountMS1 = 0;
                 var scanCountMS2 = 0;
@@ -877,7 +879,6 @@ namespace RawFileReaderTests
                     Console.WriteLine("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
                     Assert.Fail("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
                 }
-
             }
         }
 
@@ -885,7 +886,6 @@ namespace RawFileReaderTests
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
         public void TestGetScanInfoStruct(string rawFileName, int scanStart, int scanEnd)
         {
-
             var dataFile = GetRawDataFile(rawFileName);
 
             using (var reader = new XRawFileIO(dataFile.FullName))
@@ -912,7 +912,6 @@ namespace RawFileReaderTests
 
                 }
             }
-
         }
 
         [Test]
@@ -1103,9 +1102,10 @@ namespace RawFileReaderTests
                     if (iteration == 1)
                     {
                         Console.WriteLine("Scan data for {0}", dataFile.Name);
-                        Console.WriteLine("{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-8} {6,-8} {7,-9} {8,-7} {9}",
-                                          "Scan", "Max#", "Centroid", "MzCount", "IntCount",
-                                          "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+                        Console.WriteLine(
+                            "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-8} {6,-8} {7,-9} {8,-7} {9}",
+                            "Scan", "Max#", "Centroid", "MzCount", "IntCount",
+                            "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
                     }
 
                     for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
@@ -1144,14 +1144,15 @@ namespace RawFileReaderTests
                             var keySpec = maxNumberOfPeaks + "_" + centroidData;
                             if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                             {
-                                Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
-                                                "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
+                                var observedValue = scanSummary.Substring(22);
+
+                                Assert.AreEqual(expectedDataDetails, observedValue,
+                                    "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
                             }
                         }
                     }
                 }
             }
-
         }
 
         [Test]
@@ -1245,9 +1246,10 @@ namespace RawFileReaderTests
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
                 Console.WriteLine("Scan data for {0}", dataFile.Name);
-                Console.WriteLine("{0,5} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
-                                "Scan", "Max#", "Centroid", "DataCount",
-                                "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+                Console.WriteLine(
+                    "{0,5} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
+                    "Scan", "Max#", "Centroid", "DataCount",
+                    "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
 
                 for (var iteration = 1; iteration <= 4; iteration++)
                 {
@@ -1349,7 +1351,6 @@ namespace RawFileReaderTests
                     }
                 }
             }
-
         }
 
         [Test]
@@ -1391,9 +1392,10 @@ namespace RawFileReaderTests
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
                 Console.WriteLine("Scan data for {0}", dataFile.Name);
-                Console.WriteLine("{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
-                                "Scan", "Max#", "Centroid", "DataCount",
-                                "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+                Console.WriteLine(
+                    "{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
+                    "Scan", "Max#", "Centroid", "DataCount",
+                    "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
 
                 for (var iteration = 1; iteration <= 4; iteration++)
                 {
@@ -1487,8 +1489,6 @@ namespace RawFileReaderTests
 
                     Console.WriteLine(scanSummary);
                 }
-
-
             }
         }
 
@@ -1541,9 +1541,10 @@ namespace RawFileReaderTests
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
                 Console.WriteLine("Scan label data for {0}", dataFile.Name);
-                Console.WriteLine("{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
-                                  "Scan", "Count", "Mass", "Intensity",
-                                  "Resolution", "Baseline", "Noise", "Charge", "ScanFilter");
+                Console.WriteLine(
+                    "{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
+                    "Scan", "Count", "Mass", "Intensity",
+                    "Resolution", "Baseline", "Noise", "Charge", "ScanFilter");
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
@@ -1661,9 +1662,10 @@ namespace RawFileReaderTests
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
                 Console.WriteLine("Scan label data for {0}", dataFile.Name);
-                Console.WriteLine("{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8}  {7}",
-                                  "Scan", "Count", "Mass", "Intensity",
-                                  "Resolution", "AccuracyMMU", "AccuracyPPM", "ScanFilter");
+                Console.WriteLine(
+                    "{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8}  {7}",
+                    "Scan", "Count", "Mass", "Intensity",
+                    "Resolution", "AccuracyMMU", "AccuracyPPM", "ScanFilter");
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
@@ -1828,7 +1830,6 @@ namespace RawFileReaderTests
                         Assert.Fail("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
                     }
                 }
-
             }
         }
 
@@ -1838,7 +1839,6 @@ namespace RawFileReaderTests
         [TestCase("B5_50uM_MS_r1.RAW", 1, 20)]
         public void TestScanInfoCopyFromStruct(string rawFileName, int scanStart, int scanEnd)
         {
-
             var dataFile = GetRawDataFile(rawFileName);
 
             using (var reader = new XRawFileIO(dataFile.FullName))
@@ -1912,7 +1912,6 @@ namespace RawFileReaderTests
 
                 }
             }
-
         }
 
         private void AddEmptyDictionaries(IDictionary<int, Dictionary<string, string>> fileData, int scanStart, int scanEnd)
