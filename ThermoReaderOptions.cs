@@ -7,8 +7,50 @@ namespace ThermoRawFileReader
     public class ThermoReaderOptions
     {
 
+        #region "Events"
+
         /// <summary>
-        /// MS Method Information
+        /// Delegate method for OptionsUpdatedEvent
+        /// </summary>
+        /// <param name="sender"></param>
+        public delegate void OptionsUpdatedEventHandler(object sender);
+
+        /// <summary>
+        /// This event is raised when one of the options tracked by this class is changed
+        /// </summary>
+        public event OptionsUpdatedEventHandler OptionsUpdatedEvent;
+
+        #endregion
+
+        #region "Member variables"
+
+        private bool mIncludeReferenceAndExceptionData = false;
+
+        #endregion
+
+        #region "Properties"
+
+
+        /// <summary>
+        /// When true, include reference and exception peaks when obtaining mass spec data
+        /// using GetScanData, GetScanData2D, or GetScanDataSumScans
+        /// </summary>
+        /// <remarks>Reference and exception peaks are internal mass calibration data within a scan</remarks>
+        public bool IncludeReferenceAndExceptionData
+        {
+            get => mIncludeReferenceAndExceptionData;
+            set
+            {
+                if (mIncludeReferenceAndExceptionData == value)
+                    return;
+
+                mIncludeReferenceAndExceptionData = value;
+                OptionsUpdatedEvent?.Invoke(this);
+            }
+        }
+
+        /// <summary>
+        /// Load MS Method Information when calling OpenRawFile
         /// </summary>
         /// <remarks>
         /// Set this to false when using the ThermoRawFileReader on Linux systems;
@@ -21,9 +63,12 @@ namespace ThermoRawFileReader
         public bool LoadMSMethodInfo { get; set; } = true;
 
         /// <summary>
-        /// MS Tune Information
+        /// Load MS Tune Information when calling OpenRawFile
         /// </summary>
         public bool LoadMSTuneInfo { get; set; } = true;
 
+        #endregion
+
     }
+
 }
