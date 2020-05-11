@@ -1068,12 +1068,187 @@ namespace RawFileReaderTests
 
             expectedData.Add("Lewy2_19Ct1_2Nov13_Samwise_13-07-28", file5Data);
 
+            var options = new ThermoReaderOptions
+            {
+                IncludeReferenceAndExceptionData = false
+            };
 
+            TestGetScanDataWork(rawFileName, options, scanStart, scanEnd, expectedData);
+        }
+
+        [Test]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165)]
+        [TestCase("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08.raw", 3101, 3102)]
+        [TestCase("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 4371, 4373)]
+        [TestCase("Lewy2_19Ct1_2Nov13_Samwise_13-07-28.raw", 22010, 22014)]
+        public void TestGetScanDataWithReferenceAndExceptionPeaks(string rawFileName, int scanStart, int scanEnd)
+        {
+            var expectedData = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
+
+            // Keys in this dictionary are the scan number of data being retrieved
+            var file1Data = new Dictionary<int, Dictionary<string, string>>();
+            AddEmptyDictionaries(file1Data, 1513, 1517);
+
+            // The KeySpec for each dictionary entry is MaxDataCount_Centroid
+            file1Data[1513].Add("0_False", "  851      851     409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("0_False", "  109      109     281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1515].Add("0_False", "  290      290     335.798   3.8E+4 1034.194   1.6E+4  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
+            file1Data[1516].Add("0_False", "  154      154     461.889   7.3E+3 1203.274   2.6E+3  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
+            file1Data[1517].Add("0_False", "  887      887     420.016   9.7E+5 1232.206   8.0E+5  + c ESI Full ms [400.00-2000.00]");
+
+            file1Data[1513].Add("0_True", "  851      851     409.615   4.8E+5 1227.956   1.6E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("0_True", "  109      109     281.601   2.4E+4  633.151   4.4E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1515].Add("0_True", "  290      290     335.798   3.8E+4 1034.194   1.6E+4  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
+            file1Data[1516].Add("0_True", "  154      154     461.889   7.3E+3 1203.274   2.6E+3  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
+            file1Data[1517].Add("0_True", "  887      887     420.016   9.7E+5 1232.206   8.0E+5  + c ESI Full ms [400.00-2000.00]");
+
+            file1Data[1513].Add("50_False", "   50       50     747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("50_False", "   50       50     281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1515].Add("50_False", "   50       50     353.590   9.7E+4 1157.949   3.6E+5  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
+            file1Data[1516].Add("50_False", "   50       50     461.889   7.3E+3 1146.341   1.4E+4  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
+            file1Data[1517].Add("50_False", "   50       50     883.347   8.9E+6 1206.792   5.5E+6  + c ESI Full ms [400.00-2000.00]");
+
+            file1Data[1513].Add("50_True", "   50       50     747.055   2.5E+6 1148.485   3.4E+6  + c ESI Full ms [400.00-2000.00]");
+            file1Data[1514].Add("50_True", "   50       50     281.601   2.4E+4  632.089   2.6E+4  + c d Full ms2 884.41@cid45.00 [230.00-1780.00]");
+            file1Data[1515].Add("50_True", "   50       50     353.590   9.7E+4 1157.949   3.6E+5  + c d Full ms2 1147.67@cid45.00 [305.00-2000.00]");
+            file1Data[1516].Add("50_True", "   50       50     461.889   7.3E+3 1146.341   1.4E+4  + c d Full ms2 1492.90@cid45.00 [400.00-2000.00]");
+            file1Data[1517].Add("50_True", "   50       50     883.347   8.9E+6 1206.792   5.5E+6  + c ESI Full ms [400.00-2000.00]");
+
+            expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
+
+
+            var file2Data = new Dictionary<int, Dictionary<string, string>>
+            {
+                {16121, new Dictionary<string, string>()},
+                {16122, new Dictionary<string, string>()},
+                {16126, new Dictionary<string, string>()},
+                {16131, new Dictionary<string, string>()},
+                {16133, new Dictionary<string, string>()},
+                {16141, new Dictionary<string, string>()}
+            };
+
+            // The KeySpec for each dictionary entry is MaxDataCount_Centroid
+            file2Data[16121].Add("0_False", "11888    11888     346.518   0.0E+0  706.844   9.8E+4  FTMS + p NSI Full ms [350.0000-1550.0000]");
+            file2Data[16122].Add("0_False", "  490      490     116.232   7.0E+1  403.932   1.1E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
+            file2Data[16126].Add("0_False", "  753      753     231.045   1.1E+1 1004.586   2.0E+1  ITMS + c NSI r d sa Full ms2 538.8400@etd53.58@cid20.00 [120.0000-1627.0000]");
+            file2Data[16131].Add("0_False", "   29       29     984.504   9.5E+3 1931.917   2.4E+1  ITMS + c NSI r d Full ms2 987.8934@etd120.55 [120.0000-1986.0000]");
+            file2Data[16133].Add("0_False", "  280      280     260.118   2.3E+1  663.160   7.7E+0  ITMS + c NSI r d sa Full ms2 421.2619@etd120.55@cid20.00 [120.0000-853.0000]");
+            file2Data[16141].Add("0_False", "  240      240     304.425   1.3E+1 1447.649   3.0E+1  ITMS + c NSI r d sa Full ms2 874.8397@etd120.55@hcd20.00 [120.0000-1760.0000]");
+
+            file2Data[16121].Add("0_True", "  833      833     351.231   2.9E+5  712.813   2.9E+5  FTMS + p NSI Full ms [350.0000-1550.0000]");
+            file2Data[16122].Add("0_True", "  490      490     116.232   7.0E+1  403.932   1.1E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
+            file2Data[16126].Add("0_True", "  753      753     231.045   1.1E+1 1004.586   2.0E+1  ITMS + c NSI r d sa Full ms2 538.8400@etd53.58@cid20.00 [120.0000-1627.0000]");
+            file2Data[16131].Add("0_True", "   29       29     984.504   9.5E+3 1931.917   2.4E+1  ITMS + c NSI r d Full ms2 987.8934@etd120.55 [120.0000-1986.0000]");
+            file2Data[16133].Add("0_True", "  280      280     260.118   2.3E+1  663.160   7.7E+0  ITMS + c NSI r d sa Full ms2 421.2619@etd120.55@cid20.00 [120.0000-853.0000]");
+            file2Data[16141].Add("0_True", "  240      240     304.425   1.3E+1 1447.649   3.0E+1  ITMS + c NSI r d sa Full ms2 874.8397@etd120.55@hcd20.00 [120.0000-1760.0000]");
+
+            file2Data[16121].Add("50_False", "   50       50     503.553   2.0E+7  504.571   2.1E+7  FTMS + p NSI Full ms [350.0000-1550.0000]");
+            file2Data[16122].Add("50_False", "   50       50     157.049   2.0E+4  385.181   6.0E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
+            file2Data[16126].Add("50_False", "   50       50     535.311   2.5E+3  798.982   1.3E+3  ITMS + c NSI r d sa Full ms2 538.8400@etd53.58@cid20.00 [120.0000-1627.0000]");
+            file2Data[16131].Add("50_False", "   29       29     984.504   9.5E+3 1931.917   2.4E+1  ITMS + c NSI r d Full ms2 987.8934@etd120.55 [120.0000-1986.0000]");
+            file2Data[16133].Add("50_False", "   50       50     356.206   7.5E+1  795.543   1.3E+2  ITMS + c NSI r d sa Full ms2 421.2619@etd120.55@cid20.00 [120.0000-853.0000]");
+            file2Data[16141].Add("50_False", "   50       50     853.937   5.6E+1 1705.974   9.8E+1  ITMS + c NSI r d sa Full ms2 874.8397@etd120.55@hcd20.00 [120.0000-1760.0000]");
+
+            file2Data[16121].Add("50_True", "   50       50     371.733   6.2E+6  681.010   6.2E+6  FTMS + p NSI Full ms [350.0000-1550.0000]");
+            file2Data[16122].Add("50_True", "   50       50     157.049   2.0E+4  385.181   6.0E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
+            file2Data[16126].Add("50_True", "   50       50     535.311   2.5E+3  798.982   1.3E+3  ITMS + c NSI r d sa Full ms2 538.8400@etd53.58@cid20.00 [120.0000-1627.0000]");
+            file2Data[16131].Add("50_True", "   29       29     984.504   9.5E+3 1931.917   2.4E+1  ITMS + c NSI r d Full ms2 987.8934@etd120.55 [120.0000-1986.0000]");
+            file2Data[16133].Add("50_True", "   50       50     356.206   7.5E+1  795.543   1.3E+2  ITMS + c NSI r d sa Full ms2 421.2619@etd120.55@cid20.00 [120.0000-853.0000]");
+            file2Data[16141].Add("50_True", "   50       50     853.937   5.6E+1 1705.974   9.8E+1  ITMS + c NSI r d sa Full ms2 874.8397@etd120.55@hcd20.00 [120.0000-1760.0000]");
+
+            expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
+
+
+            var file3Data = new Dictionary<int, Dictionary<string, string>>
+            {
+                {3101, new Dictionary<string, string>()},
+                {3102, new Dictionary<string, string>()},
+                {16126, new Dictionary<string, string>()},
+                {16131, new Dictionary<string, string>()},
+                {16133, new Dictionary<string, string>()},
+                {16141, new Dictionary<string, string>()}
+            };
+
+            // The KeySpec for each dictionary entry is MaxDataCount_Centroid
+            file3Data[3101].Add("0_False", "19200    19200     400.083   1.7E+3 1200.083  5.2E-23  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("0_False", "  329      329     147.123   4.3E+2  550.548   1.0E+1  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+            file3Data[3101].Add("0_True", "  906      906     400.389   1.5E+4  760.724   3.9E+4  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("0_True", "  329      329     147.123   4.3E+2  550.548   1.0E+1  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+            file3Data[3101].Add("50_False", "   50       50     500.333   4.8E+4  555.250   4.2E+4  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("50_False", "   50       50     147.123   4.3E+2  545.401   1.4E+3  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+            file3Data[3101].Add("50_True", "   50       50     423.593   1.1E+5  596.215   9.5E+4  ITMS + p NSI Full ms [400.00-2000.00]");
+            file3Data[3102].Add("50_True", "   50       50     147.123   4.3E+2  545.401   1.4E+3  ITMS + c NSI d Full ms2 500.85@cid35.00 [125.00-2000.00]");
+
+            expectedData.Add("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08", file3Data);
+
+
+            var file4Data = new Dictionary<int, Dictionary<string, string>>();
+            AddEmptyDictionaries(file4Data, 4371, 4373);
+
+            // The KeySpec for each dictionary entry is MaxDataCount_Centroid
+            file4Data[4371].Add("0_False", " 9271     9271     200.000   0.0E+0  597.504   0.0E+0  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("0_False", "   23       23      91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4373].Add("0_False", "   97       97      95.192   6.9E+0  337.598   7.2E+0  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
+            file4Data[4371].Add("0_True", "  691      691     200.052   4.7E+2  600.505   7.1E+2  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("0_True", "   23       23      91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4373].Add("0_True", "   97       97      95.192   6.9E+0  337.598   7.2E+0  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
+            file4Data[4371].Add("50_False", "   50       50     324.984   4.3E+4  447.116   8.4E+4  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("50_False", "   23       23      91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4373].Add("50_False", "   50       50     122.133   2.0E+1  377.493   1.7E+1  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
+            file4Data[4371].Add("50_True", "   50       50     217.018   4.9E+3  449.337   1.3E+4  FTMS + p ESI Full ms [200.00-2000.00]");
+            file4Data[4372].Add("50_True", "   23       23      91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
+            file4Data[4373].Add("50_True", "   50       50     122.133   2.0E+1  377.493   1.7E+1  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
+
+            expectedData.Add("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925", file4Data);
+
+
+            var file5Data = new Dictionary<int, Dictionary<string, string>>();
+            AddEmptyDictionaries(file5Data, 22010, 22014);
+
+            // The KeySpec for each dictionary entry is MaxDataCount_Centroid
+            file5Data[22010].Add("0_False", "35347    35347     396.014   0.0E+0  642.910   5.1E+5  FTMS + p NSI Full ms [400.00-2000.00]");
+            file5Data[22011].Add("0_False", " 3910     3910      92.733   0.0E+0  262.166   9.7E+3  FTMS + p NSI d Full ms2 451.62@hcd32.00 [93.67-1405.00]");
+            file5Data[22012].Add("0_False", "34829    34829     396.014   0.0E+0  639.990   5.6E+6  FTMS + p NSI Full ms [400.00-2000.00]");
+            file5Data[22013].Add("0_False", " 3756     3756      99.003   0.0E+0  244.134   1.7E+4  FTMS + p NSI d Full ms2 726.87@hcd32.00 [100.00-1500.00]");
+            file5Data[22014].Add("0_False", " 3403     3403     140.253   0.0E+0  367.176   0.0E+0  FTMS + p NSI d Full ms2 687.05@hcd32.00 [141.67-2125.00]");
+            file5Data[22010].Add("0_True", " 2500     2500     401.286   5.6E+5  644.143   2.2E+6  FTMS + p NSI Full ms [400.00-2000.00]");
+            file5Data[22011].Add("0_True", "  262      262     101.071   5.3E+4  267.660   8.2E+3  FTMS + p NSI d Full ms2 451.62@hcd32.00 [93.67-1405.00]");
+            file5Data[22012].Add("0_True", " 2444     2444     400.264   3.8E+5  638.584   6.1E+5  FTMS + p NSI Full ms [400.00-2000.00]");
+            file5Data[22013].Add("0_True", "  271      271     101.071   9.8E+4  244.166   3.3E+4  FTMS + p NSI d Full ms2 726.87@hcd32.00 [100.00-1500.00]");
+            file5Data[22014].Add("0_True", "  236      236     142.062   2.1E+4  361.153   1.8E+4  FTMS + p NSI d Full ms2 687.05@hcd32.00 [141.67-2125.00]");
+            file5Data[22010].Add("50_False", "   50       50     469.269   1.8E+8  495.792   6.7E+8  FTMS + p NSI Full ms [400.00-2000.00]");
+            file5Data[22011].Add("50_False", "   50       50     110.071   2.1E+5  183.153   5.6E+5  FTMS + p NSI d Full ms2 451.62@hcd32.00 [93.67-1405.00]");
+            file5Data[22012].Add("50_False", "   50       50     469.269   2.5E+8  495.789   4.6E+8  FTMS + p NSI Full ms [400.00-2000.00]");
+            file5Data[22013].Add("50_False", "   50       50     110.070   3.4E+5  169.100   4.5E+5  FTMS + p NSI d Full ms2 726.87@hcd32.00 [100.00-1500.00]");
+            file5Data[22014].Add("50_False", "   50       50     147.112   3.0E+5  687.427   2.8E+5  FTMS + p NSI d Full ms2 687.05@hcd32.00 [141.67-2125.00]");
+            file5Data[22010].Add("50_True", "   50       50     469.272   2.7E+8  606.977   9.0E+7  FTMS + p NSI Full ms [400.00-2000.00]");
+            file5Data[22011].Add("50_True", "   50       50     102.055   7.1E+4  233.165   1.1E+5  FTMS + p NSI d Full ms2 451.62@hcd32.00 [93.67-1405.00]");
+            file5Data[22012].Add("50_True", "   50       50     469.272   3.6E+8  606.643   1.7E+8  FTMS + p NSI Full ms [400.00-2000.00]");
+            file5Data[22013].Add("50_True", "   50       50     102.055   1.1E+5  218.150   1.4E+5  FTMS + p NSI d Full ms2 726.87@hcd32.00 [100.00-1500.00]");
+            file5Data[22014].Add("50_True", "   50       50     147.113   3.4E+5  428.252   1.4E+5  FTMS + p NSI d Full ms2 687.05@hcd32.00 [141.67-2125.00]");
+
+            expectedData.Add("Lewy2_19Ct1_2Nov13_Samwise_13-07-28", file5Data);
+
+            var options = new ThermoReaderOptions
+            {
+                IncludeReferenceAndExceptionData = true
+            };
+
+            TestGetScanDataWork(rawFileName, options, scanStart, scanEnd, expectedData);
+        }
+
+        private void TestGetScanDataWork(
+            string rawFileName,
+            ThermoReaderOptions options,
+            int scanStart,
+            int scanEnd,
+            IReadOnlyDictionary<string, Dictionary<int, Dictionary<string, string>>> expectedData)
+        {
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            using (var reader = new XRawFileIO(dataFile.FullName, options))
             {
-
                 for (var iteration = 1; iteration <= 4; iteration++)
                 {
                     int maxNumberOfPeaks;
