@@ -1537,33 +1537,32 @@ namespace ThermoRawFileReader
 
                 scanInfo.IsCentroided = scanStats.IsCentroidScan;
 
-                var arrayCount = 0;
-                object scanEventLabels = null;
-                object scanEventValues = null;
-
                 try
                 {
                     if (!mCorruptMemoryEncountered)
                     {
                         // Retrieve the additional parameters for this scan (including Scan Event)
                         var data = mXRawFile.GetTrailerExtraInformation(scan);
-                        arrayCount = data.Length;
-                        scanEventLabels = data.Labels;
-                        scanEventValues = data.Values;
+                        var arrayCount = data.Length;
+                        var scanEventLabels = data.Labels;
+                        var scanEventValues = data.Values;
+
+                        if (arrayCount > 0 && scanEventLabels != null && scanEventValues != null)
+                        {
+                            scanInfo.StoreScanEvents(scanEventLabels, scanEventValues);
+                        }
                     }
                 }
                 catch (AccessViolationException ex)
                 {
                     var msg = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " + scan + ": " + ex.Message;
                     RaiseWarningMessage(msg);
-                    arrayCount = 0;
 
                 }
                 catch (Exception ex)
                 {
                     var msg = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " + scan + ": " + ex.Message;
                     RaiseWarningMessage(msg);
-                    arrayCount = 0;
 
                     if (ex.Message.ToLower().Contains("memory is corrupt"))
                     {
@@ -1572,60 +1571,45 @@ namespace ThermoRawFileReader
                 }
 
                 scanInfo.EventNumber = 1;
-                if (arrayCount > 0 && scanEventLabels != null && scanEventValues != null)
+
+                // Look for the entry in scanInfo.ScanEvents named "Scan Event:"
+                // Entries for the LCQ are:
+                //   Wideband Activation
+                //   Micro Scan Count
+                //   Ion Injection Time (ms)
+                //   Scan Segment
+                //   Scan Event
+                //   Elapsed Scan Time (sec)
+                //   API Source CID Energy
+                //   Resolution
+                //   Average Scan by Inst
+                //   BackGd Subtracted by Inst
+                //   Charge State
+
+                foreach (var scanEvent in from item in scanInfo.ScanEvents where item.Key.ToLower().StartsWith("scan event") select item)
                 {
-
-                    var eventNames =
-                        ((IEnumerable)scanEventLabels).Cast<object>()
-                            .Select(x => x.ToString())
-                            .ToArray();
-
-                    var eventValues =
-                         ((IEnumerable)scanEventValues).Cast<object>()
-                            .Select(x => x.ToString())
-                            .ToArray();
-
-                    scanInfo.StoreScanEvents(eventNames, eventValues);
-
-                    // Look for the entry in scanInfo.ScanEvents named "Scan Event:"
-                    // Entries for the LCQ are:
-                    //   Wideband Activation
-                    //   Micro Scan Count
-                    //   Ion Injection Time (ms)
-                    //   Scan Segment
-                    //   Scan Event
-                    //   Elapsed Scan Time (sec)
-                    //   API Source CID Energy
-                    //   Resolution
-                    //   Average Scan by Inst
-                    //   BackGd Subtracted by Inst
-                    //   Charge State
-
-                    foreach (var scanEvent in from item in scanInfo.ScanEvents where item.Key.ToLower().StartsWith("scan event") select item)
+                    try
                     {
-                        try
-                        {
-                            scanInfo.EventNumber = Convert.ToInt32(scanEvent.Value);
-                        }
-                        catch (Exception)
-                        {
-                            // Ignore errors here
-                        }
-                        break;
+                        scanInfo.EventNumber = Convert.ToInt32(scanEvent.Value);
                     }
-
-                    foreach (var scanEvent in from item in scanInfo.ScanEvents where item.Key.ToLower().StartsWith("ion injection time (ms)") select item)
+                    catch (Exception)
                     {
-                        try
-                        {
-                            scanInfo.IonInjectionTime = Convert.ToDouble(scanEvent.Value);
-                        }
-                        catch (Exception)
-                        {
-                            // Ignore errors here
-                        }
-                        break;
+                        // Ignore errors here
                     }
+                    break;
+                }
+
+                foreach (var scanEvent in from item in scanInfo.ScanEvents where item.Key.ToLower().StartsWith("ion injection time (ms)") select item)
+                {
+                    try
+                    {
+                        scanInfo.IonInjectionTime = Convert.ToDouble(scanEvent.Value);
+                    }
+                    catch (Exception)
+                    {
+                        // Ignore errors here
+                    }
+                    break;
                 }
 
                 // Lookup the filter text for this scan
@@ -1768,9 +1752,6 @@ namespace ThermoRawFileReader
 
                 // Retrieve the Status Log for this scan using the following
                 // The Status Log includes numerous instrument parameters, including voltages, temperatures, pressures, turbo pump speeds, etc.
-                arrayCount = 0;
-                scanEventLabels = null;
-                scanEventValues = null;
 
                 try
                 {
@@ -1781,46 +1762,32 @@ namespace ThermoRawFileReader
                         // Get the status log nearest to a retention time.
                         var statusLogEntry = mXRawFile.GetStatusLogForRetentionTime(retentionTime);
 
-                        arrayCount = statusLogEntry.Length;
-                        scanEventLabels = statusLogEntry.Labels;
-                        scanEventValues = statusLogEntry.Values;
+                        var arrayCount = statusLogEntry.Length;
+                        var logNames = statusLogEntry.Labels;
+                        var logValues = statusLogEntry.Values;
+
+                        if (arrayCount > 0)
+                        {
+                            scanInfo.StoreStatusLog(logNames, logValues);
+                        }
                     }
                 }
                 catch (AccessViolationException ex)
                 {
                     var msg = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " + scan + ": " + ex.Message;
                     RaiseWarningMessage(msg);
-                    arrayCount = 0;
 
                 }
                 catch (Exception ex)
                 {
                     var msg = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " + scan + ": " + ex.Message;
                     RaiseWarningMessage(msg);
-                    arrayCount = 0;
 
                     if (ex.Message.ToLower().Contains("memory is corrupt"))
                     {
                         mCorruptMemoryEncountered = true;
                     }
                 }
-
-                if (arrayCount > 0)
-                {
-                    var logNames =
-                        ((IEnumerable)scanEventLabels).Cast<object>()
-                            .Select(x => x.ToString())
-                            .ToArray();
-
-                    var logValues =
-                         ((IEnumerable)scanEventValues).Cast<object>()
-                            .Select(x => x.ToString())
-                            .ToArray();
-
-                    scanInfo.StoreStatusLog(logNames, logValues);
-
-                }
-
             }
             catch (Exception ex)
             {
@@ -2053,8 +2020,8 @@ namespace ThermoRawFileReader
             for (var index = 0; index <= numTuneData - 1; index++)
             {
                 var tuneLabelCount = 0;
-                object tuneDataLabels = null;
-                object tuneDataValues = null;
+                string[] tuneSettingNames = null;
+                string[] tuneSettingValues = null;
 
                 string msg;
                 try
@@ -2062,8 +2029,8 @@ namespace ThermoRawFileReader
                     if (!mCorruptMemoryEncountered)
                     {
                         var tuneData = mXRawFile.GetTuneData(index);
-                        tuneDataLabels = tuneData.Labels;
-                        tuneDataValues = tuneData.Values;
+                        tuneSettingNames = tuneData.Labels;
+                        tuneSettingValues = tuneData.Values;
                         tuneLabelCount = tuneData.Length;
                     }
 
@@ -2092,14 +2059,14 @@ namespace ThermoRawFileReader
                 if (tuneLabelCount > 0)
                 {
                     msg = string.Empty;
-                    if (tuneDataLabels == null)
+                    if (tuneSettingNames == null)
                     {
                         // .GetTuneData returned a non-zero count, but no parameter names; unable to continue
                         msg = "Warning: the GetTuneData function returned a positive tune parameter count but no parameter names";
                     }
-                    else if (tuneDataValues == null)
+                    else if (tuneSettingValues == null)
                     {
-                        // .GetTuneData returned parameter names, but tuneDataValues is nothing; unable to continue
+                        // .GetTuneData returned parameter names, but tuneSettingValues is nothing; unable to continue
                         msg = "Warning: the GetTuneData function returned tune parameter names but no tune values";
                     }
 
@@ -2112,23 +2079,13 @@ namespace ThermoRawFileReader
 
                 }
 
-                if (tuneLabelCount <= 0 || tuneDataLabels == null || tuneDataValues == null)
+                if (tuneLabelCount <= 0 || tuneSettingNames == null || tuneSettingValues == null)
                 {
                     continue;
                 }
 
                 var newTuneMethod = new TuneMethod();
                 newTuneMethod.Clear();
-
-                var tuneSettingNames =
-                    ((IEnumerable)tuneDataLabels).Cast<object>()
-                        .Select(x => x.ToString())
-                        .ToArray();
-
-                var tuneSettingValues =
-                    ((IEnumerable)tuneDataValues).Cast<object>()
-                        .Select(x => x.ToString())
-                        .ToArray();
 
                 // Step through the names and store in the .Setting() arrays
                 var tuneCategory = "General";
