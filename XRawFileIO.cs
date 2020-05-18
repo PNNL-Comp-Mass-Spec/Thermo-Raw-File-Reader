@@ -1586,30 +1586,18 @@ namespace ThermoRawFileReader
                 //   BackGd Subtracted by Inst
                 //   Charge State
 
-                foreach (var scanEvent in from item in scanInfo.ScanEvents where item.Key.ToLower().StartsWith("scan event") select item)
+                if (int.TryParse(
+                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.ToLower().StartsWith("scan event")).Value ?? "",
+                    out var scanEventNumber))
                 {
-                    try
-                    {
-                        scanInfo.EventNumber = Convert.ToInt32(scanEvent.Value);
-                    }
-                    catch (Exception)
-                    {
-                        // Ignore errors here
-                    }
-                    break;
+                    scanInfo.EventNumber = scanEventNumber;
                 }
 
-                foreach (var scanEvent in from item in scanInfo.ScanEvents where item.Key.ToLower().StartsWith("ion injection time (ms)") select item)
+                if (double.TryParse(
+                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.ToLower().StartsWith("ion injection time (ms)")).Value ?? "",
+                    out var ionInjectionTime))
                 {
-                    try
-                    {
-                        scanInfo.IonInjectionTime = Convert.ToDouble(scanEvent.Value);
-                    }
-                    catch (Exception)
-                    {
-                        // Ignore errors here
-                    }
-                    break;
+                    scanInfo.IonInjectionTime = ionInjectionTime;
                 }
 
                 // Lookup the filter text for this scan
