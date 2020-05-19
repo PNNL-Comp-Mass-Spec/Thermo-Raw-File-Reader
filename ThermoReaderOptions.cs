@@ -24,7 +24,7 @@ namespace ThermoRawFileReader
 
         #region "Member variables"
 
-        private bool mIncludeReferenceAndExceptionData = false;
+        private bool mIncludeReferenceAndExceptionData;
 
         #endregion
 
