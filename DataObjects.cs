@@ -314,6 +314,7 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
+        // ReSharper disable once UnusedMember.Global
         public static void DuplicateMRMInfo(MRMInfo source, out MRMInfo target)
         {
             target = new MRMInfo();
@@ -344,6 +345,7 @@ namespace ThermoRawFileReader
         /// <param name="mrmInfo"></param>
         /// <param name="initialMassCountCapacity"></param>
         [Obsolete("Use parameterless function InitializeMRMInfo instead")]
+        // ReSharper disable once UnusedMember.Global
         public static void InitializeMRMInfo(out MRMInfo mrmInfo, int initialMassCountCapacity)
         {
             mrmInfo = InitializeMRMInfo();

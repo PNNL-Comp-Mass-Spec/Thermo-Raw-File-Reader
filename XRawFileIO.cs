@@ -2597,6 +2597,7 @@ namespace ThermoRawFileReader
                     Array.Copy(data.Intensities, intensities, sortCount);
                     data = new SimpleScanAccessTruncated(masses, intensities);
                 }
+                // ReSharper disable once RedundantIfElseBlock
                 else
                 {
 
