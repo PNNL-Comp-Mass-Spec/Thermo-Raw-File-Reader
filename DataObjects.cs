@@ -51,7 +51,7 @@ namespace ThermoRawFileReader
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("{0,-20}  {1,-40} = {2}", (Category ?? "Undefined") + ":", Name ?? "", Value ?? "");
+            return string.Format("{0,-20}  {1,-40} = {2}", (Category ?? "Undefined") + ":", Name ?? string.Empty, Value ?? string.Empty);
         }
     }
 

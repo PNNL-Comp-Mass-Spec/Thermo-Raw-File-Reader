@@ -438,7 +438,7 @@ namespace ThermoRawFileReader
         [Obsolete("This method checks for MSFileReader.XRawFile, but we now use ThermoFisher.CommonCore.Data.dll, so this method always returns true")]
         public static bool IsMSFileReaderInstalled(out string error)
         {
-            error = "";
+            error = string.Empty;
             return true;
         }
 
@@ -1587,14 +1587,14 @@ namespace ThermoRawFileReader
                 //   Charge State
 
                 if (int.TryParse(
-                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.ToLower().StartsWith("scan event")).Value ?? "",
+                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.ToLower().StartsWith("scan event")).Value ?? string.Empty,
                     out var scanEventNumber))
                 {
                     scanInfo.EventNumber = scanEventNumber;
                 }
 
                 if (double.TryParse(
-                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.ToLower().StartsWith("ion injection time (ms)")).Value ?? "",
+                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.ToLower().StartsWith("ion injection time (ms)")).Value ?? string.Empty,
                     out var ionInjectionTime))
                 {
                     scanInfo.IonInjectionTime = ionInjectionTime;
