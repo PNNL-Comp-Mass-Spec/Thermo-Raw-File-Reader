@@ -472,19 +472,19 @@ namespace ThermoRawFileReader
             // For safety, remove any text after a square bracket
             var charIndex = filterText.IndexOf('[');
 
-            Match reMatch;
+            Match match;
             if (charIndex > 0)
             {
-                reMatch = mIonMode.Match(filterText.Substring(0, charIndex));
+                match = mIonMode.Match(filterText.Substring(0, charIndex));
             }
             else
             {
-                reMatch = mIonMode.Match(filterText);
+                match = mIonMode.Match(filterText);
             }
 
-            if (reMatch.Success)
+            if (match.Success)
             {
-                switch (reMatch.Value)
+                switch (match.Value)
                 {
                     case "+":
                         ionMode = IonModeConstants.Positive;
@@ -710,9 +710,9 @@ namespace ThermoRawFileReader
                 var startIndex = 0;
                 do
                 {
-                    var reMatchParentIon = mFindParentIon.Match(mzText, startIndex);
+                    var parentIonMatch = mFindParentIon.Match(mzText, startIndex);
 
-                    if (!reMatchParentIon.Success)
+                    if (!parentIonMatch.Success)
                     {
                         // Match not found
                         // If mzText only contains a number, we will parse it out later in this function
@@ -721,28 +721,28 @@ namespace ThermoRawFileReader
 
                     // Match found
 
-                    parentIonMz = double.Parse(reMatchParentIon.Groups["ParentMZ"].Value);
+                    parentIonMz = double.Parse(parentIonMatch.Groups["ParentMZ"].Value);
                     collisionMode = string.Empty;
                     float collisionEnergyValue = 0;
 
                     matchFound = true;
 
-                    startIndex = reMatchParentIon.Index + reMatchParentIon.Length;
+                    startIndex = parentIonMatch.Index + parentIonMatch.Length;
 
-                    collisionMode = GetCapturedValue(reMatchParentIon, "CollisionMode1");
+                    collisionMode = GetCapturedValue(parentIonMatch, "CollisionMode1");
 
-                    var collisionEnergy = GetCapturedValue(reMatchParentIon, "CollisionEnergy1");
+                    var collisionEnergy = GetCapturedValue(parentIonMatch, "CollisionEnergy1");
                     if (!string.IsNullOrWhiteSpace(collisionEnergy))
                     {
                         float.TryParse(collisionEnergy, out collisionEnergyValue);
                     }
 
                     float collisionEnergy2Value = 0;
-                    var collisionMode2 = GetCapturedValue(reMatchParentIon, "CollisionMode2");
+                    var collisionMode2 = GetCapturedValue(parentIonMatch, "CollisionMode2");
 
                     if (!string.IsNullOrWhiteSpace(collisionMode2))
                     {
-                        var collisionEnergy2 = GetCapturedValue(reMatchParentIon, "CollisionEnergy2");
+                        var collisionEnergy2 = GetCapturedValue(parentIonMatch, "CollisionEnergy2");
                         float.TryParse(collisionEnergy2, out collisionEnergy2Value);
                     }
 
@@ -895,13 +895,13 @@ namespace ThermoRawFileReader
             msLevel = 1;
             var charIndex = 0;
 
-            var reMatchMS = mFindMS.Match(filterText);
+            var msMatch = mFindMS.Match(filterText);
 
-            if (reMatchMS.Success)
+            if (msMatch.Success)
             {
-                msLevel = Convert.ToInt32(reMatchMS.Groups["MSLevel"].Value);
-                charIndex = filterText.IndexOf(reMatchMS.ToString(), StringComparison.InvariantCultureIgnoreCase);
-                matchTextLength = reMatchMS.Length;
+                msLevel = Convert.ToInt32(msMatch.Groups["MSLevel"].Value);
+                charIndex = filterText.IndexOf(msMatch.ToString(), StringComparison.OrdinalIgnoreCase);
+                matchTextLength = msMatch.Length;
             }
 
             if (charIndex > 0)
@@ -1082,9 +1082,9 @@ namespace ThermoRawFileReader
 
         }
 
-        private static string GetCapturedValue(Match reMatch, string captureGroupName)
+        private static string GetCapturedValue(Match match, string captureGroupName)
         {
-            var capturedValue = reMatch.Groups[captureGroupName];
+            var capturedValue = match.Groups[captureGroupName];
 
             if (!string.IsNullOrWhiteSpace(capturedValue?.Value))
             {
@@ -2137,10 +2137,10 @@ namespace ThermoRawFileReader
                 else
                 {
                     // No @ sign; look for text of the form "ms2 748.371"
-                    var reMatch = mMzWithoutCE.Match(genericScanFilterText);
-                    if (reMatch.Success)
+                    var match = mMzWithoutCE.Match(genericScanFilterText);
+                    if (match.Success)
                     {
-                        genericScanFilterText = genericScanFilterText.Substring(0, reMatch.Groups["MzValue"].Index);
+                        genericScanFilterText = genericScanFilterText.Substring(0, match.Groups["MzValue"].Index);
                     }
                 }
             }
