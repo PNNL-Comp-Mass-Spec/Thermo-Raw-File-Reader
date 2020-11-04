@@ -404,11 +404,9 @@ namespace ThermoRawFileReader
         /// <returns>MRM scan type enum</returns>
         public static MRMScanTypeConstants DetermineMRMScanType(string filterText)
         {
-            var eMRMScanType = MRMScanTypeConstants.NotMRM;
-
             if (string.IsNullOrWhiteSpace(filterText))
             {
-                return eMRMScanType;
+                return MRMScanTypeConstants.NotMRM;
             }
 
             var mrmQMSTags = new List<string> {
@@ -418,31 +416,36 @@ namespace ThermoRawFileReader
 
             if (ContainsAny(filterText, mrmQMSTags, 1))
             {
-                eMRMScanType = MRMScanTypeConstants.MRMQMS;
-            }
-            else if (ContainsText(filterText, MRM_SRM_TEXT, 1))
-            {
-                eMRMScanType = MRMScanTypeConstants.SRM;
-            }
-            else if (ContainsText(filterText, MRM_SIM_PR_TEXT, 1))
-            {
-                // This is not technically SRM, but the data looks very similar, so we'll track it like SRM data
-                eMRMScanType = MRMScanTypeConstants.SRM;
-            }
-            else if (ContainsText(filterText, MRM_SIM_MSX_TEXT, 1))
-            {
-                eMRMScanType = MRMScanTypeConstants.SIM;
-            }
-            else if (ContainsText(filterText, MRM_FullNL_TEXT, 1))
-            {
-                eMRMScanType = MRMScanTypeConstants.FullNL;
-            }
-            else if (ContainsText(filterText, SIM_MS_TEXT, 1))
-            {
-                eMRMScanType = MRMScanTypeConstants.SIM;
+                return MRMScanTypeConstants.MRMQMS;
             }
 
-            return eMRMScanType;
+            if (ContainsText(filterText, MRM_SRM_TEXT, 1))
+            {
+                return MRMScanTypeConstants.SRM;
+            }
+
+            if (ContainsText(filterText, MRM_SIM_PR_TEXT, 1))
+            {
+                // This is not technically SRM, but the data looks very similar, so we'll track it like SRM data
+                return MRMScanTypeConstants.SRM;
+            }
+
+            if (ContainsText(filterText, MRM_SIM_MSX_TEXT, 1))
+            {
+                return MRMScanTypeConstants.SIM;
+            }
+
+            if (ContainsText(filterText, MRM_FullNL_TEXT, 1))
+            {
+                return MRMScanTypeConstants.FullNL;
+            }
+
+            if (ContainsText(filterText, SIM_MS_TEXT, 1))
+            {
+                return MRMScanTypeConstants.SIM;
+            }
+
+            return MRMScanTypeConstants.NotMRM;
         }
 
         /// <summary>
@@ -452,11 +455,10 @@ namespace ThermoRawFileReader
         public static IonModeConstants DetermineIonizationMode(string filterText)
         {
             // Determine the ion mode by simply looking for the first + or - sign
-            var ionMode = IonModeConstants.Unknown;
 
             if (string.IsNullOrWhiteSpace(filterText))
             {
-                return ionMode;
+                return IonModeConstants.Unknown;
             }
 
             // For safety, remove any text after a square bracket
@@ -477,18 +479,17 @@ namespace ThermoRawFileReader
                 switch (match.Value)
                 {
                     case "+":
-                        ionMode = IonModeConstants.Positive;
-                        break;
+                        return IonModeConstants.Positive;
+
                     case "-":
-                        ionMode = IonModeConstants.Negative;
-                        break;
+                        return IonModeConstants.Negative;
+
                     default:
-                        ionMode = IonModeConstants.Unknown;
-                        break;
+                        return IonModeConstants.Unknown;
                 }
             }
 
-            return ionMode;
+            return IonModeConstants.Unknown;
         }
 
         /// <summary>
@@ -576,12 +577,15 @@ namespace ThermoRawFileReader
         /// <returns>True if success</returns>
         /// <remarks>If multiple parent ion m/z values are listed then parentIonMz will have the last one.  However, if the filter text contains "Full msx" then parentIonMz will have the first parent ion listed</remarks>
         /// <remarks>
+        /// <para>
         /// This was created for use in other programs that only need the parent ion m/z, and no other functions from ThermoRawFileReader.
         /// Other projects that use this:
         ///      PHRPReader (https://github.com/PNNL-Comp-Mass-Spec/PHRP)
-        ///
+        /// </para>
+        /// <para>
         /// To copy this, take the code from this function, plus the RegEx strings <see cref="PARENT_ION_ONLY_NON_MSX_REGEX"/> and <see cref="PARENT_ION_ONLY_MSX_REGEX"/>,
         /// with their uses in <see cref="mFindParentIonOnlyNonMsx"/> and <see cref="mFindParentIonOnlyMsx"/>
+        /// </para>
         /// </remarks>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz)
         {
@@ -1544,13 +1548,12 @@ namespace ThermoRawFileReader
                         }
                         else
                         {
-
-                            if (ValidateMSScan(scanInfo.FilterText, out msLevel, out var simScan, out var eMRMScanType, out var zoomScan))
+                            if (ValidateMSScan(scanInfo.FilterText, out msLevel, out var simScan, out var mrmScanType, out var zoomScan))
                             {
                                 // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                                 scanInfo.MSLevel = msLevel;
                                 scanInfo.SIMScan = simScan;
-                                scanInfo.MRMScanType = eMRMScanType;
+                                scanInfo.MRMScanType = mrmScanType;
                                 scanInfo.ZoomScan = zoomScan;
                             }
                             else
@@ -1574,17 +1577,15 @@ namespace ThermoRawFileReader
                         scanInfo.MSLevel = 1;
                         scanInfo.SIMScan = false;
                         scanInfo.MRMScanType = MRMScanTypeConstants.NotMRM;
-
                     }
                     else
                     {
-
-                        if (ValidateMSScan(scanInfo.FilterText, out var msLevel, out var simScan, out var eMRMScanType, out var zoomScan))
+                        if (ValidateMSScan(scanInfo.FilterText, out var msLevel, out var simScan, out var mrmScanType, out var zoomScan))
                         {
                             // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                             scanInfo.MSLevel = msLevel;
                             scanInfo.SIMScan = simScan;
-                            scanInfo.MRMScanType = eMRMScanType;
+                            scanInfo.MRMScanType = mrmScanType;
                             scanInfo.ZoomScan = zoomScan;
                         }
                         else
@@ -1719,20 +1720,19 @@ namespace ThermoRawFileReader
             // FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]       ETciD-HMSn  (ETD fragmentation, then further fragmented by CID in the ion trap; detected with orbitrap)
             // FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]       EThcD-HMSn  (ETD fragmentation, then further fragmented by HCD in the ion routing multipole; detected with orbitrap)
 
-            var scanTypeName = "MS";
+            const string defaultScanTypeName = "MS";
 
             try
             {
                 var validScanFilter = true;
                 var collisionMode = string.Empty;
-                MRMScanTypeConstants eMRMScanType;
+                MRMScanTypeConstants mrmScanType;
                 var simScan = false;
                 var zoomScan = false;
 
                 if (string.IsNullOrWhiteSpace(filterText))
                 {
-                    scanTypeName = "MS";
-                    return scanTypeName;
+                    return defaultScanTypeName;
                 }
 
                 if (!ExtractMSLevel(filterText, out var msLevel, out _))
@@ -1748,13 +1748,13 @@ namespace ThermoRawFileReader
                     if (ExtractParentIonMZFromFilterText(filterText, out _, out msLevel, out collisionMode))
                     {
                         // Check whether this is an SRM MS2 scan
-                        eMRMScanType = DetermineMRMScanType(filterText);
+                        mrmScanType = DetermineMRMScanType(filterText);
                     }
                     else
                     {
                         // Could not find "Full ms2" in filterText
                         // XRaw periodically mislabels a scan as .EventNumber > 1 when it's really an MS scan; check for this
-                        if (ValidateMSScan(filterText, out msLevel, out simScan, out eMRMScanType, out zoomScan))
+                        if (ValidateMSScan(filterText, out msLevel, out simScan, out mrmScanType, out zoomScan))
                         {
                             // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                         }
@@ -1769,7 +1769,7 @@ namespace ThermoRawFileReader
                 {
                     // MSLevel is 1
                     // Make sure .FilterText contains one of the known MS1, SIM or MRM tags
-                    if (ValidateMSScan(filterText, out msLevel, out simScan, out eMRMScanType, out zoomScan))
+                    if (ValidateMSScan(filterText, out msLevel, out simScan, out mrmScanType, out zoomScan))
                     {
                         // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                     }
@@ -1782,86 +1782,78 @@ namespace ThermoRawFileReader
 
                 if (!validScanFilter)
                 {
-                    return scanTypeName;
+                    return defaultScanTypeName;
                 }
 
-                if (eMRMScanType == MRMScanTypeConstants.NotMRM ||
-                    eMRMScanType == MRMScanTypeConstants.SIM)
+                if (mrmScanType == MRMScanTypeConstants.NotMRM ||
+                    mrmScanType == MRMScanTypeConstants.SIM)
                 {
                     if (simScan)
                     {
-                        scanTypeName = SIM_MS_TEXT.Trim();
+                        return SIM_MS_TEXT.Trim();
                     }
-                    else if (zoomScan)
+
+                    if (zoomScan)
                     {
-                        scanTypeName = "Zoom-MS";
+                        return "Zoom-MS";
+                    }
+
+                    // This is a standard MS or MSn scan
+
+                    var baseScanTypeName = msLevel > 1 ? "MSn" : "MS";
+
+                    string scanTypeName;
+                    if (ScanIsFTMS(filterText))
+                    {
+                        // HMS or HMSn scan
+                        scanTypeName = "H" + baseScanTypeName;
                     }
                     else
                     {
-                        // Normal, plain MS or MSn scan
+                        scanTypeName = baseScanTypeName;
+                    }
 
-                        if (msLevel > 1)
-                        {
-                            scanTypeName = "MSn";
-                        }
-                        else
-                        {
-                            scanTypeName = "MS";
-                        }
-
-                        if (ScanIsFTMS(filterText))
-                        {
-                            // HMS or HMSn scan
-                            scanTypeName = "H" + scanTypeName;
-                        }
-
-                        if (msLevel > 1 && collisionMode.Length > 0)
-                        {
-                            scanTypeName = CapitalizeCollisionMode(collisionMode) + "-" + scanTypeName;
-                        }
+                    if (msLevel > 1 && collisionMode.Length > 0)
+                    {
+                        return CapitalizeCollisionMode(collisionMode) + "-" + scanTypeName;
                     }
 
                     return scanTypeName;
                 }
 
                 // This is an MRM or SRM scan
-                switch (eMRMScanType)
+                switch (mrmScanType)
                 {
                     case MRMScanTypeConstants.MRMQMS:
                         if (ContainsText(filterText, MRM_Q1MS_TEXT, 1))
                         {
-                            scanTypeName = MRM_Q1MS_TEXT.Trim();
+                            return MRM_Q1MS_TEXT.Trim();
                         }
                         else if (ContainsText(filterText, MRM_Q3MS_TEXT, 1))
                         {
-                            scanTypeName = MRM_Q3MS_TEXT.Trim();
+                            return MRM_Q3MS_TEXT.Trim();
                         }
                         else
                         {
                             // Unknown QMS mode
-                            scanTypeName = "MRM QMS";
+                            return "MRM QMS";
                         }
 
-                        break;
                     case MRMScanTypeConstants.SRM:
                         if (collisionMode.Length > 0)
                         {
-                            scanTypeName = collisionMode.ToUpper() + "-SRM";
+                            return collisionMode.ToUpper() + "-SRM";
                         }
                         else
                         {
-                            scanTypeName = "CID-SRM";
+                            return "CID-SRM";
                         }
 
-                        break;
-
                     case MRMScanTypeConstants.FullNL:
-                        scanTypeName = "MRM_Full_NL";
+                        return "MRM_Full_NL";
 
-                        break;
                     default:
-                        scanTypeName = "MRM";
-                        break;
+                        return "MRM";
                 }
             }
             catch (Exception)
@@ -1869,7 +1861,7 @@ namespace ThermoRawFileReader
                 // Ignore errors here
             }
 
-            return scanTypeName;
+            return defaultScanTypeName;
         }
 
         private void GetTuneData()
@@ -2055,26 +2047,26 @@ namespace ThermoRawFileReader
             // + p NSI Q3MS [150.070-1500.000]                                      + p NSI Q3MS
             // c NSI Full cnl 162.053 [300.000-1200.000]                            c NSI Full cnl
 
-            var genericScanFilterText = "MS";
+            const string defaultGenericScanFilterText = "MS";
 
             try
             {
                 if (string.IsNullOrWhiteSpace(filterText))
                 {
-                    return genericScanFilterText;
+                    return defaultGenericScanFilterText;
                 }
 
-                genericScanFilterText = string.Copy(filterText);
+                string genericScanFilterText;
 
                 // First look for and remove numbers between square brackets
-                var bracketIndex = genericScanFilterText.IndexOf('[');
+                var bracketIndex = filterText.IndexOf('[');
                 if (bracketIndex > 0)
                 {
-                    genericScanFilterText = genericScanFilterText.Substring(0, bracketIndex).TrimEnd(' ');
+                    genericScanFilterText = filterText.Substring(0, bracketIndex).TrimEnd(' ');
                 }
                 else
                 {
-                    genericScanFilterText = genericScanFilterText.TrimEnd(' ');
+                    genericScanFilterText = filterText.TrimEnd(' ');
                 }
 
                 var fullCnlCharIndex = genericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.OrdinalIgnoreCase);
@@ -2082,31 +2074,30 @@ namespace ThermoRawFileReader
                 {
                     // MRM neutral loss
                     // Remove any text after MRM_FullNL_TEXT
-                    genericScanFilterText = genericScanFilterText.Substring(0, fullCnlCharIndex + MRM_FullNL_TEXT.Length).Trim();
-                    return genericScanFilterText;
+                    return genericScanFilterText.Substring(0, fullCnlCharIndex + MRM_FullNL_TEXT.Length).Trim();
                 }
 
                 // Replace any digits before any @ sign with a 0
                 if (genericScanFilterText.IndexOf('@') > 0)
                 {
-                    genericScanFilterText = mCollisionSpecs.Replace(genericScanFilterText, " 0@");
+                    return mCollisionSpecs.Replace(genericScanFilterText, " 0@");
                 }
-                else
+
+                // No @ sign; look for text of the form "ms2 748.371"
+                var match = mMzWithoutCE.Match(genericScanFilterText);
+                if (match.Success)
                 {
-                    // No @ sign; look for text of the form "ms2 748.371"
-                    var match = mMzWithoutCE.Match(genericScanFilterText);
-                    if (match.Success)
-                    {
-                        genericScanFilterText = genericScanFilterText.Substring(0, match.Groups["MzValue"].Index);
-                    }
+                    return genericScanFilterText.Substring(0, match.Groups["MzValue"].Index);
                 }
+
+                return genericScanFilterText;
             }
             catch (Exception)
             {
                 // Ignore errors
             }
 
-            return genericScanFilterText;
+            return defaultGenericScanFilterText;
         }
 
         private static bool ScanIsFTMS(string filterText)
@@ -2628,9 +2619,6 @@ namespace ThermoRawFileReader
         /// <remarks>This returns a subset of the data thatGetScanLabelData does, but with 2 additional fields.</remarks>
         public int GetScanPrecisionData(int scan, out MassPrecisionInfoType[] massResolutionData)
         {
-
-            var dataCount = 0;
-
             if (scan < FileInfo.ScanStart)
             {
                 scan = FileInfo.ScanStart;
@@ -2672,7 +2660,7 @@ namespace ThermoRawFileReader
 
                 if (results.Count > 0)
                 {
-                    dataCount = results.Count;
+                    var dataCount = results.Count;
                     massResolutionData = new MassPrecisionInfoType[dataCount];
 
                     for (var i = 0; i < dataCount; i++)
@@ -2689,14 +2677,11 @@ namespace ThermoRawFileReader
                         massResolutionData[i] = massPrecisionInfo;
                     }
 
-                }
-                else
-                {
-                    massResolutionData = new MassPrecisionInfoType[0];
+                    return dataCount;
                 }
 
-                return dataCount;
-
+                massResolutionData = new MassPrecisionInfoType[0];
+                return 0;
             }
             catch (AccessViolationException)
             {
