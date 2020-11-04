@@ -6,7 +6,6 @@ namespace ThermoRawFileReader
     /// </summary>
     public class ThermoReaderOptions
     {
-
         #region "Events"
 
         /// <summary>
@@ -29,7 +28,6 @@ namespace ThermoRawFileReader
         #endregion
 
         #region "Properties"
-
 
         /// <summary>
         /// When true, include reference and exception peaks when obtaining mass spec data
@@ -70,5 +68,4 @@ namespace ThermoRawFileReader
         #endregion
 
     }
-
 }

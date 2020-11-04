@@ -343,7 +343,6 @@ namespace ThermoRawFileReader
                     mCachedScanInfo.Remove(scan);
                 }
             }
-
         }
 
         private static string CapitalizeCollisionMode(string collisionMode)
@@ -370,7 +369,6 @@ namespace ThermoRawFileReader
             {
                 mXRawFile?.Dispose();
                 mCorruptMemoryEncountered = false;
-
             }
             catch (AccessViolationException)
             {
@@ -386,7 +384,6 @@ namespace ThermoRawFileReader
                 RawFilePath = string.Empty;
                 FileInfo.Clear();
             }
-
         }
 
         private static bool ContainsAny(string stringToSearch, IEnumerable<string> itemsToFind, int indexSearchStart = 0)
@@ -460,7 +457,6 @@ namespace ThermoRawFileReader
         /// <param name="filterText"></param>
         public static IonModeConstants DetermineIonizationMode(string filterText)
         {
-
             // Determine the ion mode by simply looking for the first + or - sign
             var ionMode = IonModeConstants.Unknown;
 
@@ -568,7 +564,6 @@ namespace ThermoRawFileReader
                     mrmMassRange.CentralMass = Math.Round(centralMass, 6);
 
                     mrmInfo.MRMMassList.Add(mrmMassRange);
-
                 }
                 catch (Exception)
                 {
@@ -650,7 +645,6 @@ namespace ThermoRawFileReader
             out string collisionMode,
             out List<ParentIonInfoType> parentIons)
         {
-
             // filterText should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
             // or "+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]"
             // or "ITMS + c NSI d Full ms10 421.76@35.00"
@@ -860,7 +854,6 @@ namespace ThermoRawFileReader
                     parentIonMzOnly.ParentIonMZ = parentIonMz;
 
                     parentIons.Add(parentIonMzOnly);
-
                 }
                 catch (Exception)
                 {
@@ -873,7 +866,6 @@ namespace ThermoRawFileReader
             {
                 return false;
             }
-
         }
 
         /// <summary>
@@ -889,7 +881,6 @@ namespace ThermoRawFileReader
         /// </remarks>
         public static bool ExtractMSLevel(string filterText, out int msLevel, out string mzText)
         {
-
             var matchTextLength = 0;
 
             msLevel = 1;
@@ -922,7 +913,6 @@ namespace ThermoRawFileReader
         /// <remarks>Called from OpenRawFile</remarks>
         private bool FillFileInfo()
         {
-
             try
             {
                 if (mXRawFile == null)
@@ -1034,7 +1024,6 @@ namespace ThermoRawFileReader
                 RaiseErrorMessage("Error: Exception in FillFileInfo: ", ex);
                 return false;
             }
-
         }
 
         private ActivationTypeConstants GetActivationType(int scan)
@@ -1071,7 +1060,6 @@ namespace ThermoRawFileReader
                 }
 
                 return activationType;
-
             }
             catch (Exception ex)
             {
@@ -1079,7 +1067,6 @@ namespace ThermoRawFileReader
                 RaiseWarningMessage(msg);
                 return ActivationTypeConstants.Unknown;
             }
-
         }
 
         private static string GetCapturedValue(Match match, string captureGroupName)
@@ -1198,7 +1185,6 @@ namespace ThermoRawFileReader
                         RaiseErrorMessage(msg, ex);
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -1216,7 +1202,6 @@ namespace ThermoRawFileReader
         /// <param name="scan">Scan number</param>
         public List<double> GetCollisionEnergy(int scan)
         {
-
             var collisionEnergies = new List<double>();
 
             try
@@ -1241,7 +1226,6 @@ namespace ThermoRawFileReader
                         collisionEnergies.Add(parentIon.CollisionEnergy2);
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -1278,7 +1262,6 @@ namespace ThermoRawFileReader
 
                 deviceInfo.AxisLabelX = instData.AxisLabelX ?? string.Empty;
                 deviceInfo.AxisLabelY = instData.AxisLabelY ?? string.Empty;
-
             }
             catch (Exception ex)
             {
@@ -1307,7 +1290,6 @@ namespace ThermoRawFileReader
                     var countForDevice = mXRawFile.GetInstrumentCountOfType(deviceType);
                     devices.Add(deviceType, countForDevice);
                 }
-
             }
             catch (Exception ex)
             {
@@ -1324,7 +1306,6 @@ namespace ThermoRawFileReader
         /// <returns>The number of scans, or -1 if an error</returns>
         public int GetNumScans()
         {
-
             try
             {
                 if (mXRawFile == null)
@@ -1347,7 +1328,6 @@ namespace ThermoRawFileReader
             {
                 return -1;
             }
-
         }
 
         /// <summary>
@@ -1388,7 +1368,6 @@ namespace ThermoRawFileReader
         /// <returns>True if no error, False if an error</returns>
         public bool GetScanInfo(int scan, out clsScanInfo scanInfo)
         {
-
             // Check for the scan in the cache
             if (mCachedScanInfo.TryGetValue(scan, out scanInfo))
             {
@@ -1472,7 +1451,6 @@ namespace ThermoRawFileReader
                 {
                     var msg = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " + scan + ": " + ex.Message;
                     RaiseWarningMessage(msg);
-
                 }
                 catch (Exception ex)
                 {
@@ -1529,7 +1507,6 @@ namespace ThermoRawFileReader
 
                 if (scanInfo.EventNumber <= 1)
                 {
-
                     // XRaw periodically mislabels a scan as .EventNumber = 1 when it's really an MS/MS scan; check for this
                     if (ExtractMSLevel(scanInfo.FilterText, out var msLevel, out _))
                     {
@@ -1557,7 +1534,6 @@ namespace ThermoRawFileReader
                     }
                     else
                     {
-
                         // Parse out the parent ion and collision energy from .FilterText
                         if (ExtractParentIonMZFromFilterText(scanInfo.FilterText, out var parentIonMz, out var msLevel, out var collisionMode))
                         {
@@ -1624,7 +1600,6 @@ namespace ThermoRawFileReader
                             return false;
                         }
                     }
-
                 }
 
                 scanInfo.IonMode = DetermineIonizationMode(scanInfo.FilterText);
@@ -1679,7 +1654,6 @@ namespace ThermoRawFileReader
                 {
                     var msg = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " + scan + ": " + ex.Message;
                     RaiseWarningMessage(msg);
-
                 }
                 catch (Exception ex)
                 {
@@ -1924,14 +1898,12 @@ namespace ThermoRawFileReader
                         tuneSettingValues = tuneData.Values;
                         tuneLabelCount = tuneData.Length;
                     }
-
                 }
                 catch (AccessViolationException)
                 {
                     msg = "Unable to load tune data; possibly a corrupt .Raw file";
                     RaiseWarningMessage(msg);
                     break;
-
                 }
                 catch (Exception ex)
                 {
@@ -1967,7 +1939,6 @@ namespace ThermoRawFileReader
                         RaiseWarningMessage(msg);
                         tuneLabelCount = 0;
                     }
-
                 }
 
                 if (tuneLabelCount <= 0 || tuneSettingNames == null || tuneSettingValues == null)
@@ -2004,7 +1975,6 @@ namespace ThermoRawFileReader
 
                         newTuneMethod.Settings.Add(tuneMethodSetting);
                     }
-
                 }
 
                 if (FileInfo.TuneMethods.Count == 0)
@@ -2020,7 +1990,6 @@ namespace ThermoRawFileReader
                     }
                 }
             }
-
         }
 
         private void LoadMethodInfo()
@@ -2029,7 +1998,6 @@ namespace ThermoRawFileReader
                 OnDebugEvent("Accessing mXRawFile.InstrumentMethodsCount");
             try
             {
-
                 var methodCount = mXRawFile.InstrumentMethodsCount;
 
                 if (TraceMode)
@@ -2069,7 +2037,6 @@ namespace ThermoRawFileReader
         /// <returns>Generic filter text, e.g. FTMS + p NSI Full ms</returns>
         public static string MakeGenericThermoScanFilter(string filterText)
         {
-
             // Will make a generic version of the FilterText in filterText
             // Examples:
             // From                                                                 To
@@ -2185,7 +2152,6 @@ namespace ThermoRawFileReader
             out MRMScanTypeConstants mrmScanType,
             out bool zoomScan)
         {
-
             simScan = false;
             mrmScanType = MRMScanTypeConstants.NotMRM;
             zoomScan = false;
@@ -2251,7 +2217,6 @@ namespace ThermoRawFileReader
                     ExtractMSLevel(filterText, out msLevel, out _);
                     return false;
             }
-
         }
 
         /// <summary>
@@ -2410,7 +2375,6 @@ namespace ThermoRawFileReader
         /// <returns>The scan data container, or null if an error</returns>
         private ISimpleScanAccess ReadScanData(int scan, int maxNumberOfPeaks, bool centroidData)
         {
-
             if (scan < FileInfo.ScanStart)
             {
                 scan = FileInfo.ScanStart;
@@ -2446,7 +2410,6 @@ namespace ThermoRawFileReader
 
                 if (centroidData && !scanInfo.IsCentroided)
                 {
-
                     // Dataset was acquired on an Orbitrap, Exactive, or FTMS instrument, and the scan type
                     // includes additional peak information by default, including centroids: fastest access
 
@@ -2545,7 +2508,6 @@ namespace ThermoRawFileReader
         /// <returns>The number of data points, or -1 if an error</returns>
         public int GetScanLabelData(int scan, out FTLabelInfoType[] ftLabelData)
         {
-
             if (scan < FileInfo.ScanStart)
             {
                 scan = FileInfo.ScanStart;
@@ -2605,7 +2567,6 @@ namespace ThermoRawFileReader
 
                         ftLabelData[i] = labelInfo;
                     }
-
                 }
                 else
                 {
@@ -2613,7 +2574,6 @@ namespace ThermoRawFileReader
                 }
 
                 return dataCount;
-
             }
             catch (AccessViolationException)
             {
@@ -2665,7 +2625,6 @@ namespace ThermoRawFileReader
                 RaiseErrorMessage(msg, ex);
                 return 0;
             }
-
         }
 
         /// <summary>
@@ -2688,7 +2647,6 @@ namespace ThermoRawFileReader
             {
                 scan = FileInfo.ScanEnd;
             }
-
 
             if (!GetScanInfo(scan, out var scanInfo))
             {
@@ -2775,7 +2733,6 @@ namespace ThermoRawFileReader
         /// <remarks>Uses the scan filter of the first scan to assure that we're only averaging similar scans</remarks>
         public int GetScanDataSumScans(int scanFirst, int scanLast, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
-
             try
             {
                 try
@@ -2874,7 +2831,6 @@ namespace ThermoRawFileReader
                 }
 
                 return dataCount;
-
             }
             catch (AccessViolationException)
             {
@@ -2897,10 +2853,10 @@ namespace ThermoRawFileReader
         /// <param name="filePath"></param>
         public bool OpenRawFile(string filePath)
         {
-
             try
             {
                 var dataFile = new FileInfo(filePath);
+
                 if (!dataFile.Exists)
                 {
                     RaiseErrorMessage(string.Format("File not found: {0}", filePath));
@@ -2956,12 +2912,10 @@ namespace ThermoRawFileReader
                 RawFilePath = string.Empty;
                 return false;
             }
-
         }
 
         private bool TuneMethodsMatch(TuneMethod method1, TuneMethod method2)
         {
-
             if (method1.Settings.Count != method2.Settings.Count)
             {
                 // Different segment number of setting count; the methods don't match
@@ -3075,7 +3029,6 @@ namespace ThermoRawFileReader
                         collisionEnergies.Add(collisionEnergy);
                     }
                 }
-
             }
             catch (Exception ex)
             {

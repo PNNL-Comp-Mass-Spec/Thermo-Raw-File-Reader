@@ -390,7 +390,6 @@ namespace ThermoRawFileReader
 
             return "ms" + MSLevel + " " + ParentIonMZ.ToString("0.0#") + "@" + CollisionMode + CollisionEnergy.ToString("0.00");
         }
-
     }
 
     /// <summary>

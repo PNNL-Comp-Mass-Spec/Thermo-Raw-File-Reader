@@ -83,7 +83,6 @@ namespace RawFileReaderTests
             {
                 {1, ce30},
                 {2, ce30}
-
             };
             expectedData.Add("MZ0210MnxEF889ETD", file4Data);
 
@@ -98,7 +97,6 @@ namespace RawFileReaderTests
                 {27805, ms1Scan},
                 {27806, ce30},
                 {27807, ce30},
-
             };
             expectedData.Add("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", file5Data);
 
@@ -179,9 +177,7 @@ namespace RawFileReaderTests
                         Console.WriteLine(msg);
                         Assert.AreEqual(expectedEnergies.Count, actualEnergiesOneScan.Value.Count, msg);
                     }
-
                 }
-
             }
         }
 
@@ -205,10 +201,8 @@ namespace RawFileReaderTests
 
             try
             {
-
                 using (var reader = new XRawFileIO(dataFile.FullName))
                 {
-
                     var scanCount = reader.GetNumScans();
                     Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
 
@@ -281,7 +275,6 @@ namespace RawFileReaderTests
                                     Assert.IsTrue(dataPointCount == mzList.Length, "Array length does not agree with dataPointCount for scan {0}", scanNumber);
                                 }
                             }
-
                         }
                         catch (Exception ex)
                         {
@@ -298,7 +291,6 @@ namespace RawFileReaderTests
 
                     if (expectedMS2 >= 0)
                         Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
-
                 }
             }
             catch (Exception ex)
@@ -308,7 +300,6 @@ namespace RawFileReaderTests
                 Assert.Fail(msg);
             }
         }
-
 
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1, 5000, 23)]
@@ -322,7 +313,6 @@ namespace RawFileReaderTests
 
             using (var reader = new XRawFileIO(dataFile.FullName))
             {
-
                 for (var iteration = 1; iteration <= 4; iteration++)
                 {
                     int maxNumberOfPeaks;
@@ -368,7 +358,6 @@ namespace RawFileReaderTests
 
                     for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber += scanStep)
                     {
-
                         var dataPointsRead = reader.GetScanData(scanNumber, out var mzList, out var intensityList, maxNumberOfPeaks, centroidData);
 
                         var unsortedMzValues = 0;
@@ -403,12 +392,9 @@ namespace RawFileReaderTests
                                     "n/a", "n/a", "n/a", "n/a", scanInfo.FilterText);
                             }
                         }
-
                     }
-
                 }
             }
-
         }
 
         [Test]
@@ -539,7 +525,6 @@ namespace RawFileReaderTests
             AddExpectedTupleAndCount(expectedData, file13, "SA_HCD-HMSn", "FTMS + c ESI d sa Full ms2 0@etd121.47 0@hcd30.00", 28);
             AddExpectedTupleAndCount(expectedData, file13, "SA_HCD-HMSn", "FTMS + c ESI d sa Full ms2 0@etd53.99 0@hcd30.00", 20);
 
-
             AddExpectedTupleAndCount(expectedData, "IPA-blank-07_25Oct13_Gimli", "Zoom-MS", "ITMS + p NSI Z ms", 101);
 
             AddExpectedTupleAndCount(expectedData, "Angiotensin_325-CID", "CID-HMSn", "FTMS + p ESI Full ms2 0@cid35.00", 10);
@@ -547,7 +532,6 @@ namespace RawFileReaderTests
             AddExpectedTupleAndCount(expectedData, "Angiotensin_325-ETciD-15", "SA_CID-HMSn", "FTMS + p ESI sa Full ms2 0@etd50.00 0@cid15.00", 10);
             AddExpectedTupleAndCount(expectedData, "Angiotensin_325-ETD", "SA_CID-HMSn", "FTMS + p ESI sa Full ms2 0@etd50.00 0@cid15.00", 10);
             AddExpectedTupleAndCount(expectedData, "Angiotensin_325-HCD", "HCD-HMSn", "FTMS + p ESI Full ms2 0@hcd30.00", 10);
-
 
             var dataFile = GetRawDataFile(rawFileName);
 
@@ -588,7 +572,6 @@ namespace RawFileReaderTests
                         scanCountMS2++;
                     else
                         scanCountMS1++;
-
                 }
 
                 Console.WriteLine("scanCountMS1={0}", scanCountMS1);
@@ -732,7 +715,6 @@ namespace RawFileReaderTests
                 {20518, "2 2  1216 41.92 110 2000 3.7E+6  999.457 3.8E+5   737.69 HCD   hcd Positive True True 33 221  12.55 FTMS + c NSI..."},
                 {20519, "2 2  2144 41.92 110 1241 8.9E+6  742.409 5.7E+5   615.27 HCD   hcd Positive True True 33 221  12.77 FTMS + c NSI..."},
                 {20520, "1 1 14428 41.92 350 1800 1.7E+9  554.305 1.3E+8     0.00 CID       Positive False True 33 221   0.08 FTMS + p NSI..."}
-
             };
             expectedData.Add("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", file3Data);
 
@@ -925,7 +907,6 @@ namespace RawFileReaderTests
 
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-
             var file2Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {16121, new Dictionary<string, string>()},
@@ -967,7 +948,6 @@ namespace RawFileReaderTests
 
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
 
-
             var file3Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {3101, new Dictionary<string, string>()},
@@ -990,7 +970,6 @@ namespace RawFileReaderTests
 
             expectedData.Add("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08", file3Data);
 
-
             var file4Data = new Dictionary<int, Dictionary<string, string>>();
             AddEmptyDictionaries(file4Data, 4371, 4373);
 
@@ -1009,7 +988,6 @@ namespace RawFileReaderTests
             file4Data[4373].Add("50_True",  "   50       50     122.133   2.0E+1  377.493   1.7E+1  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
 
             expectedData.Add("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925", file4Data);
-
 
             var file5Data = new Dictionary<int, Dictionary<string, string>>();
             AddEmptyDictionaries(file5Data, 22010, 22014);
@@ -1087,7 +1065,6 @@ namespace RawFileReaderTests
 
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-
             var file2Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {16121, new Dictionary<string, string>()},
@@ -1129,7 +1106,6 @@ namespace RawFileReaderTests
 
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
 
-
             var file3Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {3101, new Dictionary<string, string>()},
@@ -1152,7 +1128,6 @@ namespace RawFileReaderTests
 
             expectedData.Add("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08", file3Data);
 
-
             var file4Data = new Dictionary<int, Dictionary<string, string>>();
             AddEmptyDictionaries(file4Data, 4371, 4373);
 
@@ -1171,7 +1146,6 @@ namespace RawFileReaderTests
             file4Data[4373].Add("50_True", "   50       50     122.133   2.0E+1  377.493   1.7E+1  ITMS + c ESI d Full ms2 465.14@cid35.00 [80.00-480.00]");
 
             expectedData.Add("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925", file4Data);
-
 
             var file5Data = new Dictionary<int, Dictionary<string, string>>();
             AddEmptyDictionaries(file5Data, 22010, 22014);
@@ -1328,7 +1302,6 @@ namespace RawFileReaderTests
 
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
-
             var file2Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {16121, new Dictionary<string, string>()},
@@ -1346,7 +1319,6 @@ namespace RawFileReaderTests
             file2Data[16122].Add("50_True",  "   50  157.049   2.0E+4  385.181   6.0E+3  ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]");
 
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
-
 
             var file3Data = new Dictionary<int, Dictionary<string, string>>
             {
@@ -1366,7 +1338,6 @@ namespace RawFileReaderTests
 
             expectedData.Add("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08", file2Data);
 
-
             var file4Data = new Dictionary<int, Dictionary<string, string>>
             {
                 {4371, new Dictionary<string, string>()},
@@ -1384,7 +1355,6 @@ namespace RawFileReaderTests
             file4Data[4372].Add("50_True",  "   23   91.297   7.5E+2  223.823   6.3E+2  FTMS + c ESI d Full ms2 465.14@hcd30.00 [90.00-480.00]");
 
             expectedData.Add("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925", file4Data);
-
 
             var dataFile = GetRawDataFile(rawFileName);
 
@@ -1616,7 +1586,6 @@ namespace RawFileReaderTests
                             massIntensityPairs[0, midPoint], massIntensityPairs[1, midPoint],
                             scanInfo.FilterText);
 
-
                     if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                     {
                         Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
@@ -1680,7 +1649,6 @@ namespace RawFileReaderTests
             };
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
 
-
             var dataFile = GetRawDataFile(rawFileName);
 
             using (var reader = new XRawFileIO(dataFile.FullName))
@@ -1693,7 +1661,6 @@ namespace RawFileReaderTests
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-
                     // List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point
 
                     var dataPointsRead = reader.GetScanLabelData(scanNumber, out var ftLabelData);
@@ -1725,7 +1692,6 @@ namespace RawFileReaderTests
                                 string.Empty,
                                 string.Empty,
                                 scanInfo.FilterText);
-
                     }
                     else
                     {
@@ -1801,7 +1767,6 @@ namespace RawFileReaderTests
             };
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
 
-
             var dataFile = GetRawDataFile(rawFileName);
 
             using (var reader = new XRawFileIO(dataFile.FullName))
@@ -1814,7 +1779,6 @@ namespace RawFileReaderTests
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-
                     // List of Intensity, Mass, AccuracyMMU, AccuracyPPM, and Resolution for each data point
 
                     var dataPointsRead = reader.GetScanPrecisionData(scanNumber, out var massResolutionData);
@@ -1845,7 +1809,6 @@ namespace RawFileReaderTests
                                 string.Empty,
                                 string.Empty,
                                 scanInfo.FilterText);
-
                     }
                     else
                     {
@@ -1909,7 +1872,6 @@ namespace RawFileReaderTests
             AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Ion Injection Time (ms):", "10.863", 1);
             AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Ion Injection Time (ms):", "12.628", 1);
 
-
             AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Orbitrap Resolution:", "60000", 4);
             AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "Orbitrap Resolution:", "7500", 3);
 
@@ -1920,7 +1882,6 @@ namespace RawFileReaderTests
 
             AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "MS2 Isolation Width:", "-1.00", 4);
             AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "MS2 Isolation Width:", "2.00", 3);
-
 
             var dataFile = GetRawDataFile(rawFileName);
 
@@ -1954,7 +1915,6 @@ namespace RawFileReaderTests
                             eventCountsActual.Add(eventKey, 1);
                         }
                     }
-
                 }
 
                 Console.WriteLine("{0,-5} {1,5} {2}", "Valid", "Count", "Event");

@@ -118,7 +118,6 @@ namespace ThermoRawFileReader
                     default:
                         return AxisLabelY;
                 }
-
             }
         }
 

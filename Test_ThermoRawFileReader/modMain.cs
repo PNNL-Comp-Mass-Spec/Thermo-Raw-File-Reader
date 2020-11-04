@@ -115,7 +115,6 @@ namespace Test_ThermoRawFileReader
             Console.WriteLine("Done");
 
             System.Threading.Thread.Sleep(150);
-
         }
 
         /// <summary>
@@ -258,7 +257,6 @@ namespace Test_ThermoRawFileReader
                         {
                             scanFilters.Add(scanFilterGeneric, new Tuple<string, int, string>(scanFilter, 1, dataFile.Name));
                         }
-
                     }
                 }
 
@@ -270,7 +268,6 @@ namespace Test_ThermoRawFileReader
                     var percentComplete = filesProcessed / (float)scanStatsFiles.Count * 100.0;
                     Console.WriteLine(percentComplete.ToString("0.0") + "% complete");
                 }
-
             }
 
             // Write the cached scan filters
@@ -297,7 +294,6 @@ namespace Test_ThermoRawFileReader
 
         private static void ParseCommandLineParameters(clsParseCommandLine commandLineParser)
         {
-
             mExtractScanFilters = commandLineParser.IsParameterPresent("GetFilters");
 
             if (commandLineParser.NonSwitchParameterCount > 0)
@@ -362,7 +358,6 @@ namespace Test_ThermoRawFileReader
             mTestScanFilters = commandLineParser.IsParameterPresent("TestFilters");
 
             mTraceMode = commandLineParser.IsParameterPresent("Trace");
-
         }
 
         private static void ShowError(string message, Exception ex = null)
@@ -423,10 +418,8 @@ namespace Test_ThermoRawFileReader
             Console.WriteLine("Website: https://omics.pnl.gov or https://panomics.pnnl.gov/");
             Console.WriteLine();
 
-
             // Delay for 1.5 seconds in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
             System.Threading.Thread.Sleep(1500);
-
         }
 
         private static FileInfo ResolveDataFile(string rawFilePath)
@@ -448,7 +441,6 @@ namespace Test_ThermoRawFileReader
                     {
                         rawFilePath = rawFilePath.Replace('\\', '/');
                     }
-
                 }
                 else
                 {
@@ -477,7 +469,6 @@ namespace Test_ThermoRawFileReader
 
         private static void ShowIonInjectionStats(int msLevel, IReadOnlyCollection<double> ionInjectionTimes)
         {
-
             if (ionInjectionTimes.Count > 0)
             {
                 Console.WriteLine("{0,-10} {1,-10:F3} {2,-10:F3} {3,-10:F3} {4,-10:F3}",
@@ -487,14 +478,12 @@ namespace Test_ThermoRawFileReader
                     ionInjectionTimes.Min(),
                     ionInjectionTimes.Max());
             }
-
         }
 
         private static void TestReader(string rawFilePath, bool centroid = false, bool testSumming = false, int scanStart = 0, int scanEnd = 0)
         {
             try
             {
-
                 var rawFile = ResolveDataFile(rawFilePath);
                 if (rawFile == null)
                     return;
@@ -632,7 +621,6 @@ namespace Test_ThermoRawFileReader
                             {
                                 Console.WriteLine("MS2 Isolation Width: " + isolationWidth);
                             }
-
                         }
 
                         if (!mLoadScanData || (scanNum % 50 != 0 && scanEnd - scanStart > 50))
@@ -682,7 +670,6 @@ namespace Test_ThermoRawFileReader
                         Console.WriteLine();
                         Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", "Mass", "Intensity", "Resolution", "Baseline", "Noise", "Charge");
 
-
                         for (var i = 0; i <= dataCount - 1; i += 50)
                         {
                             Console.WriteLine("{0,12:F3}{1,12:0}{2,12:0}{3,12:F1}{4,12:0}{5,12:0}",
@@ -698,7 +685,6 @@ namespace Test_ThermoRawFileReader
 
                         Console.WriteLine();
                         Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}", "Mass", "Intensity", "AccuracyMMU", "AccuracyPPM", "Resolution");
-
 
                         for (var i = 0; i <= dataCount - 1; i += 50)
                         {
@@ -729,10 +715,7 @@ namespace Test_ThermoRawFileReader
                         ShowIonInjectionStats(1, ionInjectionTimesMS1);
                         ShowIonInjectionStats(2, ionInjectionTimesMS2);
                     }
-
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -742,10 +725,8 @@ namespace Test_ThermoRawFileReader
 
         private static void TestLoadChromatograms(string rawFilePath)
         {
-
             try
             {
-
                 var rawFile = ResolveDataFile(rawFilePath);
                 if (rawFile == null)
                     return;
@@ -808,9 +789,7 @@ namespace Test_ThermoRawFileReader
                                 Console.WriteLine("{0,-9:N0} {1:F2}", chromPoint.Key, chromPoint.Value);
                             }
                         }
-
                     }
-
                 }
             }
             catch (Exception ex)
@@ -893,7 +872,6 @@ namespace Test_ThermoRawFileReader
 
                         scansReadSinceLastProgress = 0;
                     }
-
                 }
 
                 Console.WriteLine();
@@ -1008,15 +986,12 @@ namespace Test_ThermoRawFileReader
             }
 
             Console.WriteLine();
-
         }
 
         private static void ShowMethod(XRawFileIO reader)
         {
-
             try
             {
-
                 foreach (var method in reader.FileInfo.InstMethods)
                 {
                     Console.WriteLine();
@@ -1033,15 +1008,12 @@ namespace Test_ThermoRawFileReader
                         Console.WriteLine(method.Substring(0, 500) + " ...");
                     else
                         Console.WriteLine(method);
-
                 }
-
             }
             catch (Exception ex)
             {
                 ShowError("Error loading the MS Method: " + ex.Message, ex);
             }
-
         }
 
         #region "EventNotifier events"

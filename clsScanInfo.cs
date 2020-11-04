@@ -273,7 +273,6 @@ namespace ThermoRawFileReader
         /// <remarks>Event names nearly always end in a colon, e.g. "Monoisotopic M/Z:" or "Charge State:"</remarks>
         public bool TryGetScanEvent(string eventName, out string eventValue, bool partialMatchToStart = false)
         {
-
             IEnumerable<KeyValuePair<string, string>> results;
 
             if (partialMatchToStart)
@@ -339,7 +338,6 @@ namespace ThermoRawFileReader
                     targetList.Add(new KeyValuePair<string, string>(names[i], values[i].TrimEnd(' ')));
                 }
             }
-
         }
         #endregion
     }
