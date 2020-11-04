@@ -200,7 +200,7 @@ namespace ThermoRawFileReader
                     mMaxScansToCacheInfo = 0;
                 }
 
-                if (mCachedScanInfo.Count <= 0)
+                if (mCachedScanInfo.Count == 0)
                     return;
 
                 if (mMaxScansToCacheInfo == 0)
@@ -393,14 +393,8 @@ namespace ThermoRawFileReader
 
         private static bool ContainsText(string stringToSearch, string textToFind, int indexSearchStart = 0)
         {
-
             // Note: need to append a space since many of the search keywords end in a space
-            if ((stringToSearch + " ").IndexOf(textToFind, StringComparison.OrdinalIgnoreCase) >= indexSearchStart)
-            {
-                return true;
-            }
-
-            return false;
+            return (stringToSearch + " ").IndexOf(textToFind, StringComparison.OrdinalIgnoreCase) >= indexSearchStart;
         }
 
         /// <summary>
@@ -528,8 +522,8 @@ namespace ThermoRawFileReader
                 return;
             }
 
-            if (!(mrmScanType == MRMScanTypeConstants.SIM |
-                  mrmScanType == MRMScanTypeConstants.MRMQMS |
+            if (!(mrmScanType == MRMScanTypeConstants.SIM ||
+                  mrmScanType == MRMScanTypeConstants.MRMQMS ||
                   mrmScanType == MRMScanTypeConstants.SRM))
             {
                 // Unsupported MRM type
@@ -741,7 +735,7 @@ namespace ThermoRawFileReader
                     }
 
                     var allowSecondaryActivation = true;
-                    if (string.Equals(collisionMode, "ETD", StringComparison.OrdinalIgnoreCase) & !string.IsNullOrWhiteSpace(collisionMode2))
+                    if (string.Equals(collisionMode, "ETD", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(collisionMode2))
                     {
                         if (string.Equals(collisionMode2, "CID", StringComparison.OrdinalIgnoreCase))
                         {
@@ -822,7 +816,7 @@ namespace ThermoRawFileReader
                     return matchFound;
                 }
 
-                if (mzText.Length <= 0)
+                if (mzText.Length == 0)
                     return false;
 
                 // Find the longest contiguous number that mzText starts with
@@ -832,7 +826,7 @@ namespace ThermoRawFileReader
                 {
                     if (char.IsNumber(mzText[charIndex + 1]) || mzText[charIndex + 1] == '.')
                     {
-                        charIndex += 1;
+                        charIndex++;
                     }
                     else
                     {
@@ -1159,7 +1153,7 @@ namespace ThermoRawFileReader
                     {
                         var scanData = mXRawFile.GetSegmentedScanFromScanNumber(scanNumber, null);
 
-                        if (scanData.Intensities == null || scanData.Intensities.Length <= 0)
+                        if (scanData.Intensities == null || scanData.Intensities.Length == 0)
                             continue;
 
                         if (lastScanWithData >= 0 && lastScanWithData < scanNumber - 1)
@@ -1480,14 +1474,14 @@ namespace ThermoRawFileReader
                 //   Charge State
 
                 if (int.TryParse(
-                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.StartsWith("scan event", StringComparison.OrdinalIgnoreCase)).Value ?? string.Empty,
+                    scanInfo.ScanEvents.Find(x => x.Key.StartsWith("scan event", StringComparison.OrdinalIgnoreCase)).Value ?? string.Empty,
                     out var scanEventNumber))
                 {
                     scanInfo.EventNumber = scanEventNumber;
                 }
 
                 if (double.TryParse(
-                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.StartsWith("ion injection time (ms)", StringComparison.OrdinalIgnoreCase)).Value ?? string.Empty,
+                    scanInfo.ScanEvents.Find(x => x.Key.StartsWith("ion injection time (ms)", StringComparison.OrdinalIgnoreCase)).Value ?? string.Empty,
                     out var ionInjectionTime))
                 {
                     scanInfo.IonInjectionTime = ionInjectionTime;
@@ -1573,7 +1567,7 @@ namespace ThermoRawFileReader
                     // MS1 data
                     // Make sure .FilterText contains one of the known MS1, SIM or MRM tags
 
-                    if (scanInfo.FilterText == string.Empty)
+                    if (string.IsNullOrWhiteSpace(scanInfo.FilterText))
                     {
                         // FilterText is empty; this indicates a problem with the .Raw file
                         // This is rare, but does happen (see scans 2 and 3 in QC_Shew_08_03_pt5_1_MAXPRO_27Oct08_Raptor_08-01-01.raw)
@@ -2419,7 +2413,7 @@ namespace ThermoRawFileReader
 
                     data = mXRawFile.GetCentroidStream(scan, false);
 
-                    if (data?.Masses == null || data.Masses.Length <= 0)
+                    if (data?.Masses == null || data.Masses.Length == 0)
                     {
                         // Centroiding for profile-mode ion trap data, or for other scan types that don't include a centroid stream
                         var scanProf = Scan.FromFile(mXRawFile, scan);
@@ -2555,7 +2549,7 @@ namespace ThermoRawFileReader
 
                     for (var i = 0; i <= dataCount - 1; i++)
                     {
-                        var labelInfo = new FTLabelInfoType
+                        ftLabelData[i] = new FTLabelInfoType
                         {
                             Mass = masses[i],
                             Intensity = intensities[i],
@@ -2564,8 +2558,6 @@ namespace ThermoRawFileReader
                             Noise = Convert.ToSingle(noises[i]),
                             Charge = Convert.ToInt32(charges[i])
                         };
-
-                        ftLabelData[i] = labelInfo;
                     }
                 }
                 else
@@ -2750,7 +2742,7 @@ namespace ThermoRawFileReader
                 }
                 catch (Exception)
                 {
-                    var msg = "Unable to load data summing scans; file ThermoFisher.CommonCore.BackgroundSubtraction.dll is missing or corrupt";
+                    const string msg = "Unable to load data summing scans; file ThermoFisher.CommonCore.BackgroundSubtraction.dll is missing or corrupt";
                     RaiseWarningMessage(msg);
                 }
 
@@ -2799,12 +2791,8 @@ namespace ThermoRawFileReader
                 data.PreferCentroids = centroidData;
 
                 var masses = data.PreferredMasses;
-                var dataCount = masses.Length;
 
-                if (maxNumberOfPeaks > 0)
-                {
-                    dataCount = Math.Min(dataCount, maxNumberOfPeaks);
-                }
+                var dataCount = maxNumberOfPeaks > 0 ? Math.Min(masses.Length, maxNumberOfPeaks) : masses.Length;
 
                 if (dataCount > 0)
                 {

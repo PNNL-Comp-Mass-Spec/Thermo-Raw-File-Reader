@@ -1613,7 +1613,7 @@ namespace RawFileReaderTests
         {
             var expectedData = new Dictionary<string, Dictionary<int, string>>();
 
-            var noMatch = "  0                                                        ";
+            const string noMatch = "  0                                                        ";
 
             var file1Data = new Dictionary<int, string>
             {
@@ -1731,7 +1731,7 @@ namespace RawFileReaderTests
         {
             var expectedData = new Dictionary<string, Dictionary<int, string>>();
 
-            var noMatch = "  0                                               ";
+            const string noMatch = "  0                                               ";
 
             var file1Data = new Dictionary<int, string>
             {
@@ -1965,7 +1965,7 @@ namespace RawFileReaderTests
         private FileInfo GetRawDataFile(string rawFileName)
         {
             var localDirPath = Path.Combine("..", "..", "Docs");
-            var remoteDirPath = @"\\proto-2\UnitTest_Files\ThermoRawFileReader";
+            const string remoteDirPath = @"\\proto-2\UnitTest_Files\ThermoRawFileReader";
 
             var localFile = new FileInfo(Path.Combine(localDirPath, rawFileName));
 

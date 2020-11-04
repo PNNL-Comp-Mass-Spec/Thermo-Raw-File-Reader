@@ -11,7 +11,7 @@ using ThermoRawFileReader;
 
 namespace Test_ThermoRawFileReader
 {
-    static class Program
+    public static class Program
     {
         // Ignore Spelling: Angiotensin, centroiding, cid, hcd, etd, pqd, cnl, sa, sid, msx, Chrom, QC_Mam
 
@@ -127,7 +127,7 @@ namespace Test_ThermoRawFileReader
 
             var parentIonMZnoAtMatcher = new Regex("(ms[2-9]|cnl|pr) [0-9.]+ ", RegexOptions.Compiled);
 
-            var massRangeMatcher = new Regex(@"[0-9.]+-[0-9.]+", RegexOptions.Compiled);
+            var massRangeMatcher = new Regex("[0-9.]+-[0-9.]+", RegexOptions.Compiled);
 
             var collisionModeMatcher = new Regex("(?<CollisionMode>cid|etd|hcd|pqd)[0-9.]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -155,7 +155,7 @@ namespace Test_ThermoRawFileReader
             {
                 // Look instead in the directory that has DEFAULT_FILE_PATH
                 var defaultFile = new FileInfo(DEFAULT_FILE_PATH);
-                if (defaultFile.Directory != null && defaultFile.Directory.Exists)
+                if (defaultFile.Directory?.Exists == true)
                 {
                     var alternateScanStatsFiles = defaultFile.Directory.GetFiles("*_ScanStatsEx.txt").ToList();
                     if (alternateScanStatsFiles.Count > 0)
@@ -707,7 +707,7 @@ namespace Test_ThermoRawFileReader
                     }
 
                     Console.WriteLine();
-                    if ((ionInjectionTimesMS1.Count > 0 || ionInjectionTimesMS2.Count > 0))
+                    if (ionInjectionTimesMS1.Count > 0 || ionInjectionTimesMS2.Count > 0)
                     {
                         Console.WriteLine("Ion injection time stats");
                         Console.WriteLine("{0,-10} {1,-10} {2,-10} {3,-10} {4,-10}", "MS Level", "Average", "Median", "Minimum", "Maximum");
