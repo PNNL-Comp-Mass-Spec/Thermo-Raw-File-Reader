@@ -342,11 +342,11 @@ namespace ThermoRawFileReader
             if (partialMatchToStart)
             {
                 // Partial match
-                results = from item in ScanEvents where item.Key.ToLower().StartsWith(eventName.ToLower()) select item;
+                results = from item in ScanEvents where item.Key.StartsWith(eventName, StringComparison.OrdinalIgnoreCase) select item;
             }
             else
             {
-                results = from item in ScanEvents where string.Equals(item.Key, eventName, StringComparison.InvariantCultureIgnoreCase) select item;
+                results = from item in ScanEvents where string.Equals(item.Key, eventName, StringComparison.OrdinalIgnoreCase) select item;
             }
 
             foreach (var item in results)

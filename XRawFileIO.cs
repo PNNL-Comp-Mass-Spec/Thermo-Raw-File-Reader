@@ -347,12 +347,12 @@ namespace ThermoRawFileReader
 
         private static string CapitalizeCollisionMode(string collisionMode)
         {
-            if (string.Equals(collisionMode, "EThcD", StringComparison.InvariantCultureIgnoreCase))
+            if (string.Equals(collisionMode, "EThcD", StringComparison.OrdinalIgnoreCase))
             {
                 return "EThcD";
             }
 
-            if (string.Equals(collisionMode, "ETciD", StringComparison.InvariantCultureIgnoreCase))
+            if (string.Equals(collisionMode, "ETciD", StringComparison.OrdinalIgnoreCase))
             {
                 return "ETciD";
             }
@@ -397,7 +397,7 @@ namespace ThermoRawFileReader
         {
 
             // Note: need to append a space since many of the search keywords end in a space
-            if ((stringToSearch + " ").IndexOf(textToFind, StringComparison.InvariantCultureIgnoreCase) >= indexSearchStart)
+            if ((stringToSearch + " ").IndexOf(textToFind, StringComparison.OrdinalIgnoreCase) >= indexSearchStart)
             {
                 return true;
             }
@@ -597,7 +597,7 @@ namespace ThermoRawFileReader
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz)
         {
             Regex matcher;
-            if (filterText.ToLower().Contains("msx"))
+            if (filterText.IndexOf("msx", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 matcher = mFindParentIonOnlyMsx;
             }
@@ -747,14 +747,14 @@ namespace ThermoRawFileReader
                     }
 
                     var allowSecondaryActivation = true;
-                    if (string.Equals(collisionMode, "ETD", StringComparison.InvariantCultureIgnoreCase) & !string.IsNullOrWhiteSpace(collisionMode2))
+                    if (string.Equals(collisionMode, "ETD", StringComparison.OrdinalIgnoreCase) & !string.IsNullOrWhiteSpace(collisionMode2))
                     {
-                        if (string.Equals(collisionMode2, "CID", StringComparison.InvariantCultureIgnoreCase))
+                        if (string.Equals(collisionMode2, "CID", StringComparison.OrdinalIgnoreCase))
                         {
                             collisionMode = "ETciD";
                             allowSecondaryActivation = false;
                         }
-                        else if (string.Equals(collisionMode2, "HCD", StringComparison.InvariantCultureIgnoreCase))
+                        else if (string.Equals(collisionMode2, "HCD", StringComparison.OrdinalIgnoreCase))
                         {
                             collisionMode = "EThcD";
                             allowSecondaryActivation = false;
@@ -1482,7 +1482,7 @@ namespace ThermoRawFileReader
                     var msg = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " + scan + ": " + ex.Message;
                     RaiseWarningMessage(msg);
 
-                    if (ex.Message.ToLower().Contains("memory is corrupt"))
+                    if (ex.Message.IndexOf("memory is corrupt", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         mCorruptMemoryEncountered = true;
                     }
@@ -1505,14 +1505,14 @@ namespace ThermoRawFileReader
                 //   Charge State
 
                 if (int.TryParse(
-                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.ToLower().StartsWith("scan event")).Value ?? string.Empty,
+                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.StartsWith("scan event", StringComparison.OrdinalIgnoreCase)).Value ?? string.Empty,
                     out var scanEventNumber))
                 {
                     scanInfo.EventNumber = scanEventNumber;
                 }
 
                 if (double.TryParse(
-                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.ToLower().StartsWith("ion injection time (ms)")).Value ?? string.Empty,
+                    scanInfo.ScanEvents.FirstOrDefault(x => x.Key.StartsWith("ion injection time (ms)", StringComparison.OrdinalIgnoreCase)).Value ?? string.Empty,
                     out var ionInjectionTime))
                 {
                     scanInfo.IonInjectionTime = ionInjectionTime;
@@ -1689,7 +1689,7 @@ namespace ThermoRawFileReader
                     var msg = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " + scan + ": " + ex.Message;
                     RaiseWarningMessage(msg);
 
-                    if (ex.Message.ToLower().Contains("memory is corrupt"))
+                    if (ex.Message.IndexOf("memory is corrupt", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         mCorruptMemoryEncountered = true;
                     }
@@ -1944,7 +1944,7 @@ namespace ThermoRawFileReader
                     RaiseWarningMessage(msg);
                     tuneLabelCount = 0;
 
-                    if (ex.Message.ToLower().Contains("memory is corrupt"))
+                    if (ex.Message.IndexOf("memory is corrupt", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         mCorruptMemoryEncountered = true;
                         break;
@@ -2120,7 +2120,7 @@ namespace ThermoRawFileReader
                     genericScanFilterText = genericScanFilterText.TrimEnd(' ');
                 }
 
-                var fullCnlCharIndex = genericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.InvariantCultureIgnoreCase);
+                var fullCnlCharIndex = genericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.OrdinalIgnoreCase);
                 if (fullCnlCharIndex > 0)
                 {
                     // MRM neutral loss
