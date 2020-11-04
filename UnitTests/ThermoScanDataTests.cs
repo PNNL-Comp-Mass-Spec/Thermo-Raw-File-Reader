@@ -10,6 +10,8 @@ namespace RawFileReaderTests
     [TestFixture]
     public class ThermoScanDataTests
     {
+        // Ignore Spelling: Andro, LCQa, ETciD, EThcD, cid, etd, hcd, mnx, QC_Mam, XRawfile, fst, sa
+        // Ignore Spelling: Legolas, Samwise, Gimli, Angiotensin, Wrighton, lowdose, histone
 
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW")]
@@ -185,7 +187,7 @@ namespace RawFileReaderTests
 
         [Test]
         [TestCase("blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900, 190, 211, 0, 0)]
-        [TestCase("Corrupt_Qc_Shew_13_04_pt1_a_5Sep13_Cougar_13-06-14.raw", 0, -1, -1, 0, 0, 0)]
+        [TestCase("Corrupt_QC_Shew_13_04_pt1_a_5Sep13_Cougar_13-06-14.raw", 0, -1, -1, 0, 0, 0)]
         [TestCase("Corrupt_QC_Shew_07_03_pt25_e_6Apr08_Falcon_Fst-75-1.raw", 0, -1, -1, 0, 0, 0)]
         // When using XRawfile, this dataset caused .NET to become unstable and abort the unit tests
         // In contrast, ThermoFisher.CommonCore.RawFileReader can open this file

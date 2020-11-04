@@ -47,6 +47,9 @@ namespace ThermoRawFileReader
     [CLSCompliant(true)]
     public class XRawFileIO : EventNotifier, IDisposable
     {
+        // Ignore Spelling: Shofstahl, Bryson, cnl, msx, Biofilm, Smeagol, Jup, Ss, A-Za-z, sa, EThcD, ETciD
+        // Ignore Spelling: Wideband, Raptor, cid, multipole, mrm, sizeof, centroiding, Subtractor, struct
+
         #region "Constants"
 
         // Note that each of these strings has a space at the end; this is important to avoid matching inappropriate text in the filter string
@@ -107,7 +110,7 @@ namespace ThermoRawFileReader
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
 
         /// <summary>
         /// Maximum size of the scan info cache
@@ -588,7 +591,7 @@ namespace ThermoRawFileReader
         /// Other projects that use this:
         ///      PHRPReader (https://github.com/PNNL-Comp-Mass-Spec/PHRP)
         ///
-        /// To copy this, take the code from this function, plus the regex strings <see cref="PARENT_ION_ONLY_NON_MSX_REGEX"/> and <see cref="PARENT_ION_ONLY_MSX_REGEX"/>,
+        /// To copy this, take the code from this function, plus the RegEx strings <see cref="PARENT_ION_ONLY_NON_MSX_REGEX"/> and <see cref="PARENT_ION_ONLY_MSX_REGEX"/>,
         /// with their uses in <see cref="mFindParentIonOnlyNonMsx"/> and <see cref="mFindParentIonOnlyMsx"/>
         /// </remarks>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz)
@@ -1709,7 +1712,6 @@ namespace ThermoRawFileReader
         /// <returns>Scan type name, e.g. HMS or HCD-HMSn</returns>
         public static string GetScanTypeNameFromThermoScanFilterText(string filterText)
         {
-
             // Examines filterText to determine what the scan type is
             // Examples:
             // Given                                                                ScanTypeName
@@ -3000,7 +3002,7 @@ namespace ThermoRawFileReader
         {
             if (!FileInfo.Devices.TryGetValue(deviceType, out var deviceCount) || deviceCount == 0)
             {
-                var message = string.Format(".raw file does not have have data from device type {0}", deviceType);
+                var message = string.Format(".raw file does not have data from device type {0}", deviceType);
                 return message;
             }
 
@@ -3047,7 +3049,7 @@ namespace ThermoRawFileReader
         #region "Obsolete Functions"
 
         /// <summary>
-        /// Return un-normalized collision energies via call IScanFilter.GetEnergy
+        /// Return unnormalized collision energies via call IScanFilter.GetEnergy
         /// </summary>
         /// <param name="scan"></param>
         [Obsolete("The collision energies reported by IScanFilter.GetEnergy are not normalized and are thus not very useful")]

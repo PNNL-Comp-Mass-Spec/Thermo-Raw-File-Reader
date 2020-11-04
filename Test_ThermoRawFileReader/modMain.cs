@@ -13,7 +13,9 @@ namespace Test_ThermoRawFileReader
 {
     static class Program
     {
-        private const string PROGRAM_DATE = "May 19, 2020";
+        // Ignore Spelling: Angiotensin, centroiding, cid, hcd, etd, pqd, cnl, sa, sid, msx, Chrom, QC_Mam
+
+        private const string PROGRAM_DATE = "November 4, 2020";
 
         private const string DEFAULT_FILE_PATH = @"..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw";
 
@@ -636,7 +638,7 @@ namespace Test_ThermoRawFileReader
                         if (!mLoadScanData || (scanNum % 50 != 0 && scanEnd - scanStart > 50))
                             continue;
 
-                        // Get the data for scan scanNum
+                        // Get the data for the given scan
                         Console.WriteLine();
                         Console.WriteLine("Spectrum for scan " + scanNum);
 
@@ -658,7 +660,7 @@ namespace Test_ThermoRawFileReader
 
                         if (scanNum + scansToSum < numScans && testSumming)
                         {
-                            // Get the data for scan scanNum through scanNum + 15
+                            // Get the data for 15 scans
                             reader.GetScanDataSumScans(scanNum, scanNum + scansToSum, out var massIntensityPairs, 0, centroid);
 
                             Console.WriteLine("Summed spectrum, scans " + scanNum + " through " + (scanNum + scansToSum));

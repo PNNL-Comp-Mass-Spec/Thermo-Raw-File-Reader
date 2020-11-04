@@ -4,6 +4,8 @@ using ThermoFisher.CommonCore.Data.Business;
 
 namespace ThermoRawFileReader
 {
+    // Ignore Spelling: struct, cid, etd, hcd, EThcD, ETciD, sa
+
     /// <summary>
     /// Type for Tune Methods
     /// </summary>
@@ -94,7 +96,7 @@ namespace ThermoRawFileReader
         public DateTime CreationDate;
 
         /// <summary>
-        /// Logon name of the user when the file was created
+        /// Username of the user when the file was created
         /// </summary>
         public string CreatorID;
 

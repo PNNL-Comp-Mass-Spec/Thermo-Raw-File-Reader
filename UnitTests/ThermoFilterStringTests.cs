@@ -8,8 +8,8 @@ namespace RawFileReaderTests
     [TestFixture]
     public class ThermoFilterStringTests
     {
+        // Ignore Spelling: cd, noresult, cnl, msx, sa, cid, etd, hcd, pqd, ETciD, EThcD, sid, sps
 
-        //
         // To see the Console.WriteLine() results for a series of test cases for a given Test, run NUnit from the command line.  For example:
         // cd "C:\Program Files (x86)\NUnit.org\nunit-console"
         // c:nunit3-console.exe --noresult --where "method =~ /Filter*/" RawFileReaderTests.dll

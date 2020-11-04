@@ -10,6 +10,7 @@ namespace ThermoRawFileReader
     [CLSCompliant(true)]
     public class clsScanInfo
     {
+        // Ignore Spelling: EThcD, ETciD, frag
 
         #region "Properties"
 
@@ -106,7 +107,7 @@ namespace ThermoRawFileReader
         public double ParentIonMZ { get; set; }
 
         /// <summary>
-        /// The monoisotopic parent ion m/z, as determined by the thermo software
+        /// The monoisotopic parent ion m/z, as determined by the Thermo software
         /// </summary>
         [Obsolete("Unused")]
         public double ParentIonMonoisotopicMZ
@@ -176,7 +177,7 @@ namespace ThermoRawFileReader
         public MRMInfo MRMInfo { get; set; }
 
         /// <summary>
-        ///
+        ///Number of channels
         /// </summary>
         public int NumChannels { get; set; }
 
