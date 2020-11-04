@@ -558,7 +558,7 @@ namespace ThermoRawFileReader
                     // Group 1 is the first mass value
                     // Group 2 is the second mass value
 
-                    var mrmMassRange = new udtMRMMassRangeType
+                    var mrmMassRange = new MRMMassRangeType
                     {
                         StartMass = double.Parse(massRangeMatch.Groups["StartMass"].Value),
                         EndMass = double.Parse(massRangeMatch.Groups["EndMass"].Value)
@@ -648,7 +648,7 @@ namespace ThermoRawFileReader
             out double parentIonMz,
             out int msLevel,
             out string collisionMode,
-            out List<udtParentIonInfoType> parentIons)
+            out List<ParentIonInfoType> parentIons)
         {
 
             // filterText should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
@@ -668,7 +668,7 @@ namespace ThermoRawFileReader
             // or "ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]"
             // or "+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515"
 
-            var bestParentIon = new udtParentIonInfoType();
+            var bestParentIon = new ParentIonInfoType();
             bestParentIon.Clear();
 
             msLevel = 1;
@@ -676,7 +676,7 @@ namespace ThermoRawFileReader
             collisionMode = string.Empty;
             var matchFound = false;
 
-            parentIons = new List<udtParentIonInfoType>();
+            parentIons = new List<ParentIonInfoType>();
 
             try
             {
@@ -769,7 +769,7 @@ namespace ThermoRawFileReader
                         }
                     }
 
-                    var parentIonInfo = new udtParentIonInfoType
+                    var parentIonInfo = new ParentIonInfoType
                     {
                         MSLevel = msLevel,
                         ParentIonMZ = parentIonMz,
@@ -854,7 +854,7 @@ namespace ThermoRawFileReader
                     parentIonMz = double.Parse(mzText.Substring(0, charIndex + 1));
                     matchFound = true;
 
-                    var parentIonMzOnly = new udtParentIonInfoType();
+                    var parentIonMzOnly = new ParentIonInfoType();
                     parentIonMzOnly.Clear();
                     parentIonMzOnly.MSLevel = msLevel;
                     parentIonMzOnly.ParentIonMZ = parentIonMz;
@@ -1999,7 +1999,7 @@ namespace ThermoRawFileReader
                     }
                     else
                     {
-                        var tuneMethodSetting = new udtTuneMethodSetting()
+                        var tuneMethodSetting = new TuneMethodSettingType()
                         {
                             Category = string.Copy(tuneCategory),
                             Name = tuneSettingNames[settingIndex].TrimEnd(':'),
@@ -2548,7 +2548,7 @@ namespace ThermoRawFileReader
         /// <param name="ftLabelData">List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks></remarks>
-        public int GetScanLabelData(int scan, out udtFTLabelInfoType[] ftLabelData)
+        public int GetScanLabelData(int scan, out FTLabelInfoType[] ftLabelData)
         {
 
             if (scan < FileInfo.ScanStart)
@@ -2569,7 +2569,7 @@ namespace ThermoRawFileReader
             {
                 if (mXRawFile == null)
                 {
-                    ftLabelData = new udtFTLabelInfoType[0];
+                    ftLabelData = new FTLabelInfoType[0];
                     return -1;
                 }
 
@@ -2577,7 +2577,7 @@ namespace ThermoRawFileReader
                 {
                     var msg = "Scan " + scan + " is not an FTMS scan; function GetScanLabelData cannot be used with this scan";
                     RaiseWarningMessage(msg);
-                    ftLabelData = new udtFTLabelInfoType[0];
+                    ftLabelData = new FTLabelInfoType[0];
                     return -1;
                 }
 
@@ -2587,7 +2587,7 @@ namespace ThermoRawFileReader
 
                 if (dataCount > 0)
                 {
-                    ftLabelData = new udtFTLabelInfoType[dataCount];
+                    ftLabelData = new FTLabelInfoType[dataCount];
 
                     var masses = data.Masses;
                     var intensities = data.Intensities;
@@ -2598,7 +2598,7 @@ namespace ThermoRawFileReader
 
                     for (var i = 0; i <= dataCount - 1; i++)
                     {
-                        var labelInfo = new udtFTLabelInfoType
+                        var labelInfo = new FTLabelInfoType
                         {
                             Mass = masses[i],
                             Intensity = intensities[i],
@@ -2614,7 +2614,7 @@ namespace ThermoRawFileReader
                 }
                 else
                 {
-                    ftLabelData = new udtFTLabelInfoType[0];
+                    ftLabelData = new FTLabelInfoType[0];
                 }
 
                 return dataCount;
@@ -2631,7 +2631,7 @@ namespace ThermoRawFileReader
                 RaiseErrorMessage(msg, ex);
             }
 
-            ftLabelData = new udtFTLabelInfoType[0];
+            ftLabelData = new FTLabelInfoType[0];
             return -1;
         }
 
@@ -2680,7 +2680,7 @@ namespace ThermoRawFileReader
         /// <param name="massResolutionData">List of Intensity, Mass, AccuracyMMU, AccuracyPPM, and Resolution for each data point</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         /// <remarks>This returns a subset of the data thatGetScanLabelData does, but with 2 additional fields.</remarks>
-        public int GetScanPrecisionData(int scan, out udtMassPrecisionInfoType[] massResolutionData)
+        public int GetScanPrecisionData(int scan, out MassPrecisionInfoType[] massResolutionData)
         {
 
             var dataCount = 0;
@@ -2704,7 +2704,7 @@ namespace ThermoRawFileReader
             {
                 if (mXRawFile == null)
                 {
-                    massResolutionData = new udtMassPrecisionInfoType[0];
+                    massResolutionData = new MassPrecisionInfoType[0];
                     return -1;
                 }
 
@@ -2712,7 +2712,7 @@ namespace ThermoRawFileReader
                 {
                     var msg = "Scan " + scan + " is not an FTMS scan; function GetScanLabelData cannot be used with this scan";
                     RaiseWarningMessage(msg);
-                    massResolutionData = new udtMassPrecisionInfoType[0];
+                    massResolutionData = new MassPrecisionInfoType[0];
                     return -1;
                 }
 
@@ -2728,11 +2728,11 @@ namespace ThermoRawFileReader
                 if (results.Count > 0)
                 {
                     dataCount = results.Count;
-                    massResolutionData = new udtMassPrecisionInfoType[dataCount];
+                    massResolutionData = new MassPrecisionInfoType[dataCount];
 
                     for (var i = 0; i < dataCount; i++)
                     {
-                        var massPrecisionInfo = new udtMassPrecisionInfoType
+                        var massPrecisionInfo = new MassPrecisionInfoType
                         {
                             Intensity = results[i].Intensity,
                             Mass = results[i].Mass,
@@ -2747,7 +2747,7 @@ namespace ThermoRawFileReader
                 }
                 else
                 {
-                    massResolutionData = new udtMassPrecisionInfoType[0];
+                    massResolutionData = new MassPrecisionInfoType[0];
                 }
 
                 return dataCount;
@@ -2764,7 +2764,7 @@ namespace ThermoRawFileReader
                 RaiseErrorMessage(msg, ex);
             }
 
-            massResolutionData = new udtMassPrecisionInfoType[0];
+            massResolutionData = new MassPrecisionInfoType[0];
             return -1;
         }
 

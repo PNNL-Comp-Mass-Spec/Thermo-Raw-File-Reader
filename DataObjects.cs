@@ -13,22 +13,14 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Settings
         /// </summary>
-        public List<udtTuneMethodSetting> Settings = new List<udtTuneMethodSetting>();
-
-        /// <summary>
-        /// Clear the settings
-        /// </summary>
-        public void Clear()
-        {
-            Settings = new List<udtTuneMethodSetting>();
-        }
+        public readonly List<TuneMethodSettingType> Settings = new List<TuneMethodSettingType>();
     }
 
     /// <summary>
     /// Type for Tune Method Settings
     /// </summary>
     [CLSCompliant(true)]
-    public struct udtTuneMethodSetting
+    public struct TuneMethodSettingType
     {
         /// <summary>
         /// Tune category
@@ -263,7 +255,7 @@ namespace ThermoRawFileReader
     /// Type for storing MRM Mass Ranges
     /// </summary>
     [CLSCompliant(true)]
-    public struct udtMRMMassRangeType
+    public struct MRMMassRangeType
     {
         /// <summary>
         /// Start Mass
@@ -299,15 +291,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// List of mass ranges monitored by the first quadrupole
         /// </summary>
-        public List<udtMRMMassRangeType> MRMMassList = new List<udtMRMMassRangeType>();
-
-        /// <summary>
-        /// Clear all data in the object
-        /// </summary>
-        public void Clear()
-        {
-            MRMMassList = new List<udtMRMMassRangeType>();
-        }
+        public readonly List<MRMMassRangeType> MRMMassList = new List<MRMMassRangeType>();
 
         /// <summary>
         /// Duplicate the MRM info
@@ -318,7 +302,6 @@ namespace ThermoRawFileReader
         public static void DuplicateMRMInfo(MRMInfo source, out MRMInfo target)
         {
             target = new MRMInfo();
-            target.Clear();
 
             foreach (var item in source.MRMMassList)
             {
@@ -331,7 +314,7 @@ namespace ThermoRawFileReader
     /// Type for storing Parent Ion Information
     /// </summary>
     [CLSCompliant(true)]
-    public struct udtParentIonInfoType
+    public struct ParentIonInfoType
     {
         /// <summary>
         /// MS Level of the spectrum
@@ -415,7 +398,7 @@ namespace ThermoRawFileReader
     /// Type for Mass Precision Information
     /// </summary>
     [CLSCompliant(true)]
-    public struct udtMassPrecisionInfoType
+    public struct MassPrecisionInfoType
     {
         /// <summary>
         /// Peak Intensity
@@ -447,7 +430,7 @@ namespace ThermoRawFileReader
     /// Type for storing FT Label Information
     /// </summary>
     [CLSCompliant(true)]
-    public struct udtFTLabelInfoType
+    public struct FTLabelInfoType
     {
         /// <summary>
         /// Peak m/z

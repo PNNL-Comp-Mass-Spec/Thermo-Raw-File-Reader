@@ -75,18 +75,18 @@ namespace RawFileReaderTests
         public void ExtractMRMMasses(string filterText, string expectedMassList)
         {
             var mrmScanType = XRawFileIO.DetermineMRMScanType(filterText);
-            XRawFileIO.ExtractMRMMasses(filterText, mrmScanType, out var udtMRMInfo);
+            XRawFileIO.ExtractMRMMasses(filterText, mrmScanType, out var mrmInfo);
 
-            Console.WriteLine(filterText + " -- " + udtMRMInfo.MRMMassList.Count + " mass ranges");
+            Console.WriteLine(filterText + " -- " + mrmInfo.MRMMassList.Count + " mass ranges");
 
             if (string.IsNullOrWhiteSpace(expectedMassList))
             {
-                Assert.AreEqual(0, udtMRMInfo.MRMMassList.Count, "Mass range count mismatch");
+                Assert.AreEqual(0, mrmInfo.MRMMassList.Count, "Mass range count mismatch");
                 return;
             }
 
             var expectedMassRanges = expectedMassList.Split(';');
-            Assert.AreEqual(expectedMassRanges.Length, udtMRMInfo.MRMMassList.Count, "Mass range count mismatch");
+            Assert.AreEqual(expectedMassRanges.Length, mrmInfo.MRMMassList.Count, "Mass range count mismatch");
 
             for (var i = 0; i < expectedMassRanges.Length; i++)
             {
@@ -95,8 +95,8 @@ namespace RawFileReaderTests
                 var massStart= double.Parse(expectedMassValues[0]);
                 var massEnd = double.Parse(expectedMassValues[1]);
 
-                Assert.AreEqual(massStart, udtMRMInfo.MRMMassList[i].StartMass, .001, "Mass start mismatch");
-                Assert.AreEqual(massEnd, udtMRMInfo.MRMMassList[i].EndMass, .001, "Mass end mismatch");
+                Assert.AreEqual(massStart, mrmInfo.MRMMassList[i].StartMass, .001, "Mass start mismatch");
+                Assert.AreEqual(massEnd, mrmInfo.MRMMassList[i].EndMass, .001, "Mass end mismatch");
             }
         }
 
@@ -138,7 +138,7 @@ namespace RawFileReaderTests
         }
 
         /// <summary>
-        /// Test ExtractParentIonMZFromFilterText(string, out double, out int, out string, out list of udtParentIonInfoType)
+        /// Test ExtractParentIonMZFromFilterText(string, out double, out int, out string, out list of ParentIonInfoType)
         /// </summary>
         /// <param name="filterText">FilterText</param>
         /// <param name="expectedParentIons">ParentIon Mz (could be comma-separated list, with ! marking the "best" parent ion m/z)</param>
