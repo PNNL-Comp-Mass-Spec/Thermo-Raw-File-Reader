@@ -231,34 +231,6 @@ namespace ThermoRawFileReader
 
         #region "Events and Event Handlers"
 
-#pragma warning disable 618
-        /// <summary>
-        /// Event handler for reporting error messages
-        /// </summary>
-        [Obsolete("Subscribe to ErrorEvent")]
-        public event ReportErrorEventHandler ReportError;
-
-        /// <summary>
-        /// Event handler delegate for reporting error messages
-        /// </summary>
-        /// <param name="message"></param>
-        [Obsolete("Used by obsolete event ReportError")]
-        public delegate void ReportErrorEventHandler(string message);
-
-        /// <summary>
-        /// Event handler for reporting warning messages
-        /// </summary>
-        [Obsolete("Subscribe to WarningEvent")]
-        public event ReportWarningEventHandler ReportWarning;
-
-        /// <summary>
-        /// Event handler delegate for reporting warning messages
-        /// </summary>
-        /// <param name="message"></param>
-        [Obsolete("Used by obsolete event ReportWarning")]
-        public delegate void ReportWarningEventHandler(string message);
-#pragma warning restore 618
-
         /// <summary>
         /// Report an error message to the error event handler
         /// </summary>
@@ -267,10 +239,6 @@ namespace ThermoRawFileReader
         private void RaiseErrorMessage(string message, Exception ex = null)
         {
             OnErrorEvent(message, ex);
-
-#pragma warning disable 618
-            ReportError?.Invoke(message);
-#pragma warning restore 618
         }
 
         /// <summary>
@@ -280,10 +248,6 @@ namespace ThermoRawFileReader
         private void RaiseWarningMessage(string message)
         {
             OnWarningEvent(message);
-
-#pragma warning disable 618
-            ReportWarning?.Invoke(message);
-#pragma warning restore 618
         }
 
         private void Options_OptionsUpdatedEvent(object sender)
@@ -394,51 +358,6 @@ namespace ThermoRawFileReader
             }
 
             return collisionMode.ToUpper();
-        }
-
-        /// <summary>
-        /// Test the functionality of the reader - can we instantiate the MSFileReader Object?
-        /// </summary>
-        /// <returns></returns>
-        [Obsolete("Use 'IsMSFileReaderInstalled' instead.")]
-        public bool CheckFunctionality()
-        {
-            if (!IsMSFileReaderInstalled())
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Tests to see if we can load the needed Thermo MSFileReader DLL class without errors
-        /// </summary>
-        /// <returns></returns>
-        // ReSharper disable once InconsistentNaming
-        [Obsolete("This method checks for MSFileReader.XRawFile, but we now use ThermoFisher.CommonCore.Data.dll, so this method always returns true")]
-        public bool IsMSFileReaderInstalled()
-        {
-            var result = IsMSFileReaderInstalled(out var error);
-            if (!string.IsNullOrWhiteSpace(error))
-            {
-                RaiseErrorMessage(error);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Tests to see if we can load the needed Thermo MSFileReader DLL class without errors
-        /// </summary>
-        /// <param name="error">Reason for failure</param>
-        /// <returns></returns>
-        // ReSharper disable once InconsistentNaming
-        [Obsolete("This method checks for MSFileReader.XRawFile, but we now use ThermoFisher.CommonCore.Data.dll, so this method always returns true")]
-        public static bool IsMSFileReaderInstalled(out string error)
-        {
-            error = string.Empty;
-            return true;
         }
 
         /// <summary>
@@ -1793,17 +1712,6 @@ namespace ThermoRawFileReader
         /// Parse the scan type name out of the scan filter string
         /// </summary>
         /// <param name="filterText"></param>
-        /// <returns></returns>
-        [Obsolete("Use GetScanTypeNameFromThermoScanFilterText")]
-        public static string GetScanTypeNameFromFinniganScanFilterText(string filterText)
-        {
-            return GetScanTypeNameFromThermoScanFilterText(filterText);
-        }
-
-        /// <summary>
-        /// Parse the scan type name out of the scan filter string
-        /// </summary>
-        /// <param name="filterText"></param>
         /// <returns>Scan type name, e.g. HMS or HCD-HMSn</returns>
         public static string GetScanTypeNameFromThermoScanFilterText(string filterText)
         {
@@ -2072,7 +1980,6 @@ namespace ThermoRawFileReader
                 }
 
                 var newTuneMethod = new TuneMethod();
-                newTuneMethod.Clear();
 
                 // Step through the names and store in the .Setting() arrays
                 var tuneCategory = "General";
@@ -2157,17 +2064,6 @@ namespace ThermoRawFileReader
 
                 RaiseWarningMessage("Consider instantiating the XRawFileIO class with a ThermoReaderOptions object that has LoadMSMethodInfo = false");
             }
-        }
-
-        /// <summary>
-        /// Remove scan-specific data from a scan filter string; primarily removes the parent ion m/z and the scan m/z range
-        /// </summary>
-        /// <param name="filterText"></param>
-        /// <returns></returns>
-        [Obsolete("Use MakeGenericThermoScanFilter")]
-        public static string MakeGenericFinniganScanFilter(string filterText)
-        {
-            return MakeGenericThermoScanFilter(filterText);
         }
 
         /// <summary>
@@ -3196,164 +3092,6 @@ namespace ThermoRawFileReader
             }
 
             return collisionEnergies;
-        }
-
-        /// <summary>
-        /// Get the header info for the specified scan
-        /// </summary>
-        /// <param name="scan">Scan number</param>
-        /// <param name="udtScanInfo">Scan header info struct</param>
-        /// <returns>True if no error, False if an error</returns>
-        /// <remarks></remarks>
-        [Obsolete("Use GetScanInfo that returns a class")]
-        public bool GetScanInfo(int scan, out udtScanHeaderInfoType udtScanInfo)
-        {
-
-            var success = GetScanInfo(scan, out clsScanInfo scanInfo);
-
-            if (success)
-            {
-                udtScanInfo = ScanInfoClassToStruct(scanInfo);
-            }
-            else
-            {
-                udtScanInfo = new udtScanHeaderInfoType();
-            }
-
-            return success;
-        }
-
-        [Obsolete("udtScanHeaderInfoType is obsolete")]
-        private udtScanHeaderInfoType ScanInfoClassToStruct(clsScanInfo scanInfo)
-        {
-
-            var udtScanInfo = new udtScanHeaderInfoType
-            {
-                MSLevel = scanInfo.MSLevel,
-                EventNumber = scanInfo.EventNumber,
-                SIMScan = scanInfo.SIMScan,
-                MRMScanType = scanInfo.MRMScanType,
-                ZoomScan = scanInfo.ZoomScan,
-                NumPeaks = scanInfo.NumPeaks,
-                RetentionTime = scanInfo.RetentionTime,
-                LowMass = scanInfo.LowMass,
-                HighMass = scanInfo.HighMass,
-                TotalIonCurrent = scanInfo.TotalIonCurrent,
-                BasePeakMZ = scanInfo.BasePeakMZ,
-                BasePeakIntensity = scanInfo.BasePeakIntensity,
-                FilterText = scanInfo.FilterText,
-                ParentIonMZ = scanInfo.ParentIonMZ,
-                ActivationType = scanInfo.ActivationType,
-                CollisionMode = scanInfo.CollisionMode,
-                IonMode = scanInfo.IonMode,
-                MRMInfo = scanInfo.MRMInfo,
-                NumChannels = scanInfo.NumChannels,
-                UniformTime = scanInfo.UniformTime,
-                Frequency = scanInfo.Frequency,
-                IsCentroidScan = scanInfo.IsCentroided,
-                ScanEventNames = new string[scanInfo.ScanEvents.Count],
-                ScanEventValues = new string[scanInfo.ScanEvents.Count]
-            };
-
-            for (var i = 0; i < scanInfo.ScanEvents.Count; i++)
-            {
-                udtScanInfo.ScanEventNames[i] = scanInfo.ScanEvents[i].Key;
-                udtScanInfo.ScanEventValues[i] = scanInfo.ScanEvents[i].Value;
-            }
-
-            udtScanInfo.StatusLogNames = new string[scanInfo.StatusLog.Count];
-            udtScanInfo.StatusLogValues = new string[scanInfo.StatusLog.Count];
-
-            for (var i = 0; i < scanInfo.StatusLog.Count; i++)
-            {
-                udtScanInfo.StatusLogNames[i] = scanInfo.StatusLog[i].Key;
-                udtScanInfo.StatusLogValues[i] = scanInfo.StatusLog[i].Value;
-            }
-
-            return udtScanInfo;
-        }
-
-        /// <summary>
-        /// Obtain the mass and intensity list for the specified scan
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <param name="mzList"></param>
-        /// <param name="intensityList"></param>
-        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <returns>The number of data points, or -1 if an error</returns>
-        [Obsolete("This method is deprecated; use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo)
-        {
-            const int maxNumberOfPeaks = 0;
-            const bool centroidData = false;
-            return GetScanData(scan, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
-        }
-
-        /// <summary>
-        /// Obtain the mass and intensity list for the specified scan
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <param name="mzList"></param>
-        /// <param name="intensityList"></param>
-        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
-        /// <returns>The number of data points, or -1 if an error</returns>
-        [Obsolete("This method is deprecated; use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, ref udtScanHeaderInfoType udtScanInfo, bool centroidData)
-        {
-            const int maxNumberOfPeaks = 0;
-            return GetScanData(scan, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
-        }
-
-        /// <summary>
-        /// Obtain the mass and intensity list for the specified scan
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <param name="mzList"></param>
-        /// <param name="intensityList"></param>
-        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
-        /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated; use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks)
-        {
-            const bool centroidData = false;
-            udtScanInfo = new udtScanHeaderInfoType();
-            return GetScanData(scan, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
-        }
-
-        /// <summary>
-        /// Obtain the mass and intensity list for the specified scan
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <param name="mzList"></param>
-        /// <param name="intensityList"></param>
-        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
-        /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
-        /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated; use GetScanData that does not use udtScanHeaderInfo")]
-        public int GetScanData(int scan, out double[] mzList, out double[] intensityList, out udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks, bool centroidData)
-        {
-            udtScanInfo = new udtScanHeaderInfoType();
-            return GetScanData(scan, out mzList, out intensityList, maxNumberOfPeaks, centroidData);
-        }
-
-        /// <summary>
-        /// Obtain the mass and intensity for the specified scan
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
-        /// <param name="udtScanInfo">Unused; parameter retained for compatibility reasons</param>
-        /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
-        /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
-        [Obsolete("This method is deprecated; use GetScanData2D that does not use udtScanHeaderInfo")]
-        public int GetScanData2D(int scan, out double[,] massIntensityPairs, ref udtScanHeaderInfoType udtScanInfo, int maxNumberOfPeaks)
-        {
-            return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks, centroidData: false);
         }
 
         #endregion

@@ -305,16 +305,6 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Constructor with scan number and data in a udtScanHeaderInfoType struct
-        /// </summary>
-        /// <remarks></remarks>
-        [Obsolete("udtScanHeaderInfoType is obsolete")]
-        public clsScanInfo(int scan, udtScanHeaderInfoType udtScanHeaderInfo) : this(scan)
-        {
-            CopyFromStruct(udtScanHeaderInfo);
-        }
-
-        /// <summary>
         /// Store this scan's scan events using parallel string arrays
         /// </summary>
         /// <param name="eventNames"></param>
@@ -386,42 +376,6 @@ namespace ThermoRawFileReader
         #endregion
 
         #region "Private methods"
-
-
-        [Obsolete("Use clsScanInfo")]
-        private void CopyFromStruct(udtScanHeaderInfoType udtScanHeaderInfoType)
-        {
-            MSLevel = udtScanHeaderInfoType.MSLevel;
-            EventNumber = udtScanHeaderInfoType.EventNumber;
-            SIMScan = udtScanHeaderInfoType.SIMScan;
-            MRMScanType = udtScanHeaderInfoType.MRMScanType;
-            ZoomScan = udtScanHeaderInfoType.ZoomScan;
-
-            NumPeaks = udtScanHeaderInfoType.NumPeaks;
-            RetentionTime = udtScanHeaderInfoType.RetentionTime;
-            LowMass = udtScanHeaderInfoType.LowMass;
-            HighMass = udtScanHeaderInfoType.HighMass;
-            TotalIonCurrent = udtScanHeaderInfoType.TotalIonCurrent;
-            BasePeakMZ = udtScanHeaderInfoType.BasePeakMZ;
-            BasePeakIntensity = udtScanHeaderInfoType.BasePeakIntensity;
-
-            FilterText = udtScanHeaderInfoType.FilterText;
-            ParentIonMZ = udtScanHeaderInfoType.ParentIonMZ;
-            CollisionMode = udtScanHeaderInfoType.CollisionMode;
-            ActivationType = udtScanHeaderInfoType.ActivationType;
-
-            IonMode = udtScanHeaderInfoType.IonMode;
-            MRMInfo = udtScanHeaderInfoType.MRMInfo;
-
-            NumChannels = udtScanHeaderInfoType.NumChannels;
-            UniformTime = udtScanHeaderInfoType.UniformTime;
-            Frequency = udtScanHeaderInfoType.Frequency;
-            IsCentroided = udtScanHeaderInfoType.IsCentroidScan;
-
-            StoreScanEvents(udtScanHeaderInfoType.ScanEventNames, udtScanHeaderInfoType.ScanEventValues);
-            StoreStatusLog(udtScanHeaderInfoType.StatusLogNames, udtScanHeaderInfoType.StatusLogValues);
-
-        }
 
         private void StoreParallelStrings(
             ICollection<KeyValuePair<string, string>> targetList,
