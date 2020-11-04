@@ -883,38 +883,6 @@ namespace RawFileReaderTests
         }
 
         [Test]
-        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
-        public void TestGetScanInfoStruct(string rawFileName, int scanStart, int scanEnd)
-        {
-            var dataFile = GetRawDataFile(rawFileName);
-
-            using (var reader = new XRawFileIO(dataFile.FullName))
-            {
-
-                Console.WriteLine("Checking GetScanInfo initializing from a struct using {0}", dataFile.Name);
-
-                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
-                {
-                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
-
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
-
-#pragma warning disable 618
-                    success = reader.GetScanInfo(scanNumber, out udtScanHeaderInfoType scanInfoStruct);
-#pragma warning restore 618
-                    Assert.IsTrue(success, "GetScanInfo (struct) returned false for scan {0}", scanNumber);
-
-                    Assert.AreEqual(scanInfoStruct.MSLevel, scanInfo.MSLevel);
-                    Assert.AreEqual(scanInfoStruct.IsCentroidScan, scanInfo.IsCentroided);
-                    Assert.AreEqual(scanInfoStruct.FilterText, scanInfo.FilterText);
-                    Assert.AreEqual(scanInfoStruct.BasePeakIntensity, scanInfo.BasePeakIntensity, 0.0001);
-                    Assert.AreEqual(scanInfoStruct.TotalIonCurrent, scanInfo.TotalIonCurrent, 0.0001);
-
-                }
-            }
-        }
-
-        [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165)]
         [TestCase("QC_Shew_15_02_Run-2_9Nov15_Oak_14-11-08.raw", 3101, 3102)]
@@ -2004,87 +1972,6 @@ namespace RawFileReaderTests
                         Console.WriteLine("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
                         Assert.Fail("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
                     }
-                }
-            }
-        }
-
-        [Test]
-        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
-        [TestCase("MZ20150721blank2.raw", 300, 400)]
-        [TestCase("B5_50uM_MS_r1.RAW", 1, 20)]
-        public void TestScanInfoCopyFromStruct(string rawFileName, int scanStart, int scanEnd)
-        {
-            var dataFile = GetRawDataFile(rawFileName);
-
-            using (var reader = new XRawFileIO(dataFile.FullName))
-            {
-
-                Console.WriteLine("Checking clsScanInfo initializing from a struct using {0}", dataFile.Name);
-
-                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
-                {
-                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
-
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
-
-#pragma warning disable 618
-                    var udtScanHeaderInfo = new udtScanHeaderInfoType
-                    {
-                        MSLevel = scanInfo.MSLevel,
-                        EventNumber = scanInfo.EventNumber,
-                        SIMScan = scanInfo.SIMScan,
-                        MRMScanType = scanInfo.MRMScanType,
-                        ZoomScan = scanInfo.ZoomScan,
-                        NumPeaks = scanInfo.NumPeaks,
-                        RetentionTime = scanInfo.RetentionTime,
-                        LowMass = scanInfo.LowMass,
-                        HighMass = scanInfo.HighMass,
-                        TotalIonCurrent = scanInfo.TotalIonCurrent,
-                        BasePeakMZ = scanInfo.BasePeakMZ,
-                        BasePeakIntensity = scanInfo.BasePeakIntensity,
-                        FilterText = scanInfo.FilterText,
-                        ParentIonMZ = scanInfo.ParentIonMZ,
-                        ActivationType = scanInfo.ActivationType,
-                        CollisionMode = scanInfo.CollisionMode,
-                        IonMode = scanInfo.IonMode,
-                        MRMInfo = scanInfo.MRMInfo,
-                        NumChannels = scanInfo.NumChannels,
-                        UniformTime = scanInfo.UniformTime,
-                        Frequency = scanInfo.Frequency,
-                        IsCentroidScan = scanInfo.IsCentroided,
-                        ScanEventNames = new string[scanInfo.ScanEvents.Count],
-                        ScanEventValues = new string[scanInfo.ScanEvents.Count],
-                        StatusLogNames = new string[scanInfo.StatusLog.Count],
-                        StatusLogValues = new string[scanInfo.StatusLog.Count]
-                    };
-#pragma warning restore 618
-
-                    var targetIndex = 0;
-                    foreach (var scanEvent in scanInfo.ScanEvents)
-                    {
-                        udtScanHeaderInfo.ScanEventNames[targetIndex] = scanEvent.Key;
-                        udtScanHeaderInfo.ScanEventValues[targetIndex] = scanEvent.Value;
-                        targetIndex++;
-                    }
-
-                    targetIndex = 0;
-                    foreach (var scanEvent in scanInfo.StatusLog)
-                    {
-                        udtScanHeaderInfo.StatusLogNames[targetIndex] = scanEvent.Key;
-                        udtScanHeaderInfo.StatusLogValues[targetIndex] = scanEvent.Value;
-                        targetIndex++;
-                    }
-
-#pragma warning disable 618
-                    var scanInfoFromStruct = new clsScanInfo(scanInfo.ScanNumber, udtScanHeaderInfo);
-#pragma warning restore 618
-
-                    Assert.AreEqual(scanInfoFromStruct.MSLevel, scanInfo.MSLevel);
-                    Assert.AreEqual(scanInfoFromStruct.IsCentroided, scanInfo.IsCentroided);
-                    Assert.AreEqual(scanInfoFromStruct.FilterText, scanInfo.FilterText);
-                    Assert.AreEqual(scanInfoFromStruct.BasePeakIntensity, scanInfo.BasePeakIntensity, 0.0001);
-                    Assert.AreEqual(scanInfoFromStruct.TotalIonCurrent, scanInfo.TotalIonCurrent, 0.0001);
-
                 }
             }
         }
