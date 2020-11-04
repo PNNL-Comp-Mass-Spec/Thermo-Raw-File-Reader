@@ -1225,7 +1225,7 @@ namespace ThermoRawFileReader
                 if (mXRawFile == null)
                     return collisionEnergies;
 
-                GetScanInfo(scan, out clsScanInfo scanInfo);
+                GetScanInfo(scan, out var scanInfo);
 
                 ExtractParentIonMZFromFilterText(scanInfo.FilterText, out _, out _, out _, out var parentIons);
 
@@ -2424,7 +2424,7 @@ namespace ThermoRawFileReader
                 scan = FileInfo.ScanEnd;
             }
 
-            if (!GetScanInfo(scan, out clsScanInfo scanInfo))
+            if (!GetScanInfo(scan, out var scanInfo))
             {
                 throw new Exception("Cannot retrieve ScanInfo from cache for scan " + scan + "; cannot retrieve scan data");
             }
@@ -2560,7 +2560,7 @@ namespace ThermoRawFileReader
                 scan = FileInfo.ScanEnd;
             }
 
-            if (!GetScanInfo(scan, out clsScanInfo scanInfo))
+            if (!GetScanInfo(scan, out var scanInfo))
             {
                 throw new Exception("Cannot retrieve ScanInfo from cache for scan " + scan + "; cannot retrieve scan data");
             }
@@ -2695,7 +2695,7 @@ namespace ThermoRawFileReader
             }
 
 
-            if (!GetScanInfo(scan, out clsScanInfo scanInfo))
+            if (!GetScanInfo(scan, out var scanInfo))
             {
                 throw new Exception("Cannot retrieve ScanInfo from cache for scan " + scan + "; cannot retrieve scan data");
             }
