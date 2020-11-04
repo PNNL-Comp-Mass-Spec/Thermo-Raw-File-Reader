@@ -558,7 +558,7 @@ namespace Test_ThermoRawFileReader
                             continue;
                         }
 
-                        var success = reader.GetScanInfo(scanNum, out clsScanInfo scanInfo);
+                        var success = reader.GetScanInfo(scanNum, out var scanInfo);
 
                         if (!success)
                             continue;
@@ -828,8 +828,7 @@ namespace Test_ThermoRawFileReader
 
                     for (var scanNum = 1; scanNum <= scanCount; scanNum++)
                     {
-
-                        var success = reader.GetScanInfo(scanNum, out clsScanInfo scanInfo);
+                        var success = reader.GetScanInfo(scanNum, out var scanInfo);
 
                         if (!success)
                         {

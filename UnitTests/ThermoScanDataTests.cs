@@ -119,7 +119,7 @@ namespace RawFileReaderTests
             {
                 foreach (var scanNumber in collisionEnergiesThisFile.Keys)
                 {
-                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -229,7 +229,7 @@ namespace RawFileReaderTests
                     {
                         try
                         {
-                            reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                            reader.GetScanInfo(scanNumber, out var scanInfo);
 
                             if (reader.FileInfo.CorruptFile)
                             {
@@ -373,7 +373,7 @@ namespace RawFileReaderTests
                         scansProcessed++;
                         if (scansProcessed % statsInterval == 0)
                         {
-                            reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                            reader.GetScanInfo(scanNumber, out var scanInfo);
 
                             if (mzList.Length > 0)
                             {
@@ -550,7 +550,7 @@ namespace RawFileReaderTests
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -739,7 +739,7 @@ namespace RawFileReaderTests
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -817,7 +817,7 @@ namespace RawFileReaderTests
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -1237,7 +1237,7 @@ namespace RawFileReaderTests
 
                         var midPoint = (int)(intensityList.Length / 2f);
 
-                        var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                        var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
                         Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -1397,7 +1397,7 @@ namespace RawFileReaderTests
 
                         Assert.IsTrue(dataPointsRead > 0, "GetScanData2D returned 0 for scan {0}", scanNumber);
 
-                        var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                        var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
                         Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
@@ -1541,7 +1541,7 @@ namespace RawFileReaderTests
 
                     Assert.IsTrue(dataPointsRead > 0, string.Format("GetScanDataSumScans returned 0 summing scans {0} to {1}", scanStart, scanEnd));
 
-                    var success = reader.GetScanInfo(scanStart, out clsScanInfo scanInfo);
+                    var success = reader.GetScanInfo(scanStart, out var scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
@@ -1670,7 +1670,7 @@ namespace RawFileReaderTests
                     else
                         Assert.AreEqual(dataPointsRead, ftLabelData.Length, "Data count mismatch vs. function return value");
 
-                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
@@ -1788,7 +1788,7 @@ namespace RawFileReaderTests
                     else
                         Assert.AreEqual(dataPointsRead, massResolutionData.Length, "Data count mismatch vs. function return value");
 
-                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
@@ -1897,7 +1897,7 @@ namespace RawFileReaderTests
             {
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    var success = reader.GetScanInfo(scanNumber, out clsScanInfo scanInfo);
+                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
                     Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
