@@ -136,7 +136,6 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Display the device type and instrument model or name
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             if (!string.IsNullOrWhiteSpace(Model))

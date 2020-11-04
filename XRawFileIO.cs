@@ -260,7 +260,6 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <remarks></remarks>
         public XRawFileIO()
             : this(string.Empty)
         {
@@ -270,7 +269,6 @@ namespace ThermoRawFileReader
         /// Constructor with an options parameter
         /// </summary>
         /// <param name="options">Thermo reader options</param>
-        /// <remarks></remarks>
         public XRawFileIO(ThermoReaderOptions options)
             : this(string.Empty, options)
         {
@@ -457,7 +455,6 @@ namespace ThermoRawFileReader
         /// Determine the Ionization mode by parsing the scan filter string
         /// </summary>
         /// <param name="filterText"></param>
-        /// <returns></returns>
         public static IonModeConstants DetermineIonizationMode(string filterText)
         {
 
@@ -1214,7 +1211,6 @@ namespace ThermoRawFileReader
         /// Return the collision energy (or energies) for the given scan
         /// </summary>
         /// <param name="scan">Scan number</param>
-        /// <returns></returns>
         public List<double> GetCollisionEnergy(int scan)
         {
 
@@ -1294,7 +1290,6 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Get a count of the number of instruments of each device type, as stored in the .raw file
         /// </summary>
-        /// <returns></returns>
         public Dictionary<Device, int> GetDeviceStats()
         {
             var devices = new Dictionary<Device, int>();
@@ -1388,7 +1383,6 @@ namespace ThermoRawFileReader
         /// <param name="scan">Scan number</param>
         /// <param name="scanInfo">Scan header info class</param>
         /// <returns>True if no error, False if an error</returns>
-        /// <remarks></remarks>
         public bool GetScanInfo(int scan, out clsScanInfo scanInfo)
         {
 
@@ -2547,7 +2541,6 @@ namespace ThermoRawFileReader
         /// <param name="scan">Scan number</param>
         /// <param name="ftLabelData">List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks></remarks>
         public int GetScanLabelData(int scan, out FTLabelInfoType[] ftLabelData)
         {
 
@@ -2900,7 +2893,6 @@ namespace ThermoRawFileReader
         /// Open the .raw file
         /// </summary>
         /// <param name="filePath"></param>
-        /// <returns></returns>
         public bool OpenRawFile(string filePath)
         {
 
@@ -3047,7 +3039,6 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Dispose the reader
         /// </summary>
-        /// <remarks></remarks>
         public void Dispose()
         {
             CloseRawFile();
@@ -3059,7 +3050,6 @@ namespace ThermoRawFileReader
         /// Return un-normalized collision energies via call IScanFilter.GetEnergy
         /// </summary>
         /// <param name="scan"></param>
-        /// <returns></returns>
         [Obsolete("The collision energies reported by IScanFilter.GetEnergy are not normalized and are thus not very useful")]
         public List<double> GetCollisionEnergyUnnormalized(int scan)
         {
