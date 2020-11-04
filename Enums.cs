@@ -294,7 +294,7 @@ namespace ThermoRawFileReader
     /// Instrument Flags
     /// </summary>
     [CLSCompliant(true)]
-    public class InstFlags
+    public static class InstFlags
     {
         /// <summary>
         /// Total Ion Map
