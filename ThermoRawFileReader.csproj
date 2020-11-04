@@ -46,6 +46,7 @@
     <Compile Include="DataObjects.cs" />
     <Compile Include="DeviceInfo.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ThermoReaderOptions.cs" />
     <Compile Include="XRawFileIO.cs" />
     <Compile Include="clsScanInfo.cs" />
