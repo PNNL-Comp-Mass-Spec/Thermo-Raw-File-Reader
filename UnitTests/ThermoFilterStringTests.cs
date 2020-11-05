@@ -508,7 +508,7 @@ namespace RawFileReaderTests
         [TestCase("ITMS + p NSI Full ms2 1155.10@cid10.00 [315.00-2000.00]                                                                      ", "1155.10")]
         public void ExtractParentIonMZOnlyFromFilterText(string filterText, string expectedParentIons)
         {
-            var msLevel = 0;
+            const int msLevel = 0;
             var collisionMode = string.Empty;
 
             XRawFileIO.ExtractParentIonMZFromFilterText(filterText, out var parentIonMZ);
