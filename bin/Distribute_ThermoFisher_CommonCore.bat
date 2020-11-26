@@ -72,9 +72,6 @@ xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MAS
 xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MASIC\bin\Release\" /Y /D
 xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MASIC\MASICTest\bin\Debug\" /Y /D
 
-xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MASICResultsMerger\bin\" /Y /D
-xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MASICResultsMerger\Lib\" /Y /D
-
 xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\" /Y /D
 xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\" /Y /D
 
