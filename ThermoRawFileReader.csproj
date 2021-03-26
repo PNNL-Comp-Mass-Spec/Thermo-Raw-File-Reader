@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="PRISM-Library">
-      <Version>2.6.18</Version>
+      <Version>2.6.26</Version>
     </PackageReference>
     <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction">
       <Version>4.0.89</Version>
