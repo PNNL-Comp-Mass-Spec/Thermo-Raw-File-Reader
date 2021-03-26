@@ -62,6 +62,8 @@ xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\DataMining\PEKtoCSV
 
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\DataMining\ProteowizardWrapper\UnitTests\lib\" /Y /D
 
+xcopy Release\ThermoRawFileReader.*   "F:\Documents\Projects\DataMining\SpectrumLook_v2\lib\" /Y /D
+
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\DataMining\ThermoFAIMStoMzML\lib\" /Y /D
 
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\DataMining\ThermoPeakDataExporter\lib" /Y /D
@@ -120,6 +122,9 @@ xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\KevinCrowell\LipidT
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\Bryson_Gibbons\Thermo-Raw-Metadata-Plotter\Lib\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\Bryson_Gibbons\Thermo-Raw-Metadata-Plotter\ThermoRawMetadataPlotter\bin\Debug\" /Y /D
 
+xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Lib\" /Y /D
+xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Source Code\FAIMS MzXML Generator\FAIMS MzXML Generator\bin\Debug\" /Y /D
+xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Source Code\WriteFaimsXMLFromRawFile\WriteFaimsXMLFromRawFile\bin\Debug" /Y /D
 
 @echo off
 pause

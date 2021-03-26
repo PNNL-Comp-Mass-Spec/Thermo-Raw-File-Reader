@@ -141,6 +141,10 @@ xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\KevinCrowell\L
 xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\Bryson_Gibbons\Thermo-Raw-Metadata-Plotter\Lib\" /Y /D
 xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\Bryson_Gibbons\Thermo-Raw-Metadata-Plotter\ThermoRawMetadataPlotter\bin\Debug\" /Y /D
 
+xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Lib\" /Y /D
+xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Source Code\FAIMS MzXML Generator\FAIMS MzXML Generator\bin\Debug\" /Y /D
+xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Source Code\WriteFaimsXMLFromRawFile\WriteFaimsXMLFromRawFile\bin\Debug" /Y /D
+
 
 @echo off
 pause
