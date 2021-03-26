@@ -476,17 +476,12 @@ namespace ThermoRawFileReader
 
             if (match.Success)
             {
-                switch (match.Value)
+                return match.Value switch
                 {
-                    case "+":
-                        return IonModeConstants.Positive;
-
-                    case "-":
-                        return IonModeConstants.Negative;
-
-                    default:
-                        return IonModeConstants.Unknown;
-                }
+                    "+" => IonModeConstants.Positive,
+                    "-" => IonModeConstants.Negative,
+                    _ => IonModeConstants.Unknown
+                };
             }
 
             return IonModeConstants.Unknown;
