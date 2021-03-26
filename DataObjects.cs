@@ -15,7 +15,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Settings
         /// </summary>
-        public readonly List<TuneMethodSettingType> Settings = new List<TuneMethodSettingType>();
+        public readonly List<TuneMethodSettingType> Settings = new();
     }
 
     /// <summary>
@@ -291,7 +291,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// List of mass ranges monitored by the first quadrupole
         /// </summary>
-        public readonly List<MRMMassRangeType> MRMMassList = new List<MRMMassRangeType>();
+        public readonly List<MRMMassRangeType> MRMMassList = new();
 
         /// <summary>
         /// Duplicate the MRM info

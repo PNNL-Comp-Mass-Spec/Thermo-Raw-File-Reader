@@ -120,13 +120,13 @@ namespace ThermoRawFileReader
         /// <summary>
         /// The scan info cache
         /// </summary>
-        private readonly Dictionary<int, clsScanInfo> mCachedScanInfo = new Dictionary<int, clsScanInfo>();
+        private readonly Dictionary<int, clsScanInfo> mCachedScanInfo = new();
 
         /// <summary>
         /// This linked list tracks the scan numbers stored in mCachedScanInfo,
         /// allowing for quickly determining the oldest scan added to the cache when the cache limit is reached
         /// </summary>
-        private readonly LinkedList<int> mCachedScans = new LinkedList<int>();
+        private readonly LinkedList<int> mCachedScans = new();
 
         /// <summary>
         /// Reader that implements ThermoFisher.CommonCore.Data.Interfaces.IRawDataPlus
@@ -144,25 +144,25 @@ namespace ThermoRawFileReader
         /// </summary>
         private bool mCorruptMemoryEncountered;
 
-        private static readonly Regex mFindMS = new Regex(MS2_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindMS = new(MS2_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private static readonly Regex mIonMode = new Regex(ION_MODE_REGEX, RegexOptions.Compiled);
+        private static readonly Regex mIonMode = new(ION_MODE_REGEX, RegexOptions.Compiled);
 
-        private static readonly Regex mMassList = new Regex(MASS_LIST_REGEX, RegexOptions.Compiled);
+        private static readonly Regex mMassList = new(MASS_LIST_REGEX, RegexOptions.Compiled);
 
-        private static readonly Regex mMassRanges = new Regex(MASS_RANGES_REGEX, RegexOptions.Compiled);
+        private static readonly Regex mMassRanges = new(MASS_RANGES_REGEX, RegexOptions.Compiled);
 
-        private static readonly Regex mFindParentIon = new Regex(PARENT_ION_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex mFindParentIonOnlyNonMsx = new Regex(PARENT_ION_ONLY_NON_MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex mFindParentIonOnlyMsx = new Regex(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindParentIon = new(PARENT_ION_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindParentIonOnlyNonMsx = new(PARENT_ION_ONLY_NON_MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindParentIonOnlyMsx = new(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private static readonly Regex mFindSAFullMS = new Regex(SA_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindSAFullMS = new(SA_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private static readonly Regex mFindFullMSx = new Regex(MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex mFindFullMSx = new(MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private static readonly Regex mCollisionSpecs = new Regex(COLLISION_SPEC_REGEX, RegexOptions.Compiled);
+        private static readonly Regex mCollisionSpecs = new(COLLISION_SPEC_REGEX, RegexOptions.Compiled);
 
-        private static readonly Regex mMzWithoutCE = new Regex(MZ_WITHOUT_COLLISION_ENERGY, RegexOptions.Compiled);
+        private static readonly Regex mMzWithoutCE = new(MZ_WITHOUT_COLLISION_ENERGY, RegexOptions.Compiled);
 
         #endregion
 
