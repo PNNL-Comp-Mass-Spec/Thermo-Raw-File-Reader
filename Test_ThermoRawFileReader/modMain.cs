@@ -177,86 +177,85 @@ namespace Test_ThermoRawFileReader
             var filesProcessed = 0;
             foreach (var dataFile in scanStatsFiles)
             {
-                using (var reader = new StreamReader(new FileStream(dataFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(dataFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                if (reader.EndOfStream)
+                    continue;
+
+                var headerLine = reader.ReadLine();
+                if (headerLine == null)
                 {
-                    if (reader.EndOfStream)
+                    continue;
+                }
+
+                var headers = headerLine.Split('\t');
+                var scanFilterIndex = -1;
+
+                for (var headerIndex = 0; headerIndex < headers.Length; headerIndex++)
+                {
+                    if (headers[headerIndex] == "Scan Filter Text")
+                    {
+                        scanFilterIndex = headerIndex;
+                        break;
+                    }
+                }
+
+                if (scanFilterIndex < 0)
+                {
+                    Console.WriteLine("Scan Filter Text not found in: " + dataFile.Name);
+                    continue;
+                }
+
+                while (!reader.EndOfStream)
+                {
+                    var dataLine = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(dataLine))
                         continue;
 
-                    var headerLine = reader.ReadLine();
-                    if (headerLine == null)
-                    {
+                    var dataColumns = dataLine.Split('\t');
+                    if (dataColumns.Length < scanFilterIndex)
                         continue;
+
+                    var scanFilter = dataColumns[scanFilterIndex];
+
+                    // Scan filter will be of the form
+                    //    FTMS + p NSI d Full ms2 343.4@etd20.00
+                    // or ITMS + p NSI d Z ms [163.00-173.00]
+                    // or + c NSI d Full ms2 150.100 [10.000-155.100]
+                    // etc.
+
+                    // Change 343.4@ to 0@
+                    // Also change [163.00-173.00] to [0.00-0.00]
+                    //  and change [163.00-173.00,403.00-413.00] to [0.00-0.00,0.00-0.00]
+                    // Also change etd20.0 to etd00.0
+                    // Also change sid=30.00 to sid=00.00
+
+                    var scanFilterGeneric = parentIonMZMatcher.Replace(scanFilter, "0@");
+                    scanFilterGeneric = massRangeMatcher.Replace(scanFilterGeneric, "0.00-0.00");
+                    scanFilterGeneric = sidMatcher.Replace(scanFilterGeneric, "sid=0.00");
+
+                    var matchesParentNoAt = parentIonMZnoAtMatcher.Matches(scanFilterGeneric);
+                    foreach (Match match in matchesParentNoAt)
+                    {
+                        scanFilterGeneric = scanFilterGeneric.Replace(match.Value, match.Groups[1].Value + " 0.000");
                     }
 
-                    var headers = headerLine.Split('\t');
-                    var scanFilterIndex = -1;
-
-                    for (var headerIndex = 0; headerIndex < headers.Length; headerIndex++)
+                    var matchesCollision = collisionModeMatcher.Matches(scanFilterGeneric);
+                    foreach (Match match in matchesCollision)
                     {
-                        if (headers[headerIndex] == "Scan Filter Text")
-                        {
-                            scanFilterIndex = headerIndex;
-                            break;
-                        }
+                        scanFilterGeneric = scanFilterGeneric.Replace(match.Value, match.Groups[1].Value + "00.00");
                     }
 
-                    if (scanFilterIndex < 0)
+                    if (scanFilters.TryGetValue(scanFilterGeneric, out var filterStats))
                     {
-                        Console.WriteLine("Scan Filter Text not found in: " + dataFile.Name);
-                        continue;
+                        scanFilters[scanFilterGeneric] = new Tuple<string, int, string>(
+                            filterStats.Item1,
+                            filterStats.Item2 + 1,
+                            filterStats.Item3);
                     }
-
-                    while (!reader.EndOfStream)
+                    else
                     {
-                        var dataLine = reader.ReadLine();
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
-
-                        var dataColumns = dataLine.Split('\t');
-                        if (dataColumns.Length < scanFilterIndex)
-                            continue;
-
-                        var scanFilter = dataColumns[scanFilterIndex];
-
-                        // Scan filter will be of the form
-                        //    FTMS + p NSI d Full ms2 343.4@etd20.00
-                        // or ITMS + p NSI d Z ms [163.00-173.00]
-                        // or + c NSI d Full ms2 150.100 [10.000-155.100]
-                        // etc.
-
-                        // Change 343.4@ to 0@
-                        // Also change [163.00-173.00] to [0.00-0.00]
-                        //  and change [163.00-173.00,403.00-413.00] to [0.00-0.00,0.00-0.00]
-                        // Also change etd20.0 to etd00.0
-                        // Also change sid=30.00 to sid=00.00
-
-                        var scanFilterGeneric = parentIonMZMatcher.Replace(scanFilter, "0@");
-                        scanFilterGeneric = massRangeMatcher.Replace(scanFilterGeneric, "0.00-0.00");
-                        scanFilterGeneric = sidMatcher.Replace(scanFilterGeneric, "sid=0.00");
-
-                        var matchesParentNoAt = parentIonMZnoAtMatcher.Matches(scanFilterGeneric);
-                        foreach (Match match in matchesParentNoAt)
-                        {
-                            scanFilterGeneric = scanFilterGeneric.Replace(match.Value, match.Groups[1].Value + " 0.000");
-                        }
-
-                        var matchesCollision = collisionModeMatcher.Matches(scanFilterGeneric);
-                        foreach (Match match in matchesCollision)
-                        {
-                            scanFilterGeneric = scanFilterGeneric.Replace(match.Value, match.Groups[1].Value + "00.00");
-                        }
-
-                        if (scanFilters.TryGetValue(scanFilterGeneric, out var filterStats))
-                        {
-                            scanFilters[scanFilterGeneric] = new Tuple<string, int, string>(
-                                filterStats.Item1,
-                                filterStats.Item2 + 1,
-                                filterStats.Item3);
-                        }
-                        else
-                        {
-                            scanFilters.Add(scanFilterGeneric, new Tuple<string, int, string>(scanFilter, 1, dataFile.Name));
-                        }
+                        scanFilters.Add(scanFilterGeneric, new Tuple<string, int, string>(scanFilter, 1, dataFile.Name));
                     }
                 }
 
@@ -496,225 +495,223 @@ namespace Test_ThermoRawFileReader
                 var ionInjectionTimesMS1 = new List<double>();
                 var ionInjectionTimesMS2 = new List<double>();
 
-                using (var reader = new XRawFileIO(rawFile.FullName, options, mTraceMode))
+                using var reader = new XRawFileIO(rawFile.FullName, options, mTraceMode);
+                RegisterEvents(reader);
+
+                var numScans = reader.GetNumScans();
+
+                var collisionEnergyList = string.Empty;
+
+                ShowMethod(reader);
+
+                var scanStep = 1;
+
+                if (scanStart < 1)
+                    scanStart = 1;
+
+                if (scanEnd < 1)
                 {
-                    RegisterEvents(reader);
-
-                    var numScans = reader.GetNumScans();
-
-                    var collisionEnergyList = string.Empty;
-
-                    ShowMethod(reader);
-
-                    var scanStep = 1;
-
-                    if (scanStart < 1)
-                        scanStart = 1;
-
-                    if (scanEnd < 1)
+                    scanEnd = numScans;
+                    scanStep = 21;
+                }
+                else
+                {
+                    if (scanEnd < scanStart)
                     {
-                        scanEnd = numScans;
-                        scanStep = 21;
+                        scanEnd = scanStart;
                     }
-                    else
+                }
+
+                if (scanEnd > numScans)
+                    scanEnd = numScans;
+
+                var msLevelStats = new Dictionary<int, int>();
+
+                Console.WriteLine();
+                Console.WriteLine("Reading data for scans {0} to {1}, step {2}", scanStart, scanEnd, scanStep);
+
+                for (var scanNum = scanStart; scanNum <= scanEnd; scanNum += scanStep)
+                {
+                    if (scanNum > reader.ScanEnd)
                     {
-                        if (scanEnd < scanStart)
-                        {
-                            scanEnd = scanStart;
-                        }
-                    }
-
-                    if (scanEnd > numScans)
-                        scanEnd = numScans;
-
-                    var msLevelStats = new Dictionary<int, int>();
-
-                    Console.WriteLine();
-                    Console.WriteLine("Reading data for scans {0} to {1}, step {2}", scanStart, scanEnd, scanStep);
-
-                    for (var scanNum = scanStart; scanNum <= scanEnd; scanNum += scanStep)
-                    {
-                        if (scanNum > reader.ScanEnd)
-                        {
-                            ConsoleMsgUtils.ShowWarning("Exiting for loop since scan number {0} is greater than the max scan number, {1}", scanNum, reader.ScanEnd);
-                            break;
-                        }
-
-                        if (mOnlyLoadMSLevelInfo)
-                        {
-                            var msLevel = reader.GetMSLevel(scanNum);
-
-                            if (msLevelStats.TryGetValue(msLevel, out var msLevelObsCount))
-                            {
-                                msLevelStats[msLevel] = msLevelObsCount + 1;
-                            }
-                            else
-                            {
-                                msLevelStats.Add(msLevel, 1);
-                            }
-                            if (mScanInfoInterval <= 0 || scanNum % mScanInfoInterval == 0)
-                                Console.WriteLine("Scan " + scanNum);
-
-                            continue;
-                        }
-
-                        var success = reader.GetScanInfo(scanNum, out var scanInfo);
-
-                        if (!success)
-                            continue;
-
-                        if (mScanInfoInterval <= 0 || scanNum % mScanInfoInterval == 0)
-                            Console.WriteLine("Scan " + scanNum + " at " + scanInfo.RetentionTime.ToString("0.00") + " minutes: " + scanInfo.FilterText);
-
-                        if (scanInfo.MSLevel == 1)
-                        {
-                            ionInjectionTimesMS1.Add(scanInfo.IonInjectionTime);
-                        } else if (scanInfo.MSLevel == 2)
-                        {
-                            ionInjectionTimesMS2.Add(scanInfo.IonInjectionTime);
-                        }
-
-                        if (mLoadCollisionEnergies)
-                        {
-                            var collisionEnergies = reader.GetCollisionEnergy(scanNum);
-
-                            if (collisionEnergies.Count == 0)
-                            {
-                                collisionEnergyList = string.Empty;
-                            }
-                            else if (collisionEnergies.Count >= 1)
-                            {
-                                collisionEnergyList = collisionEnergies[0].ToString("0.0");
-
-                                if (collisionEnergies.Count > 1)
-                                {
-                                    for (var index = 1; index <= collisionEnergies.Count - 1; index++)
-                                    {
-                                        collisionEnergyList += ", " + collisionEnergies[index].ToString("0.0");
-                                    }
-                                }
-                            }
-
-                            if (string.IsNullOrEmpty(collisionEnergyList))
-                            {
-                                Console.WriteLine();
-                            }
-                            else
-                            {
-                                Console.WriteLine("; CE " + collisionEnergyList);
-                            }
-                        }
-
-                        if (mGetScanEvents)
-                        {
-                            if (scanInfo.TryGetScanEvent("Monoisotopic M/Z:", out var monoMZ))
-                            {
-                                Console.WriteLine("Monoisotopic M/Z: " + monoMZ);
-                            }
-
-                            if (scanInfo.TryGetScanEvent("Charge State", out var chargeState, true))
-                            {
-                                Console.WriteLine("Charge State: " + chargeState);
-                            }
-
-                            if (scanInfo.TryGetScanEvent("MS2 Isolation Width", out var isolationWidth, true))
-                            {
-                                Console.WriteLine("MS2 Isolation Width: " + isolationWidth);
-                            }
-                        }
-
-                        if (!mLoadScanData || (scanNum % 50 != 0 && scanEnd - scanStart > 50))
-                            continue;
-
-                        // Get the data for the given scan
-                        Console.WriteLine();
-                        Console.WriteLine("Spectrum for scan " + scanNum);
-
-                        reader.GetScanData(scanNum, out var mzList, out var intensityList, 0, centroid);
-
-                        var mzDisplayStepSize = 50;
-                        if (centroid)
-                        {
-                            mzDisplayStepSize = 1;
-                        }
-
-                        for (var i = 0; i <= mzList.Length - 1; i += mzDisplayStepSize)
-                        {
-                            Console.WriteLine("  " + mzList[i].ToString("0.000") + " mz   " + intensityList[i].ToString("0"));
-                        }
-                        Console.WriteLine();
-
-                        const int scansToSum = 15;
-
-                        if (scanNum + scansToSum < numScans && testSumming)
-                        {
-                            // Get the data for 15 scans
-                            reader.GetScanDataSumScans(scanNum, scanNum + scansToSum, out var massIntensityPairs, 0, centroid);
-
-                            Console.WriteLine("Summed spectrum, scans " + scanNum + " through " + (scanNum + scansToSum));
-
-                            for (var i = 0; i <= massIntensityPairs.GetLength(1) - 1; i += 50)
-                            {
-                                Console.WriteLine("  " + massIntensityPairs[0, i].ToString("0.000") + " mz   " +
-                                                  massIntensityPairs[1, i].ToString("0"));
-                            }
-
-                            Console.WriteLine();
-                        }
-
-                        if (!scanInfo.IsFTMS)
-                            continue;
-
-                        var dataCount = reader.GetScanLabelData(scanNum, out var ftLabelData);
-
-                        Console.WriteLine();
-                        Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", "Mass", "Intensity", "Resolution", "Baseline", "Noise", "Charge");
-
-                        for (var i = 0; i <= dataCount - 1; i += 50)
-                        {
-                            Console.WriteLine("{0,12:F3}{1,12:0}{2,12:0}{3,12:F1}{4,12:0}{5,12:0}",
-                                              ftLabelData[i].Mass,
-                                              ftLabelData[i].Intensity,
-                                              ftLabelData[i].Resolution,
-                                              ftLabelData[i].Baseline,
-                                              ftLabelData[i].Noise,
-                                              ftLabelData[i].Charge);
-                        }
-
-                        dataCount = reader.GetScanPrecisionData(scanNum, out var ftPrecisionData);
-
-                        Console.WriteLine();
-                        Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}", "Mass", "Intensity", "AccuracyMMU", "AccuracyPPM", "Resolution");
-
-                        for (var i = 0; i <= dataCount - 1; i += 50)
-                        {
-                            Console.WriteLine("{0,12:F3}{1,12:0}{2,12:F3}{3,12:F3}{4,12:0}",
-                                              ftPrecisionData[i].Mass,
-                                              ftPrecisionData[i].Intensity, ftPrecisionData[i].AccuracyMMU,
-                                              ftPrecisionData[i].AccuracyPPM,
-                                              ftPrecisionData[i].Resolution);
-                        }
+                        ConsoleMsgUtils.ShowWarning("Exiting for loop since scan number {0} is greater than the max scan number, {1}", scanNum, reader.ScanEnd);
+                        break;
                     }
 
                     if (mOnlyLoadMSLevelInfo)
                     {
-                        Console.WriteLine();
-                        Console.WriteLine("{0,-10} {1}", "MSLevel", "Scans");
-                        foreach (var item in msLevelStats)
+                        var msLevel = reader.GetMSLevel(scanNum);
+
+                        if (msLevelStats.TryGetValue(msLevel, out var msLevelObsCount))
                         {
-                            Console.WriteLine("{0, -10} {1}", item.Key, item.Value);
+                            msLevelStats[msLevel] = msLevelObsCount + 1;
+                        }
+                        else
+                        {
+                            msLevelStats.Add(msLevel, 1);
+                        }
+                        if (mScanInfoInterval <= 0 || scanNum % mScanInfoInterval == 0)
+                            Console.WriteLine("Scan " + scanNum);
+
+                        continue;
+                    }
+
+                    var success = reader.GetScanInfo(scanNum, out var scanInfo);
+
+                    if (!success)
+                        continue;
+
+                    if (mScanInfoInterval <= 0 || scanNum % mScanInfoInterval == 0)
+                        Console.WriteLine("Scan " + scanNum + " at " + scanInfo.RetentionTime.ToString("0.00") + " minutes: " + scanInfo.FilterText);
+
+                    if (scanInfo.MSLevel == 1)
+                    {
+                        ionInjectionTimesMS1.Add(scanInfo.IonInjectionTime);
+                    } else if (scanInfo.MSLevel == 2)
+                    {
+                        ionInjectionTimesMS2.Add(scanInfo.IonInjectionTime);
+                    }
+
+                    if (mLoadCollisionEnergies)
+                    {
+                        var collisionEnergies = reader.GetCollisionEnergy(scanNum);
+
+                        if (collisionEnergies.Count == 0)
+                        {
+                            collisionEnergyList = string.Empty;
+                        }
+                        else if (collisionEnergies.Count >= 1)
+                        {
+                            collisionEnergyList = collisionEnergies[0].ToString("0.0");
+
+                            if (collisionEnergies.Count > 1)
+                            {
+                                for (var index = 1; index <= collisionEnergies.Count - 1; index++)
+                                {
+                                    collisionEnergyList += ", " + collisionEnergies[index].ToString("0.0");
+                                }
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(collisionEnergyList))
+                        {
+                            Console.WriteLine();
+                        }
+                        else
+                        {
+                            Console.WriteLine("; CE " + collisionEnergyList);
                         }
                     }
 
-                    Console.WriteLine();
-                    if (ionInjectionTimesMS1.Count > 0 || ionInjectionTimesMS2.Count > 0)
+                    if (mGetScanEvents)
                     {
-                        Console.WriteLine("Ion injection time stats");
-                        Console.WriteLine("{0,-10} {1,-10} {2,-10} {3,-10} {4,-10}", "MS Level", "Average", "Median", "Minimum", "Maximum");
+                        if (scanInfo.TryGetScanEvent("Monoisotopic M/Z:", out var monoMZ))
+                        {
+                            Console.WriteLine("Monoisotopic M/Z: " + monoMZ);
+                        }
 
-                        ShowIonInjectionStats(1, ionInjectionTimesMS1);
-                        ShowIonInjectionStats(2, ionInjectionTimesMS2);
+                        if (scanInfo.TryGetScanEvent("Charge State", out var chargeState, true))
+                        {
+                            Console.WriteLine("Charge State: " + chargeState);
+                        }
+
+                        if (scanInfo.TryGetScanEvent("MS2 Isolation Width", out var isolationWidth, true))
+                        {
+                            Console.WriteLine("MS2 Isolation Width: " + isolationWidth);
+                        }
                     }
+
+                    if (!mLoadScanData || (scanNum % 50 != 0 && scanEnd - scanStart > 50))
+                        continue;
+
+                    // Get the data for the given scan
+                    Console.WriteLine();
+                    Console.WriteLine("Spectrum for scan " + scanNum);
+
+                    reader.GetScanData(scanNum, out var mzList, out var intensityList, 0, centroid);
+
+                    var mzDisplayStepSize = 50;
+                    if (centroid)
+                    {
+                        mzDisplayStepSize = 1;
+                    }
+
+                    for (var i = 0; i <= mzList.Length - 1; i += mzDisplayStepSize)
+                    {
+                        Console.WriteLine("  " + mzList[i].ToString("0.000") + " mz   " + intensityList[i].ToString("0"));
+                    }
+                    Console.WriteLine();
+
+                    const int scansToSum = 15;
+
+                    if (scanNum + scansToSum < numScans && testSumming)
+                    {
+                        // Get the data for 15 scans
+                        reader.GetScanDataSumScans(scanNum, scanNum + scansToSum, out var massIntensityPairs, 0, centroid);
+
+                        Console.WriteLine("Summed spectrum, scans " + scanNum + " through " + (scanNum + scansToSum));
+
+                        for (var i = 0; i <= massIntensityPairs.GetLength(1) - 1; i += 50)
+                        {
+                            Console.WriteLine("  " + massIntensityPairs[0, i].ToString("0.000") + " mz   " +
+                                              massIntensityPairs[1, i].ToString("0"));
+                        }
+
+                        Console.WriteLine();
+                    }
+
+                    if (!scanInfo.IsFTMS)
+                        continue;
+
+                    var dataCount = reader.GetScanLabelData(scanNum, out var ftLabelData);
+
+                    Console.WriteLine();
+                    Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", "Mass", "Intensity", "Resolution", "Baseline", "Noise", "Charge");
+
+                    for (var i = 0; i <= dataCount - 1; i += 50)
+                    {
+                        Console.WriteLine("{0,12:F3}{1,12:0}{2,12:0}{3,12:F1}{4,12:0}{5,12:0}",
+                            ftLabelData[i].Mass,
+                            ftLabelData[i].Intensity,
+                            ftLabelData[i].Resolution,
+                            ftLabelData[i].Baseline,
+                            ftLabelData[i].Noise,
+                            ftLabelData[i].Charge);
+                    }
+
+                    dataCount = reader.GetScanPrecisionData(scanNum, out var ftPrecisionData);
+
+                    Console.WriteLine();
+                    Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}", "Mass", "Intensity", "AccuracyMMU", "AccuracyPPM", "Resolution");
+
+                    for (var i = 0; i <= dataCount - 1; i += 50)
+                    {
+                        Console.WriteLine("{0,12:F3}{1,12:0}{2,12:F3}{3,12:F3}{4,12:0}",
+                            ftPrecisionData[i].Mass,
+                            ftPrecisionData[i].Intensity, ftPrecisionData[i].AccuracyMMU,
+                            ftPrecisionData[i].AccuracyPPM,
+                            ftPrecisionData[i].Resolution);
+                    }
+                }
+
+                if (mOnlyLoadMSLevelInfo)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("{0,-10} {1}", "MSLevel", "Scans");
+                    foreach (var item in msLevelStats)
+                    {
+                        Console.WriteLine("{0, -10} {1}", item.Key, item.Value);
+                    }
+                }
+
+                Console.WriteLine();
+                if (ionInjectionTimesMS1.Count > 0 || ionInjectionTimesMS2.Count > 0)
+                {
+                    Console.WriteLine("Ion injection time stats");
+                    Console.WriteLine("{0,-10} {1,-10} {2,-10} {3,-10} {4,-10}", "MS Level", "Average", "Median", "Minimum", "Maximum");
+
+                    ShowIonInjectionStats(1, ionInjectionTimesMS1);
+                    ShowIonInjectionStats(2, ionInjectionTimesMS2);
                 }
             }
             catch (Exception ex)
@@ -738,56 +735,54 @@ namespace Test_ThermoRawFileReader
 
                 Console.WriteLine("Opening " + rawFile.FullName);
 
-                using (var reader = new XRawFileIO(rawFile.FullName, options, mTraceMode))
+                using var reader = new XRawFileIO(rawFile.FullName, options, mTraceMode);
+                RegisterEvents(reader);
+
+                var deviceList = reader.FileInfo.Devices;
+                var nonMassSpecDevicesInFile = new Dictionary<Device, int>();
+
+                Console.WriteLine("{0,-15} {1}", "Device Type", "Count in .Raw file");
+                foreach (var item in deviceList)
                 {
-                    RegisterEvents(reader);
+                    Console.WriteLine("{0,-15} {1}", item.Key, item.Value);
 
-                    var deviceList = reader.FileInfo.Devices;
-                    var nonMassSpecDevicesInFile = new Dictionary<Device, int>();
+                    if (item.Value == 0)
+                        continue;
 
-                    Console.WriteLine("{0,-15} {1}", "Device Type", "Count in .Raw file");
-                    foreach (var item in deviceList)
+                    if (item.Key != Device.MS && item.Key != Device.MSAnalog)
                     {
-                        Console.WriteLine("{0,-15} {1}", item.Key, item.Value);
-
-                        if (item.Value == 0)
-                            continue;
-
-                        if (item.Key != Device.MS && item.Key != Device.MSAnalog)
-                        {
-                            nonMassSpecDevicesInFile.Add(item.Key, item.Value);
-                        }
+                        nonMassSpecDevicesInFile.Add(item.Key, item.Value);
                     }
+                }
 
-                    foreach (var device in nonMassSpecDevicesInFile)
+                foreach (var device in nonMassSpecDevicesInFile)
+                {
+                    for (var deviceNumber = 1; deviceNumber <= device.Value; deviceNumber++)
                     {
-                        for (var deviceNumber = 1; deviceNumber <= device.Value; deviceNumber++)
+                        var deviceInfo = reader.GetDeviceInfo(device.Key, deviceNumber);
+
+                        var chromData = reader.GetChromatogramData(device.Key, deviceNumber);
+
+                        Console.WriteLine();
+
+                        Console.WriteLine(deviceInfo.DeviceDescription);
+
+                        Console.WriteLine("  Name:       {0}", deviceInfo.InstrumentName);
+                        Console.WriteLine("  Model:      {0}", deviceInfo.Model);
+                        Console.WriteLine("  Serial:     {0}", deviceInfo.SerialNumber);
+                        Console.WriteLine("  SW Version: {0}", deviceInfo.SoftwareVersion);
+                        Console.WriteLine("  YAxis: {0}, units {1}", deviceInfo.AxisLabelY, deviceInfo.Units);
+                        Console.WriteLine();
+                        Console.WriteLine("Data for {0}", deviceInfo.DeviceDescription);
+                        Console.WriteLine("{0,-9} {1}", "Scan", "Intensity");
+
+                        var i = 0;
+                        foreach (var chromPoint in chromData)
                         {
-                            var deviceInfo = reader.GetDeviceInfo(device.Key, deviceNumber);
+                            i++;
+                            if (i % 100 != 0) continue;
 
-                            var chromData = reader.GetChromatogramData(device.Key, deviceNumber);
-
-                            Console.WriteLine();
-
-                            Console.WriteLine(deviceInfo.DeviceDescription);
-
-                            Console.WriteLine("  Name:       {0}", deviceInfo.InstrumentName);
-                            Console.WriteLine("  Model:      {0}", deviceInfo.Model);
-                            Console.WriteLine("  Serial:     {0}", deviceInfo.SerialNumber);
-                            Console.WriteLine("  SW Version: {0}", deviceInfo.SoftwareVersion);
-                            Console.WriteLine("  YAxis: {0}, units {1}", deviceInfo.AxisLabelY, deviceInfo.Units);
-                            Console.WriteLine();
-                            Console.WriteLine("Data for {0}", deviceInfo.DeviceDescription);
-                            Console.WriteLine("{0,-9} {1}", "Scan", "Intensity");
-
-                            var i = 0;
-                            foreach (var chromPoint in chromData)
-                            {
-                                i++;
-                                if (i % 100 != 0) continue;
-
-                                Console.WriteLine("{0,-9:N0} {1:F2}", chromPoint.Key, chromPoint.Value);
-                            }
+                            Console.WriteLine("{0,-9:N0} {1:F2}", chromPoint.Key, chromPoint.Value);
                         }
                     }
                 }

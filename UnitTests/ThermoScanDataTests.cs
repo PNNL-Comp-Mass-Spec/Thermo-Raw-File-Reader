@@ -115,68 +115,68 @@ namespace RawFileReaderTests
 
             // Keys are scan number, values are the ActivationType, for example cid, etd, hcd
             var activationTypesActual = new Dictionary<int, string>();
-            using (var reader = new XRawFileIO(dataFile.FullName))
+
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            foreach (var scanNumber in collisionEnergiesThisFile.Keys)
             {
-                foreach (var scanNumber in collisionEnergiesThisFile.Keys)
+                var success = reader.GetScanInfo(scanNumber, out var scanInfo);
+
+                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+
+                var collisionEnergiesThisScan = reader.GetCollisionEnergy(scanNumber);
+                collisionEnergiesActual.Add(scanNumber, collisionEnergiesThisScan);
+
+                msLevelsActual.Add(scanNumber, scanInfo.MSLevel);
+
+                activationTypesActual.Add(scanNumber, scanInfo.ActivationType.ToString());
+            }
+
+            Console.WriteLine("{0,-5} {1,-5} {2}", "Valid", "Scan", "Collision Energy");
+
+            foreach (var actualEnergiesOneScan in (from item in collisionEnergiesActual orderby item.Key select item))
+            {
+                var scanNumber = actualEnergiesOneScan.Key;
+
+                var expectedEnergies = collisionEnergiesThisFile[scanNumber];
+
+                var activationTypes = string.Join(", ", activationTypesActual[scanNumber]);
+
+                if (actualEnergiesOneScan.Value.Count == 0)
                 {
-                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
+                    var msLevel = msLevelsActual[scanNumber];
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
-
-                    var collisionEnergiesThisScan = reader.GetCollisionEnergy(scanNumber);
-                    collisionEnergiesActual.Add(scanNumber, collisionEnergiesThisScan);
-
-                    msLevelsActual.Add(scanNumber, scanInfo.MSLevel);
-
-                    activationTypesActual.Add(scanNumber, scanInfo.ActivationType.ToString());
-                }
-
-                Console.WriteLine("{0,-5} {1,-5} {2}", "Valid", "Scan", "Collision Energy");
-
-                foreach (var actualEnergiesOneScan in (from item in collisionEnergiesActual orderby item.Key select item))
-                {
-                    var scanNumber = actualEnergiesOneScan.Key;
-
-                    var expectedEnergies = collisionEnergiesThisFile[scanNumber];
-
-                    var activationTypes = string.Join(", ", activationTypesActual[scanNumber]);
-
-                    if (actualEnergiesOneScan.Value.Count == 0)
+                    if (msLevel != 1)
                     {
-                        var msLevel = msLevelsActual[scanNumber];
+                        var msg = string.Format(
+                            "Scan {0} has no collision energies, which should only be true for spectra with msLevel=1. This scan has msLevel={1} and activationType={2}",
+                            scanNumber, msLevel, activationTypes);
+                        Console.WriteLine(msg);
 
-                        if (msLevel != 1)
-                        {
-                            var msg = string.Format(
-                                "Scan {0} has no collision energies, which should only be true for spectra with msLevel=1. This scan has msLevel={1} and activationType={2}",
-                                scanNumber, msLevel, activationTypes);
-                            Console.WriteLine(msg);
-
-                            Assert.Fail(msg);
-                        }
-                        else
-                        {
-                            Console.WriteLine("{0,-5} {1,-5} {2}", true, scanNumber, "MS1 scan");
-                        }
+                        Assert.Fail(msg);
                     }
                     else
                     {
-                        foreach (var actualEnergy in actualEnergiesOneScan.Value)
-                        {
-                            var isValid = expectedEnergies.Any(expectedEnergy => Math.Abs(actualEnergy - expectedEnergy) < 0.00001);
-
-                            Console.WriteLine("{0,-5} {1,-5} {2:F2}", isValid, scanNumber, actualEnergy);
-
-                            Assert.IsTrue(isValid, "Unexpected collision energy {0:F2} for scan {1}", actualEnergy, scanNumber);
-                        }
+                        Console.WriteLine("{0,-5} {1,-5} {2}", true, scanNumber, "MS1 scan");
                     }
-
-                    if (expectedEnergies.Count != actualEnergiesOneScan.Value.Count)
+                }
+                else
+                {
+                    foreach (var actualEnergy in actualEnergiesOneScan.Value)
                     {
-                        var msg = string.Format("Collision energy count mismatch for scan {0}", scanNumber);
-                        Console.WriteLine(msg);
-                        Assert.AreEqual(expectedEnergies.Count, actualEnergiesOneScan.Value.Count, msg);
+                        var isValid = expectedEnergies.Any(expectedEnergy => Math.Abs(actualEnergy - expectedEnergy) < 0.00001);
+
+                        Console.WriteLine("{0,-5} {1,-5} {2:F2}", isValid, scanNumber, actualEnergy);
+
+                        Assert.IsTrue(isValid, "Unexpected collision energy {0:F2} for scan {1}", actualEnergy, scanNumber);
                     }
+                }
+
+                if (expectedEnergies.Count != actualEnergiesOneScan.Value.Count)
+                {
+                    var msg = string.Format("Collision energy count mismatch for scan {0}", scanNumber);
+                    Console.WriteLine(msg);
+                    Assert.AreEqual(expectedEnergies.Count, actualEnergiesOneScan.Value.Count, msg);
                 }
             }
         }
@@ -201,97 +201,96 @@ namespace RawFileReaderTests
 
             try
             {
-                using (var reader = new XRawFileIO(dataFile.FullName))
+                using var reader = new XRawFileIO(dataFile.FullName);
+
+                var scanCount = reader.GetNumScans();
+                Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
+
+                if (expectedMS1 == -1 && expectedMS2 == 0)
                 {
-                    var scanCount = reader.GetNumScans();
-                    Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
+                    Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
+                    Assert.IsTrue(scanCount == -1, "ScanCount is not -1");
+                }
+                else if (expectedMS1 + expectedMS2 == 0)
+                {
+                    Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
+                    Assert.IsTrue(scanCount <= 0, "ScanCount is non-zero, while we expected it to be 0");
+                }
+                else
+                {
+                    Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is true while we expected it to be false");
+                    Assert.IsTrue(scanCount > 0, "ScanCount is zero, while we expected it to be > 0");
+                }
 
-                    if (expectedMS1 == -1 && expectedMS2 == 0)
-                    {
-                        Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
-                        Assert.IsTrue(scanCount == -1, "ScanCount is not -1");
-                    }
-                    else if (expectedMS1 + expectedMS2 == 0)
-                    {
-                        Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
-                        Assert.IsTrue(scanCount <= 0, "ScanCount is non-zero, while we expected it to be 0");
-                    }
-                    else
-                    {
-                        Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is true while we expected it to be false");
-                        Assert.IsTrue(scanCount > 0, "ScanCount is zero, while we expected it to be > 0");
-                    }
+                var scanCountMS1 = 0;
+                var scanCountMS2 = 0;
 
-                    var scanCountMS1 = 0;
-                    var scanCountMS2 = 0;
-
-                    for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    try
                     {
-                        try
+                        reader.GetScanInfo(scanNumber, out var scanInfo);
+
+                        if (reader.FileInfo.CorruptFile)
                         {
-                            reader.GetScanInfo(scanNumber, out var scanInfo);
+                            Assert.IsTrue(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is not empty but should be since corrupt file");
+                        }
+                        else
+                        {
+                            Assert.IsFalse(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is empty but should not be");
 
-                            if (reader.FileInfo.CorruptFile)
-                            {
-                                Assert.IsTrue(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is not empty but should be since corrupt file");
-                            }
+                            if (scanInfo.MSLevel > 1)
+                                scanCountMS2++;
                             else
+                                scanCountMS1++;
+                        }
+
+                        // Note: this function call will fail randomly with file Corrupt_Scans6920-7021_AID_STM_013_101104_06_LTQ_16Nov04_Earth_0904-8.raw
+                        // Furthermore, we are unable to catch the exception that occurs (or no exception is thrown) and adding
+                        // [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions] to the function does not help
+                        var dataPointCount = reader.GetScanData(scanNumber, out var mzList, out var intensityList);
+
+                        if (reader.FileInfo.CorruptFile)
+                        {
+                            Assert.IsTrue(dataPointCount == 0, "GetScanData unexpectedly reported a non-zero data count for scan {0}", scanNumber);
+                            Assert.IsTrue(mzList.Length == 0, "GetScanData unexpectedly returned m/z data for scan {0}", scanNumber);
+                            Assert.IsTrue(intensityList.Length == 0, "GetScanData unexpectedly returned intensity data for scan {0}", scanNumber);
+                        }
+                        else
+                        {
+                            if (dataPointCount == 0)
                             {
-                                Assert.IsFalse(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is empty but should not be");
+                                Console.WriteLine("Corrupt scan encountered: {0}", scanNumber);
 
-                                if (scanInfo.MSLevel > 1)
-                                    scanCountMS2++;
-                                else
-                                    scanCountMS1++;
-                            }
-
-                            // Note: this function call will fail randomly with file Corrupt_Scans6920-7021_AID_STM_013_101104_06_LTQ_16Nov04_Earth_0904-8.raw
-                            // Furthermore, we are unable to catch the exception that occurs (or no exception is thrown) and adding
-                            // [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions] to the function does not help
-                            var dataPointCount = reader.GetScanData(scanNumber, out var mzList, out var intensityList);
-
-                            if (reader.FileInfo.CorruptFile)
-                            {
-                                Assert.IsTrue(dataPointCount == 0, "GetScanData unexpectedly reported a non-zero data count for scan {0}", scanNumber);
+                                Assert.IsTrue(scanNumber >= corruptScanStart && scanNumber <= corruptScanEnd, "Unexpected corrupt scan found, scan {0}", scanNumber);
                                 Assert.IsTrue(mzList.Length == 0, "GetScanData unexpectedly returned m/z data for scan {0}", scanNumber);
                                 Assert.IsTrue(intensityList.Length == 0, "GetScanData unexpectedly returned intensity data for scan {0}", scanNumber);
                             }
                             else
                             {
-                                if (dataPointCount == 0)
-                                {
-                                    Console.WriteLine("Corrupt scan encountered: {0}", scanNumber);
-
-                                    Assert.IsTrue(scanNumber >= corruptScanStart && scanNumber <= corruptScanEnd, "Unexpected corrupt scan found, scan {0}", scanNumber);
-                                    Assert.IsTrue(mzList.Length == 0, "GetScanData unexpectedly returned m/z data for scan {0}", scanNumber);
-                                    Assert.IsTrue(intensityList.Length == 0, "GetScanData unexpectedly returned intensity data for scan {0}", scanNumber);
-                                }
-                                else
-                                {
-                                    Assert.IsTrue(dataPointCount > 0, "GetScanData reported a data point count of 0 for scan {0}", scanNumber);
-                                    Assert.IsTrue(mzList.Length > 0, "GetScanData unexpectedly returned no m/z data for scan {0}", scanNumber);
-                                    Assert.IsTrue(intensityList.Length > 0, "GetScanData unexpectedly returned no intensity data for scan {0}", scanNumber);
-                                    Assert.IsTrue(mzList.Length == intensityList.Length, "Array length mismatch for m/z and intensity data for scan {0}", scanNumber);
-                                    Assert.IsTrue(dataPointCount == mzList.Length, "Array length does not agree with dataPointCount for scan {0}", scanNumber);
-                                }
+                                Assert.IsTrue(dataPointCount > 0, "GetScanData reported a data point count of 0 for scan {0}", scanNumber);
+                                Assert.IsTrue(mzList.Length > 0, "GetScanData unexpectedly returned no m/z data for scan {0}", scanNumber);
+                                Assert.IsTrue(intensityList.Length > 0, "GetScanData unexpectedly returned no intensity data for scan {0}", scanNumber);
+                                Assert.IsTrue(mzList.Length == intensityList.Length, "Array length mismatch for m/z and intensity data for scan {0}", scanNumber);
+                                Assert.IsTrue(dataPointCount == mzList.Length, "Array length does not agree with dataPointCount for scan {0}", scanNumber);
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Exception reading scan {0}: {1}", scanNumber, ex.Message);
-                            Assert.Fail("Exception reading scan {0}", scanNumber);
-                        }
                     }
-
-                    Console.WriteLine("scanCountMS1={0}", scanCountMS1);
-                    Console.WriteLine("scanCountMS2={0}", scanCountMS2);
-
-                    if (expectedMS1 >= 0)
-                        Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
-
-                    if (expectedMS2 >= 0)
-                        Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Exception reading scan {0}: {1}", scanNumber, ex.Message);
+                        Assert.Fail("Exception reading scan {0}", scanNumber);
+                    }
                 }
+
+                Console.WriteLine("scanCountMS1={0}", scanCountMS1);
+                Console.WriteLine("scanCountMS2={0}", scanCountMS2);
+
+                if (expectedMS1 >= 0)
+                    Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+
+                if (expectedMS2 >= 0)
+                    Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
             }
             catch (Exception ex)
             {
@@ -311,86 +310,85 @@ namespace RawFileReaderTests
         {
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            for (var iteration = 1; iteration <= 4; iteration++)
             {
-                for (var iteration = 1; iteration <= 4; iteration++)
+                int maxNumberOfPeaks;
+                bool centroidData;
+
+                switch (iteration)
                 {
-                    int maxNumberOfPeaks;
-                    bool centroidData;
+                    case 1:
+                        maxNumberOfPeaks = 0;
+                        centroidData = false;
+                        break;
+                    case 2:
+                        maxNumberOfPeaks = 0;
+                        centroidData = true;
+                        break;
+                    case 3:
+                        maxNumberOfPeaks = 50;
+                        centroidData = false;
+                        break;
+                    default:
+                        maxNumberOfPeaks = 50;
+                        centroidData = true;
+                        break;
+                }
 
-                    switch (iteration)
+                if (iteration == 1)
+                {
+                    Console.WriteLine("Scan data for {0}", dataFile.Name);
+                    Console.WriteLine(
+                        "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10} {6,-8} {7,-10} {8,-8}  {9}",
+                        "Scan", "Max#", "Centroid", "MzCount", "IntCount",
+                        "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+                }
+
+                if (scanEnd > reader.FileInfo.ScanEnd)
+                    scanEnd = reader.FileInfo.ScanEnd;
+
+                if (scanStep < 1)
+                    scanStep = 1;
+
+                var statsInterval = (int)Math.Floor((scanEnd - scanStart) / (double)scanStep / 10);
+                var scansProcessed = 0;
+
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber += scanStep)
+                {
+                    var dataPointsRead = reader.GetScanData(scanNumber, out var mzList, out var intensityList, maxNumberOfPeaks, centroidData);
+
+                    var unsortedMzValues = 0;
+
+                    for (var i = 0; i < dataPointsRead - 1; i++)
                     {
-                        case 1:
-                            maxNumberOfPeaks = 0;
-                            centroidData = false;
-                            break;
-                        case 2:
-                            maxNumberOfPeaks = 0;
-                            centroidData = true;
-                            break;
-                        case 3:
-                            maxNumberOfPeaks = 50;
-                            centroidData = false;
-                            break;
-                        default:
-                            maxNumberOfPeaks = 50;
-                            centroidData = true;
-                            break;
+                        if (mzList[i] > mzList[i + 1])
+                            unsortedMzValues++;
                     }
 
-                    if (iteration == 1)
+                    Assert.AreEqual(0, unsortedMzValues, "Scan {0} has {1} m/z values not sorted properly", scanNumber, unsortedMzValues);
+
+                    scansProcessed++;
+                    if (scansProcessed % statsInterval == 0)
                     {
-                        Console.WriteLine("Scan data for {0}", dataFile.Name);
-                        Console.WriteLine(
-                            "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10} {6,-8} {7,-10} {8,-8}  {9}",
-                            "Scan", "Max#", "Centroid", "MzCount", "IntCount",
-                            "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
-                    }
+                        reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                    if (scanEnd > reader.FileInfo.ScanEnd)
-                        scanEnd = reader.FileInfo.ScanEnd;
-
-                    if (scanStep < 1)
-                        scanStep = 1;
-
-                    var statsInterval = (int)Math.Floor((scanEnd - scanStart) / (double)scanStep / 10);
-                    var scansProcessed = 0;
-
-                    for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber += scanStep)
-                    {
-                        var dataPointsRead = reader.GetScanData(scanNumber, out var mzList, out var intensityList, maxNumberOfPeaks, centroidData);
-
-                        var unsortedMzValues = 0;
-
-                        for (var i = 0; i < dataPointsRead - 1; i++)
+                        if (mzList.Length > 0)
                         {
-                            if (mzList[i] > mzList[i + 1])
-                                unsortedMzValues++;
+                            var midIndex = (int)Math.Floor(mzList.Length / 2.0);
+
+                            Console.WriteLine(
+                                "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10:0.0000} {6,-8:0.0} {7,-10:0.0000} {8,-8:0.0}  {9}",
+                                scanNumber, maxNumberOfPeaks, centroidData, mzList.Length, intensityList.Length,
+                                mzList[0], intensityList[0], mzList[midIndex], intensityList[midIndex], scanInfo.FilterText);
                         }
-
-                        Assert.AreEqual(0, unsortedMzValues, "Scan {0} has {1} m/z values not sorted properly", scanNumber, unsortedMzValues);
-
-                        scansProcessed++;
-                        if (scansProcessed % statsInterval == 0)
+                        else
                         {
-                            reader.GetScanInfo(scanNumber, out var scanInfo);
-
-                            if (mzList.Length > 0)
-                            {
-                                var midIndex = (int)Math.Floor(mzList.Length / 2.0);
-
-                                Console.WriteLine(
-                                    "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10:0.0000} {6,-8:0.0} {7,-10:0.0000} {8,-8:0.0}  {9}",
-                                    scanNumber, maxNumberOfPeaks, centroidData, mzList.Length, intensityList.Length,
-                                    mzList[0], intensityList[0], mzList[midIndex], intensityList[midIndex], scanInfo.FilterText);
-                            }
-                            else
-                            {
-                                Console.WriteLine(
-                                    "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10} {6,-8} {7,-10} {8,-8}  {9}",
-                                    scanNumber, maxNumberOfPeaks, centroidData, mzList.Length, intensityList.Length,
-                                    "n/a", "n/a", "n/a", "n/a", scanInfo.FilterText);
-                            }
+                            Console.WriteLine(
+                                "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10} {6,-8} {7,-10} {8,-8}  {9}",
+                                scanNumber, maxNumberOfPeaks, centroidData, mzList.Length, intensityList.Length,
+                                "n/a", "n/a", "n/a", "n/a", scanInfo.FilterText);
                         }
                     }
                 }
@@ -409,14 +407,13 @@ namespace RawFileReaderTests
         {
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
-            {
-                var scanCount = reader.GetNumScans();
+            using var reader = new XRawFileIO(dataFile.FullName);
 
-                Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
-                if (expectedResult >= 0)
-                    Assert.AreEqual(expectedResult, scanCount, "Scan count mismatch");
-            }
+            var scanCount = reader.GetNumScans();
+
+            Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
+            if (expectedResult >= 0)
+                Assert.AreEqual(expectedResult, scanCount, "Scan count mismatch");
         }
 
         [Test]
@@ -535,84 +532,83 @@ namespace RawFileReaderTests
 
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            Console.WriteLine("Parsing scan headers for {0}", dataFile.Name);
+
+            var scanCount = reader.GetNumScans();
+            Console.WriteLine("Total scans: {0}", scanCount);
+            Assert.AreEqual(expectedTotalScanCount, scanCount, "Total scan count mismatch");
+            Console.WriteLine();
+
+            var scanCountMS1 = 0;
+            var scanCountMS2 = 0;
+            var scanTypeCountsActual = new Dictionary<Tuple<string, string>, int>();
+
+            for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
-                Console.WriteLine("Parsing scan headers for {0}", dataFile.Name);
+                var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                var scanCount = reader.GetNumScans();
-                Console.WriteLine("Total scans: {0}", scanCount);
-                Assert.AreEqual(expectedTotalScanCount, scanCount, "Total scan count mismatch");
-                Console.WriteLine();
+                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
-                var scanCountMS1 = 0;
-                var scanCountMS2 = 0;
-                var scanTypeCountsActual = new Dictionary<Tuple<string, string>, int>();
+                var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText);
+                var genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText);
 
-                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                var scanTypeKey = new Tuple<string, string>(scanType, genericScanFilter);
+
+                if (scanTypeCountsActual.TryGetValue(scanTypeKey, out var observedScanCount))
                 {
-                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
-
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
-
-                    var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText);
-                    var genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText);
-
-                    var scanTypeKey = new Tuple<string, string>(scanType, genericScanFilter);
-
-                    if (scanTypeCountsActual.TryGetValue(scanTypeKey, out var observedScanCount))
-                    {
-                        scanTypeCountsActual[scanTypeKey] = observedScanCount + 1;
-                    }
-                    else
-                    {
-                        scanTypeCountsActual.Add(scanTypeKey, 1);
-                    }
-
-                    if (scanInfo.MSLevel > 1)
-                        scanCountMS2++;
-                    else
-                        scanCountMS1++;
+                    scanTypeCountsActual[scanTypeKey] = observedScanCount + 1;
+                }
+                else
+                {
+                    scanTypeCountsActual.Add(scanTypeKey, 1);
                 }
 
-                Console.WriteLine("scanCountMS1={0}", scanCountMS1);
-                Console.WriteLine("scanCountMS2={0}", scanCountMS2);
+                if (scanInfo.MSLevel > 1)
+                    scanCountMS2++;
+                else
+                    scanCountMS1++;
+            }
 
-                if (expectedMS1 >= 0)
-                    Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+            Console.WriteLine("scanCountMS1={0}", scanCountMS1);
+            Console.WriteLine("scanCountMS2={0}", scanCountMS2);
 
-                if (expectedMS2 >= 0)
-                    Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+            if (expectedMS1 >= 0)
+                Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
 
-                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedScanInfo))
+            if (expectedMS2 >= 0)
+                Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+
+            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedScanInfo))
+            {
+                // Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                expectedScanInfo = new Dictionary<Tuple<string, string>, int>();
+            }
+
+            Console.WriteLine("{0,-5} {1,5} {2}", "Valid", "Count", "ScanType");
+
+            foreach (var scanType in (from item in scanTypeCountsActual orderby item.Key select item))
+            {
+                if (expectedScanInfo.Count == 0)
                 {
-                    // Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
-                    expectedScanInfo = new Dictionary<Tuple<string, string>, int>();
+                    Console.WriteLine("{0,5} {1}", scanType.Value, scanType.Key);
+                    continue;
                 }
 
-                Console.WriteLine("{0,-5} {1,5} {2}", "Valid", "Count", "ScanType");
-
-                foreach (var scanType in (from item in scanTypeCountsActual orderby item.Key select item))
+                if (expectedScanInfo.TryGetValue(scanType.Key, out var expectedScanCount))
                 {
-                    if (expectedScanInfo.Count == 0)
-                    {
-                        Console.WriteLine("{0,5} {1}", scanType.Value, scanType.Key);
-                        continue;
-                    }
+                    var isValid = scanType.Value == expectedScanCount;
 
-                    if (expectedScanInfo.TryGetValue(scanType.Key, out var expectedScanCount))
-                    {
-                        var isValid = scanType.Value == expectedScanCount;
+                    Console.WriteLine("{0,-5} {1,5} {2}", isValid, scanType.Value, scanType.Key);
 
-                        Console.WriteLine("{0,-5} {1,5} {2}", isValid, scanType.Value, scanType.Key);
-
-                        if (expectedScanCount >= 0)
-                            Assert.AreEqual(expectedScanCount, scanType.Value, "Scan type count mismatch");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Unexpected scan type found: {0}", scanType.Key);
-                        Assert.Fail("Unexpected scan type found: {0}", scanType.Key);
-                    }
+                    if (expectedScanCount >= 0)
+                        Assert.AreEqual(expectedScanCount, scanType.Value, "Scan type count mismatch");
+                }
+                else
+                {
+                    Console.WriteLine("Unexpected scan type found: {0}", scanType.Key);
+                    Assert.Fail("Unexpected scan type found: {0}", scanType.Key);
                 }
             }
         }
@@ -720,77 +716,76 @@ namespace RawFileReaderTests
 
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            Console.WriteLine("Scan info for {0}", dataFile.Name);
+            Console.WriteLine(
+                "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18} {19}",
+                "Scan", "MSLevel", "Event",
+                "NumPeaks", "RetentionTime",
+                "LowMass", "HighMass", "TotalIonCurrent",
+                "BasePeakMZ", "BasePeakIntensity",
+                "ParentIonMZ", "ActivationType", "CollisionMode",
+                "IonMode", "IsCentroided", "IsFTMS",
+                "ScanEvents.Count", "StatusLog.Count",
+                "IonInjectionTime", "FilterText");
+
+            var scanCountMS1 = 0;
+            var scanCountMS2 = 0;
+
+            for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
-                Console.WriteLine("Scan info for {0}", dataFile.Name);
-                Console.WriteLine(
-                    "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18} {19}",
-                    "Scan", "MSLevel", "Event",
-                    "NumPeaks", "RetentionTime",
-                    "LowMass", "HighMass", "TotalIonCurrent",
-                    "BasePeakMZ", "BasePeakIntensity",
-                    "ParentIonMZ", "ActivationType", "CollisionMode",
-                    "IonMode", "IsCentroided", "IsFTMS",
-                    "ScanEvents.Count", "StatusLog.Count",
-                    "IonInjectionTime", "FilterText");
+                var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                var scanCountMS1 = 0;
-                var scanCountMS2 = 0;
+                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
-                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                double ionInjectionTime;
+
+                if (scanInfo.TryGetScanEvent("Ion Injection Time (ms)", out var injectionTimeText, true))
                 {
-                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
-
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
-
-                    double ionInjectionTime;
-
-                    if (scanInfo.TryGetScanEvent("Ion Injection Time (ms)", out var injectionTimeText, true))
-                    {
-                        double.TryParse(injectionTimeText, out ionInjectionTime);
-                    }
-                    else
-                    {
-                        ionInjectionTime = 0;
-                    }
-
-                    var scanSummary =
-                        string.Format(
-                            "{0} {1} {2} {3,5} {4:F2} {5,3:0} {6,4:0} {7:0.0E+0} {8,8:F3} {9:0.0E+0} {10,8:F2} {11} {12,5} {13} {14} {15} {16} {17} {18,6:F2} {19}",
-                            scanInfo.ScanNumber, scanInfo.MSLevel, scanInfo.EventNumber,
-                            scanInfo.NumPeaks, scanInfo.RetentionTime,
-                            scanInfo.LowMass, scanInfo.HighMass,
-                            scanInfo.TotalIonCurrent, scanInfo.BasePeakMZ, scanInfo.BasePeakIntensity, scanInfo.ParentIonMZ,
-                            scanInfo.ActivationType, scanInfo.CollisionMode,
-                            scanInfo.IonMode, scanInfo.IsCentroided,
-                            scanInfo.IsFTMS, scanInfo.ScanEvents.Count, scanInfo.StatusLog.Count, ionInjectionTime,
-                            scanInfo.FilterText.Substring(0, 12) + "...");
-
-                    Console.WriteLine(scanSummary);
-
-                    if (scanInfo.MSLevel > 1)
-                        scanCountMS2++;
-                    else
-                        scanCountMS1++;
-
-                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
-                    {
-                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
-                    }
-
-                    if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
-                    {
-                        Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
-                                        "Scan summary mismatch, scan " + scanNumber);
-                    }
+                    double.TryParse(injectionTimeText, out ionInjectionTime);
+                }
+                else
+                {
+                    ionInjectionTime = 0;
                 }
 
-                Console.WriteLine("scanCountMS1={0}", scanCountMS1);
-                Console.WriteLine("scanCountMS2={0}", scanCountMS2);
+                var scanSummary =
+                    string.Format(
+                        "{0} {1} {2} {3,5} {4:F2} {5,3:0} {6,4:0} {7:0.0E+0} {8,8:F3} {9:0.0E+0} {10,8:F2} {11} {12,5} {13} {14} {15} {16} {17} {18,6:F2} {19}",
+                        scanInfo.ScanNumber, scanInfo.MSLevel, scanInfo.EventNumber,
+                        scanInfo.NumPeaks, scanInfo.RetentionTime,
+                        scanInfo.LowMass, scanInfo.HighMass,
+                        scanInfo.TotalIonCurrent, scanInfo.BasePeakMZ, scanInfo.BasePeakIntensity, scanInfo.ParentIonMZ,
+                        scanInfo.ActivationType, scanInfo.CollisionMode,
+                        scanInfo.IonMode, scanInfo.IsCentroided,
+                        scanInfo.IsFTMS, scanInfo.ScanEvents.Count, scanInfo.StatusLog.Count, ionInjectionTime,
+                        scanInfo.FilterText.Substring(0, 12) + "...");
 
-                Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
-                Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+                Console.WriteLine(scanSummary);
+
+                if (scanInfo.MSLevel > 1)
+                    scanCountMS2++;
+                else
+                    scanCountMS1++;
+
+                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
+                {
+                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                }
+
+                if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
+                {
+                    Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
+                        "Scan summary mismatch, scan " + scanNumber);
+                }
             }
+
+            Console.WriteLine("scanCountMS1={0}", scanCountMS1);
+            Console.WriteLine("scanCountMS2={0}", scanCountMS2);
+
+            Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+            Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
         }
 
         [Test]
@@ -809,60 +804,59 @@ namespace RawFileReaderTests
 
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            Console.WriteLine("Examining MRM details in {0}", dataFile.Name);
+
+            var mrmRangeCountsActual = new Dictionary<string, int>();
+
+            for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
-                Console.WriteLine("Examining MRM details in {0}", dataFile.Name);
+                var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                var mrmRangeCountsActual = new Dictionary<string, int>();
+                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
-                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                foreach (var mrmRange in scanInfo.MRMInfo.MRMMassList)
                 {
-                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
+                    var mrmRangeKey =
+                        mrmRange.StartMass.ToString("0.0") + "_" +
+                        mrmRange.CentralMass.ToString("0.0") + "_" +
+                        mrmRange.EndMass.ToString("0.0");
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
-
-                    foreach (var mrmRange in scanInfo.MRMInfo.MRMMassList)
+                    if (mrmRangeCountsActual.TryGetValue(mrmRangeKey, out var observedScanCount))
                     {
-                        var mrmRangeKey =
-                            mrmRange.StartMass.ToString("0.0") + "_" +
-                            mrmRange.CentralMass.ToString("0.0") + "_" +
-                            mrmRange.EndMass.ToString("0.0");
-
-                        if (mrmRangeCountsActual.TryGetValue(mrmRangeKey, out var observedScanCount))
-                        {
-                            mrmRangeCountsActual[mrmRangeKey] = observedScanCount + 1;
-                        }
-                        else
-                        {
-                            mrmRangeCountsActual.Add(mrmRangeKey, 1);
-                        }
+                        mrmRangeCountsActual[mrmRangeKey] = observedScanCount + 1;
                     }
-
-                    Assert.IsTrue(mrmRangeCountsActual.Count == 1, "Found {0} MRM scan ranges; expected to only find 1", mrmRangeCountsActual.Count);
+                    else
+                    {
+                        mrmRangeCountsActual.Add(mrmRangeKey, 1);
+                    }
                 }
 
-                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedMRMInfo))
-                {
-                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
-                }
+                Assert.IsTrue(mrmRangeCountsActual.Count == 1, "Found {0} MRM scan ranges; expected to only find 1", mrmRangeCountsActual.Count);
+            }
 
-                Console.WriteLine("{0,-5} {1,-5} {2}", "Valid", "Count", "MRMScanRange");
+            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedMRMInfo))
+            {
+                Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+            }
 
-                var mrmRangeActual = mrmRangeCountsActual.First();
+            Console.WriteLine("{0,-5} {1,-5} {2}", "Valid", "Count", "MRMScanRange");
 
-                if (expectedMRMInfo.Key == mrmRangeActual.Key)
-                {
-                    var isValid = mrmRangeActual.Value == expectedMRMInfo.Value;
+            var mrmRangeActual = mrmRangeCountsActual.First();
 
-                    Console.WriteLine("{0,-5} {1,5} {2}", isValid, mrmRangeActual.Value, mrmRangeActual.Key);
+            if (expectedMRMInfo.Key == mrmRangeActual.Key)
+            {
+                var isValid = mrmRangeActual.Value == expectedMRMInfo.Value;
 
-                    Assert.AreEqual(expectedMRMInfo.Value, mrmRangeActual.Value, "Scan type count mismatch");
-                }
-                else
-                {
-                    Console.WriteLine("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
-                    Assert.Fail("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
-                }
+                Console.WriteLine("{0,-5} {1,5} {2}", isValid, mrmRangeActual.Value, mrmRangeActual.Key);
+
+                Assert.AreEqual(expectedMRMInfo.Value, mrmRangeActual.Value, "Scan type count mismatch");
+            }
+            else
+            {
+                Console.WriteLine("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
+                Assert.Fail("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
             }
         }
 
@@ -1191,83 +1185,82 @@ namespace RawFileReaderTests
         {
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName, options))
+            using var reader = new XRawFileIO(dataFile.FullName, options);
+
+            for (var iteration = 1; iteration <= 4; iteration++)
             {
-                for (var iteration = 1; iteration <= 4; iteration++)
+                int maxNumberOfPeaks;
+                bool centroidData;
+
+                switch (iteration)
                 {
-                    int maxNumberOfPeaks;
-                    bool centroidData;
+                    case 1:
+                        maxNumberOfPeaks = 0;
+                        centroidData = false;
+                        break;
+                    case 2:
+                        maxNumberOfPeaks = 0;
+                        centroidData = true;
+                        break;
+                    case 3:
+                        maxNumberOfPeaks = 50;
+                        centroidData = false;
+                        break;
+                    default:
+                        maxNumberOfPeaks = 50;
+                        centroidData = true;
+                        break;
+                }
 
-                    switch (iteration)
+                if (iteration == 1)
+                {
+                    Console.WriteLine("Scan data for {0}", dataFile.Name);
+                    Console.WriteLine(
+                        "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-8} {6,-8} {7,-9} {8,-7} {9}",
+                        "Scan", "Max#", "Centroid", "MzCount", "IntCount",
+                        "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+                }
+
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    var dataPointsRead = reader.GetScanData(scanNumber, out var mzList, out var intensityList, maxNumberOfPeaks, centroidData);
+
+                    Assert.IsTrue(dataPointsRead > 0, "GetScanData returned 0 for scan {0}", scanNumber);
+
+                    Assert.AreEqual(mzList.Length, dataPointsRead, "Data count mismatch vs. function return value");
+
+                    var midPoint = (int)(intensityList.Length / 2f);
+
+                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+
+                    var scanSummary =
+                        // "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10:F3} {6,-8:0.0E+0} {7,-10:F3} {8,8:0.0E+0}  {9}"
+                        string.Format(
+                            "{0,5} {1,-3} {2,8} {3,8} {4,8}    {5,8:F3} {6,8:0.0E+0} {7,8:F3} {8,8:0.0E+0}  {9}",
+                            scanNumber, maxNumberOfPeaks, centroidData,
+                            mzList.Length, intensityList.Length,
+                            mzList[0], intensityList[0],
+                            mzList[midPoint], intensityList[midPoint],
+                            scanInfo.FilterText);
+
+                    Console.WriteLine(scanSummary);
+
+                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                     {
-                        case 1:
-                            maxNumberOfPeaks = 0;
-                            centroidData = false;
-                            break;
-                        case 2:
-                            maxNumberOfPeaks = 0;
-                            centroidData = true;
-                            break;
-                        case 3:
-                            maxNumberOfPeaks = 50;
-                            centroidData = false;
-                            break;
-                        default:
-                            maxNumberOfPeaks = 50;
-                            centroidData = true;
-                            break;
+                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
                     }
 
-                    if (iteration == 1)
+                    if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedDataByType))
                     {
-                        Console.WriteLine("Scan data for {0}", dataFile.Name);
-                        Console.WriteLine(
-                            "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-8} {6,-8} {7,-9} {8,-7} {9}",
-                            "Scan", "Max#", "Centroid", "MzCount", "IntCount",
-                            "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
-                    }
-
-                    for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
-                    {
-                        var dataPointsRead = reader.GetScanData(scanNumber, out var mzList, out var intensityList, maxNumberOfPeaks, centroidData);
-
-                        Assert.IsTrue(dataPointsRead > 0, "GetScanData returned 0 for scan {0}", scanNumber);
-
-                        Assert.AreEqual(mzList.Length, dataPointsRead, "Data count mismatch vs. function return value");
-
-                        var midPoint = (int)(intensityList.Length / 2f);
-
-                        var success = reader.GetScanInfo(scanNumber, out var scanInfo);
-
-                        Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
-
-                        var scanSummary =
-                            // "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10:F3} {6,-8:0.0E+0} {7,-10:F3} {8,8:0.0E+0}  {9}"
-                            string.Format(
-                                "{0,5} {1,-3} {2,8} {3,8} {4,8}    {5,8:F3} {6,8:0.0E+0} {7,8:F3} {8,8:0.0E+0}  {9}",
-                                scanNumber, maxNumberOfPeaks, centroidData,
-                                mzList.Length, intensityList.Length,
-                                mzList[0], intensityList[0],
-                                mzList[midPoint], intensityList[midPoint],
-                                scanInfo.FilterText);
-
-                        Console.WriteLine(scanSummary);
-
-                        if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
+                        var keySpec = maxNumberOfPeaks + "_" + centroidData;
+                        if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                         {
-                            Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
-                        }
+                            var observedValue = scanSummary.Substring(22);
 
-                        if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedDataByType))
-                        {
-                            var keySpec = maxNumberOfPeaks + "_" + centroidData;
-                            if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
-                            {
-                                var observedValue = scanSummary.Substring(22);
-
-                                Assert.AreEqual(expectedDataDetails, observedValue,
-                                    "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
-                            }
+                            Assert.AreEqual(expectedDataDetails, observedValue,
+                                "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
                         }
                     }
                 }
@@ -1358,110 +1351,109 @@ namespace RawFileReaderTests
 
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            Console.WriteLine("Scan data for {0}", dataFile.Name);
+            Console.WriteLine(
+                "{0,5} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
+                "Scan", "Max#", "Centroid", "DataCount",
+                "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+
+            for (var iteration = 1; iteration <= 4; iteration++)
             {
-                Console.WriteLine("Scan data for {0}", dataFile.Name);
-                Console.WriteLine(
-                    "{0,5} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
-                    "Scan", "Max#", "Centroid", "DataCount",
-                    "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+                int maxNumberOfPeaks;
+                bool centroidData;
 
-                for (var iteration = 1; iteration <= 4; iteration++)
+                switch (iteration)
                 {
-                    int maxNumberOfPeaks;
-                    bool centroidData;
+                    case 1:
+                        maxNumberOfPeaks = 0;
+                        centroidData = false;
+                        break;
+                    case 2:
+                        maxNumberOfPeaks = 0;
+                        centroidData = true;
+                        break;
+                    case 3:
+                        maxNumberOfPeaks = 50;
+                        centroidData = false;
+                        break;
+                    default:
+                        maxNumberOfPeaks = 50;
+                        centroidData = true;
+                        break;
+                }
 
-                    switch (iteration)
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    var dataPointsRead = reader.GetScanData2D(scanNumber, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
+
+                    Assert.IsTrue(dataPointsRead > 0, "GetScanData2D returned 0 for scan {0}", scanNumber);
+
+                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
+
+                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+
+                    var lastIndex = massIntensityPairs.GetUpperBound(1);
+
+                    int dataCount;
+
+                    if (maxNumberOfPeaks > 0)
                     {
-                        case 1:
-                            maxNumberOfPeaks = 0;
-                            centroidData = false;
-                            break;
-                        case 2:
-                            maxNumberOfPeaks = 0;
-                            centroidData = true;
-                            break;
-                        case 3:
-                            maxNumberOfPeaks = 50;
-                            centroidData = false;
-                            break;
-                        default:
-                            maxNumberOfPeaks = 50;
-                            centroidData = true;
-                            break;
+                        dataCount = maxNumberOfPeaks;
+                        if (dataPointsRead < maxNumberOfPeaks)
+                        {
+                            dataCount = dataPointsRead;
+                        }
+
+                        // Make sure the 2D array has values of 0 for mass and intensity beyond index maxNumberOfPeaks
+                        for (var dataIndex = maxNumberOfPeaks; dataIndex < lastIndex; dataIndex++)
+                        {
+                            if (massIntensityPairs[0, dataIndex] > 0)
+                            {
+                                Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanNumber);
+                                Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
+                            }
+
+                            if (massIntensityPairs[1, dataIndex] > 0)
+                            {
+                                Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanNumber);
+                                Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        dataCount = lastIndex + 1;
                     }
 
-                    for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                    Assert.AreEqual(dataPointsRead, dataCount, "Data count mismatch vs. function return value");
+
+                    var midPoint = (int)(dataCount / 2f);
+
+                    var scanSummary =
+                        string.Format(
+                            "{0,5} {1,3} {2,8} {3,8} {4,8:F3} {5,8:0.0E+0} {6,8:F3} {7,8:0.0E+0}  {8}",
+                            scanNumber, maxNumberOfPeaks, centroidData,
+                            dataCount,
+                            massIntensityPairs[0, 0], massIntensityPairs[1,0],
+                            massIntensityPairs[0, midPoint], massIntensityPairs[1, midPoint],
+                            scanInfo.FilterText);
+
+                    Console.WriteLine(scanSummary);
+
+                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                     {
-                        var dataPointsRead = reader.GetScanData2D(scanNumber, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
+                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                    }
 
-                        Assert.IsTrue(dataPointsRead > 0, "GetScanData2D returned 0 for scan {0}", scanNumber);
-
-                        var success = reader.GetScanInfo(scanNumber, out var scanInfo);
-
-                        Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
-
-                        var lastIndex = massIntensityPairs.GetUpperBound(1);
-
-                        int dataCount;
-
-                        if (maxNumberOfPeaks > 0)
+                    if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedDataByType))
+                    {
+                        var keySpec = maxNumberOfPeaks + "_" + centroidData;
+                        if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                         {
-                            dataCount = maxNumberOfPeaks;
-                            if (dataPointsRead < maxNumberOfPeaks)
-                            {
-                                dataCount = dataPointsRead;
-                            }
-
-                            // Make sure the 2D array has values of 0 for mass and intensity beyond index maxNumberOfPeaks
-                            for (var dataIndex = maxNumberOfPeaks; dataIndex < lastIndex; dataIndex++)
-                            {
-                                if (massIntensityPairs[0, dataIndex] > 0)
-                                {
-                                    Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanNumber);
-                                    Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
-                                }
-
-                                if (massIntensityPairs[1, dataIndex] > 0)
-                                {
-                                    Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanNumber);
-                                    Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            dataCount = lastIndex + 1;
-                        }
-
-                        Assert.AreEqual(dataPointsRead, dataCount, "Data count mismatch vs. function return value");
-
-                        var midPoint = (int)(dataCount / 2f);
-
-                        var scanSummary =
-                            string.Format(
-                                "{0,5} {1,3} {2,8} {3,8} {4,8:F3} {5,8:0.0E+0} {6,8:F3} {7,8:0.0E+0}  {8}",
-                                scanNumber, maxNumberOfPeaks, centroidData,
-                                dataCount,
-                                massIntensityPairs[0, 0], massIntensityPairs[1,0],
-                                massIntensityPairs[0, midPoint], massIntensityPairs[1, midPoint],
-                                scanInfo.FilterText);
-
-                        Console.WriteLine(scanSummary);
-
-                        if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
-                        {
-                            Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
-                        }
-
-                        if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedDataByType))
-                        {
-                            var keySpec = maxNumberOfPeaks + "_" + centroidData;
-                            if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
-                            {
-                                Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
-                                                "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
-                            }
+                            Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
+                                "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
                         }
                     }
                 }
@@ -1504,105 +1496,104 @@ namespace RawFileReaderTests
 
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            Console.WriteLine("Scan data for {0}", dataFile.Name);
+            Console.WriteLine(
+                "{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
+                "Scan", "Max#", "Centroid", "DataCount",
+                "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+
+            for (var iteration = 1; iteration <= 4; iteration++)
             {
-                Console.WriteLine("Scan data for {0}", dataFile.Name);
-                Console.WriteLine(
-                    "{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
-                    "Scan", "Max#", "Centroid", "DataCount",
-                    "FirstMz", "FirstInt", "MidMz", "MidInt", "ScanFilter");
+                int maxNumberOfPeaks;
+                bool centroidData;
 
-                for (var iteration = 1; iteration <= 4; iteration++)
+                switch (iteration)
                 {
-                    int maxNumberOfPeaks;
-                    bool centroidData;
-
-                    switch (iteration)
-                    {
-                        case 1:
-                            maxNumberOfPeaks = 0;
-                            centroidData = false;
-                            break;
-                        case 2:
-                            maxNumberOfPeaks = 0;
-                            centroidData = true;
-                            break;
-                        case 3:
-                            maxNumberOfPeaks = 50;
-                            centroidData = false;
-                            break;
-                        default:
-                            maxNumberOfPeaks = 50;
-                            centroidData = true;
-                            break;
-                    }
-
-                    var dataPointsRead = reader.GetScanDataSumScans(scanStart, scanEnd, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
-
-                    Assert.IsTrue(dataPointsRead > 0, string.Format("GetScanDataSumScans returned 0 summing scans {0} to {1}", scanStart, scanEnd));
-
-                    var success = reader.GetScanInfo(scanStart, out var scanInfo);
-
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
-
-                    var lastIndex = massIntensityPairs.GetUpperBound(1);
-                    int dataCount;
-
-                    if (maxNumberOfPeaks > 0)
-                    {
-                        dataCount = maxNumberOfPeaks;
-
-                        // Make sure the 2D array has values of 0 for mass and intensity beyond index maxNumberOfPeaks
-                        for (var dataIndex = maxNumberOfPeaks; dataIndex < lastIndex; dataIndex++)
-                        {
-                            if (massIntensityPairs[0, dataIndex] > 0)
-                            {
-                                Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanStart);
-                                Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
-                            }
-
-                            if (massIntensityPairs[1, dataIndex] > 0)
-                            {
-                                Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanStart);
-                                Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        dataCount = lastIndex + 1;
-                    }
-
-                    Assert.AreEqual(dataPointsRead, dataCount, "Data count mismatch vs. function return value");
-
-                    var midPoint = (int)(dataCount / 2f);
-
-                    var scanSummary =
-                        string.Format(
-                            "{0} {1,3} {2,8} {3,8} {4,8:F3} {5,8:0.0E+0} {6,8:F3} {7,8:0.0E+0}  {8}",
-                            scanStart, maxNumberOfPeaks, centroidData,
-                            dataCount,
-                            massIntensityPairs[0, 0], massIntensityPairs[1, 0],
-                            massIntensityPairs[0, midPoint], massIntensityPairs[1, midPoint],
-                            scanInfo.FilterText);
-
-                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
-                    {
-                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
-                    }
-
-                    if (expectedDataThisFile.TryGetValue(scanStart, out var expectedDataByType))
-                    {
-                        var keySpec = maxNumberOfPeaks + "_" + centroidData;
-                        if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
-                        {
-                            Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
-                                            "Scan details mismatch, scan " + scanStart + ", keySpec " + keySpec);
-                        }
-                    }
-
-                    Console.WriteLine(scanSummary);
+                    case 1:
+                        maxNumberOfPeaks = 0;
+                        centroidData = false;
+                        break;
+                    case 2:
+                        maxNumberOfPeaks = 0;
+                        centroidData = true;
+                        break;
+                    case 3:
+                        maxNumberOfPeaks = 50;
+                        centroidData = false;
+                        break;
+                    default:
+                        maxNumberOfPeaks = 50;
+                        centroidData = true;
+                        break;
                 }
+
+                var dataPointsRead = reader.GetScanDataSumScans(scanStart, scanEnd, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
+
+                Assert.IsTrue(dataPointsRead > 0, string.Format("GetScanDataSumScans returned 0 summing scans {0} to {1}", scanStart, scanEnd));
+
+                var success = reader.GetScanInfo(scanStart, out var scanInfo);
+
+                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
+
+                var lastIndex = massIntensityPairs.GetUpperBound(1);
+                int dataCount;
+
+                if (maxNumberOfPeaks > 0)
+                {
+                    dataCount = maxNumberOfPeaks;
+
+                    // Make sure the 2D array has values of 0 for mass and intensity beyond index maxNumberOfPeaks
+                    for (var dataIndex = maxNumberOfPeaks; dataIndex < lastIndex; dataIndex++)
+                    {
+                        if (massIntensityPairs[0, dataIndex] > 0)
+                        {
+                            Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanStart);
+                            Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
+                        }
+
+                        if (massIntensityPairs[1, dataIndex] > 0)
+                        {
+                            Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanStart);
+                            Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
+                        }
+                    }
+                }
+                else
+                {
+                    dataCount = lastIndex + 1;
+                }
+
+                Assert.AreEqual(dataPointsRead, dataCount, "Data count mismatch vs. function return value");
+
+                var midPoint = (int)(dataCount / 2f);
+
+                var scanSummary =
+                    string.Format(
+                        "{0} {1,3} {2,8} {3,8} {4,8:F3} {5,8:0.0E+0} {6,8:F3} {7,8:0.0E+0}  {8}",
+                        scanStart, maxNumberOfPeaks, centroidData,
+                        dataCount,
+                        massIntensityPairs[0, 0], massIntensityPairs[1, 0],
+                        massIntensityPairs[0, midPoint], massIntensityPairs[1, midPoint],
+                        scanInfo.FilterText);
+
+                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
+                {
+                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                }
+
+                if (expectedDataThisFile.TryGetValue(scanStart, out var expectedDataByType))
+                {
+                    var keySpec = maxNumberOfPeaks + "_" + centroidData;
+                    if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
+                    {
+                        Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
+                            "Scan details mismatch, scan " + scanStart + ", keySpec " + keySpec);
+                    }
+                }
+
+                Console.WriteLine(scanSummary);
             }
         }
 
@@ -1651,76 +1642,75 @@ namespace RawFileReaderTests
 
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            Console.WriteLine("Scan label data for {0}", dataFile.Name);
+            Console.WriteLine(
+                "{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
+                "Scan", "Count", "Mass", "Intensity",
+                "Resolution", "Baseline", "Noise", "Charge", "ScanFilter");
+
+            for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
-                Console.WriteLine("Scan label data for {0}", dataFile.Name);
-                Console.WriteLine(
-                    "{0} {1,3} {2,8} {3,-8} {4,-8} {5,-8} {6,-8} {7,-8}  {8}",
-                    "Scan", "Count", "Mass", "Intensity",
-                    "Resolution", "Baseline", "Noise", "Charge", "ScanFilter");
+                // List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point
 
-                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                var dataPointsRead = reader.GetScanLabelData(scanNumber, out var ftLabelData);
+
+                if (dataPointsRead == -1)
+                    Assert.AreEqual(0, ftLabelData.Length, "Data count mismatch vs. function return value");
+                else
+                    Assert.AreEqual(dataPointsRead, ftLabelData.Length, "Data count mismatch vs. function return value");
+
+                var success = reader.GetScanInfo(scanNumber, out var scanInfo);
+
+                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
+
+                if (ftLabelData.Length == 0 && scanInfo.IsFTMS)
                 {
-                    // List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point
-
-                    var dataPointsRead = reader.GetScanLabelData(scanNumber, out var ftLabelData);
-
-                    if (dataPointsRead == -1)
-                        Assert.AreEqual(0, ftLabelData.Length, "Data count mismatch vs. function return value");
-                    else
-                        Assert.AreEqual(dataPointsRead, ftLabelData.Length, "Data count mismatch vs. function return value");
-
-                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
-
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
-
-                    if (ftLabelData.Length == 0 && scanInfo.IsFTMS)
-                    {
-                        Assert.Fail("GetScanLabelData returned no data for FTMS scan " + scanNumber);
-                    }
-
-                    string scanSummary;
-
-                    if (ftLabelData.Length == 0)
-                    {
-                        scanSummary = string.Format("{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8} {7,8}  {8}",
-                                scanNumber, ftLabelData.Length,
-                                string.Empty,
-                                string.Empty,
-                                string.Empty,
-                                string.Empty,
-                                string.Empty,
-                                string.Empty,
-                                scanInfo.FilterText);
-                    }
-                    else
-                    {
-                        var midPoint = (int)(ftLabelData.Length / 2f);
-
-                        scanSummary = string.Format("{0} {1,3} {2,8:F3} {3,8:0.0E+0} {4,8:F3} {5,8:F3} {6,8:F3} {7,8:0}  {8}",
-                                scanNumber, ftLabelData.Length,
-                                ftLabelData[midPoint].Mass,
-                                ftLabelData[midPoint].Intensity,
-                                ftLabelData[midPoint].Resolution,
-                                ftLabelData[midPoint].Baseline,
-                                ftLabelData[midPoint].Noise,
-                                ftLabelData[midPoint].Charge,
-                                scanInfo.FilterText);
-                    }
-
-                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
-                    {
-                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
-                    }
-
-                    if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
-                    {
-                        Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
-                                        "Scan summary mismatch, scan " + scanNumber);
-                    }
-
-                    Console.WriteLine(scanSummary);
+                    Assert.Fail("GetScanLabelData returned no data for FTMS scan " + scanNumber);
                 }
+
+                string scanSummary;
+
+                if (ftLabelData.Length == 0)
+                {
+                    scanSummary = string.Format("{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8} {7,8}  {8}",
+                        scanNumber, ftLabelData.Length,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        scanInfo.FilterText);
+                }
+                else
+                {
+                    var midPoint = (int)(ftLabelData.Length / 2f);
+
+                    scanSummary = string.Format("{0} {1,3} {2,8:F3} {3,8:0.0E+0} {4,8:F3} {5,8:F3} {6,8:F3} {7,8:0}  {8}",
+                        scanNumber, ftLabelData.Length,
+                        ftLabelData[midPoint].Mass,
+                        ftLabelData[midPoint].Intensity,
+                        ftLabelData[midPoint].Resolution,
+                        ftLabelData[midPoint].Baseline,
+                        ftLabelData[midPoint].Noise,
+                        ftLabelData[midPoint].Charge,
+                        scanInfo.FilterText);
+                }
+
+                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
+                {
+                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                }
+
+                if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
+                {
+                    Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
+                        "Scan summary mismatch, scan " + scanNumber);
+                }
+
+                Console.WriteLine(scanSummary);
             }
         }
 
@@ -1769,74 +1759,73 @@ namespace RawFileReaderTests
 
             var dataFile = GetRawDataFile(rawFileName);
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            Console.WriteLine("Scan label data for {0}", dataFile.Name);
+            Console.WriteLine(
+                "{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8}  {7}",
+                "Scan", "Count", "Mass", "Intensity",
+                "Resolution", "AccuracyMMU", "AccuracyPPM", "ScanFilter");
+
+            for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
-                Console.WriteLine("Scan label data for {0}", dataFile.Name);
-                Console.WriteLine(
-                    "{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8}  {7}",
-                    "Scan", "Count", "Mass", "Intensity",
-                    "Resolution", "AccuracyMMU", "AccuracyPPM", "ScanFilter");
+                // List of Intensity, Mass, AccuracyMMU, AccuracyPPM, and Resolution for each data point
 
-                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                var dataPointsRead = reader.GetScanPrecisionData(scanNumber, out var massResolutionData);
+
+                if (dataPointsRead == -1)
+                    Assert.AreEqual(0, massResolutionData.Length, "Data count mismatch vs. function return value");
+                else
+                    Assert.AreEqual(dataPointsRead, massResolutionData.Length, "Data count mismatch vs. function return value");
+
+                var success = reader.GetScanInfo(scanNumber, out var scanInfo);
+
+                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
+
+                if (massResolutionData.Length == 0 && scanInfo.IsFTMS)
                 {
-                    // List of Intensity, Mass, AccuracyMMU, AccuracyPPM, and Resolution for each data point
-
-                    var dataPointsRead = reader.GetScanPrecisionData(scanNumber, out var massResolutionData);
-
-                    if (dataPointsRead == -1)
-                        Assert.AreEqual(0, massResolutionData.Length, "Data count mismatch vs. function return value");
-                    else
-                        Assert.AreEqual(dataPointsRead, massResolutionData.Length, "Data count mismatch vs. function return value");
-
-                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
-
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
-
-                    if (massResolutionData.Length == 0 && scanInfo.IsFTMS)
-                    {
-                        Assert.Fail("GetScanPrecisionData returned no data for FTMS scan " + scanNumber);
-                    }
-
-                    string scanSummary;
-
-                    if (massResolutionData.Length == 0)
-                    {
-                        scanSummary = string.Format("{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8}  {7}",
-                                scanNumber, massResolutionData.Length,
-                                string.Empty,
-                                string.Empty,
-                                string.Empty,
-                                string.Empty,
-                                string.Empty,
-                                scanInfo.FilterText);
-                    }
-                    else
-                    {
-                        var midPoint = (int)(massResolutionData.Length / 2f);
-
-                        scanSummary = string.Format("{0} {1,3} {2,8:F3} {3,8:0.0E+0} {4,8:F3} {5,8:F3} {6,8:F3}  {7}",
-                                scanNumber, massResolutionData.Length,
-                                massResolutionData[midPoint].Mass,
-                                massResolutionData[midPoint].Intensity,
-                                massResolutionData[midPoint].Resolution,
-                                massResolutionData[midPoint].AccuracyMMU,
-                                massResolutionData[midPoint].AccuracyPPM,
-                                scanInfo.FilterText);
-                    }
-
-                    if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
-                    {
-                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
-                    }
-
-                    if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
-                    {
-                        Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
-                                        "Scan summary mismatch, scan " + scanNumber);
-                    }
-
-                    Console.WriteLine(scanSummary);
+                    Assert.Fail("GetScanPrecisionData returned no data for FTMS scan " + scanNumber);
                 }
+
+                string scanSummary;
+
+                if (massResolutionData.Length == 0)
+                {
+                    scanSummary = string.Format("{0} {1,3} {2,8} {3,8} {4,8} {5,8} {6,8}  {7}",
+                        scanNumber, massResolutionData.Length,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        scanInfo.FilterText);
+                }
+                else
+                {
+                    var midPoint = (int)(massResolutionData.Length / 2f);
+
+                    scanSummary = string.Format("{0} {1,3} {2,8:F3} {3,8:0.0E+0} {4,8:F3} {5,8:F3} {6,8:F3}  {7}",
+                        scanNumber, massResolutionData.Length,
+                        massResolutionData[midPoint].Mass,
+                        massResolutionData[midPoint].Intensity,
+                        massResolutionData[midPoint].Resolution,
+                        massResolutionData[midPoint].AccuracyMMU,
+                        massResolutionData[midPoint].AccuracyPPM,
+                        scanInfo.FilterText);
+                }
+
+                if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
+                {
+                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                }
+
+                if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
+                {
+                    Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
+                        "Scan summary mismatch, scan " + scanNumber);
+                }
+
+                Console.WriteLine(scanSummary);
             }
         }
 
@@ -1893,47 +1882,46 @@ namespace RawFileReaderTests
             var eventsToCheck = (from item in expectedEventsThisFile select item.Key.Item1).Distinct().ToList();
             var eventCountsActual = new Dictionary<Tuple<string, string>, int>();
 
-            using (var reader = new XRawFileIO(dataFile.FullName))
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
-                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                var success = reader.GetScanInfo(scanNumber, out var scanInfo);
+
+                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+
+                foreach (var eventName in eventsToCheck)
                 {
-                    var success = reader.GetScanInfo(scanNumber, out var scanInfo);
+                    scanInfo.TryGetScanEvent(eventName, out var eventValue);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
-
-                    foreach (var eventName in eventsToCheck)
+                    var eventKey = new Tuple<string, string>(eventName, eventValue);
+                    if (eventCountsActual.TryGetValue(eventKey, out var scanCount))
                     {
-                        scanInfo.TryGetScanEvent(eventName, out var eventValue);
-
-                        var eventKey = new Tuple<string, string>(eventName, eventValue);
-                        if (eventCountsActual.TryGetValue(eventKey, out var scanCount))
-                        {
-                            eventCountsActual[eventKey] = scanCount + 1;
-                        }
-                        else
-                        {
-                            eventCountsActual.Add(eventKey, 1);
-                        }
-                    }
-                }
-
-                Console.WriteLine("{0,-5} {1,5} {2}", "Valid", "Count", "Event");
-
-                foreach (var observedEvent in (from item in eventCountsActual orderby item.Key select item))
-                {
-                    if (expectedEventsThisFile.TryGetValue(observedEvent.Key, out var expectedScanCount))
-                    {
-                        var isValid = observedEvent.Value == expectedScanCount;
-
-                        Console.WriteLine("{0,-5} {1,5} {2} {3}", isValid, observedEvent.Value, observedEvent.Key.Item1, observedEvent.Key.Item2);
-
-                        Assert.AreEqual(expectedScanCount, observedEvent.Value, "Event count mismatch");
+                        eventCountsActual[eventKey] = scanCount + 1;
                     }
                     else
                     {
-                        Console.WriteLine("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
-                        Assert.Fail("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
+                        eventCountsActual.Add(eventKey, 1);
                     }
+                }
+            }
+
+            Console.WriteLine("{0,-5} {1,5} {2}", "Valid", "Count", "Event");
+
+            foreach (var observedEvent in (from item in eventCountsActual orderby item.Key select item))
+            {
+                if (expectedEventsThisFile.TryGetValue(observedEvent.Key, out var expectedScanCount))
+                {
+                    var isValid = observedEvent.Value == expectedScanCount;
+
+                    Console.WriteLine("{0,-5} {1,5} {2} {3}", isValid, observedEvent.Value, observedEvent.Key.Item1, observedEvent.Key.Item2);
+
+                    Assert.AreEqual(expectedScanCount, observedEvent.Value, "Event count mismatch");
+                }
+                else
+                {
+                    Console.WriteLine("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
+                    Assert.Fail("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
                 }
             }
         }
