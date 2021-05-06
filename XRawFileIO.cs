@@ -47,8 +47,9 @@ namespace ThermoRawFileReader
     [CLSCompliant(true)]
     public class XRawFileIO : EventNotifier, IDisposable
     {
-        // Ignore Spelling: Shofstahl, Bryson, cnl, msx, Biofilm, Smeagol, Jup, Ss, A-Za-z, sa, EThcD, ETciD
-        // Ignore Spelling: Wideband, Raptor, cid, multipole, mrm, sizeof, centroiding, Subtractor, struct
+        // Ignore Spelling: A-Za-z, Biofilm, Bryson, centroided, centroiding, cid, cnl, ETciD, EThcD, Jup
+        // Ignore Spelling: mrm, msx, multipole, Raptor, sa, Shofstahl, sizeof, Smeagol, Ss, struct, Subtractor, Wideband
+        // Ignore Spelling: Exactive, Lumos, Orbitrap
 
         #region "Constants"
 
@@ -570,7 +571,11 @@ namespace ThermoRawFileReader
         /// <param name="filterText"></param>
         /// <param name="parentIonMz">Parent ion m/z (output)</param>
         /// <returns>True if success</returns>
-        /// <remarks>If multiple parent ion m/z values are listed then parentIonMz will have the last one.  However, if the filter text contains "Full msx" then parentIonMz will have the first parent ion listed</remarks>
+        /// <remarks>
+        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
+        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
+        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// </remarks>
         /// <remarks>
         /// <para>
         /// This was created for use in other programs that only need the parent ion m/z, and no other functions from ThermoRawFileReader.
@@ -615,7 +620,11 @@ namespace ThermoRawFileReader
         /// <param name="msLevel">MSLevel (output)</param>
         /// <param name="collisionMode">Collision mode (output)</param>
         /// <returns>True if success</returns>
-        /// <remarks>If multiple parent ion m/z values are listed then parentIonMz will have the last one.  However, if the filter text contains "Full msx" then parentIonMz will have the first parent ion listed</remarks>
+        /// <remarks>
+        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
+        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
+        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// </remarks>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz, out int msLevel, out string collisionMode)
         {
             return ExtractParentIonMZFromFilterText(filterText, out parentIonMz, out msLevel, out collisionMode, out _);
@@ -630,7 +639,11 @@ namespace ThermoRawFileReader
         /// <param name="collisionMode">Collision mode (output)</param>
         /// <param name="parentIons">Output: parent ion list</param>
         /// <returns>True if success</returns>
-        /// <remarks>If multiple parent ion m/z values are listed then parentIonMz will have the last one.  However, if the filter text contains "Full msx" then parentIonMz will have the first parent ion listed</remarks>
+        /// <remarks>
+        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
+        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
+        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// </remarks>
         public static bool ExtractParentIonMZFromFilterText(
             string filterText,
             out double parentIonMz,
@@ -684,7 +697,7 @@ namespace ThermoRawFileReader
                 // or, grab 756.98 out of "756.98@etd100.00 [50.00-2000.00]"
                 // or, grab 748.371 out of "748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515"
                 //
-                // However, if using multiplex ms/ms (msx) then we return the first parent ion listed
+                // However, if using multiplex ms/ms (msx),  we return the first parent ion listed
 
                 // For safety, remove any text after a square bracket
                 var bracketIndex = mzText.IndexOf('[');

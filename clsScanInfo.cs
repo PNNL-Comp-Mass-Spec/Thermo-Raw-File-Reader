@@ -10,7 +10,7 @@ namespace ThermoRawFileReader
     [CLSCompliant(true)]
     public class clsScanInfo
     {
-        // Ignore Spelling: EThcD, ETciD, frag
+        // Ignore Spelling: EThcD, ETciD, frag, Lumos, Orbitrap, Q-Exactive
 
         #region "Properties"
 
@@ -102,7 +102,7 @@ namespace ThermoRawFileReader
         public string FilterText { get; set; }
 
         /// <summary>
-        /// Parent ion m/z
+        /// Parent ion m/z (aka precursor m/z)
         /// </summary>
         public double ParentIonMZ { get; set; }
 

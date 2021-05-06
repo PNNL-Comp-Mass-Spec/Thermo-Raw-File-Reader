@@ -13,7 +13,7 @@ namespace Test_ThermoRawFileReader
 {
     public static class Program
     {
-        // Ignore Spelling: Angiotensin, centroiding, cid, hcd, etd, pqd, cnl, sa, sid, msx, Chrom, QC_Mam
+        // Ignore Spelling: Angiotensin, centroiding, Chrom, cid, cnl, etd, hcd, msx, pqd, QC_Mam, sa, sid
 
         private const string PROGRAM_DATE = "November 4, 2020";
 
