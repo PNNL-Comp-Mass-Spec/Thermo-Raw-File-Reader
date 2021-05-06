@@ -172,7 +172,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// File info for the currently loaded .raw file
         /// </summary>
-        public RawFileInfo FileInfo { get; } = new RawFileInfo();
+        public RawFileInfo FileInfo { get; } = new();
 
         /// <summary>
         /// Thermo reader options
