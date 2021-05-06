@@ -15,7 +15,7 @@ namespace Test_ThermoRawFileReader
     {
         // Ignore Spelling: Angiotensin, centroiding, Chrom, cid, cnl, etd, hcd, msx, pqd, QC_Mam, sa, sid
 
-        private const string PROGRAM_DATE = "November 4, 2020";
+        private const string PROGRAM_DATE = "April 29, 2021";
 
         private const string DEFAULT_FILE_PATH = @"..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw";
 
@@ -887,7 +887,7 @@ namespace Test_ThermoRawFileReader
                     }
 
                     if (string.IsNullOrWhiteSpace(mostCommonValue))
-                        Console.WriteLine("{0,-38} {1,-10} {2,-20} {3:N0}", eventName, valueCount, "whitespace", occurrenceCount);
+                        Console.WriteLine("{0,-38} {1,-10} {2,-20} {3:N0}", eventName, valueCount, "empty string", occurrenceCount);
                     else
                         Console.WriteLine("{0,-38} {1,-10} {2,-20} {3:N0}", eventName, valueCount, mostCommonValue, occurrenceCount);
                 }
