@@ -46,7 +46,9 @@ namespace ThermoRawFileReader
         private static readonly Regex mMassRanges = new(MASS_RANGES_REGEX, RegexOptions.Compiled);
 
         private static readonly Regex mFindParentIon = new(PARENT_ION_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private static readonly Regex mFindParentIonOnlyNonMsx = new(PARENT_ION_ONLY_NON_MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private static readonly Regex mFindParentIonOnlyMsx = new(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private static readonly Regex mFindSAFullMS = new(SA_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -143,13 +145,9 @@ namespace ThermoRawFileReader
         /// </remarks>
         /// <remarks>
         /// <para>
-        /// This was created for use in other programs that only need the parent ion m/z, and no other functions from ThermoRawFileReader.
+        /// This method was created for use in other programs that only need the parent ion m/z, and no other functions from ThermoRawFileReader.
         /// Other projects that use this:
         ///      PHRPReader (https://github.com/PNNL-Comp-Mass-Spec/PHRP)
-        /// </para>
-        /// <para>
-        /// To copy this, take the code from this function, plus the RegEx strings <see cref="PARENT_ION_ONLY_NON_MSX_REGEX"/> and <see cref="PARENT_ION_ONLY_MSX_REGEX"/>,
-        /// with their uses in <see cref="mFindParentIonOnlyNonMsx"/> and <see cref="mFindParentIonOnlyMsx"/>
         /// </para>
         /// </remarks>
         public static bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
