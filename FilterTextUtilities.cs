@@ -152,9 +152,10 @@ namespace ThermoRawFileReader
         /// with their uses in <see cref="mFindParentIonOnlyNonMsx"/> and <see cref="mFindParentIonOnlyMsx"/>
         /// </para>
         /// </remarks>
-        public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz)
+        public static bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
         {
             Regex matcher;
+
             if (filterText.IndexOf("msx", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 matcher = mFindParentIonOnlyMsx;
@@ -165,6 +166,7 @@ namespace ThermoRawFileReader
             }
 
             var match = matcher.Match(filterText);
+
             if (match.Success)
             {
                 var parentIonMzText = match.Groups["ParentMZ"].Value;

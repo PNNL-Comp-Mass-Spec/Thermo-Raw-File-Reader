@@ -470,7 +470,7 @@ namespace ThermoRawFileReader
         /// </remarks>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz)
         {
-            return FilterTextUtilities.ExtractParentIonMZFromFilterText(filterText, out parentIonMz);
+            return FilterTextUtilities.ExtractParentIonMzFromFilterText(filterText, out parentIonMz);
         }
 
         /// <summary>
