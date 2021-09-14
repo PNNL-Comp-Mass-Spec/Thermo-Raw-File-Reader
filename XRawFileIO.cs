@@ -47,10 +47,13 @@ namespace ThermoRawFileReader
     [CLSCompliant(true)]
     public class XRawFileIO : EventNotifier, IDisposable
     {
+        // ReSharper disable CommentTypo
+        
         // Ignore Spelling: Biofilm, Bryson, centroided, centroiding, cid, cnl, ETciD, EThcD, Jup
         // Ignore Spelling: mrm, msx, multipole, Raptor, sa, Shofstahl, sizeof, Smeagol, struct, Subtractor, Wideband
         // Ignore Spelling: Exactive, Lumos, Orbitrap
 
+        // ReSharper restore CommentTypo
 
         // Note that each of these strings has a space at the end; this is important to avoid matching inappropriate text in the filter string
         private const string MS_ONLY_C_TEXT = " c ms ";
