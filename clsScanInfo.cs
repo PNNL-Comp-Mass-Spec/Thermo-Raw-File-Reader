@@ -12,8 +12,6 @@ namespace ThermoRawFileReader
     {
         // Ignore Spelling: EThcD, ETciD, frag, Lumos, Orbitrap, Q-Exactive
 
-        #region "Properties"
-
         /// <summary>
         /// UTC Time that this scan info was cached
         /// </summary>
@@ -222,10 +220,6 @@ namespace ThermoRawFileReader
         /// <remarks>Includes blank events that separate log sections</remarks>
         public List<KeyValuePair<string, string>> StatusLog { get; }
 
-        #endregion
-
-        #region "Constructor and public methods"
-
         /// <summary>
         /// Constructor with only scan number
         /// </summary>
@@ -308,10 +302,6 @@ namespace ThermoRawFileReader
             return "Scan " + ScanNumber + ": " + FilterText;
         }
 
-        #endregion
-
-        #region "Private methods"
-
         private void StoreParallelStrings(
             ICollection<KeyValuePair<string, string>> targetList,
             IList<string> names,
@@ -339,6 +329,5 @@ namespace ThermoRawFileReader
                 }
             }
         }
-        #endregion
     }
 }

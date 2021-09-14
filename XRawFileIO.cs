@@ -51,7 +51,6 @@ namespace ThermoRawFileReader
         // Ignore Spelling: mrm, msx, multipole, Raptor, sa, Shofstahl, sizeof, Smeagol, struct, Subtractor, Wideband
         // Ignore Spelling: Exactive, Lumos, Orbitrap
 
-        #region "Constants"
 
         // Note that each of these strings has a space at the end; this is important to avoid matching inappropriate text in the filter string
         private const string MS_ONLY_C_TEXT = " c ms ";
@@ -80,10 +79,6 @@ namespace ThermoRawFileReader
         private const string COLLISION_SPEC_REGEX = "(?<MzValue> [0-9.]+)@";
 
         private const string MZ_WITHOUT_COLLISION_ENERGY = "ms[2-9](?<MzValue> [0-9.]+)$";
-
-        #endregion
-
-        #region "Class wide Variables"
 
         /// <summary>
         /// Maximum size of the scan info cache
@@ -122,10 +117,6 @@ namespace ThermoRawFileReader
         private static readonly Regex mCollisionSpecs = new(COLLISION_SPEC_REGEX, RegexOptions.Compiled);
 
         private static readonly Regex mMzWithoutCE = new(MZ_WITHOUT_COLLISION_ENERGY, RegexOptions.Compiled);
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// File info for the currently loaded .raw file
@@ -189,10 +180,6 @@ namespace ThermoRawFileReader
         /// </summary>
         public bool TraceMode { get; set; }
 
-        #endregion
-
-        #region "Events and Event Handlers"
-
         /// <summary>
         /// Report an error message to the error event handler
         /// </summary>
@@ -216,8 +203,6 @@ namespace ThermoRawFileReader
         {
             UpdateReaderOptions();
         }
-
-        #endregion
 
         /// <summary>
         /// Constructor
@@ -2588,8 +2573,6 @@ namespace ThermoRawFileReader
             CloseRawFile();
         }
 
-        #region "Obsolete Functions"
-
         /// <summary>
         /// Return unnormalized collision energies via call IScanFilter.GetEnergy
         /// </summary>
@@ -2626,7 +2609,5 @@ namespace ThermoRawFileReader
 
             return collisionEnergies;
         }
-
-        #endregion
     }
 }

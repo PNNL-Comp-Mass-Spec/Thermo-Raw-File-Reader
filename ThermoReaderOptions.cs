@@ -6,8 +6,6 @@ namespace ThermoRawFileReader
     /// </summary>
     public class ThermoReaderOptions
     {
-        #region "Events"
-
         /// <summary>
         /// Delegate method for OptionsUpdatedEvent
         /// </summary>
@@ -19,15 +17,7 @@ namespace ThermoRawFileReader
         /// </summary>
         public event OptionsUpdatedEventHandler OptionsUpdatedEvent;
 
-        #endregion
-
-        #region "Member variables"
-
         private bool mIncludeReferenceAndExceptionData;
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// When true, include reference and exception peaks when obtaining mass spec data
@@ -64,8 +54,5 @@ namespace ThermoRawFileReader
         /// Load MS Tune Information when calling OpenRawFile
         /// </summary>
         public bool LoadMSTuneInfo { get; set; } = true;
-
-        #endregion
-
     }
 }
