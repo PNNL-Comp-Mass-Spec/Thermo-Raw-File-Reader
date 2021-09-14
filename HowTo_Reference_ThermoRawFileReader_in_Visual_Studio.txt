@@ -1,7 +1,7 @@
 1) Create folder C:\NuPkg
 2) Copy the desired .nupkg file to that folder, for example:
-	4.0.26\Windows_MacOS\ThermoFisher.CommonCore.RawFileReader.4.0.26.nupkg
-3) In visual studio, go to Tools->NuGet Package Manager->Package Manager Settings
+	4.0.89\Windows_MacOS\ThermoFisher.CommonCore.RawFileReader.4.0.89.nupkg
+3) In Visual Studio, go to Tools->NuGet Package Manager->Package Manager Settings
 4) Choose Package Sources
 5) Click the green Plus sign to add a new source
 6) Name it "Local Packages" and define the source as C:\NuPkg
