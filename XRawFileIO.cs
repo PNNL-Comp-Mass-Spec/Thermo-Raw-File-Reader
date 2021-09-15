@@ -39,6 +39,7 @@ using ThermoFisher.CommonCore.Data.FilterEnums;
 // Copyright 2018 Battelle Memorial Institute
 
 // ReSharper disable UnusedMember.Global
+
 namespace ThermoRawFileReader
 {
     /// <summary>
@@ -48,7 +49,7 @@ namespace ThermoRawFileReader
     public class XRawFileIO : EventNotifier, IDisposable
     {
         // ReSharper disable CommentTypo
-        
+
         // Ignore Spelling: Biofilm, Bryson, centroided, centroiding, cid, cnl, ETciD, EThcD, Jup
         // Ignore Spelling: mrm, msx, multipole, Raptor, sa, Shofstahl, sizeof, Smeagol, struct, Subtractor, Wideband
         // Ignore Spelling: Exactive, Lumos, Orbitrap

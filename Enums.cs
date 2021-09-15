@@ -1,6 +1,7 @@
 ﻿using System;
 
 // ReSharper disable UnusedMember.Global
+
 namespace ThermoRawFileReader
 {
     /// <summary>
