@@ -1,0 +1,4 @@
+# Jekyll configuration
+name: Thermo-Raw-File-Reader
+description: The Thermo Raw File Reader is a .NET DLL that demonstrates how to read Thermo-Finnigan .Raw files using Thermo's MS File Reader.
+url: https://pnnl-comp-mass-spec.github.io/Thermo-Raw-File-Reader/
