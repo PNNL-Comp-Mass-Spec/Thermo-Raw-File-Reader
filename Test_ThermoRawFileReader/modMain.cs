@@ -15,7 +15,7 @@ namespace Test_ThermoRawFileReader
     {
         // Ignore Spelling: Angiotensin, centroiding, Chrom, cid, cnl, etd, hcd, msx, pqd, QC_Mam, sa, sid
 
-        private const string PROGRAM_DATE = "June 10, 2021";
+        private const string PROGRAM_DATE = "October 8, 2021";
 
         private const string DEFAULT_FILE_PATH = @"..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw";
 
@@ -414,7 +414,7 @@ namespace Test_ThermoRawFileReader
             Console.WriteLine();
 
             Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov");
-            Console.WriteLine("Website: https://omics.pnl.gov or https://panomics.pnnl.gov/");
+            Console.WriteLine("Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics");
             Console.WriteLine();
 
             // Delay for 1.5 seconds in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
