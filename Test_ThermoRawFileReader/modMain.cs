@@ -409,7 +409,7 @@ namespace Test_ThermoRawFileReader
             Console.WriteLine();
             Console.WriteLine("Use /Trace to display additional debug messages");
             Console.WriteLine();
-            Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012");
+            Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)");
             Console.WriteLine("Version: " + GetAppVersion());
             Console.WriteLine();
 
