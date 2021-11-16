@@ -16,7 +16,8 @@ namespace ThermoRawFileReader
         // It also matches SRM ms2
         // It also matches CRM ms3
         // It also matches Full msx ms2 (multiplexed parent ion selection, introduced with the Q-Exactive)
-        private const string MS2_REGEX = "(?<ScanMode> p|Full|SRM|CRM|Full msx) ms(?<MSLevel>[2-9]|[1-9][0-9]) ";
+        // We're not including SIM, Q1MS, or Q3MS in this RegEx since those are checked for separately (see the MRM_ constants in class XRawFileIO)
+        private const string MS2_REGEX = "(?<ScanMode> p|Full|SRM|CRM|Full msx|Z) ms(?<MSLevel>[2-9]|[1-9][0-9]) ";
 
         private const string MASS_LIST_REGEX = "\\[[0-9.]+-[0-9.]+.*\\]";
 
