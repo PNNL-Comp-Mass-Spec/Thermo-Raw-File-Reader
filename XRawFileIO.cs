@@ -2090,8 +2090,11 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Gets the scan label data for an FTMS-tagged scan
+        /// Gets the scan label data for an FTMS-tagged scan (from an Orbitrap, Q-Exactive, Lumos, or any other high resolution instrument)
         /// </summary>
+        /// <remarks>
+        /// Output parameter ftLabelData will have the centroided spectrum, where each data point includes mass (m/z), intensity, and charge
+        /// </remarks>
         /// <param name="scan">Scan number</param>
         /// <param name="ftLabelData">List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point</param>
         /// <returns>The number of data points, or -1 if an error</returns>
