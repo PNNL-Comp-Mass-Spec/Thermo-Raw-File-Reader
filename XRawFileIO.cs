@@ -1858,8 +1858,8 @@ namespace ThermoRawFileReader
                 dataCount = data.Masses.Length;
                 if (dataCount <= 0)
                 {
-                    mzList = new double[0];
-                    intensityList = new double[0];
+                    mzList = Array.Empty<double>();
+                    intensityList = Array.Empty<double>();
                     return 0;
                 }
 
@@ -1870,8 +1870,8 @@ namespace ThermoRawFileReader
             }
             catch
             {
-                mzList = new double[0];
-                intensityList = new double[0];
+                mzList = Array.Empty<double>();
+                intensityList = Array.Empty<double>();
                 dataCount = 0;
 
                 var error = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
@@ -2115,7 +2115,7 @@ namespace ThermoRawFileReader
             {
                 if (mXRawFile == null)
                 {
-                    ftLabelData = new FTLabelInfoType[0];
+                    ftLabelData = Array.Empty<FTLabelInfoType>();
                     return -1;
                 }
 
@@ -2123,7 +2123,7 @@ namespace ThermoRawFileReader
                 {
                     var msg = "Scan " + scan + " is not an FTMS scan; function GetScanLabelData cannot be used with this scan";
                     RaiseWarningMessage(msg);
-                    ftLabelData = new FTLabelInfoType[0];
+                    ftLabelData = Array.Empty<FTLabelInfoType>();
                     return -1;
                 }
 
@@ -2157,7 +2157,7 @@ namespace ThermoRawFileReader
                 }
                 else
                 {
-                    ftLabelData = new FTLabelInfoType[0];
+                    ftLabelData = Array.Empty<FTLabelInfoType>();
                 }
 
                 return dataCount;
@@ -2173,7 +2173,7 @@ namespace ThermoRawFileReader
                 RaiseErrorMessage(msg, ex);
             }
 
-            ftLabelData = new FTLabelInfoType[0];
+            ftLabelData = Array.Empty<FTLabelInfoType>();
             return -1;
         }
 
@@ -2241,7 +2241,7 @@ namespace ThermoRawFileReader
             {
                 if (mXRawFile == null)
                 {
-                    massResolutionData = new MassPrecisionInfoType[0];
+                    massResolutionData = Array.Empty<MassPrecisionInfoType>();
                     return -1;
                 }
 
@@ -2249,7 +2249,7 @@ namespace ThermoRawFileReader
                 {
                     var msg = "Scan " + scan + " is not an FTMS scan; function GetScanLabelData cannot be used with this scan";
                     RaiseWarningMessage(msg);
-                    massResolutionData = new MassPrecisionInfoType[0];
+                    massResolutionData = Array.Empty<MassPrecisionInfoType>();
                     return -1;
                 }
 
@@ -2284,7 +2284,7 @@ namespace ThermoRawFileReader
                     return dataCount;
                 }
 
-                massResolutionData = new MassPrecisionInfoType[0];
+                massResolutionData = Array.Empty<MassPrecisionInfoType>();
                 return 0;
             }
             catch (AccessViolationException)
@@ -2298,7 +2298,7 @@ namespace ThermoRawFileReader
                 RaiseErrorMessage(msg, ex);
             }
 
-            massResolutionData = new MassPrecisionInfoType[0];
+            massResolutionData = Array.Empty<MassPrecisionInfoType>();
             return -1;
         }
 
