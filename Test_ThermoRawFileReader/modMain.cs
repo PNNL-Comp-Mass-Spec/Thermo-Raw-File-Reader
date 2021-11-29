@@ -666,9 +666,9 @@ namespace Test_ThermoRawFileReader
                     var dataCount = reader.GetScanLabelData(scanNum, out var ftLabelData);
 
                     Console.WriteLine();
-                    Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", "Mass", "Intensity", "Resolution", "Baseline", "Noise", "Charge");
+                    Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", "Mass (m/z)", "Intensity", "Resolution", "Baseline", "Noise", "Charge");
 
-                    for (var i = 0; i <= dataCount - 1; i += 50)
+                    for (var i = 0; i <= dataCount - 1; i++)
                     {
                         Console.WriteLine("{0,12:F3}{1,12:0}{2,12:0}{3,12:F1}{4,12:0}{5,12:0}",
                             ftLabelData[i].Mass,
@@ -677,6 +677,11 @@ namespace Test_ThermoRawFileReader
                             ftLabelData[i].Baseline,
                             ftLabelData[i].Noise,
                             ftLabelData[i].Charge);
+
+                        if (i > 9)
+                        {
+                            i += dataCount / 10;
+                        }
                     }
 
                     dataCount = reader.GetScanPrecisionData(scanNum, out var ftPrecisionData);
