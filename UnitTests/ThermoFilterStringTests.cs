@@ -116,6 +116,7 @@ namespace RawFileReaderTests
         [TestCase("FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]    ", 2, "712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]")]
         [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]   ", 2, "1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]")]
         [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]   ", 2, "1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]")]
+        [TestCase("ITMS + c NSI d Z ms3 640.9140@cid35.00 532.3870@hcd45.00 [100.0000-150.0000]     ", 3, "640.9140@cid35.00 532.3870@hcd45.00 [100.0000-150.0000]")]
         [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", 2, "748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]")]
 
         public void ExtractMSLevel(string filterText, int expectedMSLevel, string expectedMzText)
@@ -301,6 +302,7 @@ namespace RawFileReaderTests
         [TestCase("+ c d Full ms2 1013.32@cid45.00 [265.00-2000.00]                                                                             ", "1013.32", 2, "cid")]
         [TestCase("FTMS - p NSI SIM ms [330.00-380.00]                                                                                          ", "0", 1, "")]
         [TestCase("ITMS + p NSI Full ms2 1155.10@cid10.00 [315.00-2000.00]                                                                      ", "1155.10", 2, "cid")]
+        [TestCase("ITMS + c NSI d Z ms3 640.9140@cid35.00 532.3870@hcd45.00 [100.0000-150.0000]                                                 ", "640.9140, 532.3870!", 3, "hcd")]
         public void ExtractParentIonMZFromFilterText(string filterText, string expectedParentIons, int expectedMSLevel, string expectedCollisionMode)
         {
             var success = XRawFileIO.ExtractParentIonMZFromFilterText(filterText, out var parentIonMZ, out var msLevel, out var collisionMode, out var actualParentIons);
@@ -506,6 +508,7 @@ namespace RawFileReaderTests
         [TestCase("+ c d Full ms2 1013.32@cid45.00 [265.00-2000.00]                                                                             ", "1013.32")]
         [TestCase("FTMS - p NSI SIM ms [330.00-380.00]                                                                                          ", "0")]
         [TestCase("ITMS + p NSI Full ms2 1155.10@cid10.00 [315.00-2000.00]                                                                      ", "1155.10")]
+        [TestCase("ITMS + c NSI d Z ms3 640.9140@cid35.00 532.3870@hcd45.00 [100.0000-150.0000]                                                 ", "640.9140, 532.3870!")]
         public void ExtractParentIonMZOnlyFromFilterText(string filterText, string expectedParentIons)
         {
             const int msLevel = 0;
@@ -551,6 +554,7 @@ namespace RawFileReaderTests
         [TestCase("+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]             ", "+ c NSI SRM ms2 0@cid15.00")]
         [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", "+ c NSI SRM ms2")]
         [TestCase("FTMS + p NSI SIM msx ms [575.0000-625.0000]                                    ", "FTMS + p NSI SIM msx ms")]
+        [TestCase("ITMS + c NSI d Z ms3 640.9140@cid35.00 532.3870@hcd45.00 [100.0000-150.0000]   ", "ITMS + c NSI d Z ms3 0@cid35.00 0@hcd45.00")]
         public void TestGenericScanFilter(string filterText, string expectedResult)
         {
             var genericFilterResult = XRawFileIO.MakeGenericThermoScanFilter(filterText);
