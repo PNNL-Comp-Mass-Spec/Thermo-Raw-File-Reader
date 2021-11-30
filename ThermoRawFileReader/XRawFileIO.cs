@@ -780,13 +780,16 @@ namespace ThermoRawFileReader
                     }
                     catch (AccessViolationException)
                     {
-                        var msg = "Unable to load data for scan " + scanNumber + "; possibly a corrupt .Raw file";
-                        RaiseWarningMessage(msg);
+                        RaiseWarningMessage(string.Format(
+                            "Unable to load data for scan {0} in GetChromatogramData2D; possibly a corrupt .Raw file", scan));
                     }
                     catch (Exception ex)
                     {
-                        var msg = "Unable to load data for scan " + scanNumber + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                        RaiseErrorMessage(msg, ex);
+                        RaiseErrorMessage(
+                            string.Format(
+                                "Unable to load data for scan {0} in GetChromatogramData2D: {1}; possibly a corrupt .Raw file",
+                                scan, ex.Message),
+                            ex);
                     }
                 }
             }
@@ -1596,7 +1599,7 @@ namespace ThermoRawFileReader
                 var methodCount = mXRawFile.InstrumentMethodsCount;
 
                 if (TraceMode)
-                    OnDebugEvent(string.Format("File has {0} methods", methodCount));
+                    OnDebugEvent("File has {0} methods", methodCount);
 
                 for (var methodIndex = 0; methodIndex < methodCount; methodIndex++)
                 {
@@ -1879,8 +1882,8 @@ namespace ThermoRawFileReader
                 intensityList = Array.Empty<double>();
                 dataCount = 0;
 
-                var error = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
-                RaiseWarningMessage(error);
+                RaiseWarningMessage(string.Format(
+                    "Unable to load data for scan {0} in GetScanData; possibly a corrupt .Raw file", scan));
             }
 
             return dataCount;
@@ -1952,8 +1955,11 @@ namespace ThermoRawFileReader
             }
             catch (Exception ex)
             {
-                var msg = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(msg, ex);
+                RaiseErrorMessage(
+                    string.Format(
+                        "Unable to load data for scan {0} in GetScanData2D: {1}; possibly a corrupt .Raw file",
+                        scan, ex.Message),
+                    ex);
             }
 
             massIntensityPairs = new double[0, 0];
@@ -1980,7 +1986,8 @@ namespace ThermoRawFileReader
 
             if (!GetScanInfo(scan, out var scanInfo))
             {
-                throw new Exception("Cannot retrieve ScanInfo from cache for scan " + scan + "; cannot retrieve scan data");
+                throw new Exception(string.Format(
+                    "Cannot retrieve ScanInfo from cache for scan {0} in ReadScanData; cannot retrieve scan data", scan));
             }
 
             try
@@ -2070,13 +2077,16 @@ namespace ThermoRawFileReader
             }
             catch (AccessViolationException)
             {
-                var msg = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
-                RaiseWarningMessage(msg);
+                RaiseWarningMessage(string.Format(
+                    "Unable to load data for scan {0} in ReadScanData; possibly a corrupt .Raw file", scan));
             }
             catch (Exception ex)
             {
-                var msg = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(msg, ex);
+                RaiseErrorMessage(
+                    string.Format(
+                        "Unable to load data for scan {0} in ReadScanData: {1}; possibly a corrupt .Raw file",
+                        scan, ex.Message),
+                    ex);
             }
 
             return null;
@@ -2116,7 +2126,8 @@ namespace ThermoRawFileReader
 
             if (!GetScanInfo(scan, out var scanInfo))
             {
-                throw new Exception("Cannot retrieve ScanInfo from cache for scan " + scan + "; cannot retrieve scan data");
+                throw new Exception(string.Format(
+                    "Cannot retrieve ScanInfo from cache for scan {0} in GetScanLabelData; cannot retrieve scan data", scan));
             }
 
             try
@@ -2172,13 +2183,16 @@ namespace ThermoRawFileReader
             }
             catch (AccessViolationException)
             {
-                var msg = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
-                RaiseWarningMessage(msg);
+                RaiseWarningMessage(string.Format(
+                    "Unable to load data for scan {0} in GetScanLabelData; possibly a corrupt .Raw file", scan));
             }
             catch (Exception ex)
             {
-                var msg = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(msg, ex);
+                RaiseErrorMessage(
+                    string.Format(
+                        "Unable to load data for scan {0} in GetScanLabelData: {1}; possibly a corrupt .Raw file",
+                        scan, ex.Message),
+                    ex);
             }
 
             ftLabelData = Array.Empty<FTLabelInfoType>();
@@ -2242,7 +2256,8 @@ namespace ThermoRawFileReader
 
             if (!GetScanInfo(scan, out var scanInfo))
             {
-                throw new Exception("Cannot retrieve ScanInfo from cache for scan " + scan + "; cannot retrieve scan data");
+                throw new Exception(string.Format(
+                    "Cannot retrieve ScanInfo from cache for scan {0} in GetScanPrecisionData; cannot retrieve scan data", scan));
             }
 
             try
@@ -2295,13 +2310,16 @@ namespace ThermoRawFileReader
             }
             catch (AccessViolationException)
             {
-                var msg = "Unable to load data for scan " + scan + "; possibly a corrupt .Raw file";
-                RaiseWarningMessage(msg);
+                RaiseWarningMessage(string.Format(
+                    "Unable to load data for scan {0} in GetScanPrecisionData; possibly a corrupt .Raw file", scan));
             }
             catch (Exception ex)
             {
-                var msg = "Unable to load data for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(msg, ex);
+                RaiseErrorMessage(
+                    string.Format(
+                        "Unable to load data for scan {0} in GetScanPrecisionData: {1}; possibly a corrupt .Raw file",
+                        scan, ex.Message),
+                    ex);
             }
 
             massResolutionData = Array.Empty<MassPrecisionInfoType>();
@@ -2337,8 +2355,7 @@ namespace ThermoRawFileReader
                 }
                 catch (Exception)
                 {
-                    const string msg = "Unable to load data summing scans; file ThermoFisher.CommonCore.BackgroundSubtraction.dll is missing or corrupt";
-                    RaiseWarningMessage(msg);
+                    RaiseWarningMessage("Unable to load data summing scans; file ThermoFisher.CommonCore.BackgroundSubtraction.dll is missing or corrupt");
                 }
 
                 if (mXRawFile == null)
@@ -2417,13 +2434,16 @@ namespace ThermoRawFileReader
             }
             catch (AccessViolationException)
             {
-                var msg = "Unable to load data summing scans " + scanFirst + " to " + scanLast + "; possibly a corrupt .Raw file";
-                RaiseWarningMessage(msg);
+                RaiseWarningMessage(string.Format(
+                    "Unable to load data summing scans {0} to {1}; possibly a corrupt .Raw file", scanFirst, scanLast));
             }
             catch (Exception ex)
             {
-                var msg = "Unable to load data summing scans " + scanFirst + " to " + scanLast + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(msg, ex);
+                RaiseErrorMessage(
+                    string.Format(
+                        "Unable to load data summing scans {0} to {1}: {2}; possibly a corrupt .Raw file",
+                        scanFirst, scanLast, ex),
+                    ex);
             }
 
             massIntensityPairs = new double[0, 0];
