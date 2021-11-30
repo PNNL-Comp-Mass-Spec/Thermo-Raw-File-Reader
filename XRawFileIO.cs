@@ -18,7 +18,7 @@ using ThermoFisher.CommonCore.Data.FilterEnums;
 // from Thermo .Raw files (LTQ, LTQ-FT, Orbitrap, Exactive, TSQ, etc.)
 //
 // For more information about the ThermoFisher.CommonCore DLLs,
-// see the RawFileReaderLicense.doc file in the lib directory;
+// see the RawFileReaderLicense.doc file in the solution directory;
 // see also http://planetorbitrap.com/rawfilereader#.W5BAoOhKjdM
 // For questions, contact Jim Shofstahl at ThermoFisher.com
 
