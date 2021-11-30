@@ -2098,7 +2098,7 @@ namespace ThermoRawFileReader
         /// Output parameter ftLabelData will have the centroided spectrum, where each data point includes mass (m/z), intensity, and charge
         /// </remarks>
         /// <param name="scan">Scan number</param>
-        /// <param name="ftLabelData">List of mass, intensity, resolution, baseline intensity, noise floor, and charge for each data point</param>
+        /// <param name="ftLabelData">List of mass (m/z), intensity, resolution, baseline intensity, noise floor, and charge for each data point</param>
         /// <returns>The number of data points, or -1 if an error</returns>
         public int GetScanLabelData(int scan, out FTLabelInfoType[] ftLabelData)
         {
@@ -2223,9 +2223,9 @@ namespace ThermoRawFileReader
         /// Gets scan precision data for FTMS data (resolution of each data point)
         /// </summary>
         /// <param name="scan"></param>
-        /// <param name="massResolutionData">List of Intensity, Mass, AccuracyMMU, AccuracyPPM, and Resolution for each data point</param>
+        /// <param name="massResolutionData">List of intensity, mass (m/z), accuracy (MMU), accuracy (PPM), and resolution for each data point</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>This returns a subset of the data thatGetScanLabelData does, but with 2 additional fields.</remarks>
+        /// <remarks>This returns a subset of the data that GetScanLabelData returns, but with 2 additional fields</remarks>
         public int GetScanPrecisionData(int scan, out MassPrecisionInfoType[] massResolutionData)
         {
             if (scan < FileInfo.ScanStart)
