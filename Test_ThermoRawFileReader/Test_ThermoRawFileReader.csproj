@@ -52,7 +52,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ThermoRawFileReader.csproj">
+    <ProjectReference Include="..\ThermoRawFileReader\ThermoRawFileReader.csproj">
       <Project>{9a814c6c-bd10-4ce3-bd68-bb4774fb10a8}</Project>
       <Name>ThermoRawFileReader</Name>
     </ProjectReference>

@@ -73,9 +73,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist "$(ProjectDir)Test_ThermoRawFileReader\bin\Debug" mkdir "$(ProjectDir)Test_ThermoRawFileReader\bin\Debug"
-xcopy "$(TargetDir)ThermoRawFileReader.dll" "$(ProjectDir)Test_ThermoRawFileReader\bin\Debug\" /Y
-xcopy "$(TargetDir)ThermoRawFileReader.pdb" "$(ProjectDir)Test_ThermoRawFileReader\bin\Debug\" /Y</PostBuildEvent>
+    <PostBuildEvent>if not exist "$(ProjectDir)..\Test_ThermoRawFileReader\bin\Debug" mkdir "$(ProjectDir)..\Test_ThermoRawFileReader\bin\Debug"
+xcopy "$(TargetDir)ThermoRawFileReader.dll" "$(ProjectDir)..\Test_ThermoRawFileReader\bin\Debug\" /Y
+xcopy "$(TargetDir)ThermoRawFileReader.pdb" "$(ProjectDir)..\Test_ThermoRawFileReader\bin\Debug\" /Y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

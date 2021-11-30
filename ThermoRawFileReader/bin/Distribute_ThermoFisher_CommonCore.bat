@@ -20,27 +20,27 @@ xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\SangtaeKim\Inf
 xcopy Release\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\KevinCrowell\IMSDemultiplexer\IMSDemultiplexer\lib\" /Y /D
 pause
 
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /Y /D
 
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\" /Y /D
 
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MASIC\Lib\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MASIC\Lib\" /Y /D
 
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\" /Y /D
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MSGF_Runner\Lib\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MSGF_Runner\Lib\" /Y /D
 
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\BrianLaMarche\MultiAlign\lib\InformedProteomics\" /Y /D
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\BrianLaMarche\MultiAlign\src\MultiAlignRogue\bin\Debug\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\BrianLaMarche\MultiAlign\lib\InformedProteomics\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\BrianLaMarche\MultiAlign\src\MultiAlignRogue\bin\Debug\" /Y /D
 
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\DLLLibrary\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\DLLLibrary\" /Y /D
 
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\SangtaeKim\InformedProteomics\lib\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\SangtaeKim\InformedProteomics\lib\" /Y /D
 
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\KevinCrowell\IMSDemultiplexer\IMSDemultiplexer\lib\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\KevinCrowell\IMSDemultiplexer\IMSDemultiplexer\lib\" /Y /D
 
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\ThermoFAIMStoMzML\lib\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\ThermoFAIMStoMzML\lib\" /Y /D
 
-xcopy ..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\ThermoPeakDataExporter\lib\" /Y /D
+xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\ThermoPeakDataExporter\lib\" /Y /D
 
 pause
 

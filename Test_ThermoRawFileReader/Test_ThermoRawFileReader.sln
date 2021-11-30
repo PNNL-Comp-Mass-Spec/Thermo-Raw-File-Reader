@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_ThermoRawFileReader", "Test_ThermoRawFileReader.csproj", "{EBAFAB40-68C9-473E-8B43-568F97DCC13E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermoRawFileReader", "..\ThermoRawFileReader.csproj", "{9A814C6C-BD10-4CE3-BD68-BB4774FB10A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermoRawFileReader", "..\ThermoRawFileReader\ThermoRawFileReader.csproj", "{9A814C6C-BD10-4CE3-BD68-BB4774FB10A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
