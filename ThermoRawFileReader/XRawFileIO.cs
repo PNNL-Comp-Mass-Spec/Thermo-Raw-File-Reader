@@ -2270,8 +2270,9 @@ namespace ThermoRawFileReader
 
                 if (!scanInfo.IsFTMS)
                 {
-                    var msg = "Scan " + scan + " is not an FTMS scan; function GetScanLabelData cannot be used with this scan";
-                    RaiseWarningMessage(msg);
+                    RaiseWarningMessage(string.Format(
+                        "Scan {0} is not an FTMS scan; method GetScanPrecisionData cannot be used with this scan", scan));
+
                     massResolutionData = Array.Empty<MassPrecisionInfoType>();
                     return -1;
                 }
