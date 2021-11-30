@@ -6,9 +6,6 @@
     <AssemblyName>ThermoRawFileReader</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>ThermoRawFileReader</PackageId>
-    <Version>4.0.8004</Version>
-    <AssemblyVersion>$(Version)</AssemblyVersion>
-    <FileVersion>$(Version)</FileVersion>
     <Description>The Thermo Raw File Reader is a .NET DLL wrapper for reading Thermo .raw files. It originally used the Thermo MS File Reader, but in January 2019 we switched to using the ThermoFisher.CommonCore C# DLLs</Description>
     <Company>PNNL</Company>
     <Product>ThermoRawFileReader</Product>
@@ -22,6 +19,10 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.244">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="PRISM-Library" Version="2.6.42" />
     <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.71" />
     <PackageReference Include="ThermoFisher.CommonCore.Data" Version="5.0.0.71" />
