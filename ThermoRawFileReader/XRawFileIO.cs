@@ -1480,7 +1480,6 @@ namespace ThermoRawFileReader
                 string[] tuneSettingNames = null;
                 string[] tuneSettingValues = null;
 
-                string msg;
                 try
                 {
                     if (!mCorruptMemoryEncountered)
@@ -1493,15 +1492,15 @@ namespace ThermoRawFileReader
                 }
                 catch (AccessViolationException)
                 {
-                    msg = "Unable to load tune data; possibly a corrupt .Raw file";
-                    RaiseWarningMessage(msg);
+                    RaiseWarningMessage("Unable to load tune data; possibly a corrupt .Raw file");
                     break;
                 }
                 catch (Exception ex)
                 {
                     // Exception getting TuneData
-                    msg = "Warning: Exception calling mXRawFile.GetTuneData for Index " + index + ": " + ex.Message;
-                    RaiseWarningMessage(msg);
+                    RaiseWarningMessage(string.Format(
+                        "Warning: Exception calling mXRawFile.GetTuneData for Index {0}: {1}", index, ex.Message));
+
                     tuneLabelCount = 0;
 
                     if (ex.Message.IndexOf("memory is corrupt", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -1513,7 +1512,8 @@ namespace ThermoRawFileReader
 
                 if (tuneLabelCount > 0)
                 {
-                    msg = string.Empty;
+                    string msg;
+
                     if (tuneSettingNames == null)
                     {
                         // .GetTuneData returned a non-zero count, but no parameter names; unable to continue
@@ -1524,11 +1524,14 @@ namespace ThermoRawFileReader
                         // .GetTuneData returned parameter names, but tuneSettingValues is nothing; unable to continue
                         msg = "Warning: the GetTuneData function returned tune parameter names but no tune values";
                     }
+                    else
+                    {
+                        msg = string.Empty;
+                    }
 
                     if (msg.Length > 0)
                     {
-                        msg += " (Tune Method " + (index + 1) + ")";
-                        RaiseWarningMessage(msg);
+                        RaiseWarningMessage(string.Format("{0} (Tune Method {1})", msg, index + 1));
                         tuneLabelCount = 0;
                     }
                 }
