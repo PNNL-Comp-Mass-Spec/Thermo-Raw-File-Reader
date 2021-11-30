@@ -59,16 +59,16 @@
       <Version>2.6.42</Version>
     </PackageReference>
     <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction">
-      <Version>4.0.89</Version>
+      <Version>5.0.0.71</Version>
     </PackageReference>
     <PackageReference Include="ThermoFisher.CommonCore.Data">
-      <Version>4.0.89</Version>
+      <Version>5.0.0.71</Version>
     </PackageReference>
     <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator">
-      <Version>4.0.89</Version>
+      <Version>5.0.0.71</Version>
     </PackageReference>
     <PackageReference Include="ThermoFisher.CommonCore.RawFileReader">
-      <Version>4.0.89</Version>
+      <Version>5.0.0.71</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
