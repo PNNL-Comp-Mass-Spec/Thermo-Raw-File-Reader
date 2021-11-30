@@ -757,26 +757,26 @@ namespace ThermoRawFileReader
 
                 var lastScanWithData = -1;
 
-                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                for (var scan = scanStart; scan <= scanEnd; scan++)
                 {
                     try
                     {
-                        var scanData = mXRawFile.GetSegmentedScanFromScanNumber(scanNumber, null);
+                        var scanData = mXRawFile.GetSegmentedScanFromScanNumber(scan, null);
 
                         if (scanData.Intensities == null || scanData.Intensities.Length == 0)
                             continue;
 
-                        if (lastScanWithData >= 0 && lastScanWithData < scanNumber - 1)
+                        if (lastScanWithData >= 0 && lastScanWithData < scan - 1)
                         {
                             // Insert empty lists for the scans that preceded this scan but did not have data
-                            for (var scanToAdd = lastScanWithData + 1; scanToAdd < scanNumber; scanToAdd++)
+                            for (var scanToAdd = lastScanWithData + 1; scanToAdd < scan; scanToAdd++)
                             {
                                 chromatogramData.Add(scanToAdd, new List<double>());
                             }
                         }
 
-                        chromatogramData.Add(scanNumber, scanData.Intensities.ToList());
-                        lastScanWithData = scanNumber;
+                        chromatogramData.Add(scan, scanData.Intensities.ToList());
+                        lastScanWithData = scan;
                     }
                     catch (AccessViolationException)
                     {
