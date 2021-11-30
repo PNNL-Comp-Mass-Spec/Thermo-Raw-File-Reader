@@ -234,14 +234,14 @@ namespace Test_ThermoRawFileReader
                     scanFilterGeneric = massRangeMatcher.Replace(scanFilterGeneric, "0.00-0.00");
                     scanFilterGeneric = sidMatcher.Replace(scanFilterGeneric, "sid=0.00");
 
-                    var matchesParentNoAt = parentIonMZnoAtMatcher.Matches(scanFilterGeneric);
-                    foreach (Match match in matchesParentNoAt)
+                    // Update parent ions that do not have an @ sign
+                    foreach (Match match in parentIonMZnoAtMatcher.Matches(scanFilterGeneric))
                     {
                         scanFilterGeneric = scanFilterGeneric.Replace(match.Value, match.Groups[1].Value + " 0.000");
                     }
 
-                    var matchesCollision = collisionModeMatcher.Matches(scanFilterGeneric);
-                    foreach (Match match in matchesCollision)
+                    // Update collision energies
+                    foreach (Match match in collisionModeMatcher.Matches(scanFilterGeneric))
                     {
                         scanFilterGeneric = scanFilterGeneric.Replace(match.Value, match.Groups[1].Value + "00.00");
                     }

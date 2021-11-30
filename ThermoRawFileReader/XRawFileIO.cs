@@ -2274,7 +2274,7 @@ namespace ThermoRawFileReader
 
                     for (var i = 0; i < dataCount; i++)
                     {
-                        var massPrecisionInfo = new MassPrecisionInfoType
+                        massResolutionData[i] = new MassPrecisionInfoType
                         {
                             Intensity = results[i].Intensity,
                             Mass = results[i].Mass,
@@ -2282,8 +2282,6 @@ namespace ThermoRawFileReader
                             AccuracyPPM = results[i].MassAccuracyInPpm,
                             Resolution = results[i].Resolution
                         };
-
-                        massResolutionData[i] = massPrecisionInfo;
                     }
 
                     return dataCount;
@@ -2538,8 +2536,7 @@ namespace ThermoRawFileReader
         {
             if (!FileInfo.Devices.TryGetValue(deviceType, out var deviceCount) || deviceCount == 0)
             {
-                var message = string.Format(".raw file does not have data from device type {0}", deviceType);
-                return message;
+                return string.Format(".raw file does not have data from device type {0}", deviceType);
             }
 
             if (deviceNumber > deviceCount)
@@ -2554,9 +2551,7 @@ namespace ThermoRawFileReader
                     validValues = string.Format("valid device numbers for device type {0} are {1} through {2}", deviceType, 1, deviceCount);
                 }
 
-                var message = string.Format("The specified device number, {0}, is out of range; {1}", deviceType, validValues);
-
-                return message;
+                return string.Format("The specified device number, {0}, is out of range; {1}", deviceType, validValues);
             }
 
             try

@@ -171,8 +171,7 @@ namespace ThermoRawFileReader
             {
                 var parentIonMzText = match.Groups["ParentMZ"].Value;
 
-                var success = double.TryParse(parentIonMzText, out parentIonMz);
-                return success;
+                return double.TryParse(parentIonMzText, out parentIonMz);
             }
 
             parentIonMz = 0;
