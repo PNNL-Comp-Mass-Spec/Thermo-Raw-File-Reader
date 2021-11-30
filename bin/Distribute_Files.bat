@@ -127,5 +127,9 @@ xcopy Release\ThermoRawFileReader.dll F:\Documents\Projects\Instrument-Software\
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Source Code\FAIMS MzXML Generator\FAIMS MzXML Generator\bin\Debug\" /Y /D
 xcopy Release\ThermoRawFileReader.dll "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Source Code\WriteFaimsXMLFromRawFile\WriteFaimsXMLFromRawFile\bin\Debug\" /Y /D
 
+xcopy Release\ThermoRawFileReader.XML F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Lib\ /Y /D
+xcopy Release\ThermoRawFileReader.XML "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Source Code\FAIMS MzXML Generator\FAIMS MzXML Generator\bin\Debug\" /Y /D
+xcopy Release\ThermoRawFileReader.XML "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Source Code\WriteFaimsXMLFromRawFile\WriteFaimsXMLFromRawFile\bin\Debug\" /Y /D
+
 @echo off
 pause
