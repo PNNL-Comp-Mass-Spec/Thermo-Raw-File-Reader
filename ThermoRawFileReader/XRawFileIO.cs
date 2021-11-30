@@ -13,6 +13,8 @@ using ThermoFisher.CommonCore.RawFileReader;
 using ThermoFisher.CommonCore.BackgroundSubtraction;
 using ThermoFisher.CommonCore.Data.FilterEnums;
 
+[assembly:CLSCompliant(false)]
+
 // The methods in this class use ThermoFisher.CommonCore.RawFileReader.dll
 // and related DLLs to extract scan header info and mass spec data (m/z and intensity lists)
 // from Thermo .Raw files (LTQ, LTQ-FT, Orbitrap, Exactive, TSQ, etc.)

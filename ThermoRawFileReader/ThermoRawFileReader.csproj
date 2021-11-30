@@ -1,87 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9A814C6C-BD10-4CE3-BD68-BB4774FB10A8}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFrameworks>net472;netstandard2.0</TargetFrameworks>
     <RootNamespace>ThermoRawFileReader</RootNamespace>
     <AssemblyName>ThermoRawFileReader</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>ThermoRawFileReader</PackageId>
+    <Version>4.0.8004</Version>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>
+    <Description>The Thermo Raw File Reader is a .NET DLL wrapper for reading Thermo .raw files. It originally used the Thermo MS File Reader, but in January 2019 we switched to using the ThermoFisher.CommonCore C# DLLs</Description>
+    <Company>PNNL</Company>
+    <Product>ThermoRawFileReader</Product>
+    <Authors>PNNL-Comp-Mass-Spec</Authors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RepositoryUrl>https://github.com/PNNL-Comp-Mass-Spec/Thermo-Raw-File-Reader</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/PNNL-Comp-Mass-Spec/Thermo-Raw-File-Reader</PackageProjectUrl>
+    <Title>ThermoRawFileReader</Title>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\ThermoRawFileReader.XML</DocumentationFile>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Management" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="PRISM-Library" Version="2.6.42" />
+    <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.71" />
+    <PackageReference Include="ThermoFisher.CommonCore.Data" Version="5.0.0.71" />
+    <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator" Version="5.0.0.71" />
+    <PackageReference Include="ThermoFisher.CommonCore.RawFileReader" Version="5.0.0.71" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="DataObjects.cs" />
-    <Compile Include="DeviceInfo.cs" />
-    <Compile Include="Enums.cs" />
-    <Compile Include="FilterTextUtilities.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="ThermoReaderOptions.cs" />
-    <Compile Include="XRawFileIO.cs" />
-    <Compile Include="clsScanInfo.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="PRISM-Library">
-      <Version>2.6.42</Version>
-    </PackageReference>
-    <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction">
-      <Version>5.0.0.71</Version>
-    </PackageReference>
-    <PackageReference Include="ThermoFisher.CommonCore.Data">
-      <Version>5.0.0.71</Version>
-    </PackageReference>
-    <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator">
-      <Version>5.0.0.71</Version>
-    </PackageReference>
-    <PackageReference Include="ThermoFisher.CommonCore.RawFileReader">
-      <Version>5.0.0.71</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>if not exist "$(ProjectDir)..\Test_ThermoRawFileReader\bin\Debug" mkdir "$(ProjectDir)..\Test_ThermoRawFileReader\bin\Debug"
-xcopy "$(TargetDir)ThermoRawFileReader.dll" "$(ProjectDir)..\Test_ThermoRawFileReader\bin\Debug\" /Y
-xcopy "$(TargetDir)ThermoRawFileReader.pdb" "$(ProjectDir)..\Test_ThermoRawFileReader\bin\Debug\" /Y</PostBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
