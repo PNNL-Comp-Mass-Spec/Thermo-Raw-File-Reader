@@ -687,7 +687,7 @@ namespace Test_ThermoRawFileReader
                     dataCount = reader.GetScanPrecisionData(scanNum, out var ftPrecisionData);
 
                     Console.WriteLine();
-                    Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}", "Mass", "Intensity", "AccuracyMMU", "AccuracyPPM", "Resolution");
+                    Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}", "Mass (m/z)", "Intensity", "AccuracyMMU", "AccuracyPPM", "Resolution");
 
                     for (var i = 0; i <= dataCount - 1; i += 50)
                     {
