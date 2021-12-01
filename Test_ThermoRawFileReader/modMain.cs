@@ -630,15 +630,29 @@ namespace Test_ThermoRawFileReader
 
                     reader.GetScanData(scanNum, out var mzList, out var intensityList, 0, centroid);
 
-                    var mzDisplayStepSize = 50;
+                    int mzDisplayStepSize;
+
                     if (centroid)
                     {
                         mzDisplayStepSize = 1;
                     }
+                    else
+                    {
+                        mzDisplayStepSize = mzList.Length / 10;
+                    }
 
-                    for (var i = 0; i <= mzList.Length - 1; i += mzDisplayStepSize)
+                    for (var i = 0; i <= mzList.Length - 1;)
                     {
                         Console.WriteLine("  " + mzList[i].ToString("0.000") + " mz   " + intensityList[i].ToString("0"));
+
+                        if (i < 9 || mzDisplayStepSize <= 1)
+                        {
+                            i++;
+                        }
+                        else
+                        {
+                            i += mzDisplayStepSize;
+                        }
                     }
                     Console.WriteLine();
 
@@ -668,7 +682,7 @@ namespace Test_ThermoRawFileReader
                     Console.WriteLine();
                     Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}{5,12}", "Mass (m/z)", "Intensity", "Resolution", "Baseline", "Noise", "Charge");
 
-                    for (var i = 0; i <= dataCount - 1; i++)
+                    for (var i = 0; i <= dataCount - 1;)
                     {
                         Console.WriteLine("{0,12:F3}{1,12:0}{2,12:0}{3,12:F1}{4,12:0}{5,12:0}",
                             ftLabelData[i].Mass,
@@ -678,7 +692,11 @@ namespace Test_ThermoRawFileReader
                             ftLabelData[i].Noise,
                             ftLabelData[i].Charge);
 
-                        if (i > 9)
+                        if (i < 9)
+                        {
+                            i++;
+                        }
+                        else
                         {
                             i += dataCount / 10;
                         }
@@ -689,14 +707,25 @@ namespace Test_ThermoRawFileReader
                     Console.WriteLine();
                     Console.WriteLine("{0,12}{1,12}{2,12}{3,12}{4,12}", "Mass (m/z)", "Intensity", "AccuracyMMU", "AccuracyPPM", "Resolution");
 
-                    for (var i = 0; i <= dataCount - 1; i += 50)
+                    for (var i = 0; i <= dataCount - 1;)
                     {
                         Console.WriteLine("{0,12:F3}{1,12:0}{2,12:F3}{3,12:F3}{4,12:0}",
                             ftPrecisionData[i].Mass,
                             ftPrecisionData[i].Intensity, ftPrecisionData[i].AccuracyMMU,
                             ftPrecisionData[i].AccuracyPPM,
                             ftPrecisionData[i].Resolution);
+
+                        if (i < 9)
+                        {
+                            i++;
+                        }
+                        else
+                        {
+                            i += dataCount / 10;
+                        }
                     }
+
+                    Console.WriteLine();
                 }
 
                 if (mOnlyLoadMSLevelInfo)
