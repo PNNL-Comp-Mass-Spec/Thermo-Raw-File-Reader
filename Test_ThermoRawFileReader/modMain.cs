@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using MathNet.Numerics.Statistics;
 using PRISM;
@@ -15,7 +16,7 @@ namespace Test_ThermoRawFileReader
     {
         // Ignore Spelling: Angiotensin, centroiding, Chrom, cid, cnl, etd, hcd, msx, pqd, QC_Mam, sa, sid
 
-        private const string PROGRAM_DATE = "November 15, 2021";
+        private const string PROGRAM_DATE = "December 1, 2021";
 
         private const string DEFAULT_FILE_PATH = @"..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw";
 
@@ -530,6 +531,8 @@ namespace Test_ThermoRawFileReader
                 Console.WriteLine();
                 Console.WriteLine("Reading data for scans {0} to {1}, step {2}", scanStart, scanEnd, scanStep);
 
+                var outLine = new StringBuilder();
+
                 for (var scanNum = scanStart; scanNum <= scanEnd; scanNum += scanStep)
                 {
                     if (scanNum > reader.ScanEnd)
@@ -550,8 +553,11 @@ namespace Test_ThermoRawFileReader
                         {
                             msLevelStats.Add(msLevel, 1);
                         }
+
                         if (mScanInfoInterval <= 0 || scanNum % mScanInfoInterval == 0)
+                        {
                             Console.WriteLine("Scan " + scanNum);
+                        }
 
                         continue;
                     }
@@ -561,13 +567,20 @@ namespace Test_ThermoRawFileReader
                     if (!success)
                         continue;
 
+                    outLine.Clear();
+
                     if (mScanInfoInterval <= 0 || scanNum % mScanInfoInterval == 0)
-                        Console.WriteLine("Scan " + scanNum + " at " + scanInfo.RetentionTime.ToString("0.00") + " minutes: " + scanInfo.FilterText);
+                    {
+                        outLine.AppendFormat(
+                            "Scan {0} at {1:0.00} minutes: {2}",
+                            scanNum, scanInfo.RetentionTime, scanInfo.FilterText);
+                    }
 
                     if (scanInfo.MSLevel == 1)
                     {
                         ionInjectionTimesMS1.Add(scanInfo.IonInjectionTime);
-                    } else if (scanInfo.MSLevel == 2)
+                    }
+                    else if (scanInfo.MSLevel == 2)
                     {
                         ionInjectionTimesMS2.Add(scanInfo.IonInjectionTime);
                     }
@@ -593,31 +606,51 @@ namespace Test_ThermoRawFileReader
                             }
                         }
 
-                        if (string.IsNullOrEmpty(collisionEnergyList))
+                        if (!string.IsNullOrEmpty(collisionEnergyList))
                         {
-                            Console.WriteLine();
+                            outLine.AppendFormat("; CE {0}", collisionEnergyList);
                         }
-                        else
-                        {
-                            Console.WriteLine("; CE " + collisionEnergyList);
-                        }
+                    }
+
+                    if (outLine.Length > 0)
+                    {
+                        Console.WriteLine(outLine.ToString());
                     }
 
                     if (mGetScanEvents)
                     {
+                        outLine.Clear();
+                        outLine.Append("  ");
+
                         if (scanInfo.TryGetScanEvent("Monoisotopic M/Z:", out var monoMZ))
                         {
-                            Console.WriteLine("Monoisotopic M/Z: " + monoMZ);
+                            if (!monoMZ.Equals("0.0000"))
+                            {
+                                Console.WriteLine("Check this code");
+                            }
+
+                            outLine.AppendFormat("Monoisotopic M/Z: {0}", monoMZ);
                         }
 
                         if (scanInfo.TryGetScanEvent("Charge State", out var chargeState, true))
                         {
-                            Console.WriteLine("Charge State: " + chargeState);
+                            if (outLine.Length > 0)
+                                outLine.Append(", ");
+
+                            outLine.AppendFormat("Charge State: {0}", chargeState);
                         }
 
                         if (scanInfo.TryGetScanEvent("MS2 Isolation Width", out var isolationWidth, true))
                         {
-                            Console.WriteLine("MS2 Isolation Width: " + isolationWidth);
+                            if (outLine.Length > 0)
+                                outLine.Append(", ");
+
+                            outLine.AppendFormat("MS2 Isolation Width: {0}", isolationWidth);
+                        }
+
+                        if (outLine.Length > 2)
+                        {
+                            Console.WriteLine(outLine.ToString());
                         }
                     }
 
