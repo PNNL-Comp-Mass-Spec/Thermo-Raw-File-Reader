@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -440,10 +440,10 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Parse out the MRM_QMS or SRM mass info from filterText
         /// </summary>
+        /// <remarks>We do not parse mass information out for Full Neutral Loss scans</remarks>
         /// <param name="filterText"></param>
         /// <param name="mrmScanType"></param>
         /// <param name="mrmInfo">Output: MRM info class</param>
-        /// <remarks>We do not parse mass information out for Full Neutral Loss scans</remarks>
         public static void ExtractMRMMasses(string filterText, MRMScanTypeConstants mrmScanType, out MRMInfo mrmInfo)
         {
             FilterTextUtilities.ExtractMRMMasses(filterText, mrmScanType, out mrmInfo);
@@ -451,14 +451,14 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Parse out the parent ion from filterText
         /// </summary>
-        /// <param name="filterText"></param>
-        /// <param name="parentIonMz">Parent ion m/z (output)</param>
-        /// <returns>True if success</returns>
         /// <remarks>
         /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
         /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
         /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
         /// </remarks>
+        /// <param name="filterText"></param>
+        /// <param name="parentIonMz">Parent ion m/z (output)</param>
+        /// <returns>True if success</returns>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz)
         {
             return FilterTextUtilities.ExtractParentIonMzFromFilterText(filterText, out parentIonMz);
@@ -467,16 +467,16 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Parse out the parent ion and collision energy from filterText
         /// </summary>
-        /// <param name="filterText"></param>
-        /// <param name="parentIonMz">Parent ion m/z (output)</param>
-        /// <param name="msLevel">MSLevel (output)</param>
-        /// <param name="collisionMode">Collision mode (output)</param>
-        /// <returns>True if success</returns>
         /// <remarks>
         /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
         /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
         /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
         /// </remarks>
+        /// <param name="filterText"></param>
+        /// <param name="parentIonMz">Parent ion m/z (output)</param>
+        /// <param name="msLevel">MSLevel (output)</param>
+        /// <param name="collisionMode">Collision mode (output)</param>
+        /// <returns>True if success</returns>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz, out int msLevel, out string collisionMode)
         {
             return FilterTextUtilities.ExtractParentIonMZFromFilterText(filterText, out parentIonMz, out msLevel, out collisionMode);
@@ -485,17 +485,17 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Parse out the parent ion and collision energy from filterText
         /// </summary>
+        /// <remarks>
+        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
+        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
+        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// </remarks>
         /// <param name="filterText"></param>
         /// <param name="parentIonMz">Parent ion m/z (output)</param>
         /// <param name="msLevel">MSLevel (output)</param>
         /// <param name="collisionMode">Collision mode (output)</param>
         /// <param name="parentIons">Output: parent ion list</param>
         /// <returns>True if success</returns>
-        /// <remarks>
-        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
-        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
-        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
-        /// </remarks>
         public static bool ExtractParentIonMZFromFilterText(
                     string filterText,
                     out double parentIonMz,
@@ -509,14 +509,14 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Extract the MS Level from the filter string
         /// </summary>
-        /// <param name="filterText"></param>
-        /// <param name="msLevel"></param>
-        /// <param name="mzText"></param>
-        /// <returns>True if found and False if no match</returns>
         /// <remarks>
         /// Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in filterText
         /// Populates msLevel with the number after "ms" and mzText with the text after "ms2"
         /// </remarks>
+        /// <param name="filterText"></param>
+        /// <param name="msLevel"></param>
+        /// <param name="mzText"></param>
+        /// <returns>True if found and False if no match</returns>
         public static bool ExtractMSLevel(string filterText, out int msLevel, out string mzText)
         {
             return FilterTextUtilities.ExtractMSLevel(filterText, out msLevel, out mzText);
@@ -525,8 +525,8 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Populate mFileInfo
         /// </summary>
-        /// <returns>True if no error, False if an error</returns>
         /// <remarks>Called from OpenRawFile</remarks>
+        /// <returns>True if no error, False if an error</returns>
         private bool FillFileInfo()
         {
             try
@@ -689,15 +689,15 @@ namespace ThermoRawFileReader
         /// Get the list of intensity values, by scan, for the given device
         /// Use this method to retrieve scan-based values for LC devices stored in the .raw file
         /// </summary>
+        /// <remarks>
+        /// If the scan has multiple intensity values, they are summed
+        /// Scans that have no data will still be present in the dictionary, but with an intensity of 0
+        /// </remarks>
         /// <param name="deviceType">Device type</param>
         /// <param name="deviceNumber">Device number (1 based)</param>
         /// <param name="scanStart">Start scan, or 0 to use ScanStart</param>
         /// <param name="scanEnd">End scan, or 0 to use ScanEnd</param>
         /// <returns>Dictionary where keys are scan number and values are the intensity for the scan</returns>
-        /// <remarks>
-        /// If the scan has multiple intensity values, they are summed
-        /// Scans that have no data will still be present in the dictionary, but with an intensity of 0
-        /// </remarks>
         public Dictionary<int, double> GetChromatogramData(Device deviceType, int deviceNumber = 1, int scanStart = 0, int scanEnd = 0)
         {
             var chromatogramData = new Dictionary<int, double>();
@@ -727,12 +727,12 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Get the intensities, by scan, for the given device
         /// </summary>
+        /// <remarks>Scans that have no data will still be present in the dictionary, but with an empty list of doubles</remarks>
         /// <param name="deviceType">Device type</param>
         /// <param name="deviceNumber">Device number (1 based)</param>
         /// <param name="scanStart">Start scan, or 0 to use ScanStart</param>
         /// <param name="scanEnd">End scan, or 0 to use ScanEnd</param>
         /// <returns>Dictionary where keys are scan number and values are the list of intensities for that scan</returns>
-        /// <remarks>Scans that have no data will still be present in the dictionary, but with an empty list of doubles</remarks>
         public Dictionary<int, List<double>> GetChromatogramData2D(Device deviceType, int deviceNumber = 1, int scanStart = 0, int scanEnd = 0)
         {
             var chromatogramData = new Dictionary<int, List<double>>();
@@ -1735,13 +1735,13 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Examines filterText to validate that it is a supported MS1 scan type (MS, SIM, or MRMQMS, or SRM scan)
         /// </summary>
+        /// <remarks>Returns false for MSn scans (like ms2 or ms3)</remarks>
         /// <param name="filterText"></param>
         /// <param name="msLevel"></param>
         /// <param name="simScan">True if mrmScanType is SIM or MRMQMS</param>
         /// <param name="mrmScanType"></param>
         /// <param name="zoomScan"></param>
         /// <returns>True if filterText contains a known MS scan type</returns>
-        /// <remarks>Returns false for MSn scans (like ms2 or ms3)</remarks>
         public static bool ValidateMSScan(
             string filterText,
             out int msLevel,
@@ -1819,11 +1819,11 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Obtain the mass and intensity list for the specified scan
         /// </summary>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         /// <param name="scanNumber">Scan number</param>
         /// <param name="mzList">Output array of mass values</param>
         /// <param name="intensityList">Output array of intensity values (parallel to mzList)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData(int scanNumber, out double[] mzList, out double[] intensityList)
         {
             const int maxNumberOfPeaks = 0;
@@ -1834,12 +1834,12 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Obtain the mass and intensity list for the specified scan
         /// </summary>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         /// <param name="scanNumber">Scan number</param>
         /// <param name="mzList">Output array of mass values</param>
         /// <param name="intensityList">Output array of intensity values (parallel to mzList)</param>
         /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData(int scanNumber, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks)
         {
             const bool centroid = false;
@@ -1849,13 +1849,13 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Obtain the mass and intensity for the specified scan
         /// </summary>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative),  returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         /// <param name="scan">Scan number</param>
         /// <param name="mzList">Output array of mass values</param>
         /// <param name="intensityList">Output array of intensity values (parallel to mzList)</param>
         /// <param name="maxNumberOfPeaks">Set to 0 (or negative) to return all of the data</param>
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If maxNumberOfPeaks is 0 (or negative),  returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData(int scan, out double[] mzList, out double[] intensityList, int maxNumberOfPeaks, bool centroidData)
         {
             int dataCount;
@@ -1892,10 +1892,10 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Obtain the mass and intensity for the specified scan
         /// </summary>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         /// <param name="scan"></param>
         /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData2D(int scan, out double[,] massIntensityPairs)
         {
             return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks: 0, centroidData: false);
@@ -1904,11 +1904,11 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Obtain the mass and intensity for the specified scan
         /// </summary>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         /// <param name="scan"></param>
         /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
         /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData2D(int scan, out double[,] massIntensityPairs, int maxNumberOfPeaks)
         {
             return GetScanData2D(scan, out massIntensityPairs, maxNumberOfPeaks, centroidData: false);
@@ -1917,12 +1917,12 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Obtain the mass and intensity for the specified scan
         /// </summary>
+        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         /// <param name="scan"></param>
         /// <param name="massIntensityPairs">2D array where the first dimension is 0 for mass or 1 for intensity while the second dimension is the data point index</param>
         /// <param name="maxNumberOfPeaks">Maximum number of data points; 0 to return all data</param>
         /// <param name="centroidData">True to centroid the data, false to return as-is (either profile or centroid, depending on how the data was acquired)</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>If maxNumberOfPeaks is 0 (or negative), returns all data; set maxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         public int GetScanData2D(int scan, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
             try
@@ -2105,6 +2105,43 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
+        /// Get the MSLevel (aka MS order) for a given scan
+        /// </summary>
+        /// <remarks>
+        /// MS1 spectra will return 1, MS2 spectra will return 2, etc.
+        /// Other, specialized scan types:
+        ///   Neutral gain:   -3
+        ///   Neutral loss:   -2
+        ///   Parent scan:    -1
+        /// </remarks>
+        /// <param name="scan"></param>
+        /// <returns>The MSOrder, or 0 if an error</returns>
+        public int GetMSLevel(int scan)
+        {
+            try
+            {
+                if (mXRawFile == null)
+                    return 0;
+
+                // Make sure the MS controller is selected
+                if (!SetMSController())
+                    return 0;
+
+                var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
+
+                var msOrder = scanFilter.MSOrder;
+
+                return (int)msOrder;
+            }
+            catch (Exception ex)
+            {
+                var msg = "Unable to determine the MS Level for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
+                RaiseErrorMessage(msg, ex);
+                return 0;
+            }
+        }
+
+        /// <summary>
         /// Gets the scan label data for an FTMS-tagged scan (from an Orbitrap, Q-Exactive, Lumos, or any other high resolution instrument)
         /// </summary>
         /// <remarks>
@@ -2200,49 +2237,14 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Get the MSLevel (aka MS order) for a given scan
-        /// </summary>
-        /// <param name="scan"></param>
-        /// <returns>The MSOrder, or 0 if an error</returns>
-        /// <remarks>
-        /// MS1 spectra will return 1, MS2 spectra will return 2, etc.
-        /// Other, specialized scan types:
-        ///   Neutral gain:   -3
-        ///   Neutral loss:   -2
-        ///   Parent scan:    -1
-        /// </remarks>
-        public int GetMSLevel(int scan)
-        {
-            try
-            {
-                if (mXRawFile == null)
-                    return 0;
-
-                // Make sure the MS controller is selected
-                if (!SetMSController())
-                    return 0;
-
-                var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
-
-                var msOrder = scanFilter.MSOrder;
-
-                return (int)msOrder;
-            }
-            catch (Exception ex)
-            {
-                var msg = "Unable to determine the MS Level for scan " + scan + ": " + ex.Message + "; possibly a corrupt .Raw file";
-                RaiseErrorMessage(msg, ex);
-                return 0;
-            }
-        }
-
-        /// <summary>
         /// Gets scan precision data for FTMS data (resolution of each data point)
         /// </summary>
+        /// <remarks>
+        /// This returns the same data that GetScanLabelData returns, but with AccuracyMMU and AccuracyPPM instead of Baseline, Noise, and Charge
+        /// </remarks>
         /// <param name="scan"></param>
         /// <param name="massResolutionData">List of intensity, mass (m/z), accuracy (MMU), accuracy (PPM), and resolution for each data point</param>
         /// <returns>The number of data points, or -1 if an error</returns>
-        /// <remarks>This returns a subset of the data that GetScanLabelData returns, but with 2 additional fields</remarks>
         public int GetScanPrecisionData(int scan, out MassPrecisionInfoType[] massResolutionData)
         {
             if (scan < FileInfo.ScanStart)
@@ -2330,13 +2332,13 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Sums data across scans
         /// </summary>
+        /// <remarks>Uses the scan filter of the first scan to assure that we're only averaging similar scans</remarks>
         /// <param name="scanFirst"></param>
         /// <param name="scanLast"></param>
         /// <param name="massIntensityPairs"></param>
         /// <param name="maxNumberOfPeaks"></param>
         /// <param name="centroidData"></param>
         /// <returns>The number of data points</returns>
-        /// <remarks>Uses the scan filter of the first scan to assure that we're only averaging similar scans</remarks>
         public int GetScanDataSumScans(int scanFirst, int scanLast, out double[,] massIntensityPairs, int maxNumberOfPeaks, bool centroidData)
         {
             try

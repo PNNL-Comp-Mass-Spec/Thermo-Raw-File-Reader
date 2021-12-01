@@ -38,8 +38,8 @@ namespace ThermoRawFileReader
         /// <summary>
         /// SIM Scan Flag
         /// </summary>
-        /// <returns>True if this is a selected ion monitoring (SIM) scan (i.e. a small mass range is being examined)</returns>
         /// <remarks>If multiple selected ion ranges are examined simultaneously, then this will be false but MRMScanType will be .MRMQMS</remarks>
+        /// <returns>True if this is a selected ion monitoring (SIM) scan (i.e. a small mass range is being examined)</returns>
         public bool SIMScan { get; set; }
 
         /// <summary>
@@ -51,8 +51,8 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Zoom scan flag
         /// </summary>
-        /// <returns>True when the given scan is a zoomed in mass region</returns>
         /// <remarks>These spectra are typically skipped when creating SICs</remarks>
+        /// <returns>True when the given scan is a zoomed in mass region</returns>
         public bool ZoomScan { get; set; }
 
         /// <summary>
@@ -209,15 +209,15 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Scan event data
         /// </summary>
-        /// <returns>List of key/value pairs</returns>
         /// <remarks>Ignores scan events with a blank or null event name</remarks>
+        /// <returns>List of key/value pairs</returns>
         public List<KeyValuePair<string, string>> ScanEvents { get; }
 
         /// <summary>
         /// Status log data
         /// </summary>
-        /// <returns>List of key/value pairs</returns>
         /// <remarks>Includes blank events that separate log sections</remarks>
+        /// <returns>List of key/value pairs</returns>
         public List<KeyValuePair<string, string>> StatusLog { get; }
 
         /// <summary>
@@ -260,11 +260,11 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Get the event value associated with the given scan event name
         /// </summary>
+        /// <remarks>Event names nearly always end in a colon, e.g. "Monoisotopic M/Z:" or "Charge State:"</remarks>
         /// <param name="eventName">Event name to find</param>
         /// <param name="eventValue">Event value</param>
         /// <param name="partialMatchToStart">Set to true to match the start of an event name, and not require a full match</param>
         /// <returns>True if found a match for the event name, otherwise false</returns>
-        /// <remarks>Event names nearly always end in a colon, e.g. "Monoisotopic M/Z:" or "Charge State:"</remarks>
         public bool TryGetScanEvent(string eventName, out string eventValue, bool partialMatchToStart = false)
         {
             IEnumerable<KeyValuePair<string, string>> results;

@@ -60,10 +60,10 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Parse out the MRM_QMS or SRM mass info from filterText
         /// </summary>
+        /// <remarks>We do not parse mass information out for Full Neutral Loss scans</remarks>
         /// <param name="filterText"></param>
         /// <param name="mrmScanType"></param>
         /// <param name="mrmInfo">Output: MRM info class</param>
-        /// <remarks>We do not parse mass information out for Full Neutral Loss scans</remarks>
         public static void ExtractMRMMasses(string filterText, MRMScanTypeConstants mrmScanType, out MRMInfo mrmInfo)
         {
             // Parse out the MRM_QMS or SRM mass info from filterText
@@ -137,9 +137,6 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Parse out the parent ion from filterText
         /// </summary>
-        /// <param name="filterText"></param>
-        /// <param name="parentIonMz">Parent ion m/z (output)</param>
-        /// <returns>True if success</returns>
         /// <remarks>
         /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
         /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
@@ -152,6 +149,9 @@ namespace ThermoRawFileReader
         ///      PHRPReader (https://github.com/PNNL-Comp-Mass-Spec/PHRP)
         /// </para>
         /// </remarks>
+        /// <param name="filterText"></param>
+        /// <param name="parentIonMz">Parent ion m/z (output)</param>
+        /// <returns>True if success</returns>
         public static bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
         {
             Regex matcher;
@@ -181,16 +181,16 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Parse out the parent ion and collision energy from filterText
         /// </summary>
-        /// <param name="filterText"></param>
-        /// <param name="parentIonMz">Parent ion m/z (output)</param>
-        /// <param name="msLevel">MSLevel (output)</param>
-        /// <param name="collisionMode">Collision mode (output)</param>
-        /// <returns>True if success</returns>
         /// <remarks>
         /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
         /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
         /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
         /// </remarks>
+        /// <param name="filterText"></param>
+        /// <param name="parentIonMz">Parent ion m/z (output)</param>
+        /// <param name="msLevel">MSLevel (output)</param>
+        /// <param name="collisionMode">Collision mode (output)</param>
+        /// <returns>True if success</returns>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz, out int msLevel, out string collisionMode)
         {
             return ExtractParentIonMZFromFilterText(filterText, out parentIonMz, out msLevel, out collisionMode, out _);
@@ -199,17 +199,17 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Parse out the parent ion and collision energy from filterText
         /// </summary>
+        /// <remarks>
+        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
+        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
+        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// </remarks>
         /// <param name="filterText"></param>
         /// <param name="parentIonMz">Parent ion m/z (output)</param>
         /// <param name="msLevel">MSLevel (output)</param>
         /// <param name="collisionMode">Collision mode (output)</param>
         /// <param name="parentIons">Output: parent ion list</param>
         /// <returns>True if success</returns>
-        /// <remarks>
-        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
-        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
-        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
-        /// </remarks>
         public static bool ExtractParentIonMZFromFilterText(
             string filterText,
             out double parentIonMz,
@@ -443,14 +443,14 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Extract the MS Level from the filter string
         /// </summary>
-        /// <param name="filterText"></param>
-        /// <param name="msLevel"></param>
-        /// <param name="mzText"></param>
-        /// <returns>True if found and False if no match</returns>
         /// <remarks>
         /// Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in filterText
         /// Populates msLevel with the number after "ms" and mzText with the text after "ms2"
         /// </remarks>
+        /// <param name="filterText"></param>
+        /// <param name="msLevel"></param>
+        /// <param name="mzText"></param>
+        /// <returns>True if found and False if no match</returns>
         public static bool ExtractMSLevel(string filterText, out int msLevel, out string mzText)
         {
             var matchTextLength = 0;
