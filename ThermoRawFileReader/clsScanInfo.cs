@@ -105,6 +105,11 @@ namespace ThermoRawFileReader
         public double ParentIonMZ { get; set; }
 
         /// <summary>
+        /// Parent ion list
+        /// </summary>
+        public List<ParentIonInfoType> ParentIons { get; }
+
+        /// <summary>
         /// The monoisotopic parent ion m/z, as determined by the Thermo software
         /// </summary>
         [Obsolete("Unused")]
@@ -233,6 +238,7 @@ namespace ThermoRawFileReader
             CollisionMode = string.Empty;
             ActivationType = ActivationTypeConstants.Unknown;
 
+            ParentIons = new List<ParentIonInfoType>();
             ScanEvents = new List<KeyValuePair<string, string>>();
             StatusLog = new List<KeyValuePair<string, string>>();
         }

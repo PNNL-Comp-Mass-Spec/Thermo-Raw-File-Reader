@@ -1142,22 +1142,35 @@ namespace ThermoRawFileReader
                     else
                     {
                         // Parse out the parent ion and collision energy from .FilterText
-                        if (ExtractParentIonMZFromFilterText(scanInfo.FilterText, out var parentIonMz, out var msLevel, out var collisionMode))
+                        if (ExtractParentIonMZFromFilterText(
+                                scanInfo.FilterText,
+                                out var parentIonMz,
+                                out var msLevelMSn,
+                                out var collisionMode,
+                                out var parentIons))
                         {
                             scanInfo.ParentIonMZ = parentIonMz;
                             scanInfo.CollisionMode = collisionMode;
 
-                            if (msLevel > 2)
+                            if (msLevelMSn > 2)
                             {
-                                scanInfo.MSLevel = msLevel;
+                                scanInfo.MSLevel = msLevelMSn;
                             }
 
                             // Check whether this is an SRM MS2 scan
                             scanInfo.MRMScanType = DetermineMRMScanType(scanInfo.FilterText);
+
+                            scanInfo.ParentIons.AddRange(parentIons);
+
+                            // Determine the parent scan
+                            if (getParentScan && GetParentScanNumber(scanInfo, out var parentScan))
+                            {
+                                scanInfo.ParentScan = parentScan;
+                            }
                         }
                         else
                         {
-                            if (ValidateMSScan(scanInfo.FilterText, out msLevel, out var simScan, out var mrmScanType, out var zoomScan))
+                            if (ValidateMSScan(scanInfo.FilterText, out var msLevel, out var simScan, out var mrmScanType, out var zoomScan))
                             {
                                 // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                                 scanInfo.MSLevel = msLevel;
