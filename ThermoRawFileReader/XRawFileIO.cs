@@ -1103,6 +1103,8 @@ namespace ThermoRawFileReader
                     return false;
 
                 retentionTime = mXRawFile.RetentionTimeFromScanNumber(scan);
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -1110,8 +1112,6 @@ namespace ThermoRawFileReader
                 RaiseWarningMessage(msg);
                 return false;
             }
-
-            return true;
         }
 
         /// <summary>
