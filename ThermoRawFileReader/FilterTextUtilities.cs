@@ -462,15 +462,20 @@ namespace ThermoRawFileReader
             var matchTextLength = 0;
 
             msLevel = 1;
-            var charIndex = 0;
 
             var msMatch = mFindMS.Match(filterText);
+
+            int charIndex;
 
             if (msMatch.Success)
             {
                 msLevel = Convert.ToInt32(msMatch.Groups["MSLevel"].Value);
                 charIndex = filterText.IndexOf(msMatch.ToString(), StringComparison.OrdinalIgnoreCase);
                 matchTextLength = msMatch.Length;
+            }
+            else
+            {
+                charIndex = -1;
             }
 
             if (charIndex > 0)
