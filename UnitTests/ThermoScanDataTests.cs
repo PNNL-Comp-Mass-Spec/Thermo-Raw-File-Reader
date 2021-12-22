@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using PRISM;
 using ThermoRawFileReader;
 
 namespace RawFileReaderTests
@@ -397,6 +398,54 @@ namespace RawFileReaderTests
         }
 
         [Test]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 500, 525, "", "502, 503, 504", "", "", "", "506, 507, 508", "", "", "", "510, 511, 512", "", "", "", "514, 515, 516", "", "", "", "518, 519, 520", "", "", "", "522, 523, 524", "", "", "", "526, 527, 528")]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 500, 525, "", "", "", "505, 506", "508, 509", "", "", "511, 512, 513, 514", "", "", "516 ", "", "", "", "", "518, 519, 520", "", "", "", "", "", "523 ", "525, 526", "", "528, 529", "")]
+        [TestCase("Angiotensin_325-CID.raw", 1, 5, "", "", "", "", "")]
+        [TestCase("Angiotensin_AllScans.raw", 510, 525, "", "513, 514, 515", "516, 517, 518", "", "", "", "", "", "", "541, 542, 543, 553, 554", "523, 524, 525", "526, 527, 528", "529, 530, 531", "", "", "")]
+        public void TestGetDependentScans(string rawFileName, int startScan, int endScan, params string[] expectedDependentScans)
+        {
+            var dataFile = GetRawDataFile(rawFileName);
+
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            var i = 0;
+
+            for (var scanNumber = startScan; scanNumber <= endScan; scanNumber++)
+            {
+                if (!reader.GetScanInfo(scanNumber, out var scanInfo))
+                {
+                    ConsoleMsgUtils.ShowWarning("Invalid scan number: {0}", scanNumber);
+                    i++;
+                    continue;
+                }
+
+                var dependentScanList = string.Join(", ", scanInfo.DependentScans);
+
+                Console.WriteLine("MS{0} scan {1,-4} has dependent scans: {2,-4}", scanInfo.MSLevel, scanNumber, dependentScanList);
+
+                if (i < expectedDependentScans.Length && !string.IsNullOrWhiteSpace(expectedDependentScans[i]))
+                {
+                    var scansToMatch = expectedDependentScans[i].Split(',');
+
+                    if (scansToMatch.Length == 0)
+                        break;
+
+                    for (var j = 0; j < scansToMatch.Length; j++)
+                    {
+                        var scanToMatch = int.Parse(scansToMatch[j]);
+
+                        Assert.AreEqual(
+                            scanToMatch, scanInfo.DependentScans[j],
+                            "Dependent scan does not match expected value: {0}",
+                            scanToMatch);
+                    }
+                }
+
+                i++;
+            }
+        }
+
+        [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 3316)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 71147)]
         [TestCase("Angiotensin_325-CID.raw", 10)]
@@ -415,6 +464,45 @@ namespace RawFileReaderTests
             Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
             if (expectedResult >= 0)
                 Assert.AreEqual(expectedResult, scanCount, "Scan count mismatch");
+        }
+
+        [Test]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 500, 525, 497, 0, 501, 501, 501, 0, 505, 505, 505, 0, 509, 509, 509, 0, 513, 513, 513, 0, 517, 517, 517, 0, 521, 521, 521, 0)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 500, 525, 493, 493, 0, 0, 0, 503, 503, 0, 504, 504, 0, 507, 507, 507, 507, 0, 510, 0, 515, 515, 515, 0, 0, 521, 0, 522)]
+        [TestCase("Angiotensin_325-CID.raw", 1, 5, -1, -1, -1, -1, -1)]
+        [TestCase("Angiotensin_325-ETciD-15.raw", 1, 5, -1, -1, -1, -1, -1)]
+        [TestCase("Angiotensin_325-ETD.raw", 1, 5, -1, -1, -1, -1, -1)]
+        [TestCase("Angiotensin_325-HCD.raw", 1, 5, -1, -1, -1, -1, -1)]
+        [TestCase("Angiotensin_AllScans.raw", 500, 550, 477, 477, 499, 499, 499, 500, 500, 500, 501, 501, 501, 477, 477, 511, 511, 511, 512, 512, 512, 0, 498, 498, 498, 520, 520, 520, 521, 521, 521, 522, 522, 522, 498, 498, 532, 532, 532, 533, 533, 533, 0, 519, 519, 519, 541, 541, 541, 542, 542, 542, 543)]
+        public void TestGetParentScan(string rawFileName, int startScan, int endScan, params int[] expectedParents)
+        {
+            var dataFile = GetRawDataFile(rawFileName);
+
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            var i = 0;
+
+            for (var scanNumber = startScan; scanNumber <= endScan; scanNumber++)
+            {
+                if (!reader.GetScanInfo(scanNumber, out var scanInfo))
+                {
+                    ConsoleMsgUtils.ShowWarning("Invalid scan number: {0}", scanNumber);
+                    i++;
+                    continue;
+                }
+
+                Console.WriteLine("MS{0} scan {1,-4} has parent {2,-4}", scanInfo.MSLevel, scanNumber, scanInfo.ParentScan);
+
+                if (i < expectedParents.Length && expectedParents[i] != 0)
+                {
+                    Assert.AreEqual(
+                        expectedParents[i], scanInfo.ParentScan,
+                        "Parent scan does not match expected value: {0}",
+                        expectedParents[i]);
+                }
+
+                i++;
+            }
         }
 
         [Test]
