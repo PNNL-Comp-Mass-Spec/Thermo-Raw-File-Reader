@@ -809,17 +809,34 @@ namespace ThermoRawFileReader
         /// <param name="scan">Scan number</param>
         public List<double> GetCollisionEnergy(int scan)
         {
-            var collisionEnergies = new List<double>();
-
             try
             {
                 if (mXRawFile == null)
-                    return collisionEnergies;
+                    return new List<double>();
 
                 GetScanInfo(scan, out var scanInfo);
 
                 ExtractParentIonMZFromFilterText(scanInfo.FilterText, out _, out _, out _, out var parentIons);
 
+                return GetCollisionEnergy(parentIons);
+            }
+            catch (Exception ex)
+            {
+                var msg = "Error: Exception in GetCollisionEnergy (for scan): " + ex.Message;
+                RaiseErrorMessage(msg, ex);
+                return new List<double>();
+            }
+        }
+        /// <summary>
+        /// Return the collision energy (or energies) for the given parent ion(s)
+        /// </summary>
+        /// <param name="parentIons">Parent ion list</param>
+        public List<double> GetCollisionEnergy(List<ParentIonInfoType> parentIons)
+        {
+            var collisionEnergies = new List<double>();
+
+            try
+            {
                 foreach (var parentIon in parentIons)
                 {
                     collisionEnergies.Add(parentIon.CollisionEnergy);
@@ -836,7 +853,7 @@ namespace ThermoRawFileReader
             }
             catch (Exception ex)
             {
-                var msg = "Error: Exception in GetCollisionEnergy: " + ex.Message;
+                var msg = "Error: Exception in GetCollisionEnergy (for parent ions): " + ex.Message;
                 RaiseErrorMessage(msg, ex);
             }
 

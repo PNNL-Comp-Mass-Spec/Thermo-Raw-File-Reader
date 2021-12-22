@@ -587,7 +587,7 @@ namespace Test_ThermoRawFileReader
 
                     if (mLoadCollisionEnergies)
                     {
-                        var collisionEnergies = reader.GetCollisionEnergy(scanNum);
+                        var collisionEnergies = reader.GetCollisionEnergy(scanInfo.ParentIons);
 
                         if (collisionEnergies.Count == 0)
                         {
