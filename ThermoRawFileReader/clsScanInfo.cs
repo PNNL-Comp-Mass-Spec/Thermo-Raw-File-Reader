@@ -126,6 +126,17 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
+        /// The parent scan number for MS2 or MS3 spectra
+        /// </summary>
+        /// <remarks>0 for MS1 spectra</remarks>
+        public int ParentScan { get; set; }
+
+        /// <summary>
+        /// List of scan numbers where the current scan is the parent scan (master scan)
+        /// </summary>
+        public List<int> DependentScans { get; }
+
+        /// <summary>
         /// The monoisotopic parent ion m/z, as determined by the Thermo software
         /// </summary>
         [Obsolete("Unused")]
@@ -239,6 +250,8 @@ namespace ThermoRawFileReader
             ActivationType = ActivationTypeConstants.Unknown;
 
             ParentIons = new List<ParentIonInfoType>();
+            DependentScans = new List<int>();
+
             ScanEvents = new List<KeyValuePair<string, string>>();
             StatusLog = new List<KeyValuePair<string, string>>();
         }

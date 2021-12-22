@@ -861,6 +861,52 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
+        /// Get the list of scans that have this scan as the parent scan
+        /// </summary>
+        /// <param name="scanInfo"></param>
+        /// <param name="dependentScans"></param>
+        /// <returns>True if dependent</returns>
+        private bool GetDependentScans(clsScanInfo scanInfo, out List<int> dependentScans)
+        {
+            dependentScans = new List<int>();
+
+            // Note that .GetScanDependents does not use the second parameter (filterPrecisionDecimals), so the value provided does not matter
+            var scanDependents = mXRawFile.GetScanDependents(scanInfo.ScanNumber, 3);
+
+            if (scanDependents?.ScanDependentDetailArray == null || scanDependents.ScanDependentDetailArray.Length == 0)
+                return false;
+
+            foreach (var dependentScan in scanDependents.ScanDependentDetailArray.ToList())
+            {
+                var scanIndex = dependentScan.ScanIndex;
+
+                // For files that start with scan 1, the scan number should be one more than the scan index
+                // However, the scan index values returned by mXRawFile.GetScanDependents do not follow this rule
+                // Inspect the ParentScan of both scan scanIndex and scan scanIndex+1 to determine which is the true dependent scan of this scan
+
+                var scanNumber = scanIndex + mXRawFile.RunHeaderEx.FirstSpectrum;
+
+                if (scanIndex == scanNumber)
+                {
+                    dependentScans.Add(scanNumber);
+                }
+                else
+                {
+                    if (GetScanInfo(scanIndex, out var infoByIndex, true, false) && infoByIndex.ParentScan == scanInfo.ScanNumber)
+                    {
+                        dependentScans.Add(infoByIndex.ScanNumber);
+                    }
+                    else if (GetScanInfo(scanNumber, out var infoByScanNumber, true, false) && infoByScanNumber.ParentScan == scanInfo.ScanNumber)
+                    {
+                        dependentScans.Add(infoByScanNumber.ScanNumber);
+                    }
+                }
+            }
+
+            return dependentScans.Count > 0;
+        }
+
+        /// <summary>
         /// Get the instrument information of the specified device
         /// </summary>
         public DeviceInfo GetDeviceInfo(Device deviceType, int deviceNumber)
@@ -955,6 +1001,90 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
+        /// Determine the parent scan for a MS2 or MS3 scan
+        /// </summary>
+        /// <remarks>
+        /// <para>Looks for event "Master Scan Number" (or "Master Scan Number:") in scanInfo.ScanEvents</para>
+        /// <para>Uses an alternative search for older .raw files that do not have event "Master Scan Number"</para>
+        /// </remarks>
+        /// <param name="scanInfo"></param>
+        /// <param name="parentScanNumber">Parent scan number, or 0 if an MS1 scan (or unable to determine the parent)</param>
+        /// <returns>True if successful, otherwise false</returns>
+        private bool GetParentScanNumber(clsScanInfo scanInfo, out int parentScanNumber)
+        {
+            parentScanNumber = 0;
+
+            try
+            {
+                var matchFound = int.TryParse(
+                    scanInfo.ScanEvents.Find(x => x.Key.StartsWith("Master Scan Number", StringComparison.OrdinalIgnoreCase)).Value ??
+                    string.Empty,
+                    out parentScanNumber);
+
+                if (matchFound)
+                    return true;
+
+                if (scanInfo.MSLevel <= 1)
+                    return false;
+
+                // This is an older .raw file that does not have "Master Scan Number"
+                // Find the previous scan with an MSLevel one lower than the current one
+
+                var previousScanNumber = scanInfo.ScanNumber - 1;
+                var candidateParents = new List<clsScanInfo>();
+
+                while (previousScanNumber >= 1)
+                {
+                    if (GetScanInfo(previousScanNumber, out var previousScan, false, false))
+                    {
+                        if (previousScan.MSLevel == scanInfo.MSLevel - 1)
+                        {
+                            candidateParents.Add(previousScan);
+                        }
+
+                        if (previousScan.MSLevel <= 1 || previousScan.MSLevel < scanInfo.MSLevel - 1)
+                            break;
+                    }
+
+                    previousScanNumber--;
+                }
+
+                if (candidateParents.Count == 0)
+                {
+                    return false;
+                }
+
+                if (candidateParents.Count == 1)
+                {
+                    parentScanNumber = candidateParents[0].ScanNumber;
+                    return true;
+                }
+
+                // Multiple candidates
+                // Find the one with a parent ion that matches one of this scan's parent ions (preferably the first one)
+
+                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+                foreach (var parentIon in scanInfo.ParentIons)
+                {
+                    foreach (var candidateParent in candidateParents.Where(candidateParent => Math.Abs(candidateParent.ParentIonMZ - parentIon.ParentIonMZ) < 0.001))
+                    {
+                        parentScanNumber = candidateParent.ScanNumber;
+                        return true;
+                    }
+                }
+
+                // No match
+                return false;
+            }
+            catch (Exception ex)
+            {
+                var msg = "Error: Exception in GetParentScanNumber: " + ex.Message;
+                RaiseWarningMessage(msg);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Get the retention time for the specified scan. Use when searching for scans in a time range.
         /// </summary>
         /// <param name="scan">Scan number</param>
@@ -989,8 +1119,31 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="scan">Scan number</param>
         /// <param name="scanInfo">Scan header info class</param>
-        /// <returns>True if no error, False if an error</returns>
+        /// <returns>True if successful, False if an error</returns>
         public bool GetScanInfo(int scan, out clsScanInfo scanInfo)
+        {
+            return GetScanInfo(scan, out scanInfo, true, true);
+        }
+
+        /// <summary>
+        /// Get the header info for the specified scan
+        /// </summary>
+        /// <param name="scan">Scan number</param>
+        /// <param name="scanInfo">Scan header info class</param>
+        /// <param name="getParentScan">
+        /// When true, determine the parent scan for this scan.
+        /// This is used by method GetParentScanNumber to prevent circular references.
+        /// </param>
+        /// <param name="getDependentScans">
+        /// When true, determine the dependent scans for this scan.
+        /// This is used by method GetDependentScans to prevent circular references.
+        /// </param>
+        /// <returns>True if successful, False if an error</returns>
+        private bool GetScanInfo(
+            int scan,
+            out clsScanInfo scanInfo,
+            bool getParentScan,
+            bool getDependentScans)
         {
             // Check for the scan in the cache
             if (mCachedScanInfo.TryGetValue(scan, out scanInfo))
@@ -1248,6 +1401,12 @@ namespace ThermoRawFileReader
                     scanInfo.ActivationType = ActivationTypeConstants.CID;
                 }
 
+                // Cache the list of dependent scans (if any)
+                if (getDependentScans && GetDependentScans(scanInfo, out var dependentScans))
+                {
+                    scanInfo.DependentScans.AddRange(dependentScans);
+                }
+
                 MRMInfo newMRMInfo;
 
                 if (scanInfo.MRMScanType != MRMScanTypeConstants.NotMRM)
@@ -1308,7 +1467,10 @@ namespace ThermoRawFileReader
                 return false;
             }
 
-            CacheScanInfo(scan, scanInfo);
+            if (getParentScan && getDependentScans)
+            {
+                CacheScanInfo(scan, scanInfo);
+            }
 
             return true;
         }
