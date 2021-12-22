@@ -13,7 +13,7 @@ using ThermoFisher.CommonCore.RawFileReader;
 using ThermoFisher.CommonCore.BackgroundSubtraction;
 using ThermoFisher.CommonCore.Data.FilterEnums;
 
-[assembly:CLSCompliant(false)]
+[assembly: CLSCompliant(false)]
 
 // The methods in this class use ThermoFisher.CommonCore.RawFileReader.dll
 // and related DLLs to extract scan header info and mass spec data (m/z and intensity lists)
@@ -452,9 +452,10 @@ namespace ThermoRawFileReader
         /// Parse out the parent ion from filterText
         /// </summary>
         /// <remarks>
-        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
-        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
-        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// <para>If multiple parent ion m/z values are listed, parentIonMz will have the last one</para>
+        /// <para>However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed</para>
+        /// <para>For MS3 spectra with ions listed as 1312.95@45.00 873.85@45.00, the last m/z value listed is the m/z of the first ion that was isolated</para>
+        /// <para>For MS3 spectra with ions listed as 377.9027@cid35.00 478.3521@hcd55.00, the first m/z value listed is the m/z of the parent MS2 spectrum</para>
         /// </remarks>
         /// <param name="filterText"></param>
         /// <param name="parentIonMz">Parent ion m/z (output)</param>
@@ -468,9 +469,10 @@ namespace ThermoRawFileReader
         /// Parse out the parent ion and collision energy from filterText
         /// </summary>
         /// <remarks>
-        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
-        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
-        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// <para>If multiple parent ion m/z values are listed, parentIonMz will have the last one</para>
+        /// <para>However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed</para>
+        /// <para>For MS3 spectra with ions listed as 1312.95@45.00 873.85@45.00, the last m/z value listed is the m/z of the first ion that was isolated</para>
+        /// <para>For MS3 spectra with ions listed as 377.9027@cid35.00 478.3521@hcd55.00, the first m/z value listed is the m/z of the parent MS2 spectrum</para>
         /// </remarks>
         /// <param name="filterText"></param>
         /// <param name="parentIonMz">Parent ion m/z (output)</param>
@@ -486,9 +488,10 @@ namespace ThermoRawFileReader
         /// Parse out the parent ion and collision energy from filterText
         /// </summary>
         /// <remarks>
-        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
-        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
-        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// <para>If multiple parent ion m/z values are listed, parentIonMz will have the last one</para>
+        /// <para>However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed</para>
+        /// <para>For MS3 spectra with ions listed as 1312.95@45.00 873.85@45.00, the last m/z value listed is the m/z of the first ion that was isolated</para>
+        /// <para>For MS3 spectra with ions listed as 377.9027@cid35.00 478.3521@hcd55.00, the first m/z value listed is the m/z of the parent MS2 spectrum</para>
         /// </remarks>
         /// <param name="filterText"></param>
         /// <param name="parentIonMz">Parent ion m/z (output)</param>
@@ -526,7 +529,7 @@ namespace ThermoRawFileReader
         /// Populate mFileInfo
         /// </summary>
         /// <remarks>Called from OpenRawFile</remarks>
-        /// <returns>True if no error, False if an error</returns>
+        /// <returns>True if successful, False if an error</returns>
         private bool FillFileInfo()
         {
             try
@@ -1089,7 +1092,7 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="scan">Scan number</param>
         /// <param name="retentionTime">retention time</param>
-        /// <returns>True if no error, False if an error</returns>
+        /// <returns>True if successful, False if an error</returns>
         public bool GetRetentionTime(int scan, out double retentionTime)
         {
             retentionTime = 0;
@@ -1991,17 +1994,21 @@ namespace ThermoRawFileReader
                     msLevel = 1;
                     simScan = true;
                     return true;
+
                 case MRMScanTypeConstants.MRMQMS:
                     // Multiple SIM ranges in a single scan
                     msLevel = 1;
                     simScan = true;
                     return true;
+
                 case MRMScanTypeConstants.SRM:
                     msLevel = 2;
                     return true;
+
                 case MRMScanTypeConstants.FullNL:
                     msLevel = 2;
                     return true;
+
                 default:
                     ExtractMSLevel(filterText, out msLevel, out _);
                     return false;

@@ -25,6 +25,7 @@ namespace ThermoRawFileReader
         private const string MASS_RANGES_REGEX = "(?<StartMass>[0-9.]+)-(?<EndMass>[0-9.]+)";
 
         // This RegEx matches text like 1312.95@45.00 or 756.98@cid35.00 or 902.5721@etd120.55@cid20.00
+        // For a filter string of the form "ms3 533.1917@cid35.00 434.9481@hcd55.00", it matches "533.1917@cid35.00"
         private const string PARENT_ION_REGEX = "(?<ParentMZ>[0-9.]+)@(?<CollisionMode1>[a-z]*)(?<CollisionEnergy1>[0-9.]+)(@(?<CollisionMode2>[a-z]+)(?<CollisionEnergy2>[0-9.]+))?";
 
         // This RegEx is used to extract parent ion m/z from a filter string that does not contain msx
@@ -138,15 +139,16 @@ namespace ThermoRawFileReader
         /// Parse out the parent ion from filterText
         /// </summary>
         /// <remarks>
-        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
-        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
-        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// <para>If multiple parent ion m/z values are listed, parentIonMz will have the last one</para>
+        /// <para>However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed</para>
+        /// <para>For MS3 spectra with ions listed as 1312.95@45.00 873.85@45.00, the last m/z value listed is the m/z of the first ion that was isolated</para>
+        /// <para>For MS3 spectra with ions listed as 377.9027@cid35.00 478.3521@hcd55.00, the first m/z value listed is the m/z of the parent MS2 spectrum</para>
         /// </remarks>
         /// <remarks>
         /// <para>
         /// This method was created for use in other programs that only need the parent ion m/z, and no other functions from ThermoRawFileReader.
         /// Other projects that use this:
-        ///      PHRPReader (https://github.com/PNNL-Comp-Mass-Spec/PHRP)
+        ///   PHRPReader (https://github.com/PNNL-Comp-Mass-Spec/PHRP)
         /// </para>
         /// </remarks>
         /// <param name="filterText"></param>
@@ -182,9 +184,10 @@ namespace ThermoRawFileReader
         /// Parse out the parent ion and collision energy from filterText
         /// </summary>
         /// <remarks>
-        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
-        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
-        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// <para>If multiple parent ion m/z values are listed, parentIonMz will have the last one</para>
+        /// <para>However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed</para>
+        /// <para>For MS3 spectra with ions listed as 1312.95@45.00 873.85@45.00, the last m/z value listed is the m/z of the first ion that was isolated</para>
+        /// <para>For MS3 spectra with ions listed as 377.9027@cid35.00 478.3521@hcd55.00, the first m/z value listed is the m/z of the parent MS2 spectrum</para>
         /// </remarks>
         /// <param name="filterText"></param>
         /// <param name="parentIonMz">Parent ion m/z (output)</param>
@@ -200,16 +203,17 @@ namespace ThermoRawFileReader
         /// Parse out the parent ion and collision energy from filterText
         /// </summary>
         /// <remarks>
-        /// If multiple parent ion m/z values are listed, parentIonMz will have the last one.
-        /// However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed.
-        /// For MS3 spectra, the last m/z value listed is the m/z of the first ion that was isolated.
+        /// <para>If multiple parent ion m/z values are listed, parentIonMz will have the last one</para>
+        /// <para>However, if the filter text contains "Full msx", parentIonMz will have the first parent ion listed</para>
+        /// <para>For MS3 spectra with ions listed as 1312.95@45.00 873.85@45.00, the last m/z value listed is the m/z of the first ion that was isolated</para>
+        /// <para>For MS3 spectra with ions listed as 377.9027@cid35.00 478.3521@hcd55.00, the first m/z value listed is the m/z of the parent MS2 spectrum</para>
         /// </remarks>
         /// <param name="filterText"></param>
         /// <param name="parentIonMz">Parent ion m/z (output)</param>
         /// <param name="msLevel">MSLevel (output)</param>
         /// <param name="collisionMode">Collision mode (output)</param>
         /// <param name="parentIons">Output: parent ion list</param>
-        /// <returns>True if success</returns>
+        /// <returns>True if this is a ms2, ms3, Full ms, Z ms, etc. scan, otherwise false (returns false if ExtractMSLevel returns false)</returns>
         public static bool ExtractParentIonMZFromFilterText(
             string filterText,
             out double parentIonMz,
@@ -231,6 +235,7 @@ namespace ThermoRawFileReader
             // or "+ p ms2 777.00@cid30.00 [210.00-1200.00]
             // or "+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]
             // or "FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]"
+            // or "FTMS + c NSI d Full ms3 533.1917@cid35.00 434.9481@hcd55.00 [110.0000-1054.0000]"
             // or "ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]"
             // or "+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515"
 
@@ -269,6 +274,7 @@ namespace ThermoRawFileReader
                 var bracketIndex = mzText.IndexOf('[');
                 if (bracketIndex > 0)
                 {
+                    // Remove ion ranges enclosed in square brackets
                     mzText = mzText.Substring(0, bracketIndex);
                 }
 
