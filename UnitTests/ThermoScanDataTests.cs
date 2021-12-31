@@ -409,6 +409,7 @@ namespace RawFileReaderTests
             using var reader = new XRawFileIO(dataFile.FullName);
 
             var i = 0;
+            var validScanCount = 0;
 
             for (var scanNumber = startScan; scanNumber <= endScan; scanNumber++)
             {
@@ -418,6 +419,8 @@ namespace RawFileReaderTests
                     i++;
                     continue;
                 }
+
+                validScanCount++;
 
                 var dependentScanList = string.Join(", ", scanInfo.DependentScans);
 
@@ -443,6 +446,9 @@ namespace RawFileReaderTests
 
                 i++;
             }
+
+            var percentValid = validScanCount / (double)(endScan - startScan + 1) * 100;
+            Assert.Greater(percentValid, 90, "Over 10% of the spectra had invalid scan numbers");
         }
 
         [Test]
@@ -481,6 +487,7 @@ namespace RawFileReaderTests
             using var reader = new XRawFileIO(dataFile.FullName);
 
             var i = 0;
+            var validScanCount = 0;
 
             for (var scanNumber = startScan; scanNumber <= endScan; scanNumber++)
             {
@@ -490,6 +497,8 @@ namespace RawFileReaderTests
                     i++;
                     continue;
                 }
+
+                validScanCount++;
 
                 Console.WriteLine("MS{0} scan {1,-4} has parent {2,-4}", scanInfo.MSLevel, scanNumber, scanInfo.ParentScan);
 
@@ -503,6 +512,9 @@ namespace RawFileReaderTests
 
                 i++;
             }
+
+            var percentValid = validScanCount / (double)(endScan - startScan + 1) * 100;
+            Assert.Greater(percentValid, 90, "Over 10% of the spectra had invalid scan numbers");
         }
 
         [Test]
