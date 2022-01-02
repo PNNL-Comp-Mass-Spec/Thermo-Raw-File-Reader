@@ -500,11 +500,11 @@ namespace ThermoRawFileReader
         /// <param name="parentIons">Output: parent ion list</param>
         /// <returns>True if success</returns>
         public static bool ExtractParentIonMZFromFilterText(
-                    string filterText,
-                    out double parentIonMz,
-                    out int msLevel,
-                    out string collisionMode,
-                    out List<ParentIonInfoType> parentIons)
+            string filterText,
+            out double parentIonMz,
+            out int msLevel,
+            out string collisionMode,
+            out List<ParentIonInfoType> parentIons)
         {
             return FilterTextUtilities.ExtractParentIonMZFromFilterText(filterText, out parentIonMz, out msLevel, out collisionMode, out parentIons);
         }
