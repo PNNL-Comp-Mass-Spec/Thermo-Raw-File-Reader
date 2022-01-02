@@ -500,5 +500,37 @@ namespace ThermoRawFileReader
 
             return string.Empty;
         }
+
+        /// <summary>
+        /// Return the collision energy (or energies) for the given parent ion(s)
+        /// </summary>
+        /// <param name="parentIons">Parent ion list</param>
+        public static List<double> GetCollisionEnergy(List<ParentIonInfoType> parentIons)
+        {
+            var collisionEnergies = new List<double>();
+
+            try
+            {
+                foreach (var parentIon in parentIons)
+                {
+                    collisionEnergies.Add(parentIon.CollisionEnergy);
+
+                    if (parentIon.CollisionEnergy2 > 0)
+                    {
+                        // Filter text is of the form: ITMS + c NSI r d sa Full ms2 1143.72@etd120.55@cid20.00 [120.00-2000.00]
+                        // Data will be stored as
+                        // parentIon.CollisionEnergy = 120.55
+                        // parentIon.CollisionEnergy2 = 20.0
+                        collisionEnergies.Add(parentIon.CollisionEnergy2);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: Exception in GetCollisionEnergy (for parent ions): " + ex.Message);
+            }
+
+            return collisionEnergies;
+        }
     }
 }

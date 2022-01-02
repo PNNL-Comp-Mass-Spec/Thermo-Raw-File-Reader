@@ -821,7 +821,7 @@ namespace ThermoRawFileReader
 
                 ExtractParentIonMZFromFilterText(scanInfo.FilterText, out _, out _, out _, out var parentIons);
 
-                return GetCollisionEnergy(parentIons);
+                return FilterTextUtilities.GetCollisionEnergy(parentIons);
             }
             catch (Exception ex)
             {
@@ -836,31 +836,7 @@ namespace ThermoRawFileReader
         /// <param name="parentIons">Parent ion list</param>
         public List<double> GetCollisionEnergy(List<ParentIonInfoType> parentIons)
         {
-            var collisionEnergies = new List<double>();
-
-            try
-            {
-                foreach (var parentIon in parentIons)
-                {
-                    collisionEnergies.Add(parentIon.CollisionEnergy);
-
-                    if (parentIon.CollisionEnergy2 > 0)
-                    {
-                        // Filter text is of the form: ITMS + c NSI r d sa Full ms2 1143.72@etd120.55@cid20.00 [120.00-2000.00]
-                        // Data will be stored as
-                        // parentIon.CollisionEnergy = 120.55
-                        // parentIon.CollisionEnergy2 = 20.0
-                        collisionEnergies.Add(parentIon.CollisionEnergy2);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                var msg = "Error: Exception in GetCollisionEnergy (for parent ions): " + ex.Message;
-                RaiseErrorMessage(msg, ex);
-            }
-
-            return collisionEnergies;
+            return FilterTextUtilities.GetCollisionEnergy(parentIons);
         }
 
         /// <summary>
