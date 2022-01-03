@@ -1,11 +1,15 @@
 @echo off
 echo.
-echo Be sure to compile in Release mode before continuing
 echo.
-echo Note that this batch file does NOT push the DLL to \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution
+echo.
+echo ================================================================================================
+echo This batch file is obsolete since we now reference the ThermoRawFileReader using a NuGet package
+echo See \\proto-2\CI_Publish\ThermoRawFileReader
+echo ================================================================================================
+echo.
 echo.
 
-pause
+Goto Done
 
 echo Copy the DLL, PDB, and XML to Lib directories
 @echo on
@@ -130,6 +134,8 @@ xcopy Release\net472\ThermoRawFileReader.dll "F:\Documents\Projects\Instrument-S
 xcopy Release\net472\ThermoRawFileReader.XML F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Lib\ /Y /D
 xcopy Release\net472\ThermoRawFileReader.XML "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Source Code\FAIMS MzXML Generator\FAIMS MzXML Generator\bin\Debug\" /Y /D
 xcopy Release\net472\ThermoRawFileReader.XML "F:\Documents\Projects\Instrument-Software\FAIMS_MzXML_Generator\Source Code\WriteFaimsXMLFromRawFile\WriteFaimsXMLFromRawFile\bin\Debug\" /Y /D
+
+:Done
 
 @echo off
 pause
