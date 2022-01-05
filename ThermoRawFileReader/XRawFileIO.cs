@@ -1735,7 +1735,7 @@ namespace ThermoRawFileReader
                     }
                     else
                     {
-                        var tuneMethodSetting = new TuneMethodSettingType()
+                        var tuneMethodSetting = new TuneMethodSettingType
                         {
                             Category = string.Copy(tuneCategory),
                             Name = tuneSettingNames[settingIndex].TrimEnd(':'),

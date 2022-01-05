@@ -98,7 +98,7 @@ namespace RawFileReaderTests
                 {27804, ce30},
                 {27805, ms1Scan},
                 {27806, ce30},
-                {27807, ce30},
+                {27807, ce30}
             };
             expectedData.Add("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", file5Data);
 

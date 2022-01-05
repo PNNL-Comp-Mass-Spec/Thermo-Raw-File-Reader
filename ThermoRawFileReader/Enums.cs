@@ -212,7 +212,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Last Activation
         /// </summary>
-        LastActivation = 38,
+        LastActivation = 38
     }
 
     /// <summary>
