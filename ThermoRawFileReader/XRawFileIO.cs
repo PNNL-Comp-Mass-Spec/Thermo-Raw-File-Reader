@@ -2190,7 +2190,7 @@ namespace ThermoRawFileReader
                     // includes additional peak information by default, including centroids: fastest access
 
                     // Option 1: data = mXRawFile.GetSimplifiedCentroids(scan);
-                    //           This internally calls the same function as GetCentroidStream, and then copies data to new arrays.
+                    //           This internally calls the same function as GetCentroidStream, then copies data to new arrays.
                     // Option 2: Directly call GetCentroidStream
 
                     data = mXRawFile.GetCentroidStream(scan, false);
@@ -2206,7 +2206,7 @@ namespace ThermoRawFileReader
                 else
                 {
                     // Option 1: var scanData = mXRawFile.GetSimplifiedScan(scan);
-                    //           This internally calls the same function as GetSegmentedScanFromScanNumber, and then copies data to new arrays.
+                    //           This internally calls the same function as GetSegmentedScanFromScanNumber, then copies data to new arrays.
                     // Option 2: Directly call GetSegmentedScanFromScanNumber
 
                     var scanData = mXRawFile.GetSegmentedScanFromScanNumber(scan, null);

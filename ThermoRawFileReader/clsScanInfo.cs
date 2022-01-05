@@ -38,7 +38,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// SIM Scan Flag
         /// </summary>
-        /// <remarks>If multiple selected ion ranges are examined simultaneously, then this will be false but MRMScanType will be .MRMQMS</remarks>
+        /// <remarks>If multiple selected ion ranges are examined simultaneously, this will be false but MRMScanType will be .MRMQMS</remarks>
         /// <returns>True if this is a selected ion monitoring (SIM) scan (i.e. a small mass range is being examined)</returns>
         public bool SIMScan { get; set; }
 
