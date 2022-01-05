@@ -964,14 +964,51 @@ namespace RawFileReaderTests
         [TestCase("B5_50uM_MS_r1.RAW", 1, 20)]
         [TestCase("MNSLTFKK_ms.raw", 1, 88)]
         [TestCase("QCShew200uL.raw", 4000, 4100)]
+        [TestCase("Blank04_29Mar17_Smeagol.raw", 500, 600)]
         public void TestGetScanInfoMRM(string rawFileName, int scanStart, int scanEnd)
         {
-            // Keys in this Dictionary are filename, values are the expected SIM scan counts
-            var expectedData = new Dictionary<string, KeyValuePair<string, int>>
+            // Keys in this Dictionary are filename, values are a Dictionary of expected SIM scan counts (by type)
+            var expectedData = new Dictionary<string, Dictionary<string, int>>
             {
-                {"B5_50uM_MS_r1", new KeyValuePair<string, int>("200.0_600.0_1000.0", 20)},
-                {"MNSLTFKK_ms", new KeyValuePair<string, int>("200.1_700.0_1200.0", 88)},
-                {"QCShew200uL", new KeyValuePair<string, int>("400.0_900.0_1400.0", 101)}
+                {
+                    "B5_50uM_MS_r1", new Dictionary<string, int>
+                    {
+                        { "200.0_600.0_1000.0", 20 }
+                    }
+                },
+                {
+                    "MNSLTFKK_ms", new Dictionary<string, int>
+                    {
+                        { "200.1_700.0_1200.0", 88 }
+                    }
+                },
+                { "QCShew200uL", new Dictionary<string, int>
+                    {
+                        { "400.0_900.0_1400.0", 101 }
+                    }
+                },
+                { "Blank04_29Mar17_Smeagol", new Dictionary<string, int>
+                    {
+                        { "602.3_602.3_602.3", 16 },
+                        { "610.3_610.3_610.3", 17 },
+                        { "637.3_637.3_637.3", 17 },
+                        { "645.3_645.3_645.3", 17 },
+                        { "715.4_715.4_715.4", 16 },
+                        { "723.4_723.4_723.4", 17 },
+                        { "750.3_750.3_750.3", 17 },
+                        { "758.4_758.4_758.4", 17 },
+                        { "897.4_897.4_897.4", 17 },
+                        { "907.4_907.4_907.4", 17 },
+                        { "938.4_938.4_938.4", 17 },
+                        { "946.4_946.4_946.4", 17 },
+                        { "988.5_988.5_988.5", 16 },
+                        { "996.5_996.5_996.5", 17 },
+                        { "1012.5_1012.5_1012.5", 17 },
+                        { "1022.5_1022.5_1022.5", 17 },
+                        { "1141.5_1141.5_1141.5", 17 },
+                        { "1151.5_1151.5_1151.5", 17 }
+                    }
+                }
             };
 
             var dataFile = GetRawDataFile(rawFileName);
@@ -979,8 +1016,14 @@ namespace RawFileReaderTests
             using var reader = new XRawFileIO(dataFile.FullName);
 
             Console.WriteLine("Examining MRM details in {0}", dataFile.Name);
+            Console.WriteLine();
 
             var mrmRangeCountsActual = new Dictionary<string, int>();
+
+            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedMRMInfo))
+            {
+                Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+            }
 
             for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
@@ -1004,32 +1047,70 @@ namespace RawFileReaderTests
                         mrmRangeCountsActual.Add(mrmRangeKey, 1);
                     }
                 }
-
-                Assert.IsTrue(mrmRangeCountsActual.Count == 1, "Found {0} MRM scan ranges; expected to only find 1", mrmRangeCountsActual.Count);
             }
 
-            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedMRMInfo))
+            if (mrmRangeCountsActual.Count != expectedMRMInfo.Count)
             {
-                Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                Console.WriteLine("{0,-20} {1,-9}", "MRMScanRange", "Count");
+
+                foreach (var mrmRangeActual in mrmRangeCountsActual)
+                {
+                    Console.WriteLine("{0,-20} {1,-9}", mrmRangeActual.Key, mrmRangeActual.Value);
+                }
+
+                Assert.IsTrue(mrmRangeCountsActual.Count == expectedMRMInfo.Count,
+                    "Found {0} MRM scan ranges; expected to find {1}",
+                    mrmRangeCountsActual.Count,
+                    expectedMRMInfo.Count);
+
+                return;
             }
 
             Console.WriteLine("{0,-5} {1,-5} {2}", "Valid", "Count", "MRMScanRange");
 
-            var mrmRangeActual = mrmRangeCountsActual.First();
+            var mismatches = new List<string>();
 
-            if (expectedMRMInfo.Key == mrmRangeActual.Key)
+            foreach (var mrmRangeActual in mrmRangeCountsActual)
             {
-                var isValid = mrmRangeActual.Value == expectedMRMInfo.Value;
+                bool isValid;
 
-                Console.WriteLine("{0,-5} {1,5} {2}", isValid, mrmRangeActual.Value, mrmRangeActual.Key);
+                if (expectedMRMInfo.TryGetValue(mrmRangeActual.Key, out var expectedCount))
+                {
+                    isValid = mrmRangeActual.Value == expectedCount;
 
-                Assert.AreEqual(expectedMRMInfo.Value, mrmRangeActual.Value, "Scan type count mismatch");
+                    if (!isValid)
+                    {
+                        mismatches.Add(string.Format(
+                            "Unexpected MRM scan range found: {0} has {1} scans instead of {2}",
+                            mrmRangeActual.Key,
+                            mrmRangeActual.Value,
+                            expectedCount));
+                    }
+                }
+                else
+                {
+                    isValid = false;
+
+                    mismatches.Add(string.Format(
+                        "Unexpected MRM scan range found: {0} with {1} scans is not in the dictionary",
+                        mrmRangeActual.Key,
+                        mrmRangeActual.Value));
+                }
+
+                Console.WriteLine("{0,-5} {1,-5} {2}", isValid, mrmRangeActual.Value, mrmRangeActual.Key);
             }
-            else
+
+            if (mismatches.Count == 0)
+                return;
+
+            Console.WriteLine();
+
+            foreach (var item in mismatches)
             {
-                Console.WriteLine("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
-                Assert.Fail("Unexpected MRM scan range found: {0}", mrmRangeActual.Key);
+                Console.WriteLine(item);
             }
+
+            Assert.Fail("Unexpected MRM scan range(s) found");
         }
 
         [Test]
