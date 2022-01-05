@@ -1009,11 +1009,14 @@ namespace ThermoRawFileReader
 
                 // This is an older .raw file that does not have "Master Scan Number"
                 // Find the previous scan with an MSLevel one lower than the current one
+                // For speed purposes, do not back track more than 500 scans
 
                 var previousScanNumber = scanInfo.ScanNumber - 1;
                 var candidateParents = new List<clsScanInfo>();
 
-                while (previousScanNumber >= 1)
+                var minimumScanToExamine = Math.Max(1, scanInfo.ScanNumber - 500);
+
+                while (previousScanNumber >= minimumScanToExamine)
                 {
                     if (GetScanInfo(previousScanNumber, out var previousScan, false, false))
                     {
