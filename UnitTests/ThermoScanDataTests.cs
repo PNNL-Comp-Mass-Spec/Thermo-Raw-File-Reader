@@ -21,6 +21,7 @@ namespace RawFileReaderTests
         [TestCase("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw")]
         [TestCase("MZ0210MnxEF889ETD.raw")]
         [TestCase("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01.raw")]
+        [TestCase("Blank04_29Mar17_Smeagol.raw")]
         public void TestGetCollisionEnergy(string rawFileName)
         {
             // Keys in this Dictionary are filename, values are Collision Energies by scan
@@ -31,6 +32,7 @@ namespace RawFileReaderTests
             var ce20_120 = new List<double> { 20.00, 120.550003 };
             var ce120 = new List<double> { 120.550003 };
             var ms1Scan = new List<double>();
+            var srmScan = new List<double> { 0 };
 
             // Keys in this dictionary are scan number and values are collision energies
             var file1Data = new Dictionary<int, List<double>>
@@ -47,6 +49,7 @@ namespace RawFileReaderTests
                 {2259, ce45},
                 {2260, ce45}
             };
+
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
             var file2Data = new Dictionary<int, List<double>>
@@ -63,6 +66,7 @@ namespace RawFileReaderTests
                 {39009, ce30},
                 {39010, ce30}
             };
+
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
 
             var file3Data = new Dictionary<int, List<double>>
@@ -79,6 +83,7 @@ namespace RawFileReaderTests
                 {19009, ce20_120},
                 {19010, ce30}
             };
+
             expectedData.Add("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53", file3Data);
 
             var file4Data = new Dictionary<int, List<double>>
@@ -86,6 +91,7 @@ namespace RawFileReaderTests
                 {1, ce30},
                 {2, ce30}
             };
+
             expectedData.Add("MZ0210MnxEF889ETD", file4Data);
 
             var file5Data = new Dictionary<int, List<double>>
@@ -100,7 +106,24 @@ namespace RawFileReaderTests
                 {27806, ce30},
                 {27807, ce30}
             };
+
             expectedData.Add("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", file5Data);
+
+            var file6Data = new Dictionary<int, List<double>>
+            {
+                {3200, srmScan},
+                {3201, srmScan},
+                {3202, srmScan},
+                {3203, srmScan},
+                {3204, srmScan},
+                {3205, srmScan},
+                {3206, srmScan},
+                {3207, srmScan},
+                {3208, srmScan},
+                {3209, srmScan},
+            };
+
+            expectedData.Add("Blank04_29Mar17_Smeagol", file6Data);
 
             var dataFile = GetRawDataFile(rawFileName);
 
@@ -459,6 +482,7 @@ namespace RawFileReaderTests
         [TestCase("Angiotensin_325-ETD.raw", 10)]
         [TestCase("Angiotensin_325-HCD.raw", 10)]
         [TestCase("Angiotensin_AllScans.raw", 1775)]
+        [TestCase("Blank04_29Mar17_Smeagol.raw", 4330)]
         public void TestGetNumScans(string rawFileName, int expectedResult)
         {
             var dataFile = GetRawDataFile(rawFileName);
@@ -480,6 +504,7 @@ namespace RawFileReaderTests
         [TestCase("Angiotensin_325-ETD.raw", 1, 5, -1, -1, -1, -1, -1)]
         [TestCase("Angiotensin_325-HCD.raw", 1, 5, -1, -1, -1, -1, -1)]
         [TestCase("Angiotensin_AllScans.raw", 500, 550, 477, 477, 499, 499, 499, 500, 500, 500, 501, 501, 501, 477, 477, 511, 511, 511, 512, 512, 512, 0, 498, 498, 498, 520, 520, 520, 521, 521, 521, 522, 522, 522, 498, 498, 532, 532, 532, 533, 533, 533, 0, 519, 519, 519, 541, 541, 541, 542, 542, 542, 543)]
+        [TestCase("Blank04_29Mar17_Smeagol.raw", 1500, 1510, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
         public void TestGetParentScan(string rawFileName, int startScan, int endScan, params int[] expectedParents)
         {
             var dataFile = GetRawDataFile(rawFileName);
@@ -536,6 +561,7 @@ namespace RawFileReaderTests
         [TestCase("Angiotensin_325-ETD.raw", 1, 10, 0, 10, 10)]
         [TestCase("Angiotensin_325-HCD.raw", 1, 10, 0, 10, 10)]
         [TestCase("Angiotensin_AllScans.raw", 1000, 1200, 10, 191, 1775)]
+        [TestCase("Blank04_29Mar17_Smeagol.raw", 2500, 2600, 0, 101, 4330)]
         public void TestGetScanCountsByScanType(
             string rawFileName,
             int scanStart,
@@ -631,6 +657,8 @@ namespace RawFileReaderTests
             AddExpectedTupleAndCount(expectedData, "Angiotensin_325-ETD", "SA_CID-HMSn", "FTMS + p ESI sa Full ms2 0@etd50.00 0@cid15.00", 10);
             AddExpectedTupleAndCount(expectedData, "Angiotensin_325-HCD", "HCD-HMSn", "FTMS + p ESI Full ms2 0@hcd30.00", 10);
 
+            AddExpectedTupleAndCount(expectedData, "Blank04_29Mar17_Smeagol", "CID-SRM", "+ c NSI SRM ms2", 101);
+
             var dataFile = GetRawDataFile(rawFileName);
 
             using var reader = new XRawFileIO(dataFile.FullName);
@@ -718,6 +746,7 @@ namespace RawFileReaderTests
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1513, 1521, 3, 6)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 16121, 16165, 3, 42)]
         [TestCase("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01.raw", 20500, 20520, 7, 14)]
+        [TestCase("Blank04_29Mar17_Smeagol.raw", 3000, 3030, 0, 31)]
         public void TestGetScanInfo(string rawFileName, int scanStart, int scanEnd, int expectedMS1, int expectedMS2)
         {
             var expectedData = new Dictionary<string, Dictionary<int, string>>();
@@ -735,6 +764,7 @@ namespace RawFileReaderTests
                 {1520, "2 4   210 44.77 265 2000 1.5E+6 1361.745 4.2E+4  1014.93 CID   cid Positive True False 11 79  96.14 + c d Full m..."},
                 {1521, "1 1   860 44.80 400 2000 6.9E+8 1126.627 2.9E+7     0.00 CID       Positive True False 11 79   1.45 + c ESI Full..."}
             };
+
             expectedData.Add("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", file1Data);
 
             // Note that for this dataset NumPeaks does not accurately reflect the number of data in each mass spectrum (it's much higher than it should be)
@@ -787,6 +817,7 @@ namespace RawFileReaderTests
                 {16164, "2 2  3180 47.77 120 1191 1.7E+4 1184.644 8.7E+2   590.28 ETD EThcD Positive True False 46 219 109.20 ITMS + c NSI..."},
                 {16165, "1 1 53252 47.78 350 1550 1.2E+9  503.565 1.6E+8     0.00 CID       Positive False True 46 219   0.76 FTMS + p NSI..."}
             };
+
             expectedData.Add("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53", file2Data);
 
             var file3Data = new Dictionary<int, string>
@@ -813,7 +844,45 @@ namespace RawFileReaderTests
                 {20519, "2 2  2144 41.92 110 1241 8.9E+6  742.409 5.7E+5   615.27 HCD   hcd Positive True True 33 221  12.77 FTMS + c NSI..."},
                 {20520, "1 1 14428 41.92 350 1800 1.7E+9  554.305 1.3E+8     0.00 CID       Positive False True 33 221   0.08 FTMS + p NSI..."}
             };
+
             expectedData.Add("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", file3Data);
+
+            var file4Data = new Dictionary<int, string>
+            {
+                {3000, "2 2     4 26.67 458 1152 7.0E+0  607.323 4.9E+0   518.28 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3001, "2 2     4 26.68 458 1152 3.9E+0  773.404 1.5E+0   552.80 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3002, "2 2     4 26.68 458 1152 1.6E+1  781.418 1.4E+1   556.81 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3003, "2 2     4 26.68 458 1152 4.8E+1  465.213 4.0E+1   528.94 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3004, "2 2     4 26.68 458 1152 3.1E+0  685.379 1.0E+0   531.61 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3005, "2 2     4 26.69 458 1152 3.1E+0  710.398 1.1E+0   513.27 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3006, "2 2     4 26.69 458 1152 6.7E+0  720.407 4.6E+0   518.28 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3007, "2 2     4 26.69 458 1152 3.4E+0  773.404 1.4E+0   552.80 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3008, "2 2     4 26.70 458 1152 3.1E+0  781.418 1.0E+0   556.81 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3009, "2 2     4 26.70 458 1152 2.8E+1  465.213 2.5E+1   528.94 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3010, "2 2     4 26.70 458 1152 3.8E+0  586.311 1.6E+0   531.61 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3011, "2 2     4 26.70 458 1152 8.4E+0  823.482 6.3E+0   513.27 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3012, "2 2     4 26.71 458 1152 4.7E+0  833.491 2.3E+0   518.28 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3013, "2 2     4 26.71 458 1152 3.1E+0  886.488 1.1E+0   552.80 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3014, "2 2     4 26.71 458 1152 5.0E+0  466.275 3.0E+0   556.81 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3015, "2 2     4 26.71 458 1152 3.2E+1  465.213 2.9E+1   528.94 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3016, "2 2     4 26.72 458 1152 7.9E+0  685.379 5.5E+0   531.61 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3017, "2 2     4 26.72 458 1152 3.2E+0  597.314 1.1E+0   513.27 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3018, "2 2     4 26.72 458 1152 3.1E+0  607.323 1.0E+0   518.28 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3019, "2 2     4 26.73 458 1152 2.0E+1  773.404 1.8E+1   552.80 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3020, "2 2     4 26.73 458 1152 3.6E+0  781.418 1.6E+0   556.81 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3021, "2 2     4 26.73 458 1152 1.5E+1  465.213 9.6E+0   528.94 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3022, "2 2     4 26.73 458 1152 6.1E+0  473.227 3.2E+0   531.61 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3023, "2 2     4 26.74 458 1152 3.0E+0  597.314 1.0E+0   513.27 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3024, "2 2     4 26.74 458 1152 3.7E+0  720.407 1.6E+0   518.28 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3025, "2 2     4 26.74 458 1152 3.2E+0  886.488 1.1E+0   552.80 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3026, "2 2     4 26.74 458 1152 2.3E+1  466.275 2.1E+1   556.81 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3027, "2 2     4 26.75 458 1152 6.6E+0  465.213 4.5E+0   528.94 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3028, "2 2     4 26.75 458 1152 4.6E+0  473.227 2.2E+0   531.61 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3029, "2 2     4 26.75 458 1152 3.0E+0  597.314 1.0E+0   513.27 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."},
+                {3030, "2 2     4 26.76 458 1152 8.0E+0  833.491 3.6E+0   518.28 AnyType       Positive True False 3 63   0.00 + c NSI SRM ..."}
+            };
+
+            expectedData.Add("Blank04_29Mar17_Smeagol", file4Data);
 
             var dataFile = GetRawDataFile(rawFileName);
 
@@ -885,8 +954,10 @@ namespace RawFileReaderTests
             Console.WriteLine("scanCountMS1={0}", scanCountMS1);
             Console.WriteLine("scanCountMS2={0}", scanCountMS2);
 
+            if (expectedMS1 < 0 && expectedMS2 < 0)
+                return;
+
             Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
-            Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
         }
 
         [Test]
@@ -1934,6 +2005,7 @@ namespace RawFileReaderTests
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 2000, 2100)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 45000, 45200)]
         [TestCase("QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01.raw", 15000, 15006)]
+        [TestCase("Blank04_29Mar17_Smeagol.raw", 800, 810)]
         public void TestScanEventData(string rawFileName, int scanStart, int scanEnd)
         {
             // Keys in this Dictionary are filename, values are ScanCounts by event, where the key is a Tuple of EventName and EventValue
@@ -1973,6 +2045,9 @@ namespace RawFileReaderTests
             AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "MS2 Isolation Width:", "-1.00", 4);
             AddExpectedTupleAndCount(expectedData, "QC_Mam_16_01_125ng_2pt0-IT22_Run-A_16Oct17_Pippin_AQ_17-10-01", "MS2 Isolation Width:", "2.00", 3);
 
+            AddExpectedTupleAndCount(expectedData, "Blank04_29Mar17_Smeagol", "Average Scan by Inst:", "Yes", 11);
+            AddExpectedTupleAndCount(expectedData, "Blank04_29Mar17_Smeagol", "Micro Scan count:", "1", 11);
+
             var dataFile = GetRawDataFile(rawFileName);
 
             if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedEventsThisFile))
@@ -2007,7 +2082,7 @@ namespace RawFileReaderTests
                 }
             }
 
-            Console.WriteLine("{0,-5} {1,5} {2}", "Valid", "Count", "Event");
+            Console.WriteLine("{0,-5} {1,-5} {2}", "Valid", "Count", "Event");
 
             foreach (var observedEvent in (from item in eventCountsActual orderby item.Key select item))
             {
@@ -2015,7 +2090,7 @@ namespace RawFileReaderTests
                 {
                     var isValid = observedEvent.Value == expectedScanCount;
 
-                    Console.WriteLine("{0,-5} {1,5} {2} {3}", isValid, observedEvent.Value, observedEvent.Key.Item1, observedEvent.Key.Item2);
+                    Console.WriteLine("{0,-5} {1,-5} {2} {3}", isValid, observedEvent.Value, observedEvent.Key.Item1, observedEvent.Key.Item2);
 
                     Assert.AreEqual(expectedScanCount, observedEvent.Value, "Event count mismatch");
                 }
