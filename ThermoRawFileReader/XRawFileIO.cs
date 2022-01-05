@@ -985,6 +985,7 @@ namespace ThermoRawFileReader
         /// <remarks>
         /// <para>Looks for event "Master Scan Number" (or "Master Scan Number:") in scanInfo.ScanEvents</para>
         /// <para>Uses an alternative search for older .raw files that do not have event "Master Scan Number"</para>
+        /// <para>SRM / MRM scans likely do not have a parent scan number, and this method will thus not search through previous scans to find one with msLevel lower than this scan's msLevel</para>
         /// </remarks>
         /// <param name="scanInfo"></param>
         /// <param name="parentScanNumber">Parent scan number, or 0 if an MS1 scan (or unable to determine the parent)</param>
@@ -1003,7 +1004,7 @@ namespace ThermoRawFileReader
                 if (matchFound)
                     return true;
 
-                if (scanInfo.MSLevel <= 1)
+                if (scanInfo.MSLevel <= 1 || scanInfo.SIMScan || scanInfo.MRMScanType != MRMScanTypeConstants.NotMRM)
                     return false;
 
                 // This is an older .raw file that does not have "Master Scan Number"
