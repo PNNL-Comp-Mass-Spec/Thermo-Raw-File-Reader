@@ -11,14 +11,17 @@ namespace ThermoRawFileReader
     {
         // Ignore Spelling: A-Za-z, cnl, Exactive, msx, sa, Ss
 
+        // ReSharper disable once CommentTypo
+
         // This RegEx matches Full ms2, Full ms3, ..., Full ms10, Full ms11, ...
         // It also matches p ms2 ('p' is not a scan mode, but is present here for compatibility with some old scan filter values)
         // It also matches SRM ms2
         // It also matches CRM ms3
         // It also matches Z ms3 (zoom scan)
         // It also matches Full msx ms2 (multiplexed parent ion selection, introduced with the Q-Exactive)
+        // It also matches Full lock ms2 (see Q-Exactive HF dataset 20220226_CsI_4000TO20000_POSTCAL)
         // We're not including SIM, Q1MS, or Q3MS in this RegEx since those are checked for separately (see the MRM_ constants in class XRawFileIO)
-        private const string MS2_REGEX = "(?<ScanMode> p|Full|SRM|CRM|Full msx|Z) ms(?<MSLevel>[2-9]|[1-9][0-9]) ";
+        private const string MS2_REGEX = "(?<ScanMode> p|Full|SRM|CRM|Full msx|Full lock|Z) ms(?<MSLevel>[2-9]|[1-9][0-9]) ";
 
         private const string MASS_LIST_REGEX = "\\[[0-9.]+-[0-9.]+.*\\]";
 
