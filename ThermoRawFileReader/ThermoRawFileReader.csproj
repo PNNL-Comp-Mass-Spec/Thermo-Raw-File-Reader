@@ -23,7 +23,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PRISM-Library" Version="2.6.43" />
+    <PackageReference Include="PRISM-Library" Version="2.6.48" />
     <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.71" />
     <PackageReference Include="ThermoFisher.CommonCore.Data" Version="5.0.0.71" />
     <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator" Version="5.0.0.71" />
