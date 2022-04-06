@@ -1,17 +1,38 @@
-1) Create folder C:\NuPkg
-2) Copy the desired .nupkg file to that folder, for example:
-	4.0.89\Windows_MacOS\ThermoFisher.CommonCore.RawFileReader.4.0.89.nupkg
-3) In Visual Studio, go to Tools->NuGet Package Manager->Package Manager Settings
-4) Choose Package Sources
-5) Click the green Plus sign to add a new source
-6) Name it "Local Packages" and define the source as C:\NuPkg
-7) Click Update 
-8) Click OK to close the dialog
+== Obtain the Newest .nupkg File ==
+
+1) Build the project using Jenkins
+	http://proto-2.pnl.gov:8080/job/ThermoRawFileReader/
+
+2) On the developer's computer, create directory C:\NuPkg
+
+3) Copy the desired .nupkg file to that directory, for example:
+    Copy \\proto-2\CI_Publish\ThermoRawFileReader\ThermoRawFileReader.4.1.34.nupkg
+      to
+	C:\NuPkg\ThermoRawFileReader.4.1.34.nupkg
+
+	Note: The ThermoRawFileReader .nupkg file is stored as a private NuGet package on nuget.org
+    See https://prismwiki.pnl.gov/wiki/Appveyor#Referencing_a_Private_Nuget_Package_File
+
+4) In Visual Studio, go to Tools->NuGet Package Manager->Package Manager Settings
+
+5) Choose Package Sources
+
+6) Click the green Plus sign to add a new source
+
+7) Name it "Local Packages" and define the source as C:\NuPkg
+
+8) Click Update 
+
+9) Click OK to close the dialog
+
+
+== Add/update the .npkg File in a Solution
 
 In the solution that you want to use this local package
+
 1) Choose Tools->NuGet Package Manager->Manage Packages for Solution
+
 2) Change the package source to Local Packages
+
 3) The package reference must be stored in file packages.config
 	- It cannot be stored in the .csproj file
-
-
