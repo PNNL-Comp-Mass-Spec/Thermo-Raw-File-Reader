@@ -364,7 +364,6 @@ namespace ThermoRawFileReader
                     {
                         bestParentIon = parentIonInfo;
                     }
-
                 } while (startIndex < mzText.Length - 1);
 
                 if (matchFound)
