@@ -303,10 +303,7 @@ namespace ThermoRawFileReader
         {
             target = new MRMInfo();
 
-            foreach (var item in source.MRMMassList)
-            {
-                target.MRMMassList.Add(item);
-            }
+            target.MRMMassList.AddRange(source.MRMMassList);
         }
     }
 
