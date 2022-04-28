@@ -1,16 +1,14 @@
 @echo off
-echo Copy the DLL, PDF, and XML to Lib directories
+echo Copy the DLLs to Lib directories
+echo Note that several projects download ThermoRawFileReader from NuGet and also reference a local NuGet package to obtain the Thermo CommonCore DLLs
+echo Still, the DLLs are included in some key projects
 @echo on
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /Y /D
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\" /Y /D
 
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MSGF_Runner\Lib\" /Y /D
-
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\BrianLaMarche\MultiAlign\lib\InformedProteomics\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\BrianLaMarche\MultiAlign\src\MultiAlignRogue\bin\Debug\" /Y /D
-
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\DLLLibrary\" /Y /D
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\SangtaeKim\InformedProteomics\lib\" /Y /D
 
@@ -22,12 +20,9 @@ xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\DMS_Manag
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\" /Y /D
 
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\" /Y /D
-xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MSGF_Runner\Lib\" /Y /D
 
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\BrianLaMarche\MultiAlign\lib\InformedProteomics\" /Y /D
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\BrianLaMarche\MultiAlign\src\MultiAlignRogue\bin\Debug\" /Y /D
-
-xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\DLLLibrary\" /Y /D
 
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\SangtaeKim\InformedProteomics\lib\" /Y /D
 
@@ -49,8 +44,6 @@ xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMin
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\" /Y /D
-
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MSGF_Runner\bin\" /Y /D
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\PEKtoCSVConverter\lib\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\DLL\Debug\" /Y /D
