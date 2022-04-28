@@ -15,7 +15,7 @@ xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\JoshAld
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\SangtaeKim\InformedProteomics\lib\" /Y /D
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\KevinCrowell\IMSDemultiplexer\IMSDemultiplexer\lib\" /Y /D
-pause
+if not "%1"=="NoPause" pause
 
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /Y /D
 
@@ -37,7 +37,7 @@ xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\ThermoFAI
 
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\ThermoPeakDataExporter\lib\" /Y /D
 
-pause
+if not "%1"=="NoPause" pause
 
 @echo off
 echo Copy the DLL to bin directories
@@ -63,7 +63,7 @@ xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMin
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\ThermoRawFileReader\Test_ThermoRawFileReader\bin\Debug\" /Y /D
 
 rem xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x64\Release\" /Y /D
-pause
+if not "%1"=="NoPause" pause
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\GordonSlysz\DeconEngineV2\C#_Version\lib" /Y /D
 
@@ -99,7 +99,7 @@ xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\GordonS
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\GordonSlysz\DimethylLabelingIq\Library\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\GordonSlysz\IqTargetCreator\Library\" /Y /D
-pause
+if not "%1"=="NoPause" pause
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\JoshAldrich\InterferenceDetection\IDM_Console\bin\Debug\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\bin\Debug\" /Y /D
@@ -120,4 +120,4 @@ xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\Instrum
 
 
 @echo off
-pause
+if not "%1"=="NoPause" pause
