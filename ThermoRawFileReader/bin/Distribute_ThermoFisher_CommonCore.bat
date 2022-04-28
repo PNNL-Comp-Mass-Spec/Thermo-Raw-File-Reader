@@ -5,9 +5,6 @@ xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMin
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\" /Y /D
 
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MASIC\Lib\" /Y /D
-
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MSGF_Runner\Lib\" /Y /D
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\BrianLaMarche\MultiAlign\lib\InformedProteomics\" /Y /D
@@ -23,8 +20,6 @@ pause
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /Y /D
 
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\" /Y /D
-
-xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MASIC\Lib\" /Y /D
 
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\" /Y /D
 xcopy ..\..\RawFileReaderLicense.doc "F:\Documents\Projects\DataMining\MSGF_Runner\Lib\" /Y /D
@@ -49,28 +44,8 @@ echo Copy the DLL to bin directories
 echo Note that the DLL is compiled as AnyCPU
 @echo on
 
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin\" /Y /D
-
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Decon2ls_PlugIn_Decon2LSV2\bin\Debug\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Extraction_PlugIn\bin\Debug\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_GlyQIQ_Plugin\bin\Debug\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_GlyQIQ_Plugin\GlyQResultsSummarizer\bin\Debug\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_ICR2LS_PlugIn\bin\Debug\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSGFDB_PlugIn\bin\Debug\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSGFDB_PlugIn\MSGFPlusIndexFileCopier\bin\Debug\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Mz_Refinery_Plugin\bin\Debug\" /Y /D
-
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\CaptureTaskManager\CaptureTaskManager\bin\Debug\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\CaptureTaskManager\CaptureTaskManager\bin\Debug_NoDartFTP\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\DeployedFiles\" /Y /D
-pause
-
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\CodeTestCS\bin\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\CodeTestCS\lib\" /Y /D
-
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MASIC\bin\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MASIC\bin\Release\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MASIC\MASICTest\bin\Debug\" /Y /D
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\" /Y /D
@@ -80,8 +55,6 @@ xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMin
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\PEKtoCSVConverter\lib\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\DLL\Debug\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\Exe\Debug\" /Y /D
-
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\ProteowizardWrapper\UnitTests\lib\" /Y /D
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\ThermoFAIMStoMzML\lib\" /Y /D
 
