@@ -19,14 +19,14 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.255">
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.5.107">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="PRISM-Library" Version="2.7.0" />
-    <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.71" />
-    <PackageReference Include="ThermoFisher.CommonCore.Data" Version="5.0.0.71" />
-    <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator" Version="5.0.0.71" />
-    <PackageReference Include="ThermoFisher.CommonCore.RawFileReader" Version="5.0.0.71" />
+    <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.88" />
+    <PackageReference Include="ThermoFisher.CommonCore.Data" Version="5.0.0.88" />
+    <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator" Version="5.0.0.88" />
+    <PackageReference Include="ThermoFisher.CommonCore.RawFileReader" Version="5.0.0.88" />
   </ItemGroup>
 </Project>

@@ -16,7 +16,7 @@ namespace Test_ThermoRawFileReader
     {
         // Ignore Spelling: Angiotensin, centroiding, Chrom, cid, cnl, etd, hcd, msx, pqd, QC_Mam, sa, sid
 
-        private const string PROGRAM_DATE = "April 27, 2022";
+        private const string PROGRAM_DATE = "May 31, 2022";
 
         private const string DEFAULT_FILE_PATH = @"..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw";
 
