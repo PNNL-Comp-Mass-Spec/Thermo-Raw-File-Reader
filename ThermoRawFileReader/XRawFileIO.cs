@@ -69,6 +69,7 @@ namespace ThermoRawFileReader
         private const string MS_ONLY_Z_TEXT = " NSI Z ms ";         // Likely a zoom scan
 
         private const string FULL_MS_TEXT = "Full ms ";
+        private const string FULL_MSX_MS_TEXT = "Full msx ms ";      // Q-Exactive: Isolated multiple species (but did not fragment them)
         private const string FULL_PR_TEXT = "Full pr ";             // TSQ: Full Parent Scan, Product Mass
         private const string SIM_MS_TEXT = "SIM ms ";
         private const string FULL_LOCK_MS_TEXT = "Full lock ms ";   // Lock mass scan
@@ -1470,13 +1471,15 @@ namespace ThermoRawFileReader
             // Given                                                                ScanTypeName
             // ITMS + c ESI Full ms [300.00-2000.00]                                MS
             // FTMS + p NSI Full ms [400.00-2000.00]                                HMS
+            // FTMS + p NSI Full msx ms [400.0000-1200.0000]                        HMS, but on specific precursors selected via spectral multiplexing
+
             // ITMS + p ESI d Z ms [579.00-589.00]                                  Zoom-MS
             // ITMS + c ESI d Full ms2 583.26@cid35.00 [150.00-1180.00]             CID-MSn
             // ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]              PQD-MSn
             // FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]             HCD-HMSn
             // ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]          SA_ETD-MSn
 
-            // FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]         HCD-HMSn using multiplexed MSn (introduced with the Q-Exactive)
+            // FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]        HCD-HMSn using multiplexed MSn (Spectral Multiplexing, introduced with the Q-Exactive)
 
             // + c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                                       MSn
             // + c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]                          MSn
@@ -1815,6 +1818,7 @@ namespace ThermoRawFileReader
             // From                                                                 To
             // ITMS + c ESI Full ms [300.00-2000.00]                                ITMS + c ESI Full ms
             // FTMS + p NSI Full ms [400.00-2000.00]                                FTMS + p NSI Full ms
+            // FTMS + p NSI Full msx ms [400.0000-1200.0000]                        FTMS + p NSI Full msx ms
             // ITMS + p ESI d Z ms [579.00-589.00]                                  ITMS + p ESI d Z ms
             // ITMS + c ESI d Full ms2 583.26@cid35.00 [150.00-1180.00]             ITMS + c ESI d Full ms2 0@cid35.00
             // ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]              ITMS + c NSI d Full ms2 0@pqd27.00
@@ -1930,6 +1934,7 @@ namespace ThermoRawFileReader
 
             var ms1Tags = new List<string> {
                 FULL_MS_TEXT,
+                FULL_MSX_MS_TEXT,
                 MS_ONLY_C_TEXT,
                 MS_ONLY_P_TEXT,
                 MS_ONLY_P_NSI_TEXT,

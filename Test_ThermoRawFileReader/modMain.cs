@@ -16,7 +16,7 @@ namespace Test_ThermoRawFileReader
     {
         // Ignore Spelling: Angiotensin, centroiding, Chrom, cid, cnl, etd, hcd, msx, pqd, QC_Mam, sa, sid
 
-        private const string PROGRAM_DATE = "May 31, 2022";
+        private const string PROGRAM_DATE = "June 13, 2022";
 
         private const string DEFAULT_FILE_PATH = @"..\..\..\UnitTests\Docs\Angiotensin_AllScans.raw";
 
@@ -975,6 +975,8 @@ namespace Test_ThermoRawFileReader
             {
                 "ITMS + c ESI Full ms [300.00-2000.00]",
                 "FTMS + p NSI Full ms [400.00-2000.00]",
+                "FTMS + p NSI Full msx ms [400.0000-1200.0000]",
+                "FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]",
                 "ITMS + p ESI d Z ms [579.00-589.00]",
                 "ITMS + c ESI d Full ms2 583.26@cid35.00 [150.00-1180.00]",
                 "ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]",
