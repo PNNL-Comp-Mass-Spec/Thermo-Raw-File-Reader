@@ -52,7 +52,7 @@ The Thermo Peak Data Exporter application is an example console application that
 When running on Linux with Mono, use command line option `-LoadMethod:false` to disable loading method information
 * This is required because the Thermo CommonCore DLLs cannot read method information when using Mono
 * Example command line:\
-` mono ThermoPeakDataExporter.exe DatasetFile.raw-LoadMethod:false`
+`mono ThermoPeakDataExporter.exe DatasetFile.raw -LoadMethod:false`
 
 ## Contacts
 
