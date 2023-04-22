@@ -555,9 +555,14 @@ namespace RawFileReaderTests
         [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", "+ c NSI SRM ms2")]
         [TestCase("FTMS + p NSI SIM msx ms [575.0000-625.0000]                                    ", "FTMS + p NSI SIM msx ms")]
         [TestCase("ITMS + c NSI d Z ms3 640.9140@cid35.00 532.3870@hcd45.00 [100.0000-150.0000]   ", "ITMS + c NSI d Z ms3 0@cid35.00 0@hcd45.00")]
-        public void TestGenericScanFilter(string filterText, string expectedResult)
+        [TestCase("FTMS + c NSI cv=-75.00 d Full ms2 437.5205@hcd32.00 [110.0000-1323.0000]       ", "FTMS + c NSI cv=-75.00 d Full ms2 0@hcd32.00")]           // FAIMS
+        [TestCase("FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                              ", "FTMS + p NSI cv=-60.00 Full ms2 0@hcd32.00", false)]      // DIA, replace the parent ion m/z value with a 0
+        [TestCase("FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                             ", "FTMS + p NSI cv=-80.00 Full ms2 0@hcd32.00", false)]      // DIA, replace the parent ion m/z value with a 0
+        [TestCase("FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                              ", "FTMS + p NSI cv=-60.00 Full ms2 635.0@hcd32.00", true)]   // DIA, keep the parent ion m/z value
+        [TestCase("FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                             ", "FTMS + p NSI cv=-80.00 Full ms2 1034.5@hcd32.00", true)]  // DIA, keep the parent ion m/z value
+        public void TestGenericScanFilter(string filterText, string expectedResult, bool includeParentMZ = false)
         {
-            var genericFilterResult = XRawFileIO.MakeGenericThermoScanFilter(filterText);
+            var genericFilterResult = XRawFileIO.MakeGenericThermoScanFilter(filterText, includeParentMZ);
 
             Console.WriteLine(filterText + " " + genericFilterResult);
 
@@ -594,9 +599,13 @@ namespace RawFileReaderTests
         [TestCase("FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]              ", "ETciD-HMSn")]
         [TestCase("FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]              ", "EThcD-HMSn")]
         [TestCase("FTMS + p NSI SIM msx ms [575.0000-625.0000]                                                 ", "SIM ms")]
-        public void TestScanTypeName(string filterText, string expectedResult)
+        [TestCase("FTMS + c NSI cv=-75.00 d Full ms2 437.5205@hcd32.00 [110.0000-1323.0000]                    ", "HCD-HMSn")]            // FAIMS
+        [TestCase("FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                                           ", "DIA-HCD-HMSn", true)]  // DIA
+        [TestCase("FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                                          ", "DIA-HCD-HMSn", true)]  // DIA
+
+        public void TestScanTypeName(string filterText, string expectedResult, bool isDIA = false)
         {
-            var scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterText);
+            var scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterText, isDIA);
 
             Console.WriteLine(filterText + " " + scanTypeName);
 

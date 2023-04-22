@@ -24,7 +24,7 @@ namespace RawFileReaderTests
         [TestCase("Blank04_29Mar17_Smeagol.raw")]
         public void TestGetCollisionEnergy(string rawFileName)
         {
-            // Keys in this Dictionary are filename, values are Collision Energies by scan
+            // Keys in this Dictionary are filename (without the extension), values are Collision Energies by scan
             var expectedData = new Dictionary<string, Dictionary<int, List<double>>>();
 
             var ce30 = new List<double> { 30.00 };
@@ -542,6 +542,8 @@ namespace RawFileReaderTests
             Assert.Greater(percentValid, 90, "Over 10% of the spectra had invalid scan numbers");
         }
 
+        // ReSharper disable StringLiteralTypo
+
         [Test]
         [TestCase("B5_50uM_MS_r1.RAW", 1, 20, 20, 0, 20)]
         [TestCase("MNSLTFKK_ms.raw", 1, 88, 88, 0, 88)]
@@ -561,16 +563,22 @@ namespace RawFileReaderTests
         [TestCase("Angiotensin_325-ETD.raw", 1, 10, 0, 10, 10)]
         [TestCase("Angiotensin_325-HCD.raw", 1, 10, 0, 10, 10)]
         [TestCase("Angiotensin_AllScans.raw", 1000, 1200, 10, 191, 1775)]
-        [TestCase("Blank04_29Mar17_Smeagol.raw", 2500, 2600, 0, 101, 4330)]
+        [TestCase("QC_mam_16_01_125ng_CPTACpt7-3s-a_02Nov17_Pippin_REP-17-10-01.raw", 65, 80, 4, 12, 126)]
+        [TestCase("Blank04_29Mar17_Smeagol.raw", 2500, 2600, 0, 101, 4330)]                                 // SRM data
+        [TestCase("20181115_arginine_Gua13C_CIDcol25_158_HCDcol35.raw", 10, 20, 0, 11, 34)]                 // MS3 scans
+        [TestCase("calmix_Q3_10192022_03.RAW", 5, 15, 11, 0, 20)]                                           // MRM data (Q3MS)
+        [TestCase("MM_Strap_IMAC_FT_10xDilution_FAIMS_ID_01_FAIMS_Merry_03Feb23_REP-22-11-13.raw", 42000, 42224, 9, 216, 92550, true)] // DIA data
+        // ReSharper restore StringLiteralTypo
         public void TestGetScanCountsByScanType(
             string rawFileName,
             int scanStart,
             int scanEnd,
             int expectedMS1,
             int expectedMS2,
-            int expectedTotalScanCount)
+            int expectedTotalScanCount,
+            bool skipIfMissing = false)
         {
-            // Keys in this Dictionary are filename, values are ScanCounts by collision mode, where the key is a Tuple of ScanType and FilterString
+            // Keys in this Dictionary are filename (without the extension), values are ScanCounts by collision mode, where the key is a Tuple of ScanType and FilterString
             var expectedData = new Dictionary<string, Dictionary<Tuple<string, string>, int>>();
 
             // Keys in this dictionary are scan type, values are a Dictionary of FilterString and the number of scans with that filter string
@@ -659,7 +667,64 @@ namespace RawFileReaderTests
 
             AddExpectedTupleAndCount(expectedData, "Blank04_29Mar17_Smeagol", "CID-SRM", "+ c NSI SRM ms2", 101);
 
-            var dataFile = GetRawDataFile(rawFileName);
+            // ReSharper disable StringLiteralTypo
+
+            AddExpectedTupleAndCount(expectedData, "QC_mam_16_01_125ng_CPTACpt7-3s-a_02Nov17_Pippin_REP-17-10-01", "HMS", "FTMS + p NSI Full ms", 4);
+            AddExpectedTupleAndCount(expectedData, "QC_mam_16_01_125ng_CPTACpt7-3s-a_02Nov17_Pippin_REP-17-10-01", "HCD-HMSn", "FTMS + c NSI d Full ms2 0@hcd30.00", 12);
+
+            AddExpectedTupleAndCount(expectedData, "20181115_arginine_Gua13C_CIDcol25_158_HCDcol35", "HCD-HMSn", "FTMS + c NSI Full ms3 0@cid25.00 0@hcd35.00", 11);
+
+            AddExpectedTupleAndCount(expectedData, "calmix_Q3_10192022_03", "Q3MS", "+ p NSI Q3MS", 11);
+
+            // ReSharper restore StringLiteralTypo
+
+            // DIA dataset
+            const string file14 = "MM_Strap_IMAC_FT_10xDilution_FAIMS_ID_01_FAIMS_Merry_03Feb23_REP-22-11-13";
+
+            // Selected scan range (42000 - 42224) covers 24 isolation windows, run at three different CVs (-40, -60, and -80)
+
+            // Use a for loop to add rows to the expected data dictionary, for each CV level
+
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+            foreach (var voltage in new List<int> { -40, -60, -80 })
+            {
+                // Example text: cv=-40.00
+                var currentCV = string.Format("cv={0}.00", voltage);
+
+                AddExpectedTupleAndCount(expectedData, file14, "HMS", string.Format("FTMS + p NSI {0} Full ms", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 377.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 419.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 448.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 473.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 497.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 520.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 542.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 564.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 587.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 610.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 635.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 660.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 685.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 712.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 741.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 771.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 803.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 838.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 877.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 921.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 972.0@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 1034.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 1133.5@hcd32.00", currentCV), 3);
+                AddExpectedTupleAndCount(expectedData, file14, "DIA-HCD-HMSn", string.Format("FTMS + p NSI {0} Full ms2 1423.5@hcd32.00", currentCV), 3);
+            }
+
+            var dataFile = GetRawDataFile(rawFileName, skipIfMissing);
+
+            if (dataFile == null)
+            {
+                Console.WriteLine("Skipping unit tests for " + rawFileName);
+                return;
+            }
 
             using var reader = new XRawFileIO(dataFile.FullName);
 
@@ -667,8 +732,10 @@ namespace RawFileReaderTests
 
             var scanCount = reader.GetNumScans();
             Console.WriteLine("Total scans: {0}", scanCount);
-            Assert.AreEqual(expectedTotalScanCount, scanCount, "Total scan count mismatch");
             Console.WriteLine();
+
+            if (expectedTotalScanCount > 0)
+                Assert.AreEqual(expectedTotalScanCount, scanCount, "Total scan count mismatch");
 
             var scanCountMS1 = 0;
             var scanCountMS2 = 0;
@@ -680,8 +747,8 @@ namespace RawFileReaderTests
 
                 Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
-                var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText);
-                var genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText);
+                var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText, scanInfo.IsDIA);
+                var genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText, scanInfo.IsDIA);
 
                 var scanTypeKey = new Tuple<string, string>(scanType, genericScanFilter);
 
@@ -703,15 +770,17 @@ namespace RawFileReaderTests
             Console.WriteLine("scanCountMS1={0}", scanCountMS1);
             Console.WriteLine("scanCountMS2={0}", scanCountMS2);
 
-            if (expectedMS1 >= 0)
+            if (expectedTotalScanCount > 0)
                 Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
 
-            if (expectedMS2 >= 0)
+            if (expectedTotalScanCount > 0)
                 Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
 
-            if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedScanInfo))
+            var datasetName = Path.GetFileNameWithoutExtension(dataFile.Name);
+
+            if (!expectedData.TryGetValue(datasetName, out var expectedScanInfo))
             {
-                // Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                Console.WriteLine("Dataset {0} not found in dictionary expectedData", datasetName);
                 expectedScanInfo = new Dictionary<Tuple<string, string>, int>();
             }
 
@@ -967,7 +1036,7 @@ namespace RawFileReaderTests
         [TestCase("Blank04_29Mar17_Smeagol.raw", 500, 600)]
         public void TestGetScanInfoMRM(string rawFileName, int scanStart, int scanEnd)
         {
-            // Keys in this Dictionary are filename, values are a Dictionary of expected SIM scan counts (by type)
+            // Keys in this Dictionary are filename (without the extension), values are a Dictionary of expected SIM scan counts (by type)
             var expectedData = new Dictionary<string, Dictionary<string, int>>
             {
                 {
@@ -2093,7 +2162,7 @@ namespace RawFileReaderTests
         [TestCase("Blank04_29Mar17_Smeagol.raw", 800, 810)]
         public void TestScanEventData(string rawFileName, int scanStart, int scanEnd)
         {
-            // Keys in this Dictionary are filename, values are ScanCounts by event, where the key is a Tuple of EventName and EventValue
+            // Keys in this Dictionary are filename (without the extension), values are ScanCounts by event, where the key is a Tuple of EventName and EventValue
             var expectedData = new Dictionary<string, Dictionary<Tuple<string, string>, int>>();
 
             AddExpectedTupleAndCount(expectedData, "Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20", "Resolution:", "Low", 101);
@@ -2211,7 +2280,7 @@ namespace RawFileReaderTests
             expectedScanInfo.Add(new Tuple<string, string>(tupleKey1, tupleKey2), scanCount);
         }
 
-        private FileInfo GetRawDataFile(string rawFileName)
+        private FileInfo GetRawDataFile(string rawFileName, bool skipIfMissing = false)
         {
             var localDirPath = Path.Combine("..", "..", "Docs");
             const string remoteDirPath = @"\\proto-2\UnitTest_Files\ThermoRawFileReader";
@@ -2228,6 +2297,12 @@ namespace RawFileReaderTests
             if (remoteFile.Exists)
             {
                 return remoteFile;
+            }
+
+            if (skipIfMissing)
+            {
+                Console.WriteLine("Skipping raw file since not found: " + rawFileName);
+                return null;
             }
 
             var msg = string.Format("File not found: {0}; checked in both {1} and {2}", rawFileName, localDirPath, remoteDirPath);
