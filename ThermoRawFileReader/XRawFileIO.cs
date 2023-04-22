@@ -81,12 +81,6 @@ namespace ThermoRawFileReader
         private const string MRM_SIM_PR_TEXT = "SIM pr ";           // TSQ: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., Biofilm-1000pg-std-mix_06Dec14_Smeagol-3
         private const string MRM_SIM_MSX_TEXT = "SIM msx ";         // Q-Exactive Plus: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., MM_unsorted_10ng_digestionTest_t-SIM_MDX_3_17Mar20_Oak_Jup-20-03-01
 
-        private const string ION_MODE_REGEX = "[+-]";
-
-        private const string COLLISION_SPEC_REGEX = "(?<MzValue> [0-9.]+)@";
-
-        private const string MZ_WITHOUT_COLLISION_ENERGY = "ms[2-9](?<MzValue> [0-9.]+)$";
-
         /// <summary>
         /// Maximum size of the scan info cache
         /// </summary>
@@ -119,11 +113,17 @@ namespace ThermoRawFileReader
         /// </summary>
         private bool mCorruptMemoryEncountered;
 
-        private static readonly Regex mIonMode = new(ION_MODE_REGEX, RegexOptions.Compiled);
+        private static readonly Regex mIonMode = new("[+-]", RegexOptions.Compiled);
 
-        private static readonly Regex mCollisionSpecs = new(COLLISION_SPEC_REGEX, RegexOptions.Compiled);
+        /// <summary>
+        /// Regular expression to match numbers between a space and an @ sign
+        /// </summary>
+        private static readonly Regex mCollisionSpecs = new("(?<MzValue> [0-9.]+)@", RegexOptions.Compiled);
 
-        private static readonly Regex mMzWithoutCE = new(MZ_WITHOUT_COLLISION_ENERGY, RegexOptions.Compiled);
+        /// <summary>
+        /// Regular expression to match text of the form "ms2 748.371" (used when an @ sign is not present)
+        /// </summary>
+        private static readonly Regex mMzWithoutCE = new("ms[2-9](?<MzValue> [0-9.]+)$", RegexOptions.Compiled);
 
         /// <summary>
         /// File info for the currently loaded .raw file
