@@ -289,7 +289,7 @@ namespace Test_ThermoRawFileReader
 
         private static string GetAppVersion()
         {
-            return PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
+            return AppUtils.GetAppVersion(PROGRAM_DATE);
         }
 
         private static void ParseCommandLineParameters(clsParseCommandLine commandLineParser)
@@ -372,7 +372,7 @@ namespace Test_ThermoRawFileReader
 
         private static void ShowProgramHelp()
         {
-            var exePath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppPath();
+            var exePath = AppUtils.GetAppPath();
 
             Console.WriteLine("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath));
             Console.WriteLine("  InputFilePath.raw [/GetFilters] [/Centroid] [/Sum] [/Start:Scan] [/End:Scan]");
