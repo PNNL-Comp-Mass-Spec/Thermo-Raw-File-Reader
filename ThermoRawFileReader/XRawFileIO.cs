@@ -1610,8 +1610,7 @@ namespace ThermoRawFileReader
                     return defaultScanTypeName;
                 }
 
-                if (mrmScanType == MRMScanTypeConstants.NotMRM ||
-                    mrmScanType == MRMScanTypeConstants.SIM)
+                if (mrmScanType is MRMScanTypeConstants.NotMRM or MRMScanTypeConstants.SIM)
                 {
                     if (simScan)
                     {
