@@ -126,6 +126,12 @@ namespace ThermoRawFileReader
         private static readonly Regex mCollisionSpecs = new("(?<MzValue> [0-9.]+)@", RegexOptions.Compiled);
 
         /// <summary>
+        /// Regular expression to match a period, then integers, then zeroes, then an @ sign
+        /// </summary>
+        /// <remarks>Uses lazy matching of numbers after the decimal point to assure that trailing zeroes are not included in the capture group</remarks>
+        private static readonly Regex mCollisionEnergyTrailingDigits = new(@"\.(?<TrailingDigits>\d+?)0+@", RegexOptions.Compiled);
+
+        /// <summary>
         /// Regular expression to match text of the form "ms2 748.371" (used when an @ sign is not present)
         /// </summary>
         private static readonly Regex mMzWithoutCE = new("ms[2-9](?<MzValue> [0-9.]+)$", RegexOptions.Compiled);
@@ -1851,8 +1857,9 @@ namespace ThermoRawFileReader
         /// Remove scan-specific data from a scan filter string; primarily removes the parent ion m/z and the scan m/z range
         /// </summary>
         /// <param name="filterText"></param>
+        /// <param name="includeParentMZ">When true, include the parent ion m/z value in the generic scan filter (defaults to false)</param>
         /// <returns>Generic filter text, e.g. FTMS + p NSI Full ms</returns>
-        public static string MakeGenericThermoScanFilter(string filterText)
+        public static string MakeGenericThermoScanFilter(string filterText, bool includeParentMZ = false)
         {
             // Will make a generic version of the FilterText in filterText
             // Examples:
@@ -1867,6 +1874,15 @@ namespace ThermoRawFileReader
             // ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]          ITMS + c NSI d sa Full ms2 0@etd100.00
 
             // FTMS + p NSI SIM msx ms [475.0000-525.0000]                          FTMS + p NSI SIM msx ms
+
+            // FAIMS:
+            // FTMS + c NSI cv=-75.00 d Full ms2 437.5205@hcd32.00 [110.0000-1323.0000]     FTMS + c NSI cv=-75.00 d Full ms2 0@hcd32.00
+
+            // When isDIA is true:
+            // FTMS + p NSI cv=-80.00 Full ms2 497.5000@hcd32.00 [200.0000-1600.0000]       FTMS + p NSI cv=-80.00 Full ms2 497.5@hcd32.00
+
+            // When isDIA is false:
+            // FTMS + p NSI cv=-80.00 Full ms2 497.5000@hcd32.00 [200.0000-1600.0000]       FTMS + p NSI cv=-80.00 Full ms2 0@hcd32.00
 
             // + c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                       + c d Full ms2 0@45.00
             // + c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]          + c d Full ms3 0@45.00 0@45.00
@@ -1909,9 +1925,16 @@ namespace ThermoRawFileReader
                     return genericScanFilterText.Substring(0, fullCnlCharIndex + MRM_FullNL_TEXT.Length).Trim();
                 }
 
-                // Replace any digits before any @ sign with a 0
                 if (genericScanFilterText.IndexOf('@') > 0)
                 {
+                    // ReSharper disable once ConvertIfStatementToReturnStatement
+                    if (includeParentMZ)
+                    {
+                        // Keep the parent ion m/z value, but trim trailing zeroes
+                        return mCollisionEnergyTrailingDigits.Replace(genericScanFilterText, ".${TrailingDigits}@");
+                    }
+
+                    // Replace any digits before any @ sign with a 0
                     return mCollisionSpecs.Replace(genericScanFilterText, " 0@");
                 }
 
