@@ -1007,15 +1007,37 @@ namespace Test_ThermoRawFileReader
                 "FTMS + p NSI SIM msx ms [575.0000-625.0000]"
             };
 
+            var diaFilterList = new List<string>()
+            {
+                "FTMS + p NSI cv=-80.00 Full ms2 635.0000@hcd32.00",
+                "FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00"
+            };
+
+            // Keys in this dictionary are the filter string; values are true if DIA, otherwise false
+            var combinedFilterList = new Dictionary<string, bool>();
+
             foreach (var filterItem in filterList)
             {
-                var genericFilter = XRawFileIO.MakeGenericThermoScanFilter(filterItem);
-                var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterItem);
+                combinedFilterList.Add(filterItem, false);
+            }
 
-                Console.WriteLine(filterItem);
+            foreach (var filterItem in diaFilterList)
+            {
+                combinedFilterList.Add(filterItem, true);
+            }
+
+            foreach (var item in combinedFilterList)
+            {
+                var filterString = item.Key;
+                var isDIA = item.Value;
+
+                var genericFilter = XRawFileIO.MakeGenericThermoScanFilter(filterString, isDIA);
+                var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterString, isDIA);
+
+                Console.WriteLine(filterString);
                 Console.WriteLine("  {0,-12} {1}", scanType, genericFilter);
 
-                var validMS1Scan = XRawFileIO.ValidateMSScan(filterItem, out var msLevel, out var simScan, out var mrmScanType, out var zoomScan);
+                var validMS1Scan = XRawFileIO.ValidateMSScan(filterString, out var msLevel, out var simScan, out var mrmScanType, out var zoomScan);
 
                 if (validMS1Scan)
                 {
