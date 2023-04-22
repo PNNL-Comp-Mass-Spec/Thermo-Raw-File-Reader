@@ -98,6 +98,11 @@ namespace ThermoRawFileReader
         private readonly LinkedList<int> mCachedScans = new();
 
         /// <summary>
+        /// Set to true if the instrument method has "Scan tMSn"
+        /// </summary>
+        private bool mInstrumentMethodHasDIA;
+
+        /// <summary>
         /// Reader that implements ThermoFisher.CommonCore.Data.Interfaces.IRawDataPlus
         /// </summary>
         private IRawDataPlus mXRawFile;
@@ -1788,6 +1793,11 @@ namespace ThermoRawFileReader
                     if (!string.IsNullOrWhiteSpace(methodText))
                     {
                         FileInfo.InstMethods.Add(methodText);
+
+                        if (methodText.IndexOf("Scan tMSn", StringComparison.Ordinal) > 0)
+                        {
+                            mInstrumentMethodHasDIA = true;
+                        }
                     }
                 }
             }
@@ -2658,6 +2668,7 @@ namespace ThermoRawFileReader
 
                 mCachedScanInfo.Clear();
                 mCachedScans.Clear();
+                mInstrumentMethodHasDIA = false;
                 RawFilePath = string.Empty;
 
                 if (TraceMode)
