@@ -112,7 +112,6 @@ namespace ThermoRawFileReader
         /// <summary>
         /// The monoisotopic parent ion m/z, as determined by the Thermo software
         /// </summary>
-        [Obsolete("Unused")]
         public double ParentIonMonoisotopicMZ
         {
             get
@@ -137,10 +136,12 @@ namespace ThermoRawFileReader
         public List<int> DependentScans { get; }
 
         /// <summary>
-        /// The monoisotopic parent ion m/z, as determined by the Thermo software
+        /// The window size, in m/z, of ions selected for MS/MS fragmentation
         /// </summary>
-        [Obsolete("Unused")]
-        public double IsolationWindowTargetMZ
+        /// <remarks>
+        /// In DIA searches, the isolation window width will be 10, 20, 50, or larger
+        /// </remarks>
+        public double IsolationWindowWidthMZ
         {
             get
             {
@@ -215,6 +216,11 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <returns>True if centroid (sticks) scan; False if profile (continuum) scan</returns>
         public bool IsCentroided { get; set; }
+
+        /// <summary>
+        /// This is set to true for spectra with IsolationWindowWidthMZ >= 6.5
+        /// </summary>
+        public bool IsDIA { get; set; }
 
         /// <summary>
         /// FTMS flag (or Orbitrap, Q-Exactive, Lumos, or any other high resolution instrument)
