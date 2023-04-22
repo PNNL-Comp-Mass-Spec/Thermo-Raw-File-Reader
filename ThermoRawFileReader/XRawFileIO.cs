@@ -1475,8 +1475,9 @@ namespace ThermoRawFileReader
         /// Parse the scan type name out of the scan filter string
         /// </summary>
         /// <param name="filterText"></param>
+        /// <param name="isDIA">If true, and the scan is MSn or HMSn, prepend with "DIA-"</param>
         /// <returns>Scan type name, e.g. HMS or HCD-HMSn</returns>
-        public static string GetScanTypeNameFromThermoScanFilterText(string filterText)
+        public static string GetScanTypeNameFromThermoScanFilterText(string filterText, bool isDIA)
         {
             // Examines filterText to determine what the scan type is
             // Examples:
@@ -1518,6 +1519,10 @@ namespace ThermoRawFileReader
 
             // FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]       ETciD-HMSn  (ETD fragmentation, then further fragmented by CID in the ion trap; detected with orbitrap)
             // FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]       EThcD-HMSn  (ETD fragmentation, then further fragmented by HCD in the ion routing multipole; detected with orbitrap)
+
+            // DIA examples
+            // FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                    DIA-HCD-HMSn
+            // FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                   DIA-HCD-HMSn
 
             const string defaultScanTypeName = "MS";
 
@@ -1635,7 +1640,10 @@ namespace ThermoRawFileReader
 
                     if (msLevel > 1 && collisionMode.Length > 0)
                     {
-                        return CapitalizeCollisionMode(collisionMode) + "-" + scanTypeName;
+                        return string.Format("{0}{1}-{2}",
+                            isDIA ? "DIA-" : string.Empty,
+                            CapitalizeCollisionMode(collisionMode),
+                            scanTypeName);
                     }
 
                     return scanTypeName;
