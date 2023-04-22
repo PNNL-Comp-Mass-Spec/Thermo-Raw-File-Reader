@@ -1343,6 +1343,13 @@ namespace ThermoRawFileReader
                                 RaiseErrorMessage("Unknown format for Scan Filter: " + scanInfo.FilterText);
                                 return false;
                             }
+
+                        var isolationWindowWidthMZ = scanInfo.IsolationWindowWidthMZ;
+
+                        if (isolationWindowWidthMZ >= 6.5 || mInstrumentMethodHasDIA && isolationWindowWidthMZ >= 2.5)
+                        {
+                            // Assume this is a Data Independent Acquisition scan
+                            scanInfo.IsDIA = true;
                         }
                     }
                 }
