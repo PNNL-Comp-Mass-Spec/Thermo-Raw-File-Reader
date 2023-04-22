@@ -275,6 +275,7 @@ namespace ThermoRawFileReader
 
                 // For safety, remove any text after a square bracket
                 var bracketIndex = mzText.IndexOf('[');
+
                 if (bracketIndex > 0)
                 {
                     // Remove ion ranges enclosed in square brackets
@@ -283,6 +284,7 @@ namespace ThermoRawFileReader
 
                 // Find all of the parent ion m/z's present in mzText
                 var startIndex = 0;
+
                 do
                 {
                     var parentIonMatch = mFindParentIon.Match(mzText, startIndex);
@@ -307,6 +309,7 @@ namespace ThermoRawFileReader
                     collisionMode = GetCapturedValue(parentIonMatch, "CollisionMode1");
 
                     var collisionEnergy = GetCapturedValue(parentIonMatch, "CollisionEnergy1");
+
                     if (!string.IsNullOrWhiteSpace(collisionEnergy))
                     {
                         float.TryParse(collisionEnergy, out collisionEnergyValue);
@@ -322,6 +325,7 @@ namespace ThermoRawFileReader
                     }
 
                     var allowSecondaryActivation = true;
+
                     if (string.Equals(collisionMode, "ETD", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(collisionMode2))
                     {
                         if (string.Equals(collisionMode2, "CID", StringComparison.OrdinalIgnoreCase))
@@ -380,10 +384,12 @@ namespace ThermoRawFileReader
                 // Use manual text parsing instead
 
                 var atIndex = mzText.LastIndexOf('@');
+
                 if (atIndex > 0)
                 {
                     mzText = mzText.Substring(0, atIndex);
                     var spaceIndex = mzText.LastIndexOf(' ');
+
                     if (spaceIndex > 0)
                     {
                         mzText = mzText.Substring(spaceIndex + 1);
@@ -408,6 +414,7 @@ namespace ThermoRawFileReader
                 // Find the longest contiguous number that mzText starts with
 
                 var charIndex = -1;
+
                 while (charIndex < mzText.Length - 1)
                 {
                     if (char.IsNumber(mzText[charIndex + 1]) || mzText[charIndex + 1] == '.')

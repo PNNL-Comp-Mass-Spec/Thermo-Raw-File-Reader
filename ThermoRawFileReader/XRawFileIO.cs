@@ -427,6 +427,7 @@ namespace ThermoRawFileReader
             var charIndex = filterText.IndexOf('[');
 
             Match match;
+
             if (charIndex > 0)
             {
                 match = mIonMode.Match(filterText.Substring(0, charIndex));
@@ -672,6 +673,7 @@ namespace ThermoRawFileReader
                 }
 
                 var index = reactions - 1;
+
                 if (index > 0 && scanFilter.GetIsMultipleActivation(index))
                 {
                     // The last activation is part of a ETciD/EThcD pair
@@ -764,6 +766,7 @@ namespace ThermoRawFileReader
                     scanEnd = ScanEnd;
 
                 var warningMessage = ValidateAndSelectDevice(deviceType, deviceNumber);
+
                 if (!string.IsNullOrEmpty(warningMessage))
                 {
                     RaiseWarningMessage(warningMessage + "; cannot load chromatogram data");
@@ -907,6 +910,7 @@ namespace ThermoRawFileReader
             try
             {
                 var warningMessage = ValidateAndSelectDevice(deviceType, deviceNumber);
+
                 if (!string.IsNullOrEmpty(warningMessage))
                 {
                     RaiseWarningMessage(warningMessage);
@@ -1298,10 +1302,12 @@ namespace ThermoRawFileReader
                         // We'll set the Parent Ion to 0 m/z and the collision mode to CID
                         scanInfo.ParentIonMZ = 0;
                         scanInfo.CollisionMode = "cid";
+
                         if (scanInfo.ActivationType == ActivationTypeConstants.Unknown)
                         {
                             scanInfo.ActivationType = ActivationTypeConstants.CID;
                         }
+
                         scanInfo.MRMScanType = MRMScanTypeConstants.NotMRM;
                     }
                     else
@@ -1631,6 +1637,7 @@ namespace ThermoRawFileReader
                     var baseScanTypeName = msLevel > 1 ? "MSn" : "MS";
 
                     string scanTypeName;
+
                     if (ScanIsFTMS(filterText))
                     {
                         // HMS or HMSn scan
@@ -1768,6 +1775,7 @@ namespace ThermoRawFileReader
 
                 // Step through the names and store in the .Setting() arrays
                 var tuneCategory = "General";
+
                 for (var settingIndex = 0; settingIndex <= tuneLabelCount - 1; settingIndex++)
                 {
                     if (tuneSettingValues[settingIndex].Length == 0 && !tuneSettingNames[settingIndex].EndsWith(":"))
@@ -1827,6 +1835,7 @@ namespace ThermoRawFileReader
                         OnDebugEvent("Retrieving method from index " + methodIndex);
 
                     var methodText = mXRawFile.GetInstrumentMethod(methodIndex);
+
                     if (!string.IsNullOrWhiteSpace(methodText))
                     {
                         FileInfo.InstMethods.Add(methodText);
@@ -1908,6 +1917,7 @@ namespace ThermoRawFileReader
 
                 // First look for and remove numbers between square brackets
                 var bracketIndex = filterText.IndexOf('[');
+
                 if (bracketIndex > 0)
                 {
                     genericScanFilterText = filterText.Substring(0, bracketIndex).TrimEnd(' ');
@@ -1918,6 +1928,7 @@ namespace ThermoRawFileReader
                 }
 
                 var fullCnlCharIndex = genericScanFilterText.IndexOf(MRM_FullNL_TEXT, StringComparison.OrdinalIgnoreCase);
+
                 if (fullCnlCharIndex > 0)
                 {
                     // MRM neutral loss
@@ -1940,6 +1951,7 @@ namespace ThermoRawFileReader
 
                 // No @ sign; look for text of the form "ms2 748.371"
                 var match = mMzWithoutCE.Match(genericScanFilterText);
+
                 if (match.Success)
                 {
                     return genericScanFilterText.Substring(0, match.Groups["MzValue"].Index);
@@ -2112,6 +2124,7 @@ namespace ThermoRawFileReader
             {
                 var data = ReadScanData(scan, maxNumberOfPeaks, centroidData);
                 dataCount = data.Masses.Length;
+
                 if (dataCount <= 0)
                 {
                     mzList = Array.Empty<double>();
@@ -2177,6 +2190,7 @@ namespace ThermoRawFileReader
             {
                 var data = ReadScanData(scan, maxNumberOfPeaks, centroidData);
                 var dataCount = data.Masses.Length;
+
                 if (dataCount <= 0)
                 {
                     massIntensityPairs = new double[0, 0];
@@ -2670,6 +2684,7 @@ namespace ThermoRawFileReader
                     }
 
                     massIntensityPairs = new double[2, dataCount];
+
                     for (var i = 0; i < dataCount; i++)
                     {
                         massIntensityPairs[0, i] = masses[i];
@@ -2817,6 +2832,7 @@ namespace ThermoRawFileReader
             if (deviceNumber > deviceCount)
             {
                 string validValues;
+
                 if (deviceCount == 1)
                 {
                     validValues = string.Format("the file only has one entry for device type {0}; specify deviceNumber = 1", deviceType);

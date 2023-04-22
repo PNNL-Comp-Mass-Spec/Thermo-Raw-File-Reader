@@ -319,6 +319,7 @@ namespace RawFileReaderTests
 
             var expectedParentIonList = expectedParentIons.Split(',');
             var expectedParentIonMZ = double.Parse(expectedParentIonList[0].Replace("!", ""));
+
             foreach (var parentIon in expectedParentIonList)
             {
                 if (parentIon.Contains('!'))
@@ -520,6 +521,7 @@ namespace RawFileReaderTests
             var expectedParentIonList = expectedParentIons.Split(',');
             //var expectedParentIonMZ = double.Parse(expectedParentIonList.Last().Replace("!", ""));
             var expectedParentIonMZ = double.Parse(expectedParentIonList[0].Replace("!", ""));
+
             foreach (var parentIon in expectedParentIonList)
             {
                 if (parentIon.Contains('!'))

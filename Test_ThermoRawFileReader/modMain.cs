@@ -135,6 +135,7 @@ namespace Test_ThermoRawFileReader
             var sidMatcher = new Regex("sid=[0-9.]+", RegexOptions.Compiled);
 
             var workingDirectory = new DirectoryInfo(directoryToScan);
+
             if (!workingDirectory.Exists)
             {
                 Console.WriteLine("Directory not found: " + workingDirectory.FullName);
@@ -156,9 +157,11 @@ namespace Test_ThermoRawFileReader
             {
                 // Look instead in the directory that has DEFAULT_FILE_PATH
                 var defaultFile = new FileInfo(DEFAULT_FILE_PATH);
+
                 if (defaultFile.Directory?.Exists == true)
                 {
                     var alternateScanStatsFiles = defaultFile.Directory.GetFiles("*_ScanStatsEx.txt").ToList();
+
                     if (alternateScanStatsFiles.Count > 0)
                     {
                         scanStatsFiles.AddRange(alternateScanStatsFiles);
@@ -176,6 +179,7 @@ namespace Test_ThermoRawFileReader
             var lastProgress = DateTime.UtcNow;
 
             var filesProcessed = 0;
+
             foreach (var dataFile in scanStatsFiles)
             {
                 using var reader = new StreamReader(new FileStream(dataFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
@@ -184,6 +188,7 @@ namespace Test_ThermoRawFileReader
                     continue;
 
                 var headerLine = reader.ReadLine();
+
                 if (headerLine == null)
                 {
                     continue;
@@ -210,10 +215,12 @@ namespace Test_ThermoRawFileReader
                 while (!reader.EndOfStream)
                 {
                     var dataLine = reader.ReadLine();
+
                     if (string.IsNullOrWhiteSpace(dataLine))
                         continue;
 
                     var dataColumns = dataLine.Split('\t');
+
                     if (dataColumns.Length < scanFilterIndex)
                         continue;
 
@@ -433,6 +440,7 @@ namespace Test_ThermoRawFileReader
                     // from: \\proto-2\UnitTest_Files\ThermoRawFileReader\QC_Mam_16_01_1
                     // to    /UnitTest_Files/ThermoRawFileReader/QC_Mam_16_01_1
                     var slashIndex = rawFilePath.IndexOf('\\', 2);
+
                     if (slashIndex > 2)
                     {
                         rawFilePath = rawFilePath.Substring(slashIndex).Replace('\\', '/');
@@ -485,6 +493,7 @@ namespace Test_ThermoRawFileReader
             try
             {
                 var rawFile = ResolveDataFile(rawFilePath);
+
                 if (rawFile == null)
                     return;
 
@@ -765,6 +774,7 @@ namespace Test_ThermoRawFileReader
                 {
                     Console.WriteLine();
                     Console.WriteLine("{0,-10} {1}", "MSLevel", "Scans");
+
                     foreach (var item in msLevelStats)
                     {
                         Console.WriteLine("{0, -10} {1}", item.Key, item.Value);
@@ -772,6 +782,7 @@ namespace Test_ThermoRawFileReader
                 }
 
                 Console.WriteLine();
+
                 if (ionInjectionTimesMS1.Count > 0 || ionInjectionTimesMS2.Count > 0)
                 {
                     Console.WriteLine("Ion injection time stats");
@@ -792,6 +803,7 @@ namespace Test_ThermoRawFileReader
             try
             {
                 var rawFile = ResolveDataFile(rawFilePath);
+
                 if (rawFile == null)
                     return;
 
@@ -809,6 +821,7 @@ namespace Test_ThermoRawFileReader
                 var nonMassSpecDevicesInFile = new Dictionary<Device, int>();
 
                 Console.WriteLine("{0,-15} {1}", "Device Type", "Count in .Raw file");
+
                 foreach (var item in deviceList)
                 {
                     Console.WriteLine("{0,-15} {1}", item.Key, item.Value);
@@ -844,9 +857,11 @@ namespace Test_ThermoRawFileReader
                         Console.WriteLine("{0,-9} {1}", "Scan", "Intensity");
 
                         var i = 0;
+
                         foreach (var chromPoint in chromData)
                         {
                             i++;
+
                             if (i % 100 != 0) continue;
 
                             Console.WriteLine("{0,-9:N0} {1:F2}", chromPoint.Key, chromPoint.Value);
@@ -865,6 +880,7 @@ namespace Test_ThermoRawFileReader
             try
             {
                 var rawFile = ResolveDataFile(rawFilePath);
+
                 if (rawFile == null)
                     return;
 
@@ -920,6 +936,7 @@ namespace Test_ThermoRawFileReader
                         scansReadSinceLastProgress++;
 
                         var elapsedSeconds = DateTime.UtcNow.Subtract(lastProgress).TotalSeconds;
+
                         if (!(elapsedSeconds > 3) || scansRead % 100 != 0)
                             continue;
 
@@ -937,6 +954,7 @@ namespace Test_ThermoRawFileReader
 
                 Console.WriteLine();
                 Console.WriteLine("{0,-38} {1,-10} {2,-20} {3}", "Event name", "Values", "Most Common Value", "Occurrence count");
+
                 foreach (var eventInfo in scanEventStats)
                 {
                     var eventName = eventInfo.Key;

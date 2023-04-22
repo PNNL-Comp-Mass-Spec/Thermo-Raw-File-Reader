@@ -395,6 +395,7 @@ namespace RawFileReaderTests
                     Assert.AreEqual(0, unsortedMzValues, "Scan {0} has {1} m/z values not sorted properly", scanNumber, unsortedMzValues);
 
                     scansProcessed++;
+
                     if (scansProcessed % statsInterval == 0)
                     {
                         reader.GetScanInfo(scanNumber, out var scanInfo);
@@ -689,6 +690,7 @@ namespace RawFileReaderTests
             var scanCount = reader.GetNumScans();
 
             Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
+
             if (expectedResult >= 0)
                 Assert.AreEqual(expectedResult, scanCount, "Scan count mismatch");
         }
@@ -1774,6 +1776,7 @@ namespace RawFileReaderTests
                     if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedDataByType))
                     {
                         var keySpec = maxNumberOfPeaks + "_" + centroidData;
+
                         if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                         {
                             var observedValue = scanSummary.Substring(22);
@@ -1920,6 +1923,7 @@ namespace RawFileReaderTests
                     if (maxNumberOfPeaks > 0)
                     {
                         dataCount = maxNumberOfPeaks;
+
                         if (dataPointsRead < maxNumberOfPeaks)
                         {
                             dataCount = dataPointsRead;
@@ -1969,6 +1973,7 @@ namespace RawFileReaderTests
                     if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedDataByType))
                     {
                         var keySpec = maxNumberOfPeaks + "_" + centroidData;
+
                         if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                         {
                             Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
@@ -2105,6 +2110,7 @@ namespace RawFileReaderTests
                 if (expectedDataThisFile.TryGetValue(scanStart, out var expectedDataByType))
                 {
                     var keySpec = maxNumberOfPeaks + "_" + centroidData;
+
                     if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                     {
                         Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
@@ -2422,6 +2428,7 @@ namespace RawFileReaderTests
                     scanInfo.TryGetScanEvent(eventName, out var eventValue);
 
                     var eventKey = new Tuple<string, string>(eventName, eventValue);
+
                     if (eventCountsActual.TryGetValue(eventKey, out var scanCount))
                     {
                         eventCountsActual[eventKey] = scanCount + 1;
@@ -2507,6 +2514,7 @@ namespace RawFileReaderTests
 
             // Look for the file on Proto-2
             var remoteFile = new FileInfo(Path.Combine(remoteDirPath, rawFileName));
+
             if (remoteFile.Exists)
             {
                 return remoteFile;
