@@ -1327,22 +1327,20 @@ namespace ThermoRawFileReader
                                 scanInfo.ParentScan = parentScan;
                             }
                         }
+                        else if (ValidateMSScan(scanInfo.FilterText, out var msLevel, out var simScan, out var mrmScanType, out var zoomScan))
+                        {
+                            // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
+                            scanInfo.MSLevel = msLevel;
+                            scanInfo.SIMScan = simScan;
+                            scanInfo.MRMScanType = mrmScanType;
+                            scanInfo.ZoomScan = zoomScan;
+                        }
                         else
                         {
-                            if (ValidateMSScan(scanInfo.FilterText, out var msLevel, out var simScan, out var mrmScanType, out var zoomScan))
-                            {
-                                // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
-                                scanInfo.MSLevel = msLevel;
-                                scanInfo.SIMScan = simScan;
-                                scanInfo.MRMScanType = mrmScanType;
-                                scanInfo.ZoomScan = zoomScan;
-                            }
-                            else
-                            {
-                                // Unknown format for .FilterText; return an error
-                                RaiseErrorMessage("Unknown format for Scan Filter: " + scanInfo.FilterText);
-                                return false;
-                            }
+                            // Unknown format for .FilterText; return an error
+                            RaiseErrorMessage("Unknown format for Scan Filter: " + scanInfo.FilterText);
+                            return false;
+                        }
 
                         var isolationWindowWidthMZ = scanInfo.IsolationWindowWidthMZ;
 
@@ -1656,25 +1654,23 @@ namespace ThermoRawFileReader
                         {
                             return MRM_Q1MS_TEXT.Trim();
                         }
-                        else if (ContainsText(filterText, MRM_Q3MS_TEXT, 1))
+
+                        // ReSharper disable once ConvertIfStatementToReturnStatement
+                        if (ContainsText(filterText, MRM_Q3MS_TEXT, 1))
                         {
                             return MRM_Q3MS_TEXT.Trim();
                         }
-                        else
-                        {
-                            // Unknown QMS mode
-                            return "MRM QMS";
-                        }
+
+                        // Unknown QMS mode
+                        return "MRM QMS";
 
                     case MRMScanTypeConstants.SRM:
                         if (collisionMode.Length > 0)
                         {
                             return collisionMode.ToUpper() + "-SRM";
                         }
-                        else
-                        {
-                            return "CID-SRM";
-                        }
+
+                        return "CID-SRM";
 
                     case MRMScanTypeConstants.FullNL:
                         return "MRM_Full_NL";
