@@ -1524,10 +1524,6 @@ namespace ThermoRawFileReader
             try
             {
                 var validScanFilter = true;
-                var collisionMode = string.Empty;
-                MRMScanTypeConstants mrmScanType;
-                var simScan = false;
-                var zoomScan = false;
 
                 if (string.IsNullOrWhiteSpace(filterText))
                 {
@@ -1540,43 +1536,68 @@ namespace ThermoRawFileReader
                     msLevel = 1;
                 }
 
+                string collisionMode;
+                MRMScanTypeConstants mrmScanType;
+                bool simScan;
+                bool zoomScan;
+
                 if (msLevel > 1)
                 {
                     // Parse out the parent ion and collision energy from filterText
 
-                    if (ExtractParentIonMZFromFilterText(filterText, out _, out msLevel, out collisionMode))
+                    if (ExtractParentIonMZFromFilterText(filterText, out _, out msLevel, out var extractedCollisionMode))
                     {
+                        collisionMode = extractedCollisionMode;
+
                         // Check whether this is an SRM MS2 scan
                         mrmScanType = DetermineMRMScanType(filterText);
+                        simScan = false;
+                        zoomScan = false;
                     }
                     else
                     {
                         // Could not find "Full ms2" in filterText
                         // XRaw periodically mislabels a scan as .EventNumber > 1 when it's really an MS scan; check for this
-                        if (ValidateMSScan(filterText, out msLevel, out simScan, out mrmScanType, out zoomScan))
+                        if (ValidateMSScan(filterText, out msLevel, out var isSimScan, out var extractedMRMScanType, out var isZoomScan))
                         {
                             // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
+                            mrmScanType = extractedMRMScanType;
+                            simScan = isSimScan;
+                            zoomScan = isZoomScan;
                         }
                         else
                         {
                             // Unknown format for filterText; return an error
                             validScanFilter = false;
+                            mrmScanType = MRMScanTypeConstants.NotMRM;
+                            simScan = false;
+                            zoomScan = false;
                         }
+
+                        collisionMode = string.Empty;
                     }
                 }
                 else
                 {
                     // MSLevel is 1
                     // Make sure .FilterText contains one of the known MS1, SIM or MRM tags
-                    if (ValidateMSScan(filterText, out msLevel, out simScan, out mrmScanType, out zoomScan))
+                    if (ValidateMSScan(filterText, out msLevel, out var isSimScan, out var extractedMRMScanType, out var isZoomScan))
                     {
                         // Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
+                        mrmScanType = extractedMRMScanType;
+                        simScan = isSimScan;
+                        zoomScan = isZoomScan;
                     }
                     else
                     {
                         // Unknown format for filterText; return an error
                         validScanFilter = false;
+                        mrmScanType = MRMScanTypeConstants.NotMRM;
+                        simScan = false;
+                        zoomScan = false;
                     }
+
+                    collisionMode = string.Empty;
                 }
 
                 if (!validScanFilter)
