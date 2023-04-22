@@ -474,6 +474,203 @@ namespace RawFileReaderTests
             Assert.Greater(percentValid, 90, "Over 10% of the spectra had invalid scan numbers");
         }
 
+        // ReSharper disable StringLiteralTypo
+
+        [Test]
+        [TestCase("B5_50uM_MS_r1.RAW", 1, 20)]
+        [TestCase("MNSLTFKK_ms.raw", 1, 88)]
+        [TestCase("QCShew200uL.raw", 4000, 4100)]
+        [TestCase("Wrighton_MT2_SPE_200avg_240k_neg_330-380.raw", 1, 200)]
+        [TestCase("1229_02blk1.raw", 6000, 6100)]
+        [TestCase("MCF7_histone_32_49B_400min_HCD_ETD_01172014_b.raw", 2300, 2400)]
+        [TestCase("lowdose_IMAC_iTRAQ1_PQDMSA.raw", 15000, 15100)]
+        [TestCase("MZ20150721blank2.raw", 1, 434)]
+        [TestCase("OG_CEPC_PU_22Oct13_Legolas_13-05-12.raw", 5000, 5100)]
+        [TestCase("blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 1500, 1900)]
+        [TestCase("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw", 25200, 25600)]
+        [TestCase("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 5900, 6000)]
+        [TestCase("IPA-blank-07_25Oct13_Gimli.raw", 1750, 1850)]
+        [TestCase("Angiotensin_325-CID.raw", 1, 10)]
+        [TestCase("Angiotensin_325-ETciD-15.raw", 1, 10)]
+        [TestCase("Angiotensin_325-ETD.raw", 1, 10)]
+        [TestCase("Angiotensin_325-HCD.raw", 1, 10)]
+        [TestCase("Angiotensin_AllScans.raw", 1000, 1200)]
+        [TestCase("QC_mam_16_01_125ng_CPTACpt7-3s-a_02Nov17_Pippin_REP-17-10-01.raw", 65, 80)]
+        [TestCase("Blank04_29Mar17_Smeagol.raw", 2500, 2600)] // SRM data
+        [TestCase("20181115_arginine_Gua13C_CIDcol25_158_HCDcol35.raw", 10, 20)]                                               // MS3 scans
+        [TestCase("calmix_Q3_10192022_03.RAW", 5, 15)]                                                                         // MRM data (Q3MS)
+        [TestCase("MM_Strap_IMAC_FT_10xDilution_FAIMS_ID_01_FAIMS_Merry_03Feb23_REP-22-11-13.raw", 42000, 42224, true)] // DIA data
+        // ReSharper restore StringLiteralTypo
+        public void TestIsolationWindowWidth(
+            string rawFileName,
+            int scanStart,
+            int scanEnd,
+            bool skipIfMissing = false)
+        {
+            // Keys in this Dictionary are filename (without the extension), values are ScanCounts by isolation window width, where the key is a Tuple of MSLevel and Isolation Window Width
+            var expectedData = new Dictionary<string, Dictionary<Tuple<int, double>, int>>();
+
+            AddExpectedTupleAndCount(expectedData, "B5_50uM_MS_r1", 1, 0.0, 20);
+
+            AddExpectedTupleAndCount(expectedData, "MNSLTFKK_ms", 1, 0.0, 88);
+
+            AddExpectedTupleAndCount(expectedData, "QCShew200uL", 1, 0.0, 101);
+
+            AddExpectedTupleAndCount(expectedData, "Wrighton_MT2_SPE_200avg_240k_neg_330-380", 1, 50.0, 200);
+
+            const string file5 = "1229_02blk1";
+            AddExpectedTupleAndCount(expectedData, file5, 1, 0.0, 77);
+            AddExpectedTupleAndCount(expectedData, file5, 2, 0.0, 24);
+
+            const string file6 = "MCF7_histone_32_49B_400min_HCD_ETD_01172014_b";
+            AddExpectedTupleAndCount(expectedData, file6, 1, 0.0, 18);
+            AddExpectedTupleAndCount(expectedData, file6, 2, 3.0, 83);
+
+            const string file7 = "lowdose_IMAC_iTRAQ1_PQDMSA";
+            AddExpectedTupleAndCount(expectedData, file7, 1, 0.0, 16);
+            AddExpectedTupleAndCount(expectedData, file7, 2, 3.0, 85);
+
+            const string file8 = "MZ20150721blank2";
+            AddExpectedTupleAndCount(expectedData, file8, 1, 0.0, 62);
+            AddExpectedTupleAndCount(expectedData, file8, 2, 3.0, 372);
+
+            const string file9 = "OG_CEPC_PU_22Oct13_Legolas_13-05-12";
+            AddExpectedTupleAndCount(expectedData, file9, 1, 0.0, 9);
+            AddExpectedTupleAndCount(expectedData, file9, 2, 3.0, 92);
+
+            const string file10 = "blank_MeOH-3_18May16_Rainier_Thermo_10344958";
+            AddExpectedTupleAndCount(expectedData, file10, 1, 0.0, 190);
+            AddExpectedTupleAndCount(expectedData, file10, 2, 2.0, 207);
+            AddExpectedTupleAndCount(expectedData, file10, 3, 2.0, 4);
+
+            const string file11 = "HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53";
+            AddExpectedTupleAndCount(expectedData, file11, 1, 1150.0, 20);
+            AddExpectedTupleAndCount(expectedData, file11, 2, 2.0, 381);
+
+            const string file12 = "MeOHBlank03POS_11May16_Legolas_HSS-T3_A925";
+            AddExpectedTupleAndCount(expectedData, file12, 1, 0.0, 8);
+            AddExpectedTupleAndCount(expectedData, file12, 2, 2.0, 93);
+
+            const string file13 = "Angiotensin_AllScans";
+            AddExpectedTupleAndCount(expectedData, file13, 1, -1, 10);
+            AddExpectedTupleAndCount(expectedData, file13, 2, 1.6, 48);
+            AddExpectedTupleAndCount(expectedData, file13, 2, 2.0, 143);
+
+            AddExpectedTupleAndCount(expectedData, "IPA-blank-07_25Oct13_Gimli", 1, 0.0, 101);
+
+            AddExpectedTupleAndCount(expectedData, "Angiotensin_325-CID", 2, 2.0, 10);
+
+            AddExpectedTupleAndCount(expectedData, "Angiotensin_325-ETciD-15", 2, 2.0, 10);
+            AddExpectedTupleAndCount(expectedData, "Angiotensin_325-ETD", 2, 2.0, 10);
+            AddExpectedTupleAndCount(expectedData, "Angiotensin_325-HCD", 2, 2.0, 10);
+
+            AddExpectedTupleAndCount(expectedData, "Blank04_29Mar17_Smeagol", 2, 0.0, 101);
+
+            // ReSharper disable StringLiteralTypo
+
+            const string file14 = "QC_mam_16_01_125ng_CPTACpt7-3s-a_02Nov17_Pippin_REP-17-10-01";
+            AddExpectedTupleAndCount(expectedData, file14, 1, 1450.0, 4);
+            AddExpectedTupleAndCount(expectedData, file14, 2, 0.7, 12);
+
+            AddExpectedTupleAndCount(expectedData, "20181115_arginine_Gua13C_CIDcol25_158_HCDcol35", 3, 1.0, 11);
+
+            AddExpectedTupleAndCount(expectedData, "calmix_Q3_10192022_03", 1, 0.0, 11);
+
+            // ReSharper restore StringLiteralTypo
+
+            // DIA dataset
+            const string file15 = "MM_Strap_IMAC_FT_10xDilution_FAIMS_ID_01_FAIMS_Merry_03Feb23_REP-22-11-13";
+            AddExpectedTupleAndCount(expectedData, file15, 1, -1.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 23.0, 27);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 24.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 25.0, 27);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 26.0, 18);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 27.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 28.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 29.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 30.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 32.0, 18);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 35.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 37.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 42.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 48.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 52.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 54.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 71.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 129.0, 9);
+            AddExpectedTupleAndCount(expectedData, file15, 2, 453.0, 9);
+
+            var dataFile = GetRawDataFile(rawFileName, skipIfMissing);
+
+            if (dataFile == null)
+            {
+                Console.WriteLine("Skipping unit tests for " + rawFileName);
+                return;
+            }
+
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            Console.WriteLine("Parsing scan headers for {0}", dataFile.Name);
+            Console.WriteLine();
+
+            var scanCountsActual = new Dictionary<Tuple<int, double>, int>();
+
+            for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+            {
+                var success = reader.GetScanInfo(scanNumber, out var scanInfo);
+
+                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+
+                var isolationWindowWidth = scanInfo.IsolationWindowWidthMZ;
+
+                var isolationWindowKey = new Tuple<int, double>(scanInfo.MSLevel, isolationWindowWidth);
+
+                if (scanCountsActual.TryGetValue(isolationWindowKey, out var observedScanCount))
+                {
+                    scanCountsActual[isolationWindowKey] = observedScanCount + 1;
+                }
+                else
+                {
+                    scanCountsActual.Add(isolationWindowKey, 1);
+                }
+            }
+
+            var datasetName = Path.GetFileNameWithoutExtension(dataFile.Name);
+
+            if (!expectedData.TryGetValue(datasetName, out var expectedScanInfo))
+            {
+                Console.WriteLine("Dataset {0} not found in dictionary expectedData", datasetName);
+                expectedScanInfo = new Dictionary<Tuple<int, double>, int>();
+            }
+
+            Console.WriteLine("{0,-5} {1,-7} {2,-9} {3}", "Valid", "MSLevel", "Width m/z", "Scan Count");
+
+            foreach (var isolationWindow in (from item in scanCountsActual orderby item.Key select item))
+            {
+                if (expectedScanInfo.Count == 0)
+                {
+                    Console.WriteLine("{0,-5} {1,-7} {2,-9:0.0###} {3}", string.Empty, isolationWindow.Key.Item1, isolationWindow.Key.Item2, isolationWindow.Value);
+                    continue;
+                }
+
+                if (expectedScanInfo.TryGetValue(isolationWindow.Key, out var expectedScanCount))
+                {
+                    var isValid = isolationWindow.Value == expectedScanCount;
+
+                    Console.WriteLine("{0,-5} {1,-7} {2,-9:0.0###} {3}", isValid, isolationWindow.Key.Item1, isolationWindow.Key.Item2, isolationWindow.Value);
+
+                    if (expectedScanCount >= 0)
+                        Assert.AreEqual(expectedScanCount, isolationWindow.Value, "Scan count mismatch");
+                }
+                else
+                {
+                    Console.WriteLine("{0,-5} {1,-7} {2,-9:0.0###} {3}", "??", isolationWindow.Key.Item1, isolationWindow.Key.Item2, isolationWindow.Value);
+
+                    Assert.Fail("Unexpected window width key found: {0}", isolationWindow.Key);
+                }
+            }
+        }
+
         [Test]
         [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 3316)]
         [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 71147)]
@@ -2262,6 +2459,22 @@ namespace RawFileReaderTests
             {
                 fileData.Add(scanNum, new Dictionary<string, string>());
             }
+        }
+
+        private void AddExpectedTupleAndCount(
+            IDictionary<string, Dictionary<Tuple<int, double>, int>> expectedData,
+            string fileName,
+            int tupleKey1,
+            double tupleKey2,
+            int scanCount)
+        {
+            if (!expectedData.TryGetValue(fileName, out var expectedScanInfo))
+            {
+                expectedScanInfo = new Dictionary<Tuple<int, double>, int>();
+                expectedData.Add(fileName, expectedScanInfo);
+            }
+
+            expectedScanInfo.Add(new Tuple<int, double>(tupleKey1, tupleKey2), scanCount);
         }
 
         private void AddExpectedTupleAndCount(
