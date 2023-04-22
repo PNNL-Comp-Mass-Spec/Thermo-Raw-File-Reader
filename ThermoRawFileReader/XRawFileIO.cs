@@ -1485,6 +1485,17 @@ namespace ThermoRawFileReader
         /// Parse the scan type name out of the scan filter string
         /// </summary>
         /// <param name="filterText"></param>
+        /// <returns>Scan type name, e.g. HMS or HCD-HMSn</returns>
+        [Obsolete("Use the method with argument isDIA")]
+        public static string GetScanTypeNameFromThermoScanFilterText(string filterText)
+        {
+            return GetScanTypeNameFromThermoScanFilterText(filterText, false);
+        }
+
+        /// <summary>
+        /// Parse the scan type name out of the scan filter string
+        /// </summary>
+        /// <param name="filterText"></param>
         /// <param name="isDIA">If true, and the scan is MSn or HMSn, prepend with "DIA-"</param>
         /// <returns>Scan type name, e.g. HMS or HCD-HMSn</returns>
         public static string GetScanTypeNameFromThermoScanFilterText(string filterText, bool isDIA)
