@@ -1957,7 +1957,7 @@ namespace ThermoRawFileReader
                     }
 
                     // Replace any digits before any @ sign with a 0
-                    return mCollisionSpecs.Replace(genericScanFilterText, " 0@");
+                    return GetScanFilterWithGenericPrecursorMZ(genericScanFilterText);
                 }
 
                 // No @ sign; look for text of the form "ms2 748.371"
@@ -1976,6 +1976,19 @@ namespace ThermoRawFileReader
             }
 
             return defaultGenericScanFilterText;
+        }
+
+        /// <summary>
+        /// Update the scan filter text to replace the precursor m/z value with a zero
+        /// </summary>
+        /// <remarks>
+        /// 0
+        /// </remarks>
+        /// <param name="scanFilterText"></param>
+        /// <returns>Updated scan filter</returns>
+        public static string GetScanFilterWithGenericPrecursorMZ(string scanFilterText)
+        {
+            return mCollisionSpecs.Replace(scanFilterText, " 0@");
         }
 
         private static bool ScanIsFTMS(string filterText)
