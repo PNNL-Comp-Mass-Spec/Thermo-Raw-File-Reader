@@ -1877,11 +1877,14 @@ namespace ThermoRawFileReader
         /// Remove scan-specific data from a scan filter string; primarily removes the parent ion m/z and the scan m/z range
         /// </summary>
         /// <param name="filterText"></param>
-        /// <param name="includeParentMZ">When true, include the parent ion m/z value in the generic scan filter (defaults to false)</param>
+        /// <param name="includeParentMZ">
+        /// When true, include the actual parent ion m/z value in the generic scan filter (defaults to false)
+        /// When false, change the parent ion m/z to 0
+        /// </param>
         /// <returns>Generic filter text, e.g. FTMS + p NSI Full ms</returns>
         public static string MakeGenericThermoScanFilter(string filterText, bool includeParentMZ = false)
         {
-            // Will make a generic version of the FilterText in filterText
+            // Will make a generic version of the FilterText in filterText, optionally changing the parent ion m/z to 0
             // Examples:
             // From                                                                 To
             // ITMS + c ESI Full ms [300.00-2000.00]                                ITMS + c ESI Full ms
