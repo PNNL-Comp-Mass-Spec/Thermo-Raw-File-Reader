@@ -1356,7 +1356,8 @@ namespace ThermoRawFileReader
 
                         var isolationWindowWidthMZ = scanInfo.IsolationWindowWidthMZ;
 
-                        if (isolationWindowWidthMZ >= 6.5 || mInstrumentMethodHasDIA && isolationWindowWidthMZ >= 2.5)
+                        if (scanInfo.MSLevel > 1 &&
+                            (isolationWindowWidthMZ >= 6.5 || mInstrumentMethodHasDIA && isolationWindowWidthMZ >= 2.5))
                         {
                             // Assume this is a Data Independent Acquisition scan
                             scanInfo.IsDIA = true;
