@@ -1,6 +1,6 @@
 # Thermo Raw File Reader
 
-The Thermo Raw File Reader is a .NET DLL for reading 
+The Thermo Raw File Reader is a .NET DLL for reading
 Thermo .raw files, as acquired on Thermo mass spectrometers
 * The Raw File Reader is a wrapper for the ThermoFisher.CommonCore C# DLLs
 
@@ -41,7 +41,7 @@ Download the newest ThermoRawFileReader .zip file from the [Releases page](https
 
 ## Software Example 1
 
-The Test_ThermoRawFileReader directory in the Thermo Raw File Reader source code contains a .NET command-line application 
+The Test_ThermoRawFileReader directory in the Thermo Raw File Reader source code contains a .NET command-line application
 that illustrates how to interface with ThermoRawFileReader.dll
 
 ## Software Example 2
@@ -57,14 +57,14 @@ When running on Linux with Mono, use command line option `-LoadMethod:false` to 
 ## Contacts
 
 Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)\
-Copyright 2019, Battelle Memorial Institute.  All Rights Reserved.\
+Copyright 2019, Battelle Memorial Institute. All Rights Reserved.\
 E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov\
 Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics/
 
 ## License
 
-The Thermo Raw File Reader is licensed under the 2-Clause BSD License; you may not use this program 
-except in compliance with the License. You may obtain a copy of the License at 
+The Thermo Raw File Reader is licensed under the 2-Clause BSD License; you may not use this program
+except in compliance with the License. You may obtain a copy of the License at
 https://opensource.org/licenses/BSD-2-Clause
 
 Copyright 2018 Battelle Memorial Institute
