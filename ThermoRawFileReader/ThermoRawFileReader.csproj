@@ -15,9 +15,13 @@
     <RepositoryType>GitHub</RepositoryType>
     <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/PNNL-Comp-Mass-Spec/Thermo-Raw-File-Reader</PackageProjectUrl>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
     <Title>ThermoRawFileReader</Title>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\Readme.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.5.107">
       <PrivateAssets>all</PrivateAssets>
