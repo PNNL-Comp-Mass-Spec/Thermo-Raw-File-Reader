@@ -233,17 +233,17 @@ namespace RawFileReaderTests
 
                 if (expectedMS1 == -1 && expectedMS2 == 0)
                 {
-                    Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
+                    Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true (a)");
                     Assert.IsTrue(scanCount == -1, "ScanCount is not -1");
                 }
                 else if (expectedMS1 + expectedMS2 == 0)
                 {
-                    Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true");
+                    Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true (b)");
                     Assert.IsTrue(scanCount <= 0, "ScanCount is non-zero, while we expected it to be 0");
                 }
                 else
                 {
-                    Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is true while we expected it to be false");
+                    Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is true while we expected it to be false (c)");
                     Assert.IsTrue(scanCount > 0, "ScanCount is zero, while we expected it to be > 0");
                 }
 
