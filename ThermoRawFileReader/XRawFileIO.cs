@@ -199,6 +199,16 @@ namespace ThermoRawFileReader
         public bool TraceMode { get; set; }
 
         /// <summary>
+        /// When true, the file has no MS device
+        /// </summary>
+        public bool HasNoMSDevice { get; private set; }
+
+        /// <summary>
+        /// When true, the file has non-MS devices that may have data
+        /// </summary>
+        public bool HasNonMSDataDevice { get; private set; }
+
+        /// <summary>
         /// Report an error message to the error event handler
         /// </summary>
         /// <param name="message"></param>
@@ -564,16 +574,46 @@ namespace ThermoRawFileReader
                     FileInfo.Devices.Add(item.Key, item.Value);
                 }
 
+                HasNoMSDevice = false;
+                HasNonMSDataDevice = false;
+
                 if (FileInfo.Devices.Count == 0)
                 {
                     RaiseWarningMessage("File does not have data from any devices");
                 }
+                else if (FileInfo.Devices.All(x => x.Key != Device.MS))
+                {
+                    RaiseWarningMessage("File does not have data from any MS devices");
+                    HasNoMSDevice = true;
+                }
+
+                if (FileInfo.Devices.Any(x => x.Key is Device.MSAnalog or Device.Analog or Device.UV or Device.Pda))
+                {
+                    HasNonMSDataDevice = true;
+                }
 
                 // Make sure the MS controller is selected
-                if (!SetMSController())
+                if (!HasNoMSDevice && !SetMSController())
                 {
                     FileInfo.CorruptFile = true;
                     return false;
+                }
+
+                if (HasNoMSDevice)
+                {
+                    // Set this to true to maintain certain existing behavior (as of Oct. 2023)
+                    FileInfo.CorruptFile = true;
+
+                    if (!HasNonMSDataDevice)
+                    {
+                        return false;
+                    }
+
+                    // If we have non-MS data devices, then select the first one according to a priority list
+                    if (!SetFirstDataController())
+                    {
+                        return false;
+                    }
                 }
 
                 FileInfo.CreationDate = DateTime.MinValue;
@@ -649,7 +689,7 @@ namespace ThermoRawFileReader
                     GetTuneData();
                 }
 
-                return true;
+                return !HasNoMSDevice;
             }
             catch (Exception ex)
             {
@@ -2002,13 +2042,42 @@ namespace ThermoRawFileReader
 
         private bool SetMSController()
         {
-            mXRawFile.SelectInstrument(Device.MS, 1);
+            //mXRawFile.SelectInstrument(Device.MS, 1); // Throws an exception if there is no MS device, and .SelectMsData() does the same work without the exception
             var hasMsData = mXRawFile.SelectMsData();
 
             if (!hasMsData)
             {
                 // Either the file is corrupt, or it simply doesn't have Mass Spec data
                 // The ThermoRawFileReader is primarily intended for
+                mCorruptMemoryEncountered = true;
+            }
+
+            return hasMsData;
+        }
+
+        /// <summary>
+        /// Select the first device of available devices with data
+        /// </summary>
+        /// <returns>true if a device with data was found</returns>
+        private bool SetFirstDataController()
+        {
+            var hasMsData = mXRawFile.SelectMsData();
+
+            if (!hasMsData)
+            {
+                if (FileInfo.Devices.Count > 0)
+                {
+                    var deviceTypePriority = new[] { Device.MSAnalog, Device.UV, Device.Pda, Device.Analog };
+                    foreach (var deviceType in deviceTypePriority.Where(x => FileInfo.Devices.ContainsKey(x)))
+                    {
+                        // Get first device with the highest-priority device type available
+                        mXRawFile.SelectInstrument(deviceType, 1);
+                        HasNoMSDevice = true;
+                        return true;
+                    }
+                }
+
+                // Either the file is corrupt, or it simply doesn't have Mass Spec data
                 mCorruptMemoryEncountered = true;
             }
 
@@ -2789,6 +2858,11 @@ namespace ThermoRawFileReader
 
                 if (!FillFileInfo())
                 {
+                    if (HasNoMSDevice && HasNonMSDataDevice)
+                    {
+                        return false;
+                    }
+
                     RawFilePath = string.Empty;
                     return false;
                 }
