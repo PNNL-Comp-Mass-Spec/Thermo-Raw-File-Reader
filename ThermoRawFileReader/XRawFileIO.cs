@@ -21,7 +21,7 @@ using ThermoFisher.CommonCore.Data.FilterEnums;
 //
 // For more information about the ThermoFisher.CommonCore DLLs,
 // see the RawFileReaderLicense.doc file in the solution directory;
-// see also http://planetorbitrap.com/rawfilereader#.W5BAoOhKjdM
+// see also https://www.analyteguru.com/t5/Scientific-Library/Raw-File-Reader/ta-p/8870 (best link as of Oct. 2023)
 // For questions, contact Jim Shofstahl at ThermoFisher.com
 
 // -------------------------------------------------------------------------------
