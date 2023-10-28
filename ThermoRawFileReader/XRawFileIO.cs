@@ -201,12 +201,22 @@ namespace ThermoRawFileReader
         /// <summary>
         /// When true, the file has no MS device
         /// </summary>
-        public bool HasNoMSDevice { get; private set; }
+        public bool HasNoMSDevice => FileInfo.HasNoMSDevice;
 
         /// <summary>
         /// When true, the file has non-MS devices that may have data
         /// </summary>
-        public bool HasNonMSDataDevice { get; private set; }
+        public bool HasNonMSDataDevice => FileInfo.HasNonMSDataDevice;
+
+        /// <summary>
+        /// The time (in minutes) when the first scan was acquired, or -1 if an error; set by <see cref="OpenRawFile"/>
+        /// </summary>
+        public double FirstScanTimeMinutes => FileInfo.FirstScanTimeMinutes;
+
+        /// <summary>
+        /// The time (in minutes) when the last scan was acquired, or -1 if an error; set by <see cref="OpenRawFile"/>
+        /// </summary>
+        public double LastScanTimeMinutes => FileInfo.LastScanTimeMinutes;
 
         /// <summary>
         /// Report an error message to the error event handler
@@ -574,9 +584,6 @@ namespace ThermoRawFileReader
                     FileInfo.Devices.Add(item.Key, item.Value);
                 }
 
-                HasNoMSDevice = false;
-                HasNonMSDataDevice = false;
-
                 if (FileInfo.Devices.Count == 0)
                 {
                     RaiseWarningMessage("File does not have data from any devices");
@@ -584,12 +591,12 @@ namespace ThermoRawFileReader
                 else if (FileInfo.Devices.All(x => x.Key != Device.MS))
                 {
                     RaiseWarningMessage("File does not have data from any MS devices");
-                    HasNoMSDevice = true;
+                    FileInfo.HasNoMSDevice = true;
                 }
 
                 if (FileInfo.Devices.Any(x => x.Key is Device.MSAnalog or Device.Analog or Device.UV or Device.Pda))
                 {
-                    HasNonMSDataDevice = true;
+                    FileInfo.HasNonMSDataDevice = true;
                 }
 
                 // Make sure the MS controller is selected
@@ -670,6 +677,8 @@ namespace ThermoRawFileReader
 
                 FileInfo.ScanStart = runData.FirstSpectrum;
                 FileInfo.ScanEnd = runData.LastSpectrum;
+                FileInfo.FirstScanTimeMinutes = runData.StartTime;
+                FileInfo.LastScanTimeMinutes = runData.EndTime;
 
                 FileInfo.AcquisitionFilename = string.Empty;
 
@@ -2072,7 +2081,7 @@ namespace ThermoRawFileReader
                     {
                         // Get first device with the highest-priority device type available
                         mXRawFile.SelectInstrument(deviceType, 1);
-                        HasNoMSDevice = true;
+                        FileInfo.HasNoMSDevice = true;
                         return true;
                     }
                 }

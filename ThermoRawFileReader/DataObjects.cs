@@ -180,6 +180,28 @@ namespace ThermoRawFileReader
         public int ScanEnd;
 
         /// <summary>
+        /// The time (in minutes) when the first scan was acquired, or -1 if an error
+        /// </summary>
+        public double FirstScanTimeMinutes { get; internal set; }
+
+        /// <summary>
+        /// The time (in minutes) when the last scan was acquired, or -1 if an error
+        /// </summary>
+        public double LastScanTimeMinutes { get; internal set; }
+
+        /// <summary>
+        /// When true, the file has no MS device
+        /// </summary>
+        // ReSharper disable once InconsistentNaming
+        public bool HasNoMSDevice { get; internal set; }
+
+        /// <summary>
+        /// When true, the file has non-MS devices that may have data
+        /// </summary>
+        // ReSharper disable once InconsistentNaming
+        public bool HasNonMSDataDevice { get; internal set; }
+
+        /// <summary>
         /// Flag for corrupt files
         /// </summary>
         /// <remarks>Auto-set to true if the file is corrupt / has no data</remarks>
@@ -214,7 +236,11 @@ namespace ThermoRawFileReader
             MassResolution = 0;
             ScanStart = 0;
             ScanEnd = 0;
+            FirstScanTimeMinutes = -1;
+            LastScanTimeMinutes = -1;
 
+            HasNoMSDevice = false;
+            HasNonMSDataDevice = false;
             CorruptFile = false;
         }
 
@@ -247,7 +273,11 @@ namespace ThermoRawFileReader
             MassResolution = 0;
             ScanStart = 0;
             ScanEnd = 0;
+            FirstScanTimeMinutes = -1;
+            LastScanTimeMinutes = -1;
 
+            HasNoMSDevice = false;
+            HasNonMSDataDevice = false;
             CorruptFile = false;
         }
     }
