@@ -42,8 +42,9 @@ echo Note that the DLL is compiled as AnyCPU
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\CodeTestCS\bin\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\CodeTestCS\lib\" /Y /D
 
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\" /Y /D
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\" /Y /D
+rem Skip these since the DLLs are obtained via a NuGet package at C:\NuPkg
+rem xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\" /Y /D
+rem xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\" /Y /D
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\PEKtoCSVConverter\lib\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMining\PEKtoCSVConverter\PEKtoCSVConverter\bin\DLL\Debug\" /Y /D
@@ -57,8 +58,6 @@ xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\DataMin
 
 rem xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x64\Release\" /Y /D
 if not "%1"=="NoPause" pause
-
-xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\GordonSlysz\DeconEngineV2\C#_Version\lib" /Y /D
 
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconConsole\bin\x86\Debug\" /Y /D
 xcopy Release\net472\ThermoFisher.CommonCore*.dll "F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconConsole\bin\x86\Release\" /Y /D

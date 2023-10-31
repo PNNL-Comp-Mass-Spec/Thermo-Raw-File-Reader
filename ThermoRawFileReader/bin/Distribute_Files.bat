@@ -5,6 +5,9 @@ echo.
 echo ================================================================================================
 echo This batch file is obsolete since we now reference the ThermoRawFileReader using a NuGet package
 echo See \\proto-2\CI_Publish\ThermoRawFileReader
+echo.
+echo Copy the .nupkg file from \\proto-2\CI_Publish\NuGet\
+echo to                        C:\NuPkg
 echo ================================================================================================
 echo.
 echo.
