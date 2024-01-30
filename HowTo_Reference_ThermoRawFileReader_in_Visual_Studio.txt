@@ -25,6 +25,20 @@
 
 9) Click OK to close the dialog
 
+== Referencing the ThermoFisher.CommonCore package files ==
+
+1) Copy files from:
+	  \\proto-2\CI_Publish\RawFileReader\Version_5_0_93\Repackage\ThermoFisher.CommonCore.BackgroundSubtraction.5.0.0.93.nupkg
+	  \\proto-2\CI_Publish\RawFileReader\Version_5_0_93\Repackage\ThermoFisher.CommonCore.Data.5.0.0.93.nupkg
+	  \\proto-2\CI_Publish\RawFileReader\Version_5_0_93\Repackage\ThermoFisher.CommonCore.MassPrecisionEstimator.5.0.0.93.nupkg
+	  \\proto-2\CI_Publish\RawFileReader\Version_5_0_93\Repackage\ThermoFisher.CommonCore.RawFileReader.5.0.0.93.nupkg
+   to:
+	  C:\NuPkg\ThermoFisher.CommonCore.BackgroundSubtraction.5.0.0.93.nupkg
+	  C:\NuPkg\ThermoFisher.CommonCore.Data.5.0.0.93.nupkg
+	  C:\NuPkg\ThermoFisher.CommonCore.MassPrecisionEstimator.5.0.0.93.nupkg
+	  C:\NuPkg\ThermoFisher.CommonCore.RawFileReader.5.0.0.93.nupkg
+
+2) Update the package references in file ThermoRawFileReader.csproj
 
 == Add/update the .npkg File in a Solution
 
