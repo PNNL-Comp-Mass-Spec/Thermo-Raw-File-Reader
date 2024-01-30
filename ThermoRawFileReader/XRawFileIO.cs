@@ -2460,16 +2460,10 @@ namespace ThermoRawFileReader
             return null;
         }
 
-        private class SimpleScanAccessTruncated : ISimpleScanAccess
+        private class SimpleScanAccessTruncated(double[] masses, double[] intensities) : ISimpleScanAccess
         {
-            public double[] Masses { get; }
-            public double[] Intensities { get; }
-
-            public SimpleScanAccessTruncated(double[] masses, double[] intensities)
-            {
-                Masses = masses;
-                Intensities = intensities;
-            }
+            public double[] Masses { get; } = masses;
+            public double[] Intensities { get; } = intensities;
         }
 
         /// <summary>
