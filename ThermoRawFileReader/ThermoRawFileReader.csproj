@@ -19,6 +19,9 @@
     <Title>ThermoRawFileReader</Title>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="..\Readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
@@ -27,10 +30,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PRISM-Library" Version="2.8.12" />
-    <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.88" />
-    <PackageReference Include="ThermoFisher.CommonCore.Data" Version="5.0.0.88" />
-    <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator" Version="5.0.0.88" />
-    <PackageReference Include="ThermoFisher.CommonCore.RawFileReader" Version="5.0.0.88" />
+    <PackageReference Include="PRISM-Library" Version="2.8.17" />
+    <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.93" />
+    <PackageReference Include="ThermoFisher.CommonCore.Data" Version="5.0.0.93" />
+    <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator" Version="5.0.0.93" />
+    <PackageReference Include="ThermoFisher.CommonCore.RawFileReader" Version="5.0.0.93" />
   </ItemGroup>
 </Project>

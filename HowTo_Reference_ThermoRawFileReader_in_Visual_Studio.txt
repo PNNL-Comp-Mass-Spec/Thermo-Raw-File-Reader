@@ -34,5 +34,5 @@ In the solution that you want to use this local package
 
 2) Change the package source to Local Packages
 
-3) The package reference must be stored in file packages.config
+3) The package reference must be stored in file packages.config (for early RawFileReader versions, probably before 5.0)
 	- It cannot be stored in the .csproj file
