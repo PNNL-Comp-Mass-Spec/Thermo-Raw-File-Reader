@@ -10,7 +10,7 @@ namespace ThermoRawFileReader
     [CLSCompliant(true)]
     public class clsScanInfo
     {
-        // Ignore Spelling: EThcD, ETciD, frag, Lumos, Orbitrap, Q-Exactive
+        // Ignore Spelling: Centroided, cls, EThcD, ETciD, frag, Lumos, Orbitrap, Q-Exactive
 
         /// <summary>
         /// UTC Time that this scan info was cached
