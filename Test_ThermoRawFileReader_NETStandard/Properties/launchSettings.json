@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Test_ThermoRawFileReader_NETStandard": {
+      "commandName": "Project",
+      "commandLineArgs": "/TestFilters"
+    }
+  }
+}
