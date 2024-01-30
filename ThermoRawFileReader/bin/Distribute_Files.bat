@@ -25,9 +25,9 @@ xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\DataMining\MASI
 xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\ /Y /D
 xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\DataMining\MSGF_Runner\Lib\ /Y /D
 
-xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\DLLLibrary\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\Josh_Aldrich\InterferenceDetection\InterDetect\DLLLibrary\ /Y /D
 
-xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\KevinCrowell\IMSDemultiplexer\IMSDemultiplexer\lib\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\Kevin_Crowell\IMSDemultiplexer\IMSDemultiplexer\lib\ /Y /D
 
 pause
 
@@ -78,54 +78,54 @@ xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\DataMining\Th
 
 xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\DataMining\ThermoRawFileReader\Test_ThermoRawFileReader\bin\Debug\ /Y /D
 
-rem xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x64\Release\ /Y /D
+rem xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x64\Release\ /Y /D
 pause
 
-xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\GordonSlysz\DeconEngineV2\C#_Version\lib /Y /D
+xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\Gordon_Slysz\DeconEngineV2\C#_Version\lib /Y /D
 
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconConsole\bin\x86\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconConsole\bin\x86\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconConsole\bin\x64\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Backend\bin\x86\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Backend\bin\x86\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Backend\bin\x64\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Testing.ProblemCases\bin\x86\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.UnitTesting2\bin\x86\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.UnitTesting2\bin\x86\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows.ProblemTesting\bin\x86\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows.UnitTesting\bin\x86\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows.UnitTesting\bin\x86\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows\bin\x86\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows\bin\x86\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows\bin\x64\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowConsole\bin\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowConsole\bin\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowConsoleDMS\bin\x86\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowConsoleDMS\bin\x64\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowManagerConsole\bin\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowManagerConsole\bin\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x86\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x86\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x64\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\IQ\bin\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\IQ\bin\Release\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\GordonSlysz\DeconTools_IQ\Library\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\TestConsole1\bin\x86\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DeconTools_IQ\TestConsole1\bin\x86\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconConsole\bin\x86\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconConsole\bin\x86\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconConsole\bin\x64\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Backend\bin\x86\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Backend\bin\x86\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Backend\bin\x64\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Testing.ProblemCases\bin\x86\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.UnitTesting2\bin\x86\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.UnitTesting2\bin\x86\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows.ProblemTesting\bin\x86\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows.UnitTesting\bin\x86\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows.UnitTesting\bin\x86\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows\bin\x86\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows\bin\x86\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\DeconTools.Workflows\bin\x64\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowConsole\bin\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowConsole\bin\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowConsoleDMS\bin\x86\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowConsoleDMS\bin\x64\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowManagerConsole\bin\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconTools.Workflows\TargetedWorkflowManagerConsole\bin\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x86\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x86\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\DeconToolsAutoProcessV1\bin\x64\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\IQ\bin\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\IQ\bin\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.* F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\Library\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\TestConsole1\bin\x86\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DeconTools_IQ\TestConsole1\bin\x86\Release\ /Y /D
 
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\SIPPER\Library /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\SIPPER\Library /Y /D
 
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\DimethylLabelingIq\Library\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\GordonSlysz\IqTargetCreator\Library\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\DimethylLabelingIq\Library\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Gordon_Slysz\IqTargetCreator\Library\ /Y /D
 pause
 
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\JoshAldrich\InterferenceDetection\IDM_Console\bin\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\bin\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\JoshAldrich\InterferenceDetection\InterDetect\bin\Release\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Josh_Aldrich\InterferenceDetection\IDM_Console\bin\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Josh_Aldrich\InterferenceDetection\InterDetect\bin\Debug\ /Y /D
+xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Josh_Aldrich\InterferenceDetection\InterDetect\bin\Release\ /Y /D
 
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\KevinCrowell\LipidTools\lib\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\KevinCrowell\LipidTools\LipidTools\bin\x86\Debug\ /Y /D
-xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\KevinCrowell\LipidTools\LipidToolsTest\bin\x86\Debug\ /Y /D
+rem xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Kevin_Crowell\LipidTools\lib\ /Y /D
+rem xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Kevin_Crowell\LipidTools\LipidTools\bin\x86\Debug\ /Y /D
+rem xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Kevin_Crowell\LipidTools\LipidToolsTest\bin\x86\Debug\ /Y /D
 
 xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Bryson_Gibbons\Thermo-Raw-Metadata-Plotter\Lib\ /Y /D
 xcopy Release\net472\ThermoRawFileReader.dll F:\Documents\Projects\Bryson_Gibbons\Thermo-Raw-Metadata-Plotter\ThermoRawMetadataPlotter\bin\Debug\ /Y /D
