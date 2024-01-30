@@ -9,12 +9,14 @@ Thermo .raw files, as acquired on Thermo mass spectrometers
 * .NET Framework 4.7.2
 * .NET Framework 4.8
 * .NET Framework 4.8.1
+* .NET 6.x
+* .NET 7.x
+* .NET 8.x
 * On Linux, Mono 6.12, or newer
 
 ### Incompatible C# Versions
 
-The Thermo Raw File Reader does not work with .NET Core 2.x, or newer
-* Unsupported: .NET Core 2.x, .NET Core 3.x, .NET 5.x, .NET 6.x, .NET 7.x, etc.
+The Thermo Raw File Reader does not work with .NET Core 2.x or .NET Core 3.x
 
 ## Features
 
