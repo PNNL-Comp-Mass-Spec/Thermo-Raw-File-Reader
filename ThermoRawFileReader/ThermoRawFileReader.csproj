@@ -17,6 +17,7 @@
     <PackageProjectUrl>https://github.com/PNNL-Comp-Mass-Spec/Thermo-Raw-File-Reader</PackageProjectUrl>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
     <Title>ThermoRawFileReader</Title>
+    <NoWarn>IDE0028; IDE0290; IDE0301</NoWarn>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
