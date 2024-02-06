@@ -42,7 +42,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Display the category, name, and value of this setting
         /// </summary>
-        public override string ToString()
+        public readonly override string ToString()
         {
             return string.Format("{0,-20}  {1,-40} = {2}", (Category ?? "Undefined") + ":", Name ?? string.Empty, Value ?? string.Empty);
         }
@@ -494,7 +494,7 @@ namespace ThermoRawFileReader
         /// Signal-to-noise ratio
         /// </summary>
         /// <returns>Intensity divided by noise, or 0 if Noise is 0</returns>
-        public double SignalToNoise
+        public readonly double SignalToNoise
         {
             get
             {
@@ -508,7 +508,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Return a summary of this object
         /// </summary>
-        public override string ToString()
+        public readonly override string ToString()
         {
             return string.Format("m/z {0,9:F3}, S/N {1,7:F1}, intensity {2,12:F0}", Mass, SignalToNoise, Intensity);
         }
