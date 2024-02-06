@@ -92,9 +92,7 @@ namespace ThermoRawFileReader
                 return;
             }
 
-            if (!(mrmScanType == MRMScanTypeConstants.SIM ||
-                  mrmScanType == MRMScanTypeConstants.MRMQMS ||
-                  mrmScanType == MRMScanTypeConstants.SRM))
+            if (!(mrmScanType is MRMScanTypeConstants.SIM or MRMScanTypeConstants.MRMQMS or MRMScanTypeConstants.SRM))
             {
                 // Unsupported MRM type
                 return;

@@ -33,7 +33,7 @@ namespace ThermoRawFileReader
         {
             get
             {
-                if (DeviceType == Device.MS || DeviceType == Device.MSAnalog)
+                if (DeviceType is Device.MS or Device.MSAnalog)
                     return "Mass Spectrometer";
 
                 return string.Format("{0} device #{1}", DeviceType.ToString(), DeviceNumber);
