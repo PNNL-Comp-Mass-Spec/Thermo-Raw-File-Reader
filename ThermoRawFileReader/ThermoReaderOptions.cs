@@ -9,7 +9,7 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Delegate method for OptionsUpdatedEvent
         /// </summary>
-        /// <param name="sender"></param>
+        /// <param name="sender">Sender</param>
         public delegate void OptionsUpdatedEventHandler(object sender);
 
         /// <summary>

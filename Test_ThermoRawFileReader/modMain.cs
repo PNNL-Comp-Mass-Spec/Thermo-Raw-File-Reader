@@ -121,7 +121,7 @@ namespace Test_ThermoRawFileReader
         /// <summary>
         /// Parse scan filters in one or more _ScanStatsEx.txt files
         /// </summary>
-        /// <param name="directoryToScan"></param>
+        /// <param name="directoryToScan">Directory to look for _ScanStatsEx.txt files</param>
         private static void ExtractScanFilters(string directoryToScan)
         {
             var parentIonMZMatcher = new Regex("[0-9.]+@", RegexOptions.Compiled);

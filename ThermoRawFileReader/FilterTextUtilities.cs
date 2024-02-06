@@ -9,7 +9,7 @@ namespace ThermoRawFileReader
     /// </summary>
     public static class FilterTextUtilities
     {
-        // Ignore Spelling: A-Za-z, cnl, Exactive, msx, sa, Ss
+        // Ignore Spelling: A-Za-z, cnl, Exactive, MRM, msx, sa, Ss
 
         // ReSharper disable once CommentTypo
 
@@ -65,8 +65,8 @@ namespace ThermoRawFileReader
         /// Parse out the MRM_QMS or SRM mass info from filterText
         /// </summary>
         /// <remarks>We do not parse mass information out for Full Neutral Loss scans</remarks>
-        /// <param name="filterText"></param>
-        /// <param name="mrmScanType"></param>
+        /// <param name="filterText">Thermo scan filter text</param>>
+        /// <param name="mrmScanType">MRM scan type</param>
         /// <param name="mrmInfo">Output: MRM info class</param>
         public static void ExtractMRMMasses(string filterText, MRMScanTypeConstants mrmScanType, out MRMInfo mrmInfo)
         {
@@ -154,8 +154,8 @@ namespace ThermoRawFileReader
         ///   PHRPReader (https://github.com/PNNL-Comp-Mass-Spec/PHRP)
         /// </para>
         /// </remarks>
-        /// <param name="filterText"></param>
-        /// <param name="parentIonMz">Parent ion m/z (output)</param>
+        /// <param name="filterText">Thermo scan filter text</param>>
+        /// <param name="parentIonMz">Output: parent ion m/z</param>
         /// <returns>True if success</returns>
         public static bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
         {
@@ -192,10 +192,10 @@ namespace ThermoRawFileReader
         /// <para>For MS3 spectra with ions listed as 1312.95@45.00 873.85@45.00, the last m/z value listed is the m/z of the first ion that was isolated</para>
         /// <para>For MS3 spectra with ions listed as 377.9027@cid35.00 478.3521@hcd55.00, the first m/z value listed is the m/z of the parent MS2 spectrum</para>
         /// </remarks>
-        /// <param name="filterText"></param>
-        /// <param name="parentIonMz">Parent ion m/z (output)</param>
-        /// <param name="msLevel">MSLevel (output)</param>
-        /// <param name="collisionMode">Collision mode (output)</param>
+        /// <param name="filterText">Thermo scan filter text</param>>
+        /// <param name="parentIonMz">Output: parent ion m/z</param>
+        /// <param name="msLevel">Output: MS level (1 for MS1, 2 for MS2, etc.)</param>
+        /// <param name="collisionMode">Output: collision mode</param>
         /// <returns>True if success</returns>
         public static bool ExtractParentIonMZFromFilterText(string filterText, out double parentIonMz, out int msLevel, out string collisionMode)
         {
@@ -211,10 +211,10 @@ namespace ThermoRawFileReader
         /// <para>For MS3 spectra with ions listed as 1312.95@45.00 873.85@45.00, the last m/z value listed is the m/z of the first ion that was isolated</para>
         /// <para>For MS3 spectra with ions listed as 377.9027@cid35.00 478.3521@hcd55.00, the first m/z value listed is the m/z of the parent MS2 spectrum</para>
         /// </remarks>
-        /// <param name="filterText"></param>
-        /// <param name="parentIonMz">Parent ion m/z (output)</param>
-        /// <param name="msLevel">MSLevel (output)</param>
-        /// <param name="collisionMode">Collision mode (output)</param>
+        /// <param name="filterText">Thermo scan filter text</param>>
+        /// <param name="parentIonMz">Output: parent ion m/z</param>
+        /// <param name="msLevel">Output: MS level (1 for MS1, 2 for MS2, etc.)</param>
+        /// <param name="collisionMode">Output: collision mode</param>
         /// <param name="parentIons">Output: parent ion list</param>
         /// <returns>True if this is a ms2, ms3, Full ms, Z ms, etc. scan, otherwise false (returns false if ExtractMSLevel returns false)</returns>
         public static bool ExtractParentIonMZFromFilterText(
@@ -462,9 +462,9 @@ namespace ThermoRawFileReader
         /// Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in filterText
         /// Populates msLevel with the number after "ms" and mzText with the text after "ms2"
         /// </remarks>
-        /// <param name="filterText"></param>
-        /// <param name="msLevel"></param>
-        /// <param name="mzText"></param>
+        /// <param name="filterText">Thermo scan filter text</param>>
+        /// <param name="msLevel">Output: MS level (1 for MS1, 2 for MS2, etc.)</param>
+        /// <param name="mzText">Output: parent ion m/z</param>
         /// <returns>True if found and False if no match</returns>
         public static bool ExtractMSLevel(string filterText, out int msLevel, out string mzText)
         {

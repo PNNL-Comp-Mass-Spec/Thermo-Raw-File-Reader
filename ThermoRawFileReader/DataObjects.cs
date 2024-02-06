@@ -326,8 +326,8 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Duplicate the MRM info
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
+        /// <param name="source">Source</param>
+        /// <param name="target">Output: Duplicated MRM info</param>
         // ReSharper disable once UnusedMember.Global
         public static void DuplicateMRMInfo(MRMInfo source, out MRMInfo target)
         {
@@ -491,7 +491,7 @@ namespace ThermoRawFileReader
         public int Charge;
 
         /// <summary>
-        /// Signal to noise ratio
+        /// Signal-to-noise ratio
         /// </summary>
         /// <returns>Intensity divided by noise, or 0 if Noise is 0</returns>
         public double SignalToNoise

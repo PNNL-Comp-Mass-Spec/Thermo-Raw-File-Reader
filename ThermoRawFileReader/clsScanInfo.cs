@@ -265,8 +265,8 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Store this scan's scan events using parallel string arrays
         /// </summary>
-        /// <param name="eventNames"></param>
-        /// <param name="eventValues"></param>
+        /// <param name="eventNames">Event names</param>
+        /// <param name="eventValues">Event values</param>
         public void StoreScanEvents(string[] eventNames, string[] eventValues)
         {
             StoreParallelStrings(ScanEvents, eventNames, eventValues, true, true);
@@ -275,8 +275,8 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Store this scan's log messages using parallel string arrays
         /// </summary>
-        /// <param name="logNames"></param>
-        /// <param name="logValues"></param>
+        /// <param name="logNames">Log names</param>
+        /// <param name="logValues">Log values</param>
         public void StoreStatusLog(string[] logNames, string[] logValues)
         {
             StoreParallelStrings(StatusLog, logNames, logValues);
@@ -287,7 +287,7 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <remarks>Event names nearly always end in a colon, e.g. "Monoisotopic M/Z:" or "Charge State:"</remarks>
         /// <param name="eventName">Event name to find</param>
-        /// <param name="eventValue">Event value</param>
+        /// <param name="eventValue">Output: event value</param>
         /// <param name="partialMatchToStart">Set to true to match the start of an event name, and not require a full match</param>
         /// <returns>True if found a match for the event name, otherwise false</returns>
         public bool TryGetScanEvent(string eventName, out string eventValue, bool partialMatchToStart = false)
