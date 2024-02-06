@@ -47,6 +47,7 @@ namespace RawFileReaderTests
         [Test]
         [TestCase("FTMS + p NSI Full ms [400.00-2000.00]                             ", IonModeConstants.Positive)]
         [TestCase("ITMS + c ESI Full ms [300.00-2000.00]                             ", IonModeConstants.Positive)]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.55 [150.0000-1500.0000]   ", IonModeConstants.Positive)]
         [TestCase("+ c EI SRM ms2 247.000 [300.000-1500.00]                          ", IonModeConstants.Positive)]
         [TestCase("+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                    ", IonModeConstants.Positive)]
         [TestCase("- p NSI Full ms2 168.070 [300.000-1500.00]                        ", IonModeConstants.Negative)]
@@ -63,6 +64,7 @@ namespace RawFileReaderTests
         [Test]
         [TestCase("FTMS + p NSI Full ms [400.00-2000.00]                                ", "")]
         [TestCase("ITMS + c ESI Full ms [300.00-2000.00]                                ", "")]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.55 [150.0000-1500.0000]      ", "")]
         [TestCase("+ p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]     ", "179.652-184.582; 505.778-510.708; 994.968-999.898")]
         [TestCase("+ p NSI Q3MS [150.070-1500.000]                                      ", "150.070-1500.000")]
         [TestCase("+ c NSI SRM ms2 965.958 [300.000-1500.00]                            ", "300.000-1500.00")]
@@ -109,7 +111,9 @@ namespace RawFileReaderTests
         [TestCase("ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]                          ", 2, "606.30@pqd27.00 [50.00-2000.00]")]
         [TestCase("ITMS + c ESI d Full ms2 342.90@cid35.00 [50.00-2000.00]                          ", 2, "342.90@cid35.00 [50.00-2000.00]")]
         [TestCase("FTMS + p NSI Full ms [400.00-2000.00]                                            ", 1, "")]
+        [TestCase("FTMS + p NSI Full ms [350.0000-1350.0000]                                        ", 1, "")]
         [TestCase("ITMS + c ESI Full ms [300.00-2000.00]                                            ", 1, "")]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.55 [150.0000-1500.0000]                  ", 2, "833.4459@hcd28.55 [150.0000-1500.0000]")]
         [TestCase("ITMS + p ESI d Z ms [1108.00-1118.00]                                            ", 1, "")]
         [TestCase("+ p ms2 777.00@cid30.00 [210.00-1200.00]                                         ", 2, "777.00@cid30.00 [210.00-1200.00]")]
         [TestCase("+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]               ", 2, "501.560@cid15.00 [507.259-507.261, 635-319-635.32]")]
@@ -118,7 +122,6 @@ namespace RawFileReaderTests
         [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]   ", 2, "1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]")]
         [TestCase("ITMS + c NSI d Z ms3 640.9140@cid35.00 532.3870@hcd45.00 [100.0000-150.0000]     ", 3, "640.9140@cid35.00 532.3870@hcd45.00 [100.0000-150.0000]")]
         [TestCase("+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]", 2, "748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515]")]
-
         public void ExtractMSLevel(string filterText, int expectedMSLevel, string expectedMzText)
         {
             var success = XRawFileIO.ExtractMSLevel(filterText, out var msLevel, out var parentIonMZ);
@@ -142,8 +145,8 @@ namespace RawFileReaderTests
         /// </summary>
         /// <param name="filterText">FilterText</param>
         /// <param name="expectedParentIons">ParentIon Mz (could be comma-separated list, with ! marking the "best" parent ion m/z)</param>
-        /// <param name="expectedMSLevel"></param>
-        /// <param name="expectedCollisionMode"></param>
+        /// <param name="expectedMSLevel">Expected MS level</param>
+        /// <param name="expectedCollisionMode">Expected collision mode</param>
         [Test]
         [TestCase("+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]                      ", "1312.95, 873.85!", 3, "")]
         [TestCase("ITMS + c NSI d Full ms10 421.76@35.00                                            ", "421.76", 10, "")]
@@ -161,6 +164,7 @@ namespace RawFileReaderTests
         [TestCase("+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]               ", "501.56", 2, "cid")]
         [TestCase("+ p NSI SRM ms2 1025.250 [300.000-1500.00]                                       ", "1025.250", 2, "")]
         [TestCase("FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]    ", "712.85!, 407.92", 2, "hcd")]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.55 [150.0000-1500.0000]                  ", "833.4459", 2, "hcd")]
         [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]   ", "1073.48", 2, "ETciD")]
         [TestCase("ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]   ", "1073.48", 2, "EThcD")]
         [TestCase("FTMS + p NSI Full ms                                                             ", "0", 1, "")]
@@ -361,6 +365,7 @@ namespace RawFileReaderTests
         [TestCase("ITMS + c ESI d Full ms2 342.90@cid35.00 [50.00-2000.00]                          ", "342.9")]
         [TestCase("FTMS + p NSI Full ms [400.00-2000.00]                                            ", "0")]
         [TestCase("ITMS + c ESI Full ms [300.00-2000.00]                                            ", "0")]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.55 [150.0000-1500.0000]                  ", "833.4459")]
         [TestCase("ITMS + p ESI d Z ms [1108.00-1118.00]                                            ", "0")]
         [TestCase("+ p ms2 777.00@cid30.00 [210.00-1200.00]                                         ", "777")]
         [TestCase("+ c NSI SRM ms2 400.576 [376.895-376.897, 459.772-459.774, 516.314-516.316]      ", "400.576")]
@@ -562,9 +567,21 @@ namespace RawFileReaderTests
         [TestCase("FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                             ", "FTMS + p NSI cv=-80.00 Full ms2 0@hcd32.00", false)]      // DIA, replace the parent ion m/z value with a 0
         [TestCase("FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                              ", "FTMS + p NSI cv=-60.00 Full ms2 635.0@hcd32.00", true)]   // DIA, keep the parent ion m/z value
         [TestCase("FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                             ", "FTMS + p NSI cv=-80.00 Full ms2 1034.5@hcd32.00", true)]  // DIA, keep the parent ion m/z value
-        public void TestGenericScanFilter(string filterText, string expectedResult, bool includeParentMZ = false)
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.15 [150.0000-1500.0000]                ", "MRTOF + c NSI d Full ms2 0@hcd28.00", false, true)]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.50 [150.0000-1500.0000]                ", "MRTOF + c NSI d Full ms2 0@hcd28.00", false, true)]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.55 [150.0000-1500.0000]                ", "MRTOF + c NSI d Full ms2 0@hcd29.00", false, true)]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.85 [150.0000-1500.0000]                ", "MRTOF + c NSI d Full ms2 0@hcd29.00", false, true)]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.15 [150.0000-1500.0000]                ", "MRTOF + c NSI d Full ms2 0@hcd28.15", false, false)]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.50 [150.0000-1500.0000]                ", "MRTOF + c NSI d Full ms2 0@hcd28.50", false, false)]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.55 [150.0000-1500.0000]                ", "MRTOF + c NSI d Full ms2 0@hcd28.55", false, false)]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.85 [150.0000-1500.0000]                ", "MRTOF + c NSI d Full ms2 0@hcd28.85", false, false)]
+        public void TestGenericScanFilter(
+            string filterText,
+            string expectedResult,
+            bool includeParentMZ = false,
+            bool roundCollisionEnergyForMRTOF = true)
         {
-            var genericFilterResult = XRawFileIO.MakeGenericThermoScanFilter(filterText, includeParentMZ);
+            var genericFilterResult = XRawFileIO.MakeGenericThermoScanFilter(filterText, includeParentMZ, roundCollisionEnergyForMRTOF);
 
             Console.WriteLine(filterText + " " + genericFilterResult);
 
@@ -578,6 +595,7 @@ namespace RawFileReaderTests
         [TestCase("ITMS + c ESI d Full ms2 583.26@cid35.00 [150.00-1180.00]                                    ", "CID-MSn")]
         [TestCase("ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]                                     ", "PQD-MSn")]
         [TestCase("FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]                                    ", "HCD-HMSn")]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.55 [150.0000-1500.0000]                             ", "HCD-HMSn")]
         [TestCase("ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]                                 ", "SA_ETD-MSn")]
         [TestCase("FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]               ", "HCD-HMSn")]
         [TestCase("+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                                              ", "MSn")]
@@ -604,7 +622,6 @@ namespace RawFileReaderTests
         [TestCase("FTMS + c NSI cv=-75.00 d Full ms2 437.5205@hcd32.00 [110.0000-1323.0000]                    ", "HCD-HMSn")]            // FAIMS
         [TestCase("FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                                           ", "DIA-HCD-HMSn", true)]  // DIA
         [TestCase("FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                                          ", "DIA-HCD-HMSn", true)]  // DIA
-
         public void TestScanTypeName(string filterText, string expectedResult, bool isDIA = false)
         {
             var scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterText, isDIA);
@@ -617,6 +634,7 @@ namespace RawFileReaderTests
         [Test]
         [TestCase("FTMS + p NSI Full ms [400.00-2000.00]                                             ", true, 1, false, MRMScanTypeConstants.NotMRM, false)]
         [TestCase("FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]                          ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
+        [TestCase("MRTOF + c NSI d Full ms2 833.4459@hcd28.55 [150.0000-1500.0000]                   ", false, 2, false, MRMScanTypeConstants.NotMRM, false)]
         [TestCase("+ c EI SRM ms2 247.000 [300.000-1500.00]                                          ", true, 2, false, MRMScanTypeConstants.SRM, false)]
         [TestCase("+ c NSI SRM ms2 965.958 [300.000-1500.00]                                         ", true, 2, false, MRMScanTypeConstants.SRM, false)]
         [TestCase("+ p NSI SRM ms2 1025.250 [300.000-1500.00]                                        ", true, 2, false, MRMScanTypeConstants.SRM, false)]
