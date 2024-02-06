@@ -83,8 +83,28 @@ namespace ThermoRawFileReader
         private const string MRM_SIM_MSX_TEXT = "SIM msx ";         // Q-Exactive Plus: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., MM_unsorted_10ng_digestionTest_t-SIM_MDX_3_17Mar20_Oak_Jup-20-03-01
 
         // Do not include a space at the end of these constants
-        private const string FTMS_TEXT = "FTMS";                    // Fourier transfer ICR mass spec
-        private const string MR_TOF_TEXT = "MRTOF";                 // Multi-reflection time-of-flight mass spec
+
+        /// <summary>
+        /// Fourier transfer ICR mass spec
+        /// </summary>
+        private const string FTMS_TEXT = "FTMS";
+
+        /// <summary>
+        /// Asymmetric Track Lossless (ASTRAL) mass spec
+        /// AS         TRA   L
+        /// </summary>
+        /// <remarks>
+        /// Corresponds to the 7th item in enum MassAnalyzerType (ThermoFisher.CommonCore.Data.FilterEnums), as reported by ThermoFisher.CommonCore.RawFileReader.dll v5.0.0.93
+        /// </remarks>
+        private const string ASTMS_TEXT = "ASTMS";
+
+        /// <summary>
+        /// Multi-reflection time-of-flight mass spec
+        /// </summary>
+        /// <remarks>
+        /// Corresponds to the 7th item in enum MassAnalyzerType (ThermoFisher.CommonCore.Data.FilterEnums), as reported by ThermoFisher.CommonCore.RawFileReader.dll v5.0.0.88
+        /// </remarks>
+        private const string MRTOF_TEXT = "MRTOF";
 
         /// <summary>
         /// Maximum size of the scan info cache
@@ -740,6 +760,7 @@ namespace ThermoRawFileReader
                 }
 
                 var activationTypeCode = scanFilter.GetActivation(index);
+
                 ActivationTypeConstants activationType;
 
                 try
@@ -1335,7 +1356,7 @@ namespace ThermoRawFileReader
 
                 scanInfo.FilterText = string.Copy(filterText);
 
-                scanInfo.IsFTMS = scanFilter.MassAnalyzer == MassAnalyzerType.MassAnalyzerFTMS;
+                scanInfo.IsHighResolution = scanFilter.MassAnalyzer is MassAnalyzerType.MassAnalyzerFTMS or MassAnalyzerType.MassAnalyzerTOFMS or MassAnalyzerType.MassAnalyzerASTMS;
 
                 if (string.IsNullOrWhiteSpace(scanInfo.FilterText))
                     scanInfo.FilterText = string.Empty;
@@ -1603,7 +1624,7 @@ namespace ThermoRawFileReader
 
             // Astral scan filter examples
             // FTMS + p NSI Full ms                       HMS
-            // MRTOF + c NSI d Full ms2 0@hcd16.75        HCD-HMSn
+            // ASTMS + c NSI d Full ms2 0@hcd16.75        HCD-HMSn
 
             // DIA examples
             // FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                    DIA-HCD-HMSn
@@ -1945,11 +1966,11 @@ namespace ThermoRawFileReader
         /// When true, include the actual parent ion m/z value in the generic scan filter (defaults to false)
         /// When false, change the parent ion m/z to 0
         /// </param>
-        /// <param name="roundCollisionEnergyForMRTOF">
-        /// When true, round collision energies for multi-reflection time-of-flight (MRTOF) scans to the nearest integer
+        /// <param name="roundCollisionEnergyForAstral">
+        /// When true, round collision energies for Asymmetric Track Lossless (ASTRAL) scans to the nearest integer
         /// </param>
         /// <returns>Generic filter text, e.g. FTMS + p NSI Full ms</returns>
-        public static string MakeGenericThermoScanFilter(string filterText, bool includeParentMZ = false, bool roundCollisionEnergyForMRTOF = true)
+        public static string MakeGenericThermoScanFilter(string filterText, bool includeParentMZ = false, bool roundCollisionEnergyForAstral = true)
         {
             // Will make a generic version of the FilterText in filterText, optionally changing the parent ion m/z to 0
             // Examples:
@@ -1962,6 +1983,7 @@ namespace ThermoRawFileReader
             // ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]              ITMS + c NSI d Full ms2 0@pqd27.00
             // FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]             FTMS + c NSI d Full ms2 0@hcd40.00
             // ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]          ITMS + c NSI d sa Full ms2 0@etd100.00
+            // ASTMS + c NSI d Full ms2 0@hcd16.75                                  ASTMS + c NSI d Full ms2 0@hcd17
             // MRTOF + c NSI d Full ms2 0@hcd16.75                                  MRTOF + c NSI d Full ms2 0@hcd17
             // FTMS + p NSI SIM msx ms [475.0000-525.0000]                          FTMS + p NSI SIM msx ms
 
@@ -2021,7 +2043,7 @@ namespace ThermoRawFileReader
                 {
                     string scanFilterToUse;
 
-                    if (roundCollisionEnergyForMRTOF && ContainsText(genericScanFilterText, MR_TOF_TEXT))
+                    if (roundCollisionEnergyForAstral && (ContainsText(genericScanFilterText, ASTMS_TEXT) || ContainsText(genericScanFilterText, MRTOF_TEXT)))
                     {
                         var collisionInfoMatch = mCollisionModeAndEnergy.Match(genericScanFilterText);
 
@@ -2030,10 +2052,12 @@ namespace ThermoRawFileReader
                             var collisionEnergy = double.Parse(collisionInfoMatch.Groups["CollisionEnergy"].Value);
 
                             var roundedCollisionInfo = string.Format("{0}{1:F2}",
-                                collisionInfoMatch.Groups["CollisionMode"],
+                                collisionInfoMatch.Groups["CollisionMode"].Value,
                                 Math.Round(collisionEnergy, 0));
 
-                            scanFilterToUse = genericScanFilterText.Replace(collisionInfoMatch.Value, roundedCollisionInfo);
+                            scanFilterToUse = collisionInfoMatch.Value.Equals(roundedCollisionInfo)
+                                ? genericScanFilterText
+                                : genericScanFilterText.Replace(collisionInfoMatch.Value, roundedCollisionInfo);
                         }
                         else
                         {
@@ -2088,14 +2112,14 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Return true if the scan filter has FTMS (FTICR Mass Spectra) or "MRTOF" (multi-reflection time-of-flight mass spectra)
+        /// Return true if the scan filter has FTMS (FTICR Mass Spectra), "ASTMS" (Asymmetric Track Lossless, aka ASTRAL) or "MRTOF" (multi-reflection time-of-flight mass spectra)
         /// </summary>
         /// <remarks>Uses a case-insensitive search</remarks>
         /// <param name="filterText">Thermo scan filter text</param>
         /// <returns>True if a high resolution spectrum</returns>
         private static bool ScanIsHighResolution(string filterText)
         {
-            return ContainsText(filterText, FTMS_TEXT) || ContainsText(filterText, MR_TOF_TEXT);
+            return ContainsText(filterText, FTMS_TEXT) || ContainsText(filterText, ASTMS_TEXT) || ContainsText(filterText, MRTOF_TEXT);
         }
 
         private bool SetMSController()
@@ -2203,6 +2227,7 @@ namespace ThermoRawFileReader
             }
 
             mrmScanType = DetermineMRMScanType(filterText);
+
             switch (mrmScanType)
             {
                 case MRMScanTypeConstants.SIM:
@@ -2648,7 +2673,7 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Gets scan precision data for FTMS data (resolution of each data point)
+        /// Gets scan precision data for high resolution (Orbitrap, Lumos, Astral, etc.) spectral data (resolution of each data point)
         /// </summary>
         /// <remarks>
         /// This returns the same data that GetScanLabelData returns, but with AccuracyMMU and AccuracyPPM instead of Baseline, Noise, and Charge

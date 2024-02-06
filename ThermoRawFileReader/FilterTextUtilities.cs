@@ -224,23 +224,26 @@ namespace ThermoRawFileReader
             out string collisionMode,
             out List<ParentIonInfoType> parentIons)
         {
-            // filterText should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
-            // or "+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]"
-            // or "ITMS + c NSI d Full ms10 421.76@35.00"
-            // or "ITMS + c NSI d sa Full ms2 467.16@etd100.00 [50.00-1880.00]"              ' Note: sa stands for "supplemental activation"
-            // or "ITMS + c NSI d Full ms2 467.16@etd100.00 [50.00-1880.00]"
-            // or "ITMS + c NSI d Full ms2 756.98@cid35.00 [195.00-2000.00]"
-            // or "ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]"
-            // or "ITMS + c ESI d Full ms2 342.90@cid35.00 [50.00-2000.00]"
-            // or "FTMS + p NSI Full ms [400.00-2000.00]"  (high res full MS)
-            // or "ITMS + c ESI Full ms [300.00-2000.00]"  (low res full MS)
-            // or "ITMS + p ESI d Z ms [1108.00-1118.00]"  (zoom scan)
-            // or "+ p ms2 777.00@cid30.00 [210.00-1200.00]
-            // or "+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]
-            // or "FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]"
-            // or "FTMS + c NSI d Full ms3 533.1917@cid35.00 434.9481@hcd55.00 [110.0000-1054.0000]"
-            // or "ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]"
-            // or "+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515"
+            // filterText should be similar to one of the following:
+            // "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
+            // "+ c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]"
+            // "ITMS + c NSI d Full ms10 421.76@35.00"
+            // "ITMS + c NSI d sa Full ms2 467.16@etd100.00 [50.00-1880.00]"              ' Note: sa stands for "supplemental activation"
+            // "ITMS + c NSI d Full ms2 467.16@etd100.00 [50.00-1880.00]"
+            // "ITMS + c NSI d Full ms2 756.98@cid35.00 [195.00-2000.00]"
+            // "ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]"
+            // "ITMS + c ESI d Full ms2 342.90@cid35.00 [50.00-2000.00]"
+            // "FTMS + p NSI Full ms [400.00-2000.00]"  (high res full MS)
+            // "ITMS + c ESI Full ms [300.00-2000.00]"  (low res full MS)
+            // "ITMS + p ESI d Z ms [1108.00-1118.00]"  (zoom scan)
+            // "+ p ms2 777.00@cid30.00 [210.00-1200.00]
+            // "+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]
+            // "FTMS + p NSI d Full msx ms2 712.85@hcd28.00 407.92@hcd28.00  [100.00-1475.00]"
+            // "FTMS + c NSI d Full ms3 533.1917@cid35.00 434.9481@hcd55.00 [110.0000-1054.0000]"
+            // "ASTMS + c NSI d Full ms2 0@hcd15.71"
+            // "MRTOF + c NSI d Full ms2 0@hcd15.71"
+            // "ITMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]"
+            // "+ c NSI SRM ms2 748.371 [701.368-701.370, 773.402-773.404, 887.484-887.486, 975.513-975.515"
 
             var bestParentIon = new ParentIonInfoType();
             bestParentIon.Clear();
