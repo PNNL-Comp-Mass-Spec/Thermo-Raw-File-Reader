@@ -76,7 +76,7 @@ namespace ThermoRawFileReader
 
         private const string MRM_Q1MS_TEXT = "Q1MS ";
         private const string MRM_Q3MS_TEXT = "Q3MS ";
-        private const string MRM_SRM_TEXT = "SRM ms2";
+        private const string MRM_SRM_TEXT = "SRM ms2 ";
         private const string MRM_FullNL_TEXT = "Full cnl ";         // MRM neutral loss; yes, cnl starts with a c
         private const string MRM_SIM_PR_TEXT = "SIM pr ";           // TSQ: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., Biofilm-1000pg-std-mix_06Dec14_Smeagol-3
         private const string MRM_SIM_MSX_TEXT = "SIM msx ";         // Q-Exactive Plus: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., MM_unsorted_10ng_digestionTest_t-SIM_MDX_3_17Mar20_Oak_Jup-20-03-01
