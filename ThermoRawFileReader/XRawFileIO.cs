@@ -81,6 +81,10 @@ namespace ThermoRawFileReader
         private const string MRM_SIM_PR_TEXT = "SIM pr ";           // TSQ: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., Biofilm-1000pg-std-mix_06Dec14_Smeagol-3
         private const string MRM_SIM_MSX_TEXT = "SIM msx ";         // Q-Exactive Plus: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., MM_unsorted_10ng_digestionTest_t-SIM_MDX_3_17Mar20_Oak_Jup-20-03-01
 
+        // Do not include a space at the end of these constants
+        private const string FTMS_TEXT = "FTMS";                    // Fourier transfer ICR mass spec
+        private const string MR_TOF_TEXT = "MRTOF";                 // Multi-reflection time-of-flight mass spec
+
         /// <summary>
         /// Maximum size of the scan info cache
         /// </summary>
@@ -1698,7 +1702,7 @@ namespace ThermoRawFileReader
 
                     string scanTypeName;
 
-                    if (ScanIsFTMS(filterText))
+                    if (ScanIsHighResolution(filterText))
                     {
                         // HMS or HMSn scan
                         scanTypeName = "H" + baseScanTypeName;
@@ -2043,9 +2047,15 @@ namespace ThermoRawFileReader
             return mParentIonMz.Replace(scanFilterText, " 0@");
         }
 
-        private static bool ScanIsFTMS(string filterText)
+        /// <summary>
+        /// Return true if the scan filter has FTMS (FTICR Mass Spectra) or "MRTOF" (multi-reflection time-of-flight mass spectra)
+        /// </summary>
+        /// <remarks>Uses a case-insensitive search</remarks>
+        /// <param name="filterText">Thermo scan filter text</param>
+        /// <returns>True if a high resolution spectrum</returns>
+        private static bool ScanIsHighResolution(string filterText)
         {
-            return ContainsText(filterText, "FTMS");
+            return ContainsText(filterText, FTMS_TEXT) || ContainsText(filterText, MR_TOF_TEXT);
         }
 
         private bool SetMSController()
