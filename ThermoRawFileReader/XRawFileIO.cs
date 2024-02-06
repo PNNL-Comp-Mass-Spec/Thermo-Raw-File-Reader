@@ -123,13 +123,12 @@ namespace ThermoRawFileReader
         /// <summary>
         /// Regular expression to match numbers between a space and an @ sign
         /// </summary>
-        private static readonly Regex mCollisionSpecs = new("(?<MzValue> [0-9.]+)@", RegexOptions.Compiled);
+        private static readonly Regex mParentIonMz = new("(?<MzValue> [0-9.]+)@", RegexOptions.Compiled);
 
         /// <summary>
         /// Regular expression to match a period, then integers, then zeroes, then an @ sign
         /// </summary>
         /// <remarks>Uses lazy matching of numbers after the decimal point to assure that trailing zeroes are not included in the capture group</remarks>
-        private static readonly Regex mCollisionEnergyTrailingDigits = new(@"\.(?<TrailingDigits>\d+?)0+@", RegexOptions.Compiled);
 
         /// <summary>
         /// Regular expression to match text of the form "ms2 748.371" (used when an @ sign is not present)
@@ -2014,11 +2013,11 @@ namespace ThermoRawFileReader
                 }
 
                 // No @ sign; look for text of the form "ms2 748.371"
-                var match = mMzWithoutCE.Match(genericScanFilterText);
+                var mzMatch = mMzWithoutCE.Match(genericScanFilterText);
 
-                if (match.Success)
+                if (mzMatch.Success)
                 {
-                    return genericScanFilterText.Substring(0, match.Groups["MzValue"].Index);
+                    return genericScanFilterText.Substring(0, mzMatch.Groups["MzValue"].Index);
                 }
 
                 return genericScanFilterText;
@@ -2041,7 +2040,7 @@ namespace ThermoRawFileReader
         /// <returns>Updated scan filter</returns>
         public static string GetScanFilterWithGenericPrecursorMZ(string scanFilterText)
         {
-            return mCollisionSpecs.Replace(scanFilterText, " 0@");
+            return mParentIonMz.Replace(scanFilterText, " 0@");
         }
 
         private static bool ScanIsFTMS(string filterText)
