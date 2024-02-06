@@ -23,7 +23,7 @@ namespace ThermoRawFileReader
         // We're not including SIM, Q1MS, or Q3MS in this RegEx since those are checked for separately (see the MRM_ constants in class XRawFileIO)
         private const string MS2_REGEX = "(?<ScanMode> p|Full|SRM|CRM|Full msx|Full lock|Z) ms(?<MSLevel>[2-9]|[1-9][0-9]) ";
 
-        private const string MASS_LIST_REGEX = "\\[[0-9.]+-[0-9.]+.*\\]";
+        private const string MASS_LIST_REGEX = @"\[[0-9.]+-[0-9.]+.*\]";
 
         private const string MASS_RANGES_REGEX = "(?<StartMass>[0-9.]+)-(?<EndMass>[0-9.]+)";
 
@@ -469,9 +469,7 @@ namespace ThermoRawFileReader
         /// <returns>True if found and False if no match</returns>
         public static bool ExtractMSLevel(string filterText, out int msLevel, out string mzText)
         {
-            var matchTextLength = 0;
-
-            msLevel = 1;
+            int matchTextLength;
 
             var msMatch = mFindMS.Match(filterText);
 
@@ -485,7 +483,9 @@ namespace ThermoRawFileReader
             }
             else
             {
+                msLevel = 1;
                 charIndex = -1;
+                matchTextLength = 0;
             }
 
             if (charIndex > 0)
