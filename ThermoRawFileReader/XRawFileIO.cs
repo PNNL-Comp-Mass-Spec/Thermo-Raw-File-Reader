@@ -41,6 +41,7 @@ using ThermoFisher.CommonCore.Data.FilterEnums;
 // Copyright 2018 Battelle Memorial Institute
 
 // ReSharper disable UnusedMember.Global
+// ReSharper disable UseCollectionExpression
 
 namespace ThermoRawFileReader
 {
@@ -133,6 +134,12 @@ namespace ThermoRawFileReader
         /// Regular expression to match a period, then integers, then zeroes, then an @ sign
         /// </summary>
         /// <remarks>Uses lazy matching of numbers after the decimal point to assure that trailing zeroes are not included in the capture group</remarks>
+        private static readonly Regex mParentIonMzTrailingDigits = new(@"\.(?<TrailingDigits>\d+?)0+@", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Regular expression to match an @ sign, then characters (typically "hcd") then a number (e.g. 21.49)
+        /// </summary>
+        private static readonly Regex mCollisionModeAndEnergy = new("(?<CollisionMode>@[a-z]+)(?<CollisionEnergy>[0-9.]+)", RegexOptions.Compiled);
 
         /// <summary>
         /// Regular expression to match text of the form "ms2 748.371" (used when an @ sign is not present)
@@ -1594,6 +1601,10 @@ namespace ThermoRawFileReader
             // FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]       ETciD-HMSn  (ETD fragmentation, then further fragmented by CID in the ion trap; detected with orbitrap)
             // FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]       EThcD-HMSn  (ETD fragmentation, then further fragmented by HCD in the ion routing multipole; detected with orbitrap)
 
+            // Astral scan filter examples
+            // FTMS + p NSI Full ms                       HMS
+            // MRTOF + c NSI d Full ms2 0@hcd16.75        HCD-HMSn
+
             // DIA examples
             // FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                    DIA-HCD-HMSn
             // FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                   DIA-HCD-HMSn
@@ -1934,8 +1945,11 @@ namespace ThermoRawFileReader
         /// When true, include the actual parent ion m/z value in the generic scan filter (defaults to false)
         /// When false, change the parent ion m/z to 0
         /// </param>
+        /// <param name="roundCollisionEnergyForMRTOF">
+        /// When true, round collision energies for multi-reflection time-of-flight (MRTOF) scans to the nearest integer
+        /// </param>
         /// <returns>Generic filter text, e.g. FTMS + p NSI Full ms</returns>
-        public static string MakeGenericThermoScanFilter(string filterText, bool includeParentMZ = false)
+        public static string MakeGenericThermoScanFilter(string filterText, bool includeParentMZ = false, bool roundCollisionEnergyForMRTOF = true)
         {
             // Will make a generic version of the FilterText in filterText, optionally changing the parent ion m/z to 0
             // Examples:
@@ -1948,7 +1962,7 @@ namespace ThermoRawFileReader
             // ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]              ITMS + c NSI d Full ms2 0@pqd27.00
             // FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]             FTMS + c NSI d Full ms2 0@hcd40.00
             // ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]          ITMS + c NSI d sa Full ms2 0@etd100.00
-
+            // MRTOF + c NSI d Full ms2 0@hcd16.75                                  MRTOF + c NSI d Full ms2 0@hcd17
             // FTMS + p NSI SIM msx ms [475.0000-525.0000]                          FTMS + p NSI SIM msx ms
 
             // FAIMS:
@@ -2005,15 +2019,41 @@ namespace ThermoRawFileReader
 
                 if (genericScanFilterText.IndexOf('@') > 0)
                 {
+                    string scanFilterToUse;
+
+                    if (roundCollisionEnergyForMRTOF && ContainsText(genericScanFilterText, MR_TOF_TEXT))
+                    {
+                        var collisionInfoMatch = mCollisionModeAndEnergy.Match(genericScanFilterText);
+
+                        if (collisionInfoMatch.Success)
+                        {
+                            var collisionEnergy = double.Parse(collisionInfoMatch.Groups["CollisionEnergy"].Value);
+
+                            var roundedCollisionInfo = string.Format("{0}{1:F2}",
+                                collisionInfoMatch.Groups["CollisionMode"],
+                                Math.Round(collisionEnergy, 0));
+
+                            scanFilterToUse = genericScanFilterText.Replace(collisionInfoMatch.Value, roundedCollisionInfo);
+                        }
+                        else
+                        {
+                            scanFilterToUse = genericScanFilterText;
+                        }
+                    }
+                    else
+                    {
+                        scanFilterToUse = genericScanFilterText;
+                    }
+
                     // ReSharper disable once ConvertIfStatementToReturnStatement
                     if (includeParentMZ)
                     {
                         // Keep the parent ion m/z value, but trim trailing zeroes
-                        return mCollisionEnergyTrailingDigits.Replace(genericScanFilterText, ".${TrailingDigits}@");
+                        return mParentIonMzTrailingDigits.Replace(scanFilterToUse, ".${TrailingDigits}@");
                     }
 
                     // Replace any digits before any @ sign with a 0
-                    return GetScanFilterWithGenericPrecursorMZ(genericScanFilterText);
+                    return GetScanFilterWithGenericPrecursorMZ(scanFilterToUse);
                 }
 
                 // No @ sign; look for text of the form "ms2 748.371"
