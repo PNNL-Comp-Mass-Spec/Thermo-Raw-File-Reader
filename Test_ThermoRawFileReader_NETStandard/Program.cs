@@ -445,6 +445,7 @@ namespace Test_ThermoRawFileReader_NETStandard
 
                     if (slashIndex > 2)
                     {
+                        // ReSharper disable once ReplaceSubstringWithRangeIndexer
                         rawFilePath = rawFilePath.Substring(slashIndex).Replace('\\', '/');
                     }
                     else

@@ -43,6 +43,7 @@ namespace ThermoRawFileReader
 
         // This RegEx looks for "sa" prior to Full ms"
         private const string SA_REGEX = " sa Full ms";
+
         private const string MSX_REGEX = " Full msx ";
 
         private static readonly Regex mFindMS = new(MS2_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -283,7 +284,7 @@ namespace ThermoRawFileReader
                     mzText = mzText.Substring(0, bracketIndex);
                 }
 
-                // Find all of the parent ion m/z's present in mzText
+                // Find all the parent ion m/z's present in mzText
                 var startIndex = 0;
 
                 do
