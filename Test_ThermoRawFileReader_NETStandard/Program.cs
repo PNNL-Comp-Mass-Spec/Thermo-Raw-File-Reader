@@ -721,7 +721,7 @@ namespace Test_ThermoRawFileReader_NETStandard
                         Console.WriteLine();
                     }
 
-                    if (!scanInfo.IsFTMS)
+                    if (!scanInfo.IsHighResolution)
                         continue;
 
                     var dataCount = reader.GetScanLabelData(scanNum, out var ftLabelData);

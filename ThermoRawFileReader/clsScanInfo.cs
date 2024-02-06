@@ -223,10 +223,21 @@ namespace ThermoRawFileReader
         public bool IsDIA { get; set; }
 
         /// <summary>
-        /// FTMS flag (or Orbitrap, Q-Exactive, Lumos, or any other high resolution instrument)
+        /// FTMS flag (or Orbitrap, Q-Exactive, Lumos, Astral, TOF, or any other high resolution instrument)
         /// </summary>
-        /// <returns>True if acquired on a high resolution mass analyzer (for example, on an Orbitrap or Q-Exactive)</returns>
-        public bool IsFTMS { get; set; }
+        /// <returns>True if acquired using a high resolution mass analyzer</returns>
+        [Obsolete("Use IsHighResolution instead")]
+        public bool IsFTMS
+        {
+            get => IsHighResolution;
+            set => IsHighResolution = value;
+        }
+
+        /// <summary>
+        /// High resolution mass spectrum flag (Orbitrap, Q-Exactive, Lumos, Astral, TOF, etc.)
+        /// </summary>
+        /// <returns>True if acquired using a high resolution mass analyzer</returns>
+        public bool IsHighResolution { get; set; }
 
         /// <summary>
         /// Scan event data

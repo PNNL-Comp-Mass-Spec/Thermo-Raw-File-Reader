@@ -2586,9 +2586,9 @@ namespace ThermoRawFileReader
                     return -1;
                 }
 
-                if (!scanInfo.IsFTMS)
+                if (!scanInfo.IsHighResolution)
                 {
-                    var msg = "Scan " + scan + " is not an FTMS scan; function GetScanLabelData cannot be used with this scan";
+                    var msg = "Scan " + scan + " is not a high resolution scan; function GetScanLabelData cannot be used with this scan";
                     RaiseWarningMessage(msg);
                     ftLabelData = Array.Empty<FTLabelInfoType>();
                     return -1;
@@ -2681,7 +2681,7 @@ namespace ThermoRawFileReader
                     return -1;
                 }
 
-                if (!scanInfo.IsFTMS)
+                if (!scanInfo.IsHighResolution)
                 {
                     RaiseWarningMessage(string.Format(
                         "Scan {0} is not an FTMS scan; method GetScanPrecisionData cannot be used with this scan", scan));

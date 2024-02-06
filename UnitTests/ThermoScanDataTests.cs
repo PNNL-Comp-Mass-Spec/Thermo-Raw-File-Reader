@@ -1164,7 +1164,7 @@ namespace RawFileReaderTests
                 "LowMass", "HighMass", "TotalIonCurrent",
                 "BasePeakMZ", "BasePeakIntensity",
                 "ParentIonMZ", "ActivationType", "CollisionMode",
-                "IonMode", "IsCentroided", "IsFTMS",
+                "IonMode", "IsCentroided", "IsHighResolution",
                 "ScanEvents.Count", "StatusLog.Count",
                 "IonInjectionTime", "FilterText");
 
@@ -1197,7 +1197,7 @@ namespace RawFileReaderTests
                         scanInfo.TotalIonCurrent, scanInfo.BasePeakMZ, scanInfo.BasePeakIntensity, scanInfo.ParentIonMZ,
                         scanInfo.ActivationType, scanInfo.CollisionMode,
                         scanInfo.IonMode, scanInfo.IsCentroided,
-                        scanInfo.IsFTMS, scanInfo.ScanEvents.Count, scanInfo.StatusLog.Count, ionInjectionTime,
+                        scanInfo.IsHighResolution, scanInfo.ScanEvents.Count, scanInfo.StatusLog.Count, ionInjectionTime,
                         scanInfo.FilterText.Substring(0, 12) + "...");
 
                 Console.WriteLine(scanSummary);
@@ -2192,7 +2192,7 @@ namespace RawFileReaderTests
 
                 Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
-                if (ftLabelData.Length == 0 && scanInfo.IsFTMS)
+                if (ftLabelData.Length == 0 && scanInfo.IsHighResolution)
                 {
                     Assert.Fail("GetScanLabelData returned no data for FTMS scan " + scanNumber);
                 }
@@ -2311,7 +2311,7 @@ namespace RawFileReaderTests
 
                 Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
 
-                if (massResolutionData.Length == 0 && scanInfo.IsFTMS)
+                if (massResolutionData.Length == 0 && scanInfo.IsHighResolution)
                 {
                     Assert.Fail("GetScanPrecisionData returned no data for FTMS scan " + scanNumber);
                 }
