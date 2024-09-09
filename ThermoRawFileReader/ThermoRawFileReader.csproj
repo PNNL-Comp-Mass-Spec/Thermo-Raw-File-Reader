@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net472;net48;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net472;net48;netstandard2.0;net8.0</TargetFrameworks>
     <RootNamespace>ThermoRawFileReader</RootNamespace>
     <AssemblyName>ThermoRawFileReader</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -20,8 +20,11 @@
     <NoWarn>IDE0028; IDE0290; IDE0301</NoWarn>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard')) OR $(TargetFramework.StartsWith('net8'))">
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)'=='net8.0'">
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\Readme.md" Pack="true" PackagePath="\" />
@@ -32,9 +35,17 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="PRISM-Library" Version="2.8.32" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'!='net8.0'">
     <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.93" />
     <PackageReference Include="ThermoFisher.CommonCore.Data" Version="5.0.0.93" />
     <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator" Version="5.0.0.93" />
     <PackageReference Include="ThermoFisher.CommonCore.RawFileReader" Version="5.0.0.93" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
+    <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="7.1.21" />
+    <PackageReference Include="ThermoFisher.CommonCore.Data" Version="7.1.21" />
+    <PackageReference Include="ThermoFisher.CommonCore.MassPrecisionEstimator" Version="7.1.21" />
+    <PackageReference Include="ThermoFisher.CommonCore.RawFileReader" Version="7.1.21" />
   </ItemGroup>
 </Project>
