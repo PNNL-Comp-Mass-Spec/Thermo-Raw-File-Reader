@@ -927,7 +927,7 @@ namespace ThermoRawFileReader
         /// Return the collision energy (or energies) for the given parent ion(s)
         /// </summary>
         /// <param name="parentIons">Parent ion list</param>
-        public List<double> GetCollisionEnergy(List<ParentIonInfoType> parentIons)
+        public static List<double> GetCollisionEnergy(List<ParentIonInfoType> parentIons)
         {
             return FilterTextUtilities.GetCollisionEnergy(parentIons);
         }
@@ -2962,7 +2962,7 @@ namespace ThermoRawFileReader
             }
         }
 
-        private bool TuneMethodsMatch(TuneMethod method1, TuneMethod method2)
+        private static bool TuneMethodsMatch(TuneMethod method1, TuneMethod method2)
         {
             if (method1.Settings.Count != method2.Settings.Count)
             {
@@ -3047,7 +3047,7 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Return unnormalized collision energies via call IScanFilter.GetEnergy
+        /// Return un-normalized collision energies via call IScanFilter.GetEnergy
         /// </summary>
         /// <param name="scan">Scan number</param>
         [Obsolete("The collision energies reported by IScanFilter.GetEnergy are not normalized and are thus not very useful")]
