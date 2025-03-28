@@ -338,16 +338,18 @@ namespace ThermoRawFileReader
             return "Scan " + ScanNumber + ": " + FilterText;
         }
 
-        private void StoreParallelStrings(
-            ICollection<KeyValuePair<string, string>> targetList,
-            IList<string> names,
-            IList<string> values,
+        private static void StoreParallelStrings(
+            // ReSharper disable SuggestBaseTypeForParameter
+            List<KeyValuePair<string, string>> targetList,
+            string[] names,
+            string[] values,
+            // ReSharper restore SuggestBaseTypeForParameter
             bool skipEmptyNames = false,
             bool replaceTabsInValues = false)
         {
             targetList.Clear();
 
-            for (var i = 0; i <= names.Count - 1; i++)
+            for (var i = 0; i <= names.Length- 1; i++)
             {
                 if (skipEmptyNames && (string.IsNullOrWhiteSpace(names[i]) || names[i] == "\u0001"))
                 {
