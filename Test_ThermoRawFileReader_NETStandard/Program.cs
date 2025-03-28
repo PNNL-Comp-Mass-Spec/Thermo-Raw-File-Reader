@@ -478,7 +478,8 @@ namespace Test_ThermoRawFileReader_NETStandard
             return null;
         }
 
-        private static void ShowIonInjectionStats(int msLevel, IReadOnlyCollection<double> ionInjectionTimes)
+        // ReSharper disable once SuggestBaseTypeForParameter
+        private static void ShowIonInjectionStats(int msLevel, List<double> ionInjectionTimes)
         {
             if (ionInjectionTimes.Count > 0)
             {
