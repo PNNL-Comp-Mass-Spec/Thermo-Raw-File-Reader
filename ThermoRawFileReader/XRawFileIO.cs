@@ -3065,6 +3065,7 @@ namespace ThermoRawFileReader
         public void Dispose()
         {
             CloseRawFile();
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
