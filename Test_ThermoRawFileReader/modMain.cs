@@ -1028,7 +1028,8 @@ namespace Test_ThermoRawFileReader
             var diaFilterList = new List<string>()
             {
                 "FTMS + p NSI cv=-80.00 Full ms2 635.0000@hcd32.00",
-                "FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00"
+                "FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00",
+                "ASTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00"
             };
 
             // Keys in this dictionary are the filter string; values are true if DIA, otherwise false

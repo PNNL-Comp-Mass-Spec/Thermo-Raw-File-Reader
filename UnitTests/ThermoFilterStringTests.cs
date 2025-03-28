@@ -627,10 +627,10 @@ namespace RawFileReaderTests
         [TestCase("FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@cid20.00 [120.0000-2000.0000]              ", "ETciD-HMSn")]
         [TestCase("FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]              ", "EThcD-HMSn")]
         [TestCase("FTMS + p NSI SIM msx ms [575.0000-625.0000]                                                 ", "SIM ms")]
-        [TestCase("FTMS + c NSI cv=-75.00 d Full ms2 437.5205@hcd32.00 [110.0000-1323.0000]                    ", "HCD-HMSn")]            // FAIMS
-        [TestCase("FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                                           ", "DIA-HCD-HMSn", true)]  // DIA
-        [TestCase("FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                                          ", "DIA-HCD-HMSn", true)]  // DIA
-        public void TestScanTypeName(string filterText, string expectedResult, bool isDIA = false)
+        [TestCase("FTMS + c NSI cv=-75.00 d Full ms2 437.5205@hcd32.00 [110.0000-1323.0000]                    ", "HCD-HMSn")]           // FAIMS
+        [TestCase("FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                                           ", "DIA-HCD-HMSn", true)] // DIA
+        [TestCase("FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                                          ", "DIA-HCD-HMSn", true)] // DIA
+        [TestCase("ASTMS + c NSI Full ms2 677.5579@hcd25.00 [150.0000-2000.0000]                               ", "DIA-HCD-HMSn", true, 0.0)] // DIA on Astral
         public void TestScanTypeName(string filterText, string expectedResult, bool isDIA = false, double? parentIonMonoisotopicMZ = null)
         {
             var scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterText, isDIA, parentIonMonoisotopicMZ);

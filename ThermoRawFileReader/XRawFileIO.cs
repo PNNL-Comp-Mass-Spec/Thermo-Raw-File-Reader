@@ -1624,9 +1624,9 @@ namespace ThermoRawFileReader
             // FTMS + c NSI r d sa Full ms2 1073.4800@etd120.55@hcd30.00 [120.0000-2000.0000]       EThcD-HMSn  (ETD fragmentation, then further fragmented by HCD in the ion routing multipole; detected with orbitrap)
 
             // Astral scan filter examples
-            // FTMS + p NSI Full ms                       HMS
-            // ASTMS + c NSI d Full ms2 0@hcd16.75        HCD-HMSn
-            // ASTMS + c NSI Full ms2 0@hcd25.00          DIA-HMS-HCD-HMSn (scans will have "'trailer' monoisotopic m/z" = 0)
+            // FTMS + p NSI Full ms [300.0000-1500.0000]                            HMS
+            // ASTMS + c NSI d Full ms2 711.6851@hcd29.00 [110.0000-1500.0000]      HCD-HMSn
+            // ASTMS + c NSI Full ms2 931.6734@hcd25.00 [150.0000-2000.0000]        DIA-HMS-HCD-HMSn (scans will have "'trailer' monoisotopic m/z" = 0)
 
             // DIA examples
             // FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                    DIA-HCD-HMSn
