@@ -112,7 +112,9 @@ namespace ThermoRawFileReader
         /// <summary>
         /// The monoisotopic parent ion m/z, as determined by the Thermo software
         /// </summary>
-        public double ParentIonMonoisotopicMZ
+        /// <remarks>Comes from "trailer" scan events; null if undefined</remarks>
+        // ReSharper disable once UnusedMember.Global
+        public double? ParentIonMonoisotopicMZ
         {
             get
             {
@@ -120,7 +122,8 @@ namespace ThermoRawFileReader
                 {
                     return Convert.ToDouble(value);
                 }
-                return 0;
+
+                return null;
             }
         }
 
