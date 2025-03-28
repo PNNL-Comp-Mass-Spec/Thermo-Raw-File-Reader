@@ -350,10 +350,8 @@ namespace ThermoRawFileReader
                 var scan = mCachedScans.First();
                 mCachedScans.RemoveFirst();
 
-                if (mCachedScanInfo.ContainsKey(scan))
-                {
-                    mCachedScanInfo.Remove(scan);
-                }
+                // Remove the scan number (if present)
+                mCachedScanInfo.Remove(scan);
             }
         }
 

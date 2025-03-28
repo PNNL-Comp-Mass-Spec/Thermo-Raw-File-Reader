@@ -357,7 +357,7 @@ namespace ThermoRawFileReader
                     continue;
                 }
 
-                if (replaceTabsInValues && values[i].Contains("\t"))
+                if (replaceTabsInValues && values[i].Contains('\t'))
                 {
                     targetList.Add(new KeyValuePair<string, string>(names[i], values[i].Replace("\t", " ").TrimEnd(' ')));
                 }
