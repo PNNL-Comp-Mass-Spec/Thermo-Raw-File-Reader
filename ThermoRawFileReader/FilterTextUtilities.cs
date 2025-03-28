@@ -359,10 +359,10 @@ namespace ThermoRawFileReader
                     };
 
                     if (collisionMode != null)
-                        parentIonInfo.CollisionMode = string.Copy(collisionMode);
+                        parentIonInfo.CollisionMode = collisionMode;
 
                     if (collisionMode2 != null)
-                        parentIonInfo.CollisionMode2 = string.Copy(collisionMode2);
+                        parentIonInfo.CollisionMode2 = collisionMode2;
 
                     parentIons.Add(parentIonInfo);
 

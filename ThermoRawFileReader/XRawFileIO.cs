@@ -1352,9 +1352,8 @@ namespace ThermoRawFileReader
                 // Lookup the filter text for this scan
                 // Parse out the parent ion m/z for fragmentation scans
                 var scanFilter = mXRawFile.GetFilterForScanNumber(scan);
-                var filterText = scanFilter.ToString();
 
-                scanInfo.FilterText = string.Copy(filterText);
+                scanInfo.FilterText = scanFilter.ToString();
 
                 scanInfo.IsHighResolution = scanFilter.MassAnalyzer is MassAnalyzerType.MassAnalyzerFTMS or MassAnalyzerType.MassAnalyzerTOFMS or MassAnalyzerType.MassAnalyzerASTMS;
 
@@ -1881,7 +1880,7 @@ namespace ThermoRawFileReader
                         // New category
                         if (tuneSettingNames[settingIndex].Length > 0)
                         {
-                            tuneCategory = string.Copy(tuneSettingNames[settingIndex]);
+                            tuneCategory = tuneSettingNames[settingIndex];
                         }
                         else
                         {
@@ -1892,9 +1891,9 @@ namespace ThermoRawFileReader
                     {
                         var tuneMethodSetting = new TuneMethodSettingType
                         {
-                            Category = string.Copy(tuneCategory),
+                            Category = tuneCategory,
                             Name = tuneSettingNames[settingIndex].TrimEnd(':'),
-                            Value = string.Copy(tuneSettingValues[settingIndex])
+                            Value = tuneSettingValues[settingIndex]
                         };
 
                         newTuneMethod.Settings.Add(tuneMethodSetting);
