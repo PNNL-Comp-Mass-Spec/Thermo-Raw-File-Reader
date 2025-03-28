@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using PRISM.DataUtils;
 
 namespace ThermoRawFileReader
 {
@@ -301,8 +302,6 @@ namespace ThermoRawFileReader
                     // Match found
 
                     parentIonMz = double.Parse(parentIonMatch.Groups["ParentMZ"].Value);
-                    collisionMode = string.Empty;
-                    float collisionEnergyValue = 0;
 
                     matchFound = true;
 
@@ -312,18 +311,20 @@ namespace ThermoRawFileReader
 
                     var collisionEnergy = GetCapturedValue(parentIonMatch, "CollisionEnergy1");
 
-                    if (!string.IsNullOrWhiteSpace(collisionEnergy))
-                    {
-                        float.TryParse(collisionEnergy, out collisionEnergyValue);
-                    }
+                    var collisionEnergyValue = StringToValueUtils.CFloatSafe(collisionEnergy, 0);
 
-                    float collisionEnergy2Value = 0;
                     var collisionMode2 = GetCapturedValue(parentIonMatch, "CollisionMode2");
 
-                    if (!string.IsNullOrWhiteSpace(collisionMode2))
+                    float collisionEnergy2Value;
+
+                    if (string.IsNullOrWhiteSpace(collisionMode2))
+                    {
+                        collisionEnergy2Value = 0;
+                    }
+                    else
                     {
                         var collisionEnergy2 = GetCapturedValue(parentIonMatch, "CollisionEnergy2");
-                        float.TryParse(collisionEnergy2, out collisionEnergy2Value);
+                        collisionEnergy2Value = StringToValueUtils.CFloatSafe(collisionEnergy2, 0);
                     }
 
                     var allowSecondaryActivation = true;
