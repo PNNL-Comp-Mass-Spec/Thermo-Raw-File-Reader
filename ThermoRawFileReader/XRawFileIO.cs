@@ -1567,7 +1567,7 @@ namespace ThermoRawFileReader
         [Obsolete("Use the method with argument isDIA")]
         public static string GetScanTypeNameFromThermoScanFilterText(string filterText)
         {
-            return GetScanTypeNameFromThermoScanFilterText(filterText, false);
+            return GetScanTypeNameFromThermoScanFilterText(filterText, false, null);
         }
 
         /// <summary>
@@ -1575,8 +1575,12 @@ namespace ThermoRawFileReader
         /// </summary>
         /// <param name="filterText">Thermo scan filter</param>
         /// <param name="isDIA">If true, and the scan is MSn or HMSn, prepend with "DIA-"</param>
+        /// <param name="parentIonMonoisotopicMZ">
+        /// Parent ion monoisotopic m/z value (from "trailer" scan events); null if undefined.
+        /// This is 0.0000 for DIA spectra on the Astral
+        /// </param>
         /// <returns>Scan type name, e.g. HMS or HCD-HMSn</returns>
-        public static string GetScanTypeNameFromThermoScanFilterText(string filterText, bool isDIA)
+        public static string GetScanTypeNameFromThermoScanFilterText(string filterText, bool isDIA, double? parentIonMonoisotopicMZ)
         {
             // Examines filterText to determine what the scan type is
             // Examples:
@@ -1622,6 +1626,7 @@ namespace ThermoRawFileReader
             // Astral scan filter examples
             // FTMS + p NSI Full ms                       HMS
             // ASTMS + c NSI d Full ms2 0@hcd16.75        HCD-HMSn
+            // ASTMS + c NSI Full ms2 0@hcd25.00          DIA-HMS-HCD-HMSn (scans will have "'trailer' monoisotopic m/z" = 0)
 
             // DIA examples
             // FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                    DIA-HCD-HMSn
@@ -1731,7 +1736,9 @@ namespace ThermoRawFileReader
 
                     string scanTypeName;
 
-                    if (ScanIsHighResolution(filterText))
+                    var isHighResolution = ScanIsHighResolution(filterText, out var isAstralASTMS);
+
+                    if (isHighResolution)
                     {
                         // HMS or HMSn scan
                         scanTypeName = "H" + baseScanTypeName;
@@ -1743,8 +1750,20 @@ namespace ThermoRawFileReader
 
                     if (msLevel > 1 && collisionMode.Length > 0)
                     {
+                        string diaPrefix;
+
+                        if (isDIA || (isAstralASTMS && parentIonMonoisotopicMZ is 0.0))
+                        {
+                            // Either isDIA is true, or this is an MS/MS spectrum on an Astral instrument and the parent ion monoisotopic m/z value is 0.0000
+                            diaPrefix = "DIA-";
+                        }
+                        else
+                        {
+                            diaPrefix = string.Empty;
+                        }
+
                         return string.Format("{0}{1}-{2}",
-                            isDIA ? "DIA-" : string.Empty,
+                            diaPrefix,
                             CapitalizeCollisionMode(collisionMode),
                             scanTypeName);
                     }
@@ -2111,14 +2130,16 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
-        /// Return true if the scan filter has FTMS (FTICR Mass Spectra), "ASTMS" (Asymmetric Track Lossless, aka ASTRAL) or "MRTOF" (multi-reflection time-of-flight mass spectra)
+        /// Return true if the scan filter has FTMS (FTICR Mass Spectra), "ASTMS" (Asymmetric Track Lossless, aka ASTRAL), or "MRTOF" (multi-reflection time-of-flight mass spectra)
         /// </summary>
         /// <remarks>Uses a case-insensitive search</remarks>
         /// <param name="filterText">Thermo scan filter text</param>
+        /// <param name="isAstralASTMS">Output: true if filterText contains ASTMS</param>
         /// <returns>True if a high resolution spectrum</returns>
-        private static bool ScanIsHighResolution(string filterText)
+        private static bool ScanIsHighResolution(string filterText, out bool isAstralASTMS)
         {
-            return ContainsText(filterText, FTMS_TEXT) || ContainsText(filterText, ASTMS_TEXT) || ContainsText(filterText, MRTOF_TEXT);
+            isAstralASTMS = ContainsText(filterText, ASTMS_TEXT);
+            return ContainsText(filterText, FTMS_TEXT) || isAstralASTMS || ContainsText(filterText, MRTOF_TEXT);
         }
 
         private bool SetMSController()
