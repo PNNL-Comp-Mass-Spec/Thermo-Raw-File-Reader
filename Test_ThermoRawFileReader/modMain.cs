@@ -59,10 +59,9 @@ namespace Test_ThermoRawFileReader
                 return;
             }
 
-            if (Path.DirectorySeparatorChar == '/')
-                mSourceFilePath = DEFAULT_FILE_PATH.Replace('\\', '/');
-            else
-                mSourceFilePath = DEFAULT_FILE_PATH;
+            mSourceFilePath = Path.DirectorySeparatorChar == '/'
+                ? DEFAULT_FILE_PATH.Replace('\\', '/')
+                : DEFAULT_FILE_PATH;
 
             ParseCommandLineParameters(commandLineParser);
 
@@ -74,6 +73,7 @@ namespace Test_ThermoRawFileReader
                 {
                     workingDirectory = commandLineParser.RetrieveNonSwitchParameter(0);
                 }
+
                 ExtractScanFilters(workingDirectory);
                 System.Threading.Thread.Sleep(1500);
                 return;
@@ -888,7 +888,7 @@ namespace Test_ThermoRawFileReader
                 Console.WriteLine("Opening " + rawFile.FullName);
 
                 // Keys in this dictionary are event names
-                // Values are dictionaries tracking all of the values for each event (key is value, value is occurrence of that value)
+                // Values are dictionaries tracking the values for each event (key is value, value is occurrence of that value)
                 var scanEventStats = new Dictionary<string, Dictionary<string, int>>();
 
                 var lastProgress = DateTime.UtcNow;
