@@ -17,7 +17,7 @@
     <PackageProjectUrl>https://github.com/PNNL-Comp-Mass-Spec/Thermo-Raw-File-Reader</PackageProjectUrl>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
     <Title>ThermoRawFileReader</Title>
-    <NoWarn>IDE0028; IDE0290; IDE0301</NoWarn>
+    <NoWarn>IDE0028; IDE0290; IDE0301; SYSLIB1045</NoWarn>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard')) OR $(TargetFramework.StartsWith('net8'))">
@@ -30,11 +30,11 @@
     <None Include="..\Readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.6.133">
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.7.115">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PRISM-Library" Version="2.8.32" />
+    <PackageReference Include="PRISM-Library" Version="2.9.6" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'!='net8.0'">
     <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.93" />
