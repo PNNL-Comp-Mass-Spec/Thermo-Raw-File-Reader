@@ -1050,7 +1050,7 @@ namespace Test_ThermoRawFileReader
                 var isDIA = item.Value;
 
                 var genericFilter = XRawFileIO.MakeGenericThermoScanFilter(filterString, isDIA);
-                var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterString, isDIA);
+                var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterString, isDIA, null);
 
                 Console.WriteLine(filterString);
                 Console.WriteLine("  {0,-12} {1}", scanType, genericFilter);

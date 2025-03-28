@@ -947,7 +947,7 @@ namespace RawFileReaderTests
 
                 Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
 
-                var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText, scanInfo.IsDIA);
+                var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText, scanInfo.IsDIA, null);
                 var genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText, scanInfo.IsDIA);
 
                 var scanTypeKey = new Tuple<string, string>(scanType, genericScanFilter);
