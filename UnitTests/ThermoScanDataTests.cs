@@ -878,6 +878,7 @@ namespace RawFileReaderTests
             // ReSharper restore StringLiteralTypo
 
             // DIA dataset
+            // ReSharper disable once StringLiteralTypo
             const string file14 = "MM_Strap_IMAC_FT_10xDilution_FAIMS_ID_01_FAIMS_Merry_03Feb23_REP-22-11-13";
 
             // Selected scan range (42000 - 42224) covers 24 isolation windows, run at three different CVs (-40, -60, and -80)
