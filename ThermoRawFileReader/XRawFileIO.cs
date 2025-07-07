@@ -123,7 +123,7 @@ namespace ThermoRawFileReader
         private readonly LinkedList<int> mCachedScans = new();
 
         /// <summary>
-        /// Set to true if the instrument method has "Scan tMSn"
+        /// Set to true if the instrument method has "Scan tMSn" or "Scan DIAScan"
         /// </summary>
         private bool mInstrumentMethodHasDIA;
 
@@ -1954,7 +1954,8 @@ namespace ThermoRawFileReader
                     {
                         FileInfo.InstMethods.Add(methodText);
 
-                        if (methodText.IndexOf("Scan tMSn", StringComparison.Ordinal) > 0)
+                        if (methodText.IndexOf("Scan tMSn", StringComparison.Ordinal) > 0 ||
+                            methodText.IndexOf("Scan DIAScan", StringComparison.Ordinal) > 0)
                         {
                             mInstrumentMethodHasDIA = true;
                         }
