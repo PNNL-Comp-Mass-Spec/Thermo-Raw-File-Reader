@@ -1433,8 +1433,14 @@ namespace ThermoRawFileReader
 
                         var isolationWindowWidthMZ = scanInfo.IsolationWindowWidthMZ;
 
+                        // DIA scan checks:
+                        // * MS Level > 1
+                        // AND
+                        //   * Isolation window >= 6.5 m/z (regardless of instrument method information)
+                        //   OR
+                        //   * Instrument method includes DIA marker and scan is not marked as data dependent
                         if (scanInfo.MSLevel > 1 &&
-                            (isolationWindowWidthMZ >= 6.5 || mInstrumentMethodHasDIA && isolationWindowWidthMZ >= 2.5))
+                            (isolationWindowWidthMZ >= 6.5 || mInstrumentMethodHasDIA && scanFilter.Dependent != TriState.On))
                         {
                             // Assume this is a Data Independent Acquisition scan
                             scanInfo.IsDIA = true;
