@@ -99,8 +99,11 @@ namespace RawFileReaderTests
                 var massStart= double.Parse(expectedMassValues[0]);
                 var massEnd = double.Parse(expectedMassValues[1]);
 
-                Assert.That(mrmInfo.MRMMassList[i].StartMass, Is.EqualTo(massStart).Within(.001), "Mass start mismatch");
-                Assert.That(mrmInfo.MRMMassList[i].EndMass, Is.EqualTo(massEnd).Within(.001), "Mass end mismatch");
+                using (Assert.EnterMultipleScope())
+                {
+                    Assert.That(mrmInfo.MRMMassList[i].StartMass, Is.EqualTo(massStart).Within(.001), "Mass start mismatch");
+                    Assert.That(mrmInfo.MRMMassList[i].EndMass, Is.EqualTo(massEnd).Within(.001), "Mass end mismatch");
+                }
             }
         }
 
@@ -137,10 +140,13 @@ namespace RawFileReaderTests
                 return;
             }
 
-            Assert.That(success, Is.True, "ExtractMSLevel returned false");
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(success, Is.True, "ExtractMSLevel returned false");
 
-            Assert.That(msLevel, Is.EqualTo(expectedMSLevel), "MS level mismatch");
-            Assert.That(parentIonMZ, Is.EqualTo(expectedMzText), "mzText mismatch");
+                Assert.That(msLevel, Is.EqualTo(expectedMSLevel), "MS level mismatch");
+                Assert.That(parentIonMZ, Is.EqualTo(expectedMzText), "mzText mismatch");
+            }
         }
 
         /// <summary>
@@ -334,12 +340,15 @@ namespace RawFileReaderTests
                     expectedParentIonMZ = double.Parse(parentIon.Replace("!", ""));
             }
 
-            Assert.That(msLevel, Is.EqualTo(expectedMSLevel), "MS level mismatch");
-            Assert.That(actualParentIons, Has.Count.EqualTo(expectedParentIonList.Length), "Parent ion count mismatch");
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(msLevel, Is.EqualTo(expectedMSLevel), "MS level mismatch");
+                Assert.That(actualParentIons, Has.Count.EqualTo(expectedParentIonList.Length), "Parent ion count mismatch");
 
-            Assert.That(parentIonMZ, Is.EqualTo(expectedParentIonMZ).Within(0.001), "Parent ion m/z mismatch");
+                Assert.That(parentIonMZ, Is.EqualTo(expectedParentIonMZ).Within(0.001), "Parent ion m/z mismatch");
 
-            Assert.That(collisionMode, Is.EqualTo(expectedCollisionMode), "Collision mode mismatch");
+                Assert.That(collisionMode, Is.EqualTo(expectedCollisionMode), "Collision mode mismatch");
+            }
 
             if (expectedParentIonList.Length > 0)
             {
@@ -701,11 +710,14 @@ namespace RawFileReaderTests
 
             Console.WriteLine(filterText + "  -- ms" + msLevel + "; SIM=" + isSIMScan + "; MRMScanType=" + mrmScanType);
 
-            Assert.That(isValid, Is.EqualTo(expectedIsValidMS1orSIM), "Mismatch for IsValidMS1orSIM");
-            Assert.That(msLevel, Is.EqualTo(expectedMSLevel), "MSLevel mismatch");
-            Assert.That(isSIMScan, Is.EqualTo(expectedIsSIMScan), "SIMScan mismatch");
-            Assert.That(mrmScanType, Is.EqualTo(expectedMRMScanType), "MRMScanType mismatch");
-            Assert.That(zoomScan, Is.EqualTo(expectedIsZoomScan), "ZoomScan mismatch");
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(isValid, Is.EqualTo(expectedIsValidMS1orSIM), "Mismatch for IsValidMS1orSIM");
+                Assert.That(msLevel, Is.EqualTo(expectedMSLevel), "MSLevel mismatch");
+                Assert.That(isSIMScan, Is.EqualTo(expectedIsSIMScan), "SIMScan mismatch");
+                Assert.That(mrmScanType, Is.EqualTo(expectedMRMScanType), "MRMScanType mismatch");
+                Assert.That(zoomScan, Is.EqualTo(expectedIsZoomScan), "ZoomScan mismatch");
+            }
         }
     }
 }

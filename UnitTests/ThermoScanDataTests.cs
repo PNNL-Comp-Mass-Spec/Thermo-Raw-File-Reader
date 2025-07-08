@@ -231,20 +231,23 @@ namespace RawFileReaderTests
                 var scanCount = reader.GetNumScans();
                 Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
 
-                if (expectedMS1 == -1 && expectedMS2 == 0)
+                using (Assert.EnterMultipleScope())
                 {
-                    Assert.That(reader.FileInfo.CorruptFile, Is.True, "CorruptFile is false while we expected it to be true (a)");
-                    Assert.That(scanCount, Is.EqualTo(-1), "ScanCount is not -1");
-                }
-                else if (expectedMS1 + expectedMS2 == 0)
-                {
-                    Assert.That(reader.FileInfo.CorruptFile, Is.True, "CorruptFile is false while we expected it to be true (b)");
-                    Assert.That(scanCount, Is.LessThanOrEqualTo(0), "ScanCount is non-zero, while we expected it to be 0");
-                }
-                else
-                {
-                    Assert.That(reader.FileInfo.CorruptFile, Is.False, "CorruptFile is true while we expected it to be false (c)");
-                    Assert.That(scanCount, Is.GreaterThan(0), "ScanCount is zero, while we expected it to be > 0");
+                    if (expectedMS1 == -1 && expectedMS2 == 0)
+                    {
+                        Assert.That(reader.FileInfo.CorruptFile, Is.True, "CorruptFile is false while we expected it to be true (a)");
+                        Assert.That(scanCount, Is.EqualTo(-1), "ScanCount is not -1");
+                    }
+                    else if (expectedMS1 + expectedMS2 == 0)
+                    {
+                        Assert.That(reader.FileInfo.CorruptFile, Is.True, "CorruptFile is false while we expected it to be true (b)");
+                        Assert.That(scanCount, Is.LessThanOrEqualTo(0), "ScanCount is non-zero, while we expected it to be 0");
+                    }
+                    else
+                    {
+                        Assert.That(reader.FileInfo.CorruptFile, Is.False, "CorruptFile is true while we expected it to be false (c)");
+                        Assert.That(scanCount, Is.GreaterThan(0), "ScanCount is zero, while we expected it to be > 0");
+                    }
                 }
 
                 var scanCountMS1 = 0;
@@ -275,29 +278,32 @@ namespace RawFileReaderTests
                         // [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions] to the function does not help
                         var dataPointCount = reader.GetScanData(scanNumber, out var mzList, out var intensityList);
 
-                        if (reader.FileInfo.CorruptFile)
+                        using (Assert.EnterMultipleScope())
                         {
-                            Assert.That(dataPointCount, Is.Zero, $"GetScanData unexpectedly reported a non-zero data count for scan {scanNumber}");
-                            Assert.That(mzList, Has.Length.Zero, $"GetScanData unexpectedly returned m/z data for scan {scanNumber}");
-                            Assert.That(intensityList, Has.Length.Zero, $"GetScanData unexpectedly returned intensity data for scan {scanNumber}");
-                        }
-                        else
-                        {
-                            if (dataPointCount == 0)
+                            if (reader.FileInfo.CorruptFile)
                             {
-                                Console.WriteLine("Corrupt scan encountered: {0}", scanNumber);
-
-                                Assert.That(scanNumber, Is.InRange(corruptScanStart, corruptScanEnd), $"Unexpected corrupt scan found, scan {scanNumber}");
+                                Assert.That(dataPointCount, Is.Zero, $"GetScanData unexpectedly reported a non-zero data count for scan {scanNumber}");
                                 Assert.That(mzList, Has.Length.Zero, $"GetScanData unexpectedly returned m/z data for scan {scanNumber}");
                                 Assert.That(intensityList, Has.Length.Zero, $"GetScanData unexpectedly returned intensity data for scan {scanNumber}");
                             }
                             else
                             {
-                                Assert.That(dataPointCount, Is.GreaterThan(0), $"GetScanData reported a data point count of 0 for scan {scanNumber}");
-                                Assert.That(mzList, Has.Length.GreaterThan(0), $"GetScanData unexpectedly returned no m/z data for scan {scanNumber}");
-                                Assert.That(intensityList, Has.Length.GreaterThan(0), $"GetScanData unexpectedly returned no intensity data for scan {scanNumber}");
-                                Assert.That(mzList, Has.Length.EqualTo(intensityList.Length), $"Array length mismatch for m/z and intensity data for scan {scanNumber}");
-                                Assert.That(mzList, Has.Length.EqualTo(dataPointCount), $"Array length does not agree with dataPointCount for scan {scanNumber}");
+                                if (dataPointCount == 0)
+                                {
+                                    Console.WriteLine("Corrupt scan encountered: {0}", scanNumber);
+
+                                    Assert.That(scanNumber, Is.InRange(corruptScanStart, corruptScanEnd), $"Unexpected corrupt scan found, scan {scanNumber}");
+                                    Assert.That(mzList, Has.Length.Zero, $"GetScanData unexpectedly returned m/z data for scan {scanNumber}");
+                                    Assert.That(intensityList, Has.Length.Zero, $"GetScanData unexpectedly returned intensity data for scan {scanNumber}");
+                                }
+                                else
+                                {
+                                    Assert.That(dataPointCount, Is.GreaterThan(0), $"GetScanData reported a data point count of 0 for scan {scanNumber}");
+                                    Assert.That(mzList, Has.Length.GreaterThan(0), $"GetScanData unexpectedly returned no m/z data for scan {scanNumber}");
+                                    Assert.That(intensityList, Has.Length.GreaterThan(0), $"GetScanData unexpectedly returned no intensity data for scan {scanNumber}");
+                                    Assert.That(mzList, Has.Length.EqualTo(intensityList.Length), $"Array length mismatch for m/z and intensity data for scan {scanNumber}");
+                                    Assert.That(mzList, Has.Length.EqualTo(dataPointCount), $"Array length does not agree with dataPointCount for scan {scanNumber}");
+                                }
                             }
                         }
                     }
