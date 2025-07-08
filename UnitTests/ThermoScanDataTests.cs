@@ -147,7 +147,7 @@ namespace RawFileReaderTests
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
+                Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanNumber}");
 
                 var collisionEnergiesThisScan = reader.GetCollisionEnergy(scanNumber);
                 collisionEnergiesActual.Add(scanNumber, collisionEnergiesThisScan);
@@ -193,7 +193,7 @@ namespace RawFileReaderTests
 
                         Console.WriteLine("{0,-5} {1,-5} {2:F2}", isValid, scanNumber, actualEnergy);
 
-                        Assert.IsTrue(isValid, $"Unexpected collision energy {actualEnergy:F2} for scan {scanNumber}");
+                        Assert.That(isValid, Is.True, $"Unexpected collision energy {actualEnergy:F2} for scan {scanNumber}");
                     }
                 }
 
@@ -201,7 +201,7 @@ namespace RawFileReaderTests
                 {
                     var msg = string.Format("Collision energy count mismatch for scan {0}", scanNumber);
                     Console.WriteLine(msg);
-                    Assert.AreEqual(expectedEnergies.Count, actualEnergiesOneScan.Value.Count, msg);
+                    Assert.That(actualEnergiesOneScan.Value, Has.Count.EqualTo(expectedEnergies.Count), msg);
                 }
             }
         }
@@ -233,18 +233,18 @@ namespace RawFileReaderTests
 
                 if (expectedMS1 == -1 && expectedMS2 == 0)
                 {
-                    Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true (a)");
-                    Assert.IsTrue(scanCount == -1, "ScanCount is not -1");
+                    Assert.That(reader.FileInfo.CorruptFile, Is.True, "CorruptFile is false while we expected it to be true (a)");
+                    Assert.That(scanCount, Is.EqualTo(-1), "ScanCount is not -1");
                 }
                 else if (expectedMS1 + expectedMS2 == 0)
                 {
-                    Assert.IsTrue(reader.FileInfo.CorruptFile, "CorruptFile is false while we expected it to be true (b)");
-                    Assert.IsTrue(scanCount <= 0, "ScanCount is non-zero, while we expected it to be 0");
+                    Assert.That(reader.FileInfo.CorruptFile, Is.True, "CorruptFile is false while we expected it to be true (b)");
+                    Assert.That(scanCount, Is.LessThanOrEqualTo(0), "ScanCount is non-zero, while we expected it to be 0");
                 }
                 else
                 {
-                    Assert.IsFalse(reader.FileInfo.CorruptFile, "CorruptFile is true while we expected it to be false (c)");
-                    Assert.IsTrue(scanCount > 0, "ScanCount is zero, while we expected it to be > 0");
+                    Assert.That(reader.FileInfo.CorruptFile, Is.False, "CorruptFile is true while we expected it to be false (c)");
+                    Assert.That(scanCount, Is.GreaterThan(0), "ScanCount is zero, while we expected it to be > 0");
                 }
 
                 var scanCountMS1 = 0;
@@ -258,11 +258,11 @@ namespace RawFileReaderTests
 
                         if (reader.FileInfo.CorruptFile)
                         {
-                            Assert.IsTrue(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is not empty but should be since corrupt file");
+                            Assert.That(string.IsNullOrEmpty(scanInfo.FilterText), Is.True, "FilterText is not empty but should be since corrupt file");
                         }
                         else
                         {
-                            Assert.IsFalse(string.IsNullOrEmpty(scanInfo.FilterText), "FilterText is empty but should not be");
+                            Assert.That(string.IsNullOrEmpty(scanInfo.FilterText), Is.False, "FilterText is empty but should not be");
 
                             if (scanInfo.MSLevel > 1)
                                 scanCountMS2++;
@@ -277,9 +277,9 @@ namespace RawFileReaderTests
 
                         if (reader.FileInfo.CorruptFile)
                         {
-                            Assert.IsTrue(dataPointCount == 0, $"GetScanData unexpectedly reported a non-zero data count for scan {scanNumber}");
-                            Assert.IsTrue(mzList.Length == 0, $"GetScanData unexpectedly returned m/z data for scan {scanNumber}");
-                            Assert.IsTrue(intensityList.Length == 0, $"GetScanData unexpectedly returned intensity data for scan {scanNumber}");
+                            Assert.That(dataPointCount, Is.Zero, $"GetScanData unexpectedly reported a non-zero data count for scan {scanNumber}");
+                            Assert.That(mzList, Has.Length.Zero, $"GetScanData unexpectedly returned m/z data for scan {scanNumber}");
+                            Assert.That(intensityList, Has.Length.Zero, $"GetScanData unexpectedly returned intensity data for scan {scanNumber}");
                         }
                         else
                         {
@@ -287,17 +287,17 @@ namespace RawFileReaderTests
                             {
                                 Console.WriteLine("Corrupt scan encountered: {0}", scanNumber);
 
-                                Assert.IsTrue(scanNumber >= corruptScanStart && scanNumber <= corruptScanEnd, $"Unexpected corrupt scan found, scan {scanNumber}");
-                                Assert.IsTrue(mzList.Length == 0, $"GetScanData unexpectedly returned m/z data for scan {scanNumber}");
-                                Assert.IsTrue(intensityList.Length == 0, $"GetScanData unexpectedly returned intensity data for scan {scanNumber}");
+                                Assert.That(scanNumber, Is.InRange(corruptScanStart, corruptScanEnd), $"Unexpected corrupt scan found, scan {scanNumber}");
+                                Assert.That(mzList, Has.Length.Zero, $"GetScanData unexpectedly returned m/z data for scan {scanNumber}");
+                                Assert.That(intensityList, Has.Length.Zero, $"GetScanData unexpectedly returned intensity data for scan {scanNumber}");
                             }
                             else
                             {
-                                Assert.IsTrue(dataPointCount > 0, $"GetScanData reported a data point count of 0 for scan {scanNumber}");
-                                Assert.IsTrue(mzList.Length > 0, $"GetScanData unexpectedly returned no m/z data for scan {scanNumber}");
-                                Assert.IsTrue(intensityList.Length > 0, $"GetScanData unexpectedly returned no intensity data for scan {scanNumber}");
-                                Assert.IsTrue(mzList.Length == intensityList.Length, $"Array length mismatch for m/z and intensity data for scan {scanNumber}");
-                                Assert.IsTrue(dataPointCount == mzList.Length, $"Array length does not agree with dataPointCount for scan {scanNumber}");
+                                Assert.That(dataPointCount, Is.GreaterThan(0), $"GetScanData reported a data point count of 0 for scan {scanNumber}");
+                                Assert.That(mzList, Has.Length.GreaterThan(0), $"GetScanData unexpectedly returned no m/z data for scan {scanNumber}");
+                                Assert.That(intensityList, Has.Length.GreaterThan(0), $"GetScanData unexpectedly returned no intensity data for scan {scanNumber}");
+                                Assert.That(mzList, Has.Length.EqualTo(intensityList.Length), $"Array length mismatch for m/z and intensity data for scan {scanNumber}");
+                                Assert.That(mzList, Has.Length.EqualTo(dataPointCount), $"Array length does not agree with dataPointCount for scan {scanNumber}");
                             }
                         }
                     }
@@ -312,10 +312,10 @@ namespace RawFileReaderTests
                 Console.WriteLine("scanCountMS2={0}", scanCountMS2);
 
                 if (expectedMS1 >= 0)
-                    Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+                    Assert.That(scanCountMS1, Is.EqualTo(expectedMS1), "MS1 scan count mismatch");
 
                 if (expectedMS2 >= 0)
-                    Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+                    Assert.That(scanCountMS2, Is.EqualTo(expectedMS2), "MS2 scan count mismatch");
             }
             catch (Exception ex)
             {
@@ -392,7 +392,7 @@ namespace RawFileReaderTests
                             unsortedMzValues++;
                     }
 
-                    Assert.AreEqual(0, unsortedMzValues, $"Scan {scanNumber} has {unsortedMzValues} m/z values not sorted properly");
+                    Assert.That(unsortedMzValues, Is.Zero, $"Scan {scanNumber} has {unsortedMzValues} m/z values not sorted properly");
 
                     scansProcessed++;
 
@@ -461,8 +461,8 @@ namespace RawFileReaderTests
                     {
                         var scanToMatch = int.Parse(scansToMatch[j]);
 
-                        Assert.AreEqual(
-                            scanToMatch, scanInfo.DependentScans[j],
+                        Assert.That(
+                            scanInfo.DependentScans[j], Is.EqualTo(scanToMatch),
                             $"Dependent scan does not match expected value: {scanToMatch}");
                     }
                 }
@@ -471,7 +471,7 @@ namespace RawFileReaderTests
             }
 
             var percentValid = validScanCount / (double)(endScan - startScan + 1) * 100;
-            Assert.Greater(percentValid, 90, "Over 10% of the spectra had invalid scan numbers");
+            Assert.That(percentValid, Is.GreaterThan(90), "Over 10% of the spectra had invalid scan numbers");
         }
 
         // ReSharper disable StringLiteralTypo
@@ -619,7 +619,7 @@ namespace RawFileReaderTests
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
+                Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanNumber}");
 
                 var isolationWindowWidth = scanInfo.IsolationWindowWidthMZ;
 
@@ -660,7 +660,7 @@ namespace RawFileReaderTests
                     Console.WriteLine("{0,-5} {1,-7} {2,-9:0.0###} {3}", isValid, isolationWindow.Key.Item1, isolationWindow.Key.Item2, isolationWindow.Value);
 
                     if (expectedScanCount >= 0)
-                        Assert.AreEqual(expectedScanCount, isolationWindow.Value, "Scan count mismatch");
+                        Assert.That(isolationWindow.Value, Is.EqualTo(expectedScanCount), "Scan count mismatch");
                 }
                 else
                 {
@@ -691,7 +691,7 @@ namespace RawFileReaderTests
             Console.WriteLine("Scan count for {0}: {1}", dataFile.Name, scanCount);
 
             if (expectedResult >= 0)
-                Assert.AreEqual(expectedResult, scanCount, "Scan count mismatch");
+                Assert.That(scanCount, Is.EqualTo(expectedResult), "Scan count mismatch");
         }
 
         [Test]
@@ -727,8 +727,8 @@ namespace RawFileReaderTests
 
                 if (i < expectedParents.Length && expectedParents[i] != 0)
                 {
-                    Assert.AreEqual(
-                        expectedParents[i], scanInfo.ParentScan,
+                    Assert.That(
+                        scanInfo.ParentScan, Is.EqualTo(expectedParents[i]),
                         $"Parent scan does not match expected value: {expectedParents[i]}");
                 }
 
@@ -736,7 +736,7 @@ namespace RawFileReaderTests
             }
 
             var percentValid = validScanCount / (double)(endScan - startScan + 1) * 100;
-            Assert.Greater(percentValid, 90, "Over 10% of the spectra had invalid scan numbers");
+            Assert.That(percentValid, Is.GreaterThan(90), "Over 10% of the spectra had invalid scan numbers");
         }
 
         // ReSharper disable StringLiteralTypo
@@ -933,7 +933,7 @@ namespace RawFileReaderTests
             Console.WriteLine();
 
             if (expectedTotalScanCount > 0)
-                Assert.AreEqual(expectedTotalScanCount, scanCount, "Total scan count mismatch");
+                Assert.That(scanCount, Is.EqualTo(expectedTotalScanCount), "Total scan count mismatch");
 
             var scanCountMS1 = 0;
             var scanCountMS2 = 0;
@@ -943,7 +943,7 @@ namespace RawFileReaderTests
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
+                Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanNumber}");
 
                 var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText, scanInfo.IsDIA, null);
                 var genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText, scanInfo.IsDIA);
@@ -969,10 +969,10 @@ namespace RawFileReaderTests
             Console.WriteLine("scanCountMS2={0}", scanCountMS2);
 
             if (expectedTotalScanCount > 0)
-                Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+                Assert.That(scanCountMS1, Is.EqualTo(expectedMS1), "MS1 scan count mismatch");
 
             if (expectedTotalScanCount > 0)
-                Assert.AreEqual(expectedMS2, scanCountMS2, "MS2 scan count mismatch");
+                Assert.That(scanCountMS2, Is.EqualTo(expectedMS2), "MS2 scan count mismatch");
 
             var datasetName = Path.GetFileNameWithoutExtension(dataFile.Name);
 
@@ -999,7 +999,7 @@ namespace RawFileReaderTests
                     Console.WriteLine("{0,-5} {1,5} {2}", isValid, scanType.Value, scanType.Key);
 
                     if (expectedScanCount >= 0)
-                        Assert.AreEqual(expectedScanCount, scanType.Value, "Scan type count mismatch");
+                        Assert.That(scanType.Value, Is.EqualTo(expectedScanCount), "Scan type count mismatch");
                 }
                 else
                 {
@@ -1174,7 +1174,7 @@ namespace RawFileReaderTests
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
+                Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanNumber}");
 
                 double ionInjectionTime;
 
@@ -1213,7 +1213,7 @@ namespace RawFileReaderTests
 
                 if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
                 {
-                    Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
+                    Assert.That(scanSummary, Is.EqualTo(scanNumber + " " + expectedScanSummary),
                         "Scan summary mismatch, scan " + scanNumber);
                 }
             }
@@ -1224,7 +1224,7 @@ namespace RawFileReaderTests
             if (expectedMS1 < 0 && expectedMS2 < 0)
                 return;
 
-            Assert.AreEqual(expectedMS1, scanCountMS1, "MS1 scan count mismatch");
+            Assert.That(scanCountMS1, Is.EqualTo(expectedMS1), "MS1 scan count mismatch");
         }
 
         [Test]
@@ -1296,7 +1296,7 @@ namespace RawFileReaderTests
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
+                Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanNumber}");
 
                 foreach (var mrmRange in scanInfo.MRMInfo.MRMMassList)
                 {
@@ -1325,7 +1325,7 @@ namespace RawFileReaderTests
                     Console.WriteLine("{0,-20} {1,-9}", mrmRangeActual.Key, mrmRangeActual.Value);
                 }
 
-                Assert.IsTrue(mrmRangeCountsActual.Count == expectedMRMInfo.Count,
+                Assert.That(mrmRangeCountsActual, Has.Count.EqualTo(expectedMRMInfo.Count),
                     $"Found {mrmRangeCountsActual.Count} MRM scan ranges; expected to find {expectedMRMInfo.Count}");
 
                 return;
@@ -1743,15 +1743,15 @@ namespace RawFileReaderTests
                 {
                     var dataPointsRead = reader.GetScanData(scanNumber, out var mzList, out var intensityList, maxNumberOfPeaks, centroidData);
 
-                    Assert.IsTrue(dataPointsRead > 0, $"GetScanData returned 0 for scan {scanNumber}");
+                    Assert.That(dataPointsRead, Is.GreaterThan(0), $"GetScanData returned 0 for scan {scanNumber}");
 
-                    Assert.AreEqual(mzList.Length, dataPointsRead, "Data count mismatch vs. function return value");
+                    Assert.That(dataPointsRead, Is.EqualTo(mzList.Length), "Data count mismatch vs. function return value");
 
                     var midPoint = (int)(intensityList.Length / 2f);
 
                     var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                    Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
+                    Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanNumber}");
 
                     var scanSummary =
                         // "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10:F3} {6,-8:0.0E+0} {7,-10:F3} {8,8:0.0E+0}  {9}"
@@ -1778,7 +1778,7 @@ namespace RawFileReaderTests
                         {
                             var observedValue = scanSummary.Substring(22);
 
-                            Assert.AreEqual(expectedDataDetails, observedValue,
+                            Assert.That(observedValue, Is.EqualTo(expectedDataDetails),
                                 "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
                         }
                     }
@@ -1907,11 +1907,11 @@ namespace RawFileReaderTests
                 {
                     var dataPointsRead = reader.GetScanData2D(scanNumber, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
 
-                    Assert.IsTrue(dataPointsRead > 0, $"GetScanData2D returned 0 for scan {scanNumber}");
+                    Assert.That(dataPointsRead, Is.GreaterThan(0), $"GetScanData2D returned 0 for scan {scanNumber}");
 
                     var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                    Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
+                    Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanNumber}");
 
                     var lastIndex = massIntensityPairs.GetUpperBound(1);
 
@@ -1932,13 +1932,13 @@ namespace RawFileReaderTests
                             if (massIntensityPairs[0, dataIndex] > 0)
                             {
                                 Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanNumber);
-                                Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
+                                Assert.That(massIntensityPairs[0, dataIndex], Is.Zero, "Non-zero m/z value found in 2D array beyond expected index");
                             }
 
                             if (massIntensityPairs[1, dataIndex] > 0)
                             {
                                 Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanNumber);
-                                Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
+                                Assert.That(massIntensityPairs[1, dataIndex], Is.Zero, "Non-zero intensity value found in 2D array beyond expected index");
                             }
                         }
                     }
@@ -1947,7 +1947,7 @@ namespace RawFileReaderTests
                         dataCount = lastIndex + 1;
                     }
 
-                    Assert.AreEqual(dataPointsRead, dataCount, "Data count mismatch vs. function return value");
+                    Assert.That(dataCount, Is.EqualTo(dataPointsRead), "Data count mismatch vs. function return value");
 
                     var midPoint = (int)(dataCount / 2f);
 
@@ -1973,7 +1973,7 @@ namespace RawFileReaderTests
 
                         if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                         {
-                            Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
+                            Assert.That(scanSummary.Substring(22), Is.EqualTo(expectedDataDetails),
                                 "Scan details mismatch, scan " + scanNumber + ", keySpec " + keySpec);
                         }
                     }
@@ -2052,11 +2052,11 @@ namespace RawFileReaderTests
 
                 var dataPointsRead = reader.GetScanDataSumScans(scanStart, scanEnd, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
 
-                Assert.IsTrue(dataPointsRead > 0, $"GetScanDataSumScans returned 0 summing scans {scanStart} to {scanEnd}");
+                Assert.That(dataPointsRead, Is.GreaterThan(0), $"GetScanDataSumScans returned 0 summing scans {scanStart} to {scanEnd}");
 
                 var success = reader.GetScanInfo(scanStart, out var scanInfo);
 
-                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanStart}");
+                Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanStart}");
 
                 var lastIndex = massIntensityPairs.GetUpperBound(1);
                 int dataCount;
@@ -2071,13 +2071,13 @@ namespace RawFileReaderTests
                         if (massIntensityPairs[0, dataIndex] > 0)
                         {
                             Console.WriteLine("Non-zero m/z value found at index {0} for scan {1}", dataIndex, scanStart);
-                            Assert.AreEqual(0, massIntensityPairs[0, dataIndex], "Non-zero m/z value found in 2D array beyond expected index");
+                            Assert.That(massIntensityPairs[0, dataIndex], Is.Zero, "Non-zero m/z value found in 2D array beyond expected index");
                         }
 
                         if (massIntensityPairs[1, dataIndex] > 0)
                         {
                             Console.WriteLine("Non-zero intensity value found at index {0} for scan {1}", dataIndex, scanStart);
-                            Assert.AreEqual(0, massIntensityPairs[1, dataIndex], "Non-zero intensity value found in 2D array beyond expected index");
+                            Assert.That(massIntensityPairs[1, dataIndex], Is.Zero, "Non-zero intensity value found in 2D array beyond expected index");
                         }
                     }
                 }
@@ -2086,7 +2086,7 @@ namespace RawFileReaderTests
                     dataCount = lastIndex + 1;
                 }
 
-                Assert.AreEqual(dataPointsRead, dataCount, "Data count mismatch vs. function return value");
+                Assert.That(dataCount, Is.EqualTo(dataPointsRead), "Data count mismatch vs. function return value");
 
                 var midPoint = (int)(dataCount / 2f);
 
@@ -2110,7 +2110,7 @@ namespace RawFileReaderTests
 
                     if (expectedDataByType.TryGetValue(keySpec, out var expectedDataDetails))
                     {
-                        Assert.AreEqual(expectedDataDetails, scanSummary.Substring(22),
+                        Assert.That(scanSummary.Substring(22), Is.EqualTo(expectedDataDetails),
                             "Scan details mismatch, scan " + scanStart + ", keySpec " + keySpec);
                     }
                 }
@@ -2181,13 +2181,13 @@ namespace RawFileReaderTests
                 var dataPointsRead = reader.GetScanLabelData(scanNumber, out var ftLabelData);
 
                 if (dataPointsRead == -1)
-                    Assert.AreEqual(0, ftLabelData.Length, "Data count mismatch vs. function return value");
+                    Assert.That(ftLabelData, Has.Length.Zero, "Data count mismatch vs. function return value");
                 else
-                    Assert.AreEqual(dataPointsRead, ftLabelData.Length, "Data count mismatch vs. function return value");
+                    Assert.That(ftLabelData, Has.Length.EqualTo(dataPointsRead), "Data count mismatch vs. function return value");
 
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanStart}");
+                Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanStart}");
 
                 if (ftLabelData.Length == 0 && scanInfo.IsHighResolution)
                 {
@@ -2230,7 +2230,7 @@ namespace RawFileReaderTests
 
                 if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
                 {
-                    Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
+                    Assert.That(scanSummary, Is.EqualTo(scanNumber + " " + expectedScanSummary),
                         "Scan summary mismatch, scan " + scanNumber);
                 }
 
@@ -2300,13 +2300,13 @@ namespace RawFileReaderTests
                 var dataPointsRead = reader.GetScanPrecisionData(scanNumber, out var massResolutionData);
 
                 if (dataPointsRead == -1)
-                    Assert.AreEqual(0, massResolutionData.Length, "Data count mismatch vs. function return value");
+                    Assert.That(massResolutionData, Has.Length.Zero, "Data count mismatch vs. function return value");
                 else
-                    Assert.AreEqual(dataPointsRead, massResolutionData.Length, "Data count mismatch vs. function return value");
+                    Assert.That(massResolutionData, Has.Length.EqualTo(dataPointsRead), "Data count mismatch vs. function return value");
 
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanStart}");
+                Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanStart}");
 
                 if (massResolutionData.Length == 0 && scanInfo.IsHighResolution)
                 {
@@ -2347,7 +2347,7 @@ namespace RawFileReaderTests
 
                 if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
                 {
-                    Assert.AreEqual(scanNumber + " " + expectedScanSummary, scanSummary,
+                    Assert.That(scanSummary, Is.EqualTo(scanNumber + " " + expectedScanSummary),
                         "Scan summary mismatch, scan " + scanNumber);
                 }
 
@@ -2418,7 +2418,7 @@ namespace RawFileReaderTests
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+                Assert.That(success, Is.True, $"GetScanInfo returned false for scan {scanNumber}");
 
                 foreach (var eventName in eventsToCheck)
                 {
@@ -2447,7 +2447,7 @@ namespace RawFileReaderTests
 
                     Console.WriteLine("{0,-5} {1,-5} {2} {3}", isValid, observedEvent.Value, observedEvent.Key.Item1, observedEvent.Key.Item2);
 
-                    Assert.AreEqual(expectedScanCount, observedEvent.Value, "Event count mismatch");
+                    Assert.That(observedEvent.Value, Is.EqualTo(expectedScanCount), "Event count mismatch");
                 }
                 else
                 {

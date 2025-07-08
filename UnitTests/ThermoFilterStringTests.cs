@@ -41,7 +41,7 @@ namespace RawFileReaderTests
 
             Console.WriteLine(filterText + " " + mrmScanType);
 
-            Assert.AreEqual(expectedResult, mrmScanType);
+            Assert.That(mrmScanType, Is.EqualTo(expectedResult));
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace RawFileReaderTests
 
             Console.WriteLine(filterText + " " + ionizationMode);
 
-            Assert.AreEqual(expectedResult, ionizationMode);
+            Assert.That(ionizationMode, Is.EqualTo(expectedResult));
         }
 
         [Test]
@@ -85,12 +85,12 @@ namespace RawFileReaderTests
 
             if (string.IsNullOrWhiteSpace(expectedMassList))
             {
-                Assert.AreEqual(0, mrmInfo.MRMMassList.Count, "Mass range count mismatch");
+                Assert.That(mrmInfo.MRMMassList, Has.Count.Zero, "Mass range count mismatch");
                 return;
             }
 
             var expectedMassRanges = expectedMassList.Split(';');
-            Assert.AreEqual(expectedMassRanges.Length, mrmInfo.MRMMassList.Count, "Mass range count mismatch");
+            Assert.That(mrmInfo.MRMMassList, Has.Count.EqualTo(expectedMassRanges.Length), "Mass range count mismatch");
 
             for (var i = 0; i < expectedMassRanges.Length; i++)
             {
@@ -99,8 +99,8 @@ namespace RawFileReaderTests
                 var massStart= double.Parse(expectedMassValues[0]);
                 var massEnd = double.Parse(expectedMassValues[1]);
 
-                Assert.AreEqual(massStart, mrmInfo.MRMMassList[i].StartMass, .001, "Mass start mismatch");
-                Assert.AreEqual(massEnd, mrmInfo.MRMMassList[i].EndMass, .001, "Mass end mismatch");
+                Assert.That(mrmInfo.MRMMassList[i].StartMass, Is.EqualTo(massStart).Within(.001), "Mass start mismatch");
+                Assert.That(mrmInfo.MRMMassList[i].EndMass, Is.EqualTo(massEnd).Within(.001), "Mass end mismatch");
             }
         }
 
@@ -133,14 +133,14 @@ namespace RawFileReaderTests
 
             if (string.IsNullOrEmpty(expectedMzText))
             {
-                Assert.AreEqual(false, success, "ExtractMSLevel returned true; expected false");
+                Assert.That(success, Is.False, "ExtractMSLevel returned true; expected false");
                 return;
             }
 
-            Assert.AreEqual(true, success, "ExtractMSLevel returned false");
+            Assert.That(success, Is.True, "ExtractMSLevel returned false");
 
-            Assert.AreEqual(expectedMSLevel, msLevel, "MS level mismatch");
-            Assert.AreEqual(expectedMzText, parentIonMZ, "mzText mismatch");
+            Assert.That(msLevel, Is.EqualTo(expectedMSLevel), "MS level mismatch");
+            Assert.That(parentIonMZ, Is.EqualTo(expectedMzText), "mzText mismatch");
         }
 
         /// <summary>
@@ -319,11 +319,11 @@ namespace RawFileReaderTests
 
             if (expectedMSLevel == 1)
             {
-                Assert.AreEqual(false, success, "ExtractParentIonMZFromFilterText returned true; should have returned false");
+                Assert.That(success, Is.False, "ExtractParentIonMZFromFilterText returned true; should have returned false");
                 return;
             }
 
-            Assert.AreEqual(true, success, "ExtractParentIonMZFromFilterText returned false");
+            Assert.That(success, Is.True, "ExtractParentIonMZFromFilterText returned false");
 
             var expectedParentIonList = expectedParentIons.Split(',');
             var expectedParentIonMZ = double.Parse(expectedParentIonList[0].Replace("!", ""));
@@ -334,12 +334,12 @@ namespace RawFileReaderTests
                     expectedParentIonMZ = double.Parse(parentIon.Replace("!", ""));
             }
 
-            Assert.AreEqual(expectedMSLevel, msLevel, "MS level mismatch");
-            Assert.AreEqual(expectedParentIonList.Length, actualParentIons.Count, "Parent ion count mismatch");
+            Assert.That(msLevel, Is.EqualTo(expectedMSLevel), "MS level mismatch");
+            Assert.That(actualParentIons, Has.Count.EqualTo(expectedParentIonList.Length), "Parent ion count mismatch");
 
-            Assert.AreEqual(expectedParentIonMZ, parentIonMZ, 0.001, "Parent ion m/z mismatch");
+            Assert.That(parentIonMZ, Is.EqualTo(expectedParentIonMZ).Within(0.001), "Parent ion m/z mismatch");
 
-            Assert.AreEqual(expectedCollisionMode, collisionMode, "Collision mode mismatch");
+            Assert.That(collisionMode, Is.EqualTo(expectedCollisionMode), "Collision mode mismatch");
 
             if (expectedParentIonList.Length > 0)
             {
@@ -348,7 +348,7 @@ namespace RawFileReaderTests
                     var expectedParentIonMz = double.Parse(expectedParentIonList[i].Replace("!", ""));
                     var actualParentIonMz = actualParentIons[i].ParentIonMZ;
 
-                    Assert.AreEqual(expectedParentIonMz, actualParentIonMz, .001,
+                    Assert.That(actualParentIonMz, Is.EqualTo(expectedParentIonMz).Within(.001),
                                     "Parent ion mismatch, ion " + (i + 1));
                 }
             }
@@ -537,7 +537,7 @@ namespace RawFileReaderTests
                 if (parentIon.Contains('!'))
                     expectedParentIonMZ = double.Parse(parentIon.Replace("!", ""));
             }
-            Assert.AreEqual(expectedParentIonMZ, parentIonMZ, 0.001, "Parent ion m/z mismatch");
+            Assert.That(parentIonMZ, Is.EqualTo(expectedParentIonMZ).Within(0.001), "Parent ion m/z mismatch");
         }
 
         [Test]
@@ -592,7 +592,7 @@ namespace RawFileReaderTests
 
             Console.WriteLine(filterText + " " + genericFilterResult);
 
-            Assert.AreEqual(expectedResult, genericFilterResult);
+            Assert.That(genericFilterResult, Is.EqualTo(expectedResult));
         }
 
         [Test]
@@ -637,7 +637,7 @@ namespace RawFileReaderTests
 
             Console.WriteLine(filterText + " " + scanTypeName);
 
-            Assert.AreEqual(expectedResult, scanTypeName);
+            Assert.That(scanTypeName, Is.EqualTo(expectedResult));
         }
 
         [Test]
@@ -701,11 +701,11 @@ namespace RawFileReaderTests
 
             Console.WriteLine(filterText + "  -- ms" + msLevel + "; SIM=" + isSIMScan + "; MRMScanType=" + mrmScanType);
 
-            Assert.AreEqual(expectedIsValidMS1orSIM, isValid, "Mismatch for IsValidMS1orSIM");
-            Assert.AreEqual(expectedMSLevel, msLevel, "MSLevel mismatch");
-            Assert.AreEqual(expectedIsSIMScan, isSIMScan, "SIMScan mismatch");
-            Assert.AreEqual(expectedMRMScanType, mrmScanType, "MRMScanType mismatch");
-            Assert.AreEqual(expectedIsZoomScan, zoomScan, "ZoomScan mismatch");
+            Assert.That(isValid, Is.EqualTo(expectedIsValidMS1orSIM), "Mismatch for IsValidMS1orSIM");
+            Assert.That(msLevel, Is.EqualTo(expectedMSLevel), "MSLevel mismatch");
+            Assert.That(isSIMScan, Is.EqualTo(expectedIsSIMScan), "SIMScan mismatch");
+            Assert.That(mrmScanType, Is.EqualTo(expectedMRMScanType), "MRMScanType mismatch");
+            Assert.That(zoomScan, Is.EqualTo(expectedIsZoomScan), "ZoomScan mismatch");
         }
     }
 }
