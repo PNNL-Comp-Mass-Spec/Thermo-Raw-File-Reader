@@ -28,8 +28,10 @@
     <None Remove="Docs\**" />
   </ItemGroup>
 
+<!-- NOTE: This appears to not be needed with NUnit 4.0, and other changes have also been made to render this obsolete
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="if not exist &quot;%25appdata%25\..\Local\JetBrains\Docs&quot; (mkdir &quot;%25appdata%25\..\Local\JetBrains\Docs&quot;)&#xD;&#xA;xcopy &quot;$(ProjectDir)Docs\*.raw&quot; &quot;%25appdata%25\..\Local\JetBrains\Docs\&quot; /Y /D" />
   </Target>
+-->
 
 </Project>

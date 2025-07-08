@@ -2508,7 +2508,9 @@ namespace RawFileReaderTests
             var localDirPath = Path.Combine("..", "..", "Docs");
             const string remoteDirPath = @"\\proto-2\UnitTest_Files\ThermoRawFileReader";
 
-            var localFile = new FileInfo(Path.Combine(localDirPath, rawFileName));
+            var compileOutputDirectory = TestContext.CurrentContext.TestDirectory;
+
+            var localFile = new FileInfo(Path.Combine(compileOutputDirectory, localDirPath, rawFileName));
 
             if (localFile.Exists)
             {
