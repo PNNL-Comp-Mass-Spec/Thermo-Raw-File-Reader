@@ -15,7 +15,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-    <PackageReference Include="PRISM-Library" Version="2.9.6" />
+    <PackageReference Include="PRISM-Library" Version="2.9.17" />
     <PackageReference Include="ThermoFisher.CommonCore.RawFileReader" Version="8.0.6" />
   </ItemGroup>
   <ItemGroup>
