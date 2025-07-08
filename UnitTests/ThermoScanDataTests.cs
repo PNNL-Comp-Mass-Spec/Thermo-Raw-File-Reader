@@ -129,7 +129,7 @@ namespace RawFileReaderTests
 
             if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var collisionEnergiesThisFile))
             {
-                Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                Assert.Fail($"Dataset {dataFile.Name} not found in dictionary expectedData");
             }
 
             // Keys are scan number, values are the list of collision energies
@@ -147,7 +147,7 @@ namespace RawFileReaderTests
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
 
                 var collisionEnergiesThisScan = reader.GetCollisionEnergy(scanNumber);
                 collisionEnergiesActual.Add(scanNumber, collisionEnergiesThisScan);
@@ -193,7 +193,7 @@ namespace RawFileReaderTests
 
                         Console.WriteLine("{0,-5} {1,-5} {2:F2}", isValid, scanNumber, actualEnergy);
 
-                        Assert.IsTrue(isValid, "Unexpected collision energy {0:F2} for scan {1}", actualEnergy, scanNumber);
+                        Assert.IsTrue(isValid, $"Unexpected collision energy {actualEnergy:F2} for scan {scanNumber}");
                     }
                 }
 
@@ -277,9 +277,9 @@ namespace RawFileReaderTests
 
                         if (reader.FileInfo.CorruptFile)
                         {
-                            Assert.IsTrue(dataPointCount == 0, "GetScanData unexpectedly reported a non-zero data count for scan {0}", scanNumber);
-                            Assert.IsTrue(mzList.Length == 0, "GetScanData unexpectedly returned m/z data for scan {0}", scanNumber);
-                            Assert.IsTrue(intensityList.Length == 0, "GetScanData unexpectedly returned intensity data for scan {0}", scanNumber);
+                            Assert.IsTrue(dataPointCount == 0, $"GetScanData unexpectedly reported a non-zero data count for scan {scanNumber}");
+                            Assert.IsTrue(mzList.Length == 0, $"GetScanData unexpectedly returned m/z data for scan {scanNumber}");
+                            Assert.IsTrue(intensityList.Length == 0, $"GetScanData unexpectedly returned intensity data for scan {scanNumber}");
                         }
                         else
                         {
@@ -287,24 +287,24 @@ namespace RawFileReaderTests
                             {
                                 Console.WriteLine("Corrupt scan encountered: {0}", scanNumber);
 
-                                Assert.IsTrue(scanNumber >= corruptScanStart && scanNumber <= corruptScanEnd, "Unexpected corrupt scan found, scan {0}", scanNumber);
-                                Assert.IsTrue(mzList.Length == 0, "GetScanData unexpectedly returned m/z data for scan {0}", scanNumber);
-                                Assert.IsTrue(intensityList.Length == 0, "GetScanData unexpectedly returned intensity data for scan {0}", scanNumber);
+                                Assert.IsTrue(scanNumber >= corruptScanStart && scanNumber <= corruptScanEnd, $"Unexpected corrupt scan found, scan {scanNumber}");
+                                Assert.IsTrue(mzList.Length == 0, $"GetScanData unexpectedly returned m/z data for scan {scanNumber}");
+                                Assert.IsTrue(intensityList.Length == 0, $"GetScanData unexpectedly returned intensity data for scan {scanNumber}");
                             }
                             else
                             {
-                                Assert.IsTrue(dataPointCount > 0, "GetScanData reported a data point count of 0 for scan {0}", scanNumber);
-                                Assert.IsTrue(mzList.Length > 0, "GetScanData unexpectedly returned no m/z data for scan {0}", scanNumber);
-                                Assert.IsTrue(intensityList.Length > 0, "GetScanData unexpectedly returned no intensity data for scan {0}", scanNumber);
-                                Assert.IsTrue(mzList.Length == intensityList.Length, "Array length mismatch for m/z and intensity data for scan {0}", scanNumber);
-                                Assert.IsTrue(dataPointCount == mzList.Length, "Array length does not agree with dataPointCount for scan {0}", scanNumber);
+                                Assert.IsTrue(dataPointCount > 0, $"GetScanData reported a data point count of 0 for scan {scanNumber}");
+                                Assert.IsTrue(mzList.Length > 0, $"GetScanData unexpectedly returned no m/z data for scan {scanNumber}");
+                                Assert.IsTrue(intensityList.Length > 0, $"GetScanData unexpectedly returned no intensity data for scan {scanNumber}");
+                                Assert.IsTrue(mzList.Length == intensityList.Length, $"Array length mismatch for m/z and intensity data for scan {scanNumber}");
+                                Assert.IsTrue(dataPointCount == mzList.Length, $"Array length does not agree with dataPointCount for scan {scanNumber}");
                             }
                         }
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine("Exception reading scan {0}: {1}", scanNumber, ex.Message);
-                        Assert.Fail("Exception reading scan {0}", scanNumber);
+                        Assert.Fail($"Exception reading scan {scanNumber}");
                     }
                 }
 
@@ -392,7 +392,7 @@ namespace RawFileReaderTests
                             unsortedMzValues++;
                     }
 
-                    Assert.AreEqual(0, unsortedMzValues, "Scan {0} has {1} m/z values not sorted properly", scanNumber, unsortedMzValues);
+                    Assert.AreEqual(0, unsortedMzValues, $"Scan {scanNumber} has {unsortedMzValues} m/z values not sorted properly");
 
                     scansProcessed++;
 
@@ -463,8 +463,7 @@ namespace RawFileReaderTests
 
                         Assert.AreEqual(
                             scanToMatch, scanInfo.DependentScans[j],
-                            "Dependent scan does not match expected value: {0}",
-                            scanToMatch);
+                            $"Dependent scan does not match expected value: {scanToMatch}");
                     }
                 }
 
@@ -620,7 +619,7 @@ namespace RawFileReaderTests
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
 
                 var isolationWindowWidth = scanInfo.IsolationWindowWidthMZ;
 
@@ -667,7 +666,7 @@ namespace RawFileReaderTests
                 {
                     Console.WriteLine("{0,-5} {1,-7} {2,-9:0.0###} {3}", "??", isolationWindow.Key.Item1, isolationWindow.Key.Item2, isolationWindow.Value);
 
-                    Assert.Fail("Unexpected window width key found: {0}", isolationWindow.Key);
+                    Assert.Fail($"Unexpected window width key found: {isolationWindow.Key}");
                 }
             }
         }
@@ -730,8 +729,7 @@ namespace RawFileReaderTests
                 {
                     Assert.AreEqual(
                         expectedParents[i], scanInfo.ParentScan,
-                        "Parent scan does not match expected value: {0}",
-                        expectedParents[i]);
+                        $"Parent scan does not match expected value: {expectedParents[i]}");
                 }
 
                 i++;
@@ -945,7 +943,7 @@ namespace RawFileReaderTests
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
 
                 var scanType = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText, scanInfo.IsDIA, null);
                 var genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText, scanInfo.IsDIA);
@@ -1006,7 +1004,7 @@ namespace RawFileReaderTests
                 else
                 {
                     Console.WriteLine("Unexpected scan type found: {0}", scanType.Key);
-                    Assert.Fail("Unexpected scan type found: {0}", scanType.Key);
+                    Assert.Fail($"Unexpected scan type found: {scanType.Key}");
                 }
             }
         }
@@ -1176,7 +1174,7 @@ namespace RawFileReaderTests
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
 
                 double ionInjectionTime;
 
@@ -1210,7 +1208,7 @@ namespace RawFileReaderTests
 
                 if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                 {
-                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                    Assert.Fail($"Dataset {dataFile.Name} not found in dictionary expectedData");
                 }
 
                 if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
@@ -1291,14 +1289,14 @@ namespace RawFileReaderTests
 
             if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedMRMInfo))
             {
-                Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                Assert.Fail($"Dataset {dataFile.Name} not found in dictionary expectedData");
             }
 
             for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
 
                 foreach (var mrmRange in scanInfo.MRMInfo.MRMMassList)
                 {
@@ -1328,9 +1326,7 @@ namespace RawFileReaderTests
                 }
 
                 Assert.IsTrue(mrmRangeCountsActual.Count == expectedMRMInfo.Count,
-                    "Found {0} MRM scan ranges; expected to find {1}",
-                    mrmRangeCountsActual.Count,
-                    expectedMRMInfo.Count);
+                    $"Found {mrmRangeCountsActual.Count} MRM scan ranges; expected to find {expectedMRMInfo.Count}");
 
                 return;
             }
@@ -1747,7 +1743,7 @@ namespace RawFileReaderTests
                 {
                     var dataPointsRead = reader.GetScanData(scanNumber, out var mzList, out var intensityList, maxNumberOfPeaks, centroidData);
 
-                    Assert.IsTrue(dataPointsRead > 0, "GetScanData returned 0 for scan {0}", scanNumber);
+                    Assert.IsTrue(dataPointsRead > 0, $"GetScanData returned 0 for scan {scanNumber}");
 
                     Assert.AreEqual(mzList.Length, dataPointsRead, "Data count mismatch vs. function return value");
 
@@ -1755,7 +1751,7 @@ namespace RawFileReaderTests
 
                     var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+                    Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
 
                     var scanSummary =
                         // "{0,5} {1,-5} {2,-10} {3,-8} {4,-8} {5,-10:F3} {6,-8:0.0E+0} {7,-10:F3} {8,8:0.0E+0}  {9}"
@@ -1771,7 +1767,7 @@ namespace RawFileReaderTests
 
                     if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                     {
-                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                        Assert.Fail($"Dataset {dataFile.Name} not found in dictionary expectedData");
                     }
 
                     if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedDataByType))
@@ -1911,11 +1907,11 @@ namespace RawFileReaderTests
                 {
                     var dataPointsRead = reader.GetScanData2D(scanNumber, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
 
-                    Assert.IsTrue(dataPointsRead > 0, "GetScanData2D returned 0 for scan {0}", scanNumber);
+                    Assert.IsTrue(dataPointsRead > 0, $"GetScanData2D returned 0 for scan {scanNumber}");
 
                     var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                    Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanNumber);
+                    Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanNumber}");
 
                     var lastIndex = massIntensityPairs.GetUpperBound(1);
 
@@ -1968,7 +1964,7 @@ namespace RawFileReaderTests
 
                     if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                     {
-                        Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                        Assert.Fail($"Dataset {dataFile.Name} not found in dictionary expectedData");
                     }
 
                     if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedDataByType))
@@ -2056,11 +2052,11 @@ namespace RawFileReaderTests
 
                 var dataPointsRead = reader.GetScanDataSumScans(scanStart, scanEnd, out var massIntensityPairs, maxNumberOfPeaks, centroidData);
 
-                Assert.IsTrue(dataPointsRead > 0, string.Format("GetScanDataSumScans returned 0 summing scans {0} to {1}", scanStart, scanEnd));
+                Assert.IsTrue(dataPointsRead > 0, $"GetScanDataSumScans returned 0 summing scans {scanStart} to {scanEnd}");
 
                 var success = reader.GetScanInfo(scanStart, out var scanInfo);
 
-                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
+                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanStart}");
 
                 var lastIndex = massIntensityPairs.GetUpperBound(1);
                 int dataCount;
@@ -2105,7 +2101,7 @@ namespace RawFileReaderTests
 
                 if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                 {
-                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                    Assert.Fail($"Dataset {dataFile.Name} not found in dictionary expectedData");
                 }
 
                 if (expectedDataThisFile.TryGetValue(scanStart, out var expectedDataByType))
@@ -2191,7 +2187,7 @@ namespace RawFileReaderTests
 
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
+                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanStart}");
 
                 if (ftLabelData.Length == 0 && scanInfo.IsHighResolution)
                 {
@@ -2229,7 +2225,7 @@ namespace RawFileReaderTests
 
                 if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                 {
-                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                    Assert.Fail($"Dataset {dataFile.Name} not found in dictionary expectedData");
                 }
 
                 if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
@@ -2310,7 +2306,7 @@ namespace RawFileReaderTests
 
                 var success = reader.GetScanInfo(scanNumber, out var scanInfo);
 
-                Assert.IsTrue(success, "GetScanInfo returned false for scan {0}", scanStart);
+                Assert.IsTrue(success, $"GetScanInfo returned false for scan {scanStart}");
 
                 if (massResolutionData.Length == 0 && scanInfo.IsHighResolution)
                 {
@@ -2346,7 +2342,7 @@ namespace RawFileReaderTests
 
                 if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedDataThisFile))
                 {
-                    Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                    Assert.Fail($"Dataset {dataFile.Name} not found in dictionary expectedData");
                 }
 
                 if (expectedDataThisFile.TryGetValue(scanNumber, out var expectedScanSummary))
@@ -2410,7 +2406,7 @@ namespace RawFileReaderTests
 
             if (!expectedData.TryGetValue(Path.GetFileNameWithoutExtension(dataFile.Name), out var expectedEventsThisFile))
             {
-                Assert.Fail("Dataset {0} not found in dictionary expectedData", dataFile.Name);
+                Assert.Fail($"Dataset {dataFile.Name} not found in dictionary expectedData");
             }
 
             var eventsToCheck = (from item in expectedEventsThisFile select item.Key.Item1).Distinct().ToList();
@@ -2456,7 +2452,7 @@ namespace RawFileReaderTests
                 else
                 {
                     Console.WriteLine("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
-                    Assert.Fail("Unexpected event/value found: {0} {1}", observedEvent.Key.Item1, observedEvent.Key.Item2);
+                    Assert.Fail($"Unexpected event/value found: {observedEvent.Key.Item1} {observedEvent.Key.Item2}");
                 }
             }
         }
