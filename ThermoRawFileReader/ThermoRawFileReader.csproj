@@ -34,7 +34,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PRISM-Library" Version="2.9.18" />
+    <PackageReference Include="PRISM-Library" Version="2.9.20" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'!='net8.0'">
     <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.93" />
