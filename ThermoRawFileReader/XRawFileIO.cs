@@ -82,6 +82,8 @@ namespace ThermoRawFileReader
         private const string MRM_SIM_PR_TEXT = "SIM pr ";           // TSQ: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., Biofilm-1000pg-std-mix_06Dec14_Smeagol-3
         private const string MRM_SIM_MSX_TEXT = "SIM msx ";         // Q-Exactive Plus: Isolated and fragmented parent, monitor multiple product ion ranges; e.g., MM_unsorted_10ng_digestionTest_t-SIM_MDX_3_17Mar20_Oak_Jup-20-03-01
 
+        private const string DATA_DEPENDENT_TEXT = " d ";           // data dependent will have a solo 'd', surrounded by spaces
+
         // Do not include a space at the end of these constants
 
         /// <summary>
@@ -1631,7 +1633,7 @@ namespace ThermoRawFileReader
 
             // Astral scan filter examples
             // FTMS + p NSI Full ms [300.0000-1500.0000]                            HMS
-            // ASTMS + c NSI d Full ms2 711.6851@hcd29.00 [110.0000-1500.0000]      HCD-HMSn
+            // ASTMS + c NSI d Full ms2 711.6851@hcd29.00 [110.0000-1500.0000]      HCD-HMSn (scans may have "'trailer' monoisotopic m/z" = 0)
             // ASTMS + c NSI Full ms2 931.6734@hcd25.00 [150.0000-2000.0000]        DIA-HMS-HCD-HMSn (scans will have "'trailer' monoisotopic m/z" = 0)
 
             // DIA examples
@@ -1758,9 +1760,9 @@ namespace ThermoRawFileReader
                     {
                         string diaPrefix;
 
-                        if (isDIA || (isAstralASTMS && parentIonMonoisotopicMZ is 0.0))
+                        if (isDIA || (isAstralASTMS && parentIonMonoisotopicMZ is 0.0 && !ContainsText(filterText, DATA_DEPENDENT_TEXT)))
                         {
-                            // Either isDIA is true, or this is an MS/MS spectrum on an Astral instrument and the parent ion monoisotopic m/z value is 0.0000
+                            // Either isDIA is true, or this is a non-data-dependent MS/MS spectrum on an Astral instrument and the parent ion monoisotopic m/z value is 0.0000
                             diaPrefix = "DIA-";
                         }
                         else

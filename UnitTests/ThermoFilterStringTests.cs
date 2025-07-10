@@ -640,6 +640,8 @@ namespace RawFileReaderTests
         [TestCase("FTMS + p NSI cv=-60.00 Full ms2 635.0000@hcd32.00                                           ", "DIA-HCD-HMSn", true)] // DIA
         [TestCase("FTMS + p NSI cv=-80.00 Full ms2 1034.5000@hcd32.00                                          ", "DIA-HCD-HMSn", true)] // DIA
         [TestCase("ASTMS + c NSI Full ms2 677.5579@hcd25.00 [150.0000-2000.0000]                               ", "DIA-HCD-HMSn", true, 0.0)] // DIA on Astral
+        [TestCase("ASTMS + c NSI Full ms2 677.5579@hcd25.00 [150.0000-2000.0000]                               ", "DIA-HCD-HMSn", false, 0.0)] // DIA on Astral
+        [TestCase("ASTMS + c NSI d Full ms2 677.5579@hcd25.00 [150.0000-2000.0000]                             ", "HCD-HMSn", false, 0.0)] // DDA on Astral
         public void TestScanTypeName(string filterText, string expectedResult, bool isDIA = false, double? parentIonMonoisotopicMZ = null)
         {
             var scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(filterText, isDIA, parentIonMonoisotopicMZ);
