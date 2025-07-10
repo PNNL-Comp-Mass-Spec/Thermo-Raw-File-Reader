@@ -1,9 +1,12 @@
 {
-  "$schema": "https://raw.githubusercontent.com/dotnet/Nerdbank.GitVersioning/master/src/NerdBank.GitVersioning/version.schema.json",
+  "$schema": "https://raw.githubusercontent.com/dotnet/Nerdbank.GitVersioning/main/src/NerdBank.GitVersioning/version.schema.json",
   "version": "4.2",
   "assemblyVersion": {
     "precision": "revision"
   },
+  "pathFilters": [
+    ".", // Consider all committed file changes in the project root folder for version increases (don't include all repository files)
+  ],
   "publicReleaseRefSpec": [
     "^refs/heads/master$" // we release out of master; added to remove commit ID from the NuGet package version
   ]
