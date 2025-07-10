@@ -9,9 +9,7 @@ Thermo .raw files, as acquired on Thermo mass spectrometers
 * .NET Framework 4.7.2
 * .NET Framework 4.8
 * .NET Framework 4.8.1
-* .NET 6.x
-* .NET 7.x
-* .NET 8.x
+* .NET 8.x and newer
 * On Linux, Mono 6.12, or newer
 
 ### Incompatible C# Versions
