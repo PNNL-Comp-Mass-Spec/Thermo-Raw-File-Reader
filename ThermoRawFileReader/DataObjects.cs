@@ -4,7 +4,7 @@ using ThermoFisher.CommonCore.Data.Business;
 
 namespace ThermoRawFileReader
 {
-    // Ignore Spelling: cid, ETciD, etd, EThcD, hcd, sa, struct, Username
+    // Ignore Spelling: cid, ETciD, etd, EThcD, hcd, sa, struct, Thermo, Username
 
     /// <summary>
     /// Type for Tune Methods

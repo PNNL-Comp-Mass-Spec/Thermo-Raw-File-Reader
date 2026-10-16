@@ -53,9 +53,9 @@ namespace ThermoRawFileReader
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: Biofilm, Bryson, centroided, centroiding, cid, cnl, ETciD, EThcD, Jup
-        // Ignore Spelling: mrm, msx, multipole, Raptor, sa, Shofstahl, sizeof, Smeagol, struct, Subtractor, Wideband
-        // Ignore Spelling: Exactive, Lumos, Orbitrap
+        // Ignore Spelling: Biofilm, Bryson, centroided, centroiding, cid, cnl, cv, ETciD, EThcD, Jup, hcd
+        // Ignore Spelling: mrm, msx, multipole, Raptor, sa, Shofstahl, sizeof, Smeagol, struct, Subtractor, Unnormalized, Wideband
+        // Ignore Spelling: Exactive, Lumos, Orbitrap, Thermo
 
         // ReSharper restore CommentTypo
 

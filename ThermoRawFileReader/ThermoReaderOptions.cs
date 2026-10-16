@@ -6,6 +6,8 @@ namespace ThermoRawFileReader
     /// </summary>
     public class ThermoReaderOptions
     {
+        // Ignore Spelling: Thermo
+
         /// <summary>
         /// Delegate method for OptionsUpdatedEvent
         /// </summary>

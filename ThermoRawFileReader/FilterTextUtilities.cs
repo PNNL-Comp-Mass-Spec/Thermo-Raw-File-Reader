@@ -10,7 +10,7 @@ namespace ThermoRawFileReader
     /// </summary>
     public static class FilterTextUtilities
     {
-        // Ignore Spelling: A-Za-z, cnl, Exactive, MRM, msx, sa, Ss
+        // Ignore Spelling: A-Za-z, cnl, Exactive, MRM, msx, sa, Ss, Thermo
 
         // ReSharper disable once CommentTypo
 

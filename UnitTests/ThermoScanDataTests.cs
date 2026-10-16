@@ -12,7 +12,7 @@ namespace RawFileReaderTests
     public class ThermoScanDataTests
     {
         // Ignore Spelling: Andro, Angiotensin, cid, ETciD, etd, EThcD, fst, Gimli, hcd, histone
-        // Ignore Spelling: LCQa, Legolas, lowdose, mnx, Orbitrap, QC_Mam, sa, Samwise, Wrighton, XRawfile
+        // Ignore Spelling: LCQa, Legolas, lowdose, mnx, Orbitrap, QC_Mam, sa, Samwise, Thermo, Wrighton, XRawfile
         // Ignore Spelling: True True
 
         [Test]
