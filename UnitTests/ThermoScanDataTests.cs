@@ -480,6 +480,46 @@ namespace RawFileReaderTests
             Assert.That(percentValid, Is.GreaterThan(90), "Over 10% of the spectra had invalid scan numbers");
         }
 
+        [Test]
+        [TestCase("1229_02blk1.raw", 0)]
+        [TestCase("20181115_arginine_Gua13C_CIDcol25_158_HCDcol35.raw", 6)]
+        [TestCase("Angiotensin_325-CID.raw", 0)]
+        [TestCase("Angiotensin_325-ETciD-15.raw", 0)]
+        [TestCase("Angiotensin_325-ETD.raw", 0)]
+        [TestCase("Angiotensin_325-HCD.raw", 0)]
+        [TestCase("Angiotensin_AllScans.raw", 0)]
+        [TestCase("B5_50uM_MS_r1.RAW", 0)]
+        [TestCase("blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 6)]
+        [TestCase("Blank04_29Mar17_Smeagol.raw", 0)]
+        [TestCase("calmix_Q3_10192022_03.RAW", 0)]
+        [TestCase("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw", 27)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 67)]
+        [TestCase("IPA-blank-07_25Oct13_Gimli.raw", 0)]
+        [TestCase("lowdose_IMAC_iTRAQ1_PQDMSA.raw", 79)]
+        [TestCase("MCF7_histone_32_49B_400min_HCD_ETD_01172014_b.raw", 6)]
+        [TestCase("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 6)]
+        [TestCase("MM_Strap_IMAC_FT_10xDilution_FAIMS_ID_01_FAIMS_Merry_03Feb23_REP-22-11-13.raw", -1)]
+        [TestCase("MNSLTFKK_ms.raw", 0)]
+        [TestCase("MZ20150721blank2.raw", 6)]
+        [TestCase("OG_CEPC_PU_22Oct13_Legolas_13-05-12.raw", 5312)]
+        [TestCase("QC_mam_16_01_125ng_CPTACpt7-3s-a_02Nov17_Pippin_REP-17-10-01.raw", 0)]
+        [TestCase("QCShew200uL.raw", 0)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 1289)]
+        [TestCase("Wrighton_MT2_SPE_200avg_240k_neg_330-380.raw", 0)]
+        public void TestGetErrorLogEntries(string rawFileName, int expectedEntryCount)
+        {
+            var dataFile = GetRawDataFile(rawFileName);
+
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            var errorLogEntries = reader.GetErrorLogEntries();
+
+            Console.WriteLine(string.Format("{0}: {1}", rawFileName, errorLogEntries.Count));
+
+            if (expectedEntryCount >= 0)
+                Assert.That(errorLogEntries.Count, Is.EqualTo(expectedEntryCount), "Error log entry count mismatch");
+        }
+
         // ReSharper disable StringLiteralTypo
 
         [Test]
@@ -503,8 +543,8 @@ namespace RawFileReaderTests
         [TestCase("Angiotensin_AllScans.raw", 1000, 1200)]
         [TestCase("QC_mam_16_01_125ng_CPTACpt7-3s-a_02Nov17_Pippin_REP-17-10-01.raw", 65, 80)]
         [TestCase("Blank04_29Mar17_Smeagol.raw", 2500, 2600)] // SRM data
-        [TestCase("20181115_arginine_Gua13C_CIDcol25_158_HCDcol35.raw", 10, 20)]                                               // MS3 scans
-        [TestCase("calmix_Q3_10192022_03.RAW", 5, 15)]                                                                         // MRM data (Q3MS)
+        [TestCase("20181115_arginine_Gua13C_CIDcol25_158_HCDcol35.raw", 10, 20)]                                        // MS3 scans
+        [TestCase("calmix_Q3_10192022_03.RAW", 5, 15)]                                                                  // MRM data (Q3MS)
         [TestCase("MM_Strap_IMAC_FT_10xDilution_FAIMS_ID_01_FAIMS_Merry_03Feb23_REP-22-11-13.raw", 42000, 42224, true)] // DIA data
         // ReSharper restore StringLiteralTypo
         public void TestIsolationWindowWidth(
@@ -2359,6 +2399,46 @@ namespace RawFileReaderTests
 
                 Console.WriteLine(scanSummary);
             }
+        }
+
+        [Test]
+        [TestCase("1229_02blk1.raw", 6006)]
+        [TestCase("20181115_arginine_Gua13C_CIDcol25_158_HCDcol35.raw", 40)]
+        [TestCase("Angiotensin_325-CID.raw", 2)]
+        [TestCase("Angiotensin_325-ETciD-15.raw", 2)]
+        [TestCase("Angiotensin_325-ETD.raw", 2)]
+        [TestCase("Angiotensin_325-HCD.raw", 2)]
+        [TestCase("Angiotensin_AllScans.raw", 304)]
+        [TestCase("B5_50uM_MS_r1.RAW", 0)]
+        [TestCase("blank_MeOH-3_18May16_Rainier_Thermo_10344958.raw", 4719)]
+        [TestCase("Blank04_29Mar17_Smeagol.raw", 0)]
+        [TestCase("calmix_Q3_10192022_03.RAW", 0)]
+        [TestCase("HCC-38_ETciD_EThcD_07Jan16_Pippin_15-08-53.raw", 11026)]
+        [TestCase("HCC-38_ETciD_EThcD_4xdil_20uL_3hr_3_08Jan16_Pippin_15-08-53.raw", 17582)]
+        [TestCase("IPA-blank-07_25Oct13_Gimli.raw", 11422)]
+        [TestCase("lowdose_IMAC_iTRAQ1_PQDMSA.raw", 28802)]
+        [TestCase("MCF7_histone_32_49B_400min_HCD_ETD_01172014_b.raw", 90093)]
+        [TestCase("MeOHBlank03POS_11May16_Legolas_HSS-T3_A925.raw", 16221)]
+        [TestCase("MM_Strap_IMAC_FT_10xDilution_FAIMS_ID_01_FAIMS_Merry_03Feb23_REP-22-11-13.raw", 3602)]
+        [TestCase("MNSLTFKK_ms.raw", 0)]
+        [TestCase("MZ20150721blank2.raw", 10901)]
+        [TestCase("OG_CEPC_PU_22Oct13_Legolas_13-05-12.raw", 18012)]
+        [TestCase("QC_mam_16_01_125ng_CPTACpt7-3s-a_02Nov17_Pippin_REP-17-10-01.raw", 24)]
+        [TestCase("QCShew200uL.raw", 0)]
+        [TestCase("Shew_246a_LCQa_15Oct04_Andro_0904-2_4-20.RAW", 5534)]
+        [TestCase("Wrighton_MT2_SPE_200avg_240k_neg_330-380.raw", 10)]
+        public void TestGetStatusLogEntries(string rawFileName, int expectedEntryCount)
+        {
+            var dataFile = GetRawDataFile(rawFileName);
+
+            using var reader = new XRawFileIO(dataFile.FullName);
+
+            var statusLogEntries = reader.GetStatusLogEntries();
+
+            Console.WriteLine(string.Format("{0}: {1}", rawFileName, statusLogEntries.Count));
+
+            if (expectedEntryCount >= 0)
+                Assert.That(statusLogEntries.Count, Is.EqualTo(expectedEntryCount), "Status log entry count mismatch");
         }
 
         [Test]
