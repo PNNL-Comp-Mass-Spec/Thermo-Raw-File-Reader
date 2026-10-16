@@ -1046,6 +1046,26 @@ namespace ThermoRawFileReader
         }
 
         /// <summary>
+        /// Obtain the error log entries in the .raw file
+        /// </summary>
+        /// <returns>Sorted set of key-value pairs where the key is the retention time and the value is the error log message</returns>
+        public SortedSet<KeyValuePair<double, string>> GetErrorLogEntries()
+        {
+            var errorLogCount = mXRawFile.RunHeaderEx.ErrorLogCount;
+
+            var errorEntries = new SortedSet<KeyValuePair<double, string>>(new KeyValuePairComparer());
+
+            for (var i = 0; i < errorLogCount; i++)
+            {
+                var entry = mXRawFile.GetErrorLogItem(i);
+
+                errorEntries.Add(new KeyValuePair<double, string>(entry.RetentionTime, entry.Message));
+            }
+
+            return errorEntries;
+        }
+
+        /// <summary>
         /// Number of scans in the .raw file
         /// </summary>
         /// <returns>The number of scans, or -1 if an error</returns>
@@ -1820,6 +1840,72 @@ namespace ThermoRawFileReader
             }
 
             return defaultScanTypeName;
+        }
+
+        /// <summary>
+        /// Obtain the status log entries in the .raw file
+        /// </summary>
+        /// <param name="statusFieldName">Status field name (typically "Status"); if an empty string, return all status log entries</param>
+        /// <returns>Sorted set of key-value pairs where the key is the retention time and the value is the status log message</returns>
+        public SortedSet<KeyValuePair<double, string>> GetStatusLogEntries(string statusFieldName = "Status:")
+        {
+            var statusEntries = new SortedSet<KeyValuePair<double, string>>(new KeyValuePairComparer());
+
+            var headers = mXRawFile.GetStatusLogHeaderInformation();
+
+            // Keys are field name, values are field index
+            var statusLogFields = new Dictionary<string, int>();
+
+            for (var i = 0; i < headers.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(statusFieldName) ||
+                    headers[i].Label.Equals(statusFieldName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (string.IsNullOrWhiteSpace(headers[i].Label))
+                    {
+                        // Skip fields without a label
+                        continue;
+                    }
+
+                    if (statusLogFields.ContainsKey(headers[i].Label))
+                    {
+                        statusLogFields.Add(string.Format("{0}_{1}", headers[i].Label, i), i);
+                    }
+                    else
+                    {
+                        statusLogFields.Add(headers[i].Label, i);
+                    }
+                }
+            }
+
+            if (statusLogFields.Count == 0)
+            {
+                return statusEntries;
+            }
+
+            var statusLogCount = mXRawFile.RunHeaderEx.StatusLogCount;
+
+            foreach (var fieldIndex in statusLogFields.Values)
+            {
+                for (var i = 0; i < statusLogCount; i++)
+                {
+                    var entry = mXRawFile.GetStatusLogValues(i, true);
+
+                    var message = entry.Values[fieldIndex];
+
+                    if (string.IsNullOrWhiteSpace(message))
+                        continue;
+
+                    if (statusLogFields.Count > 1)
+                    {
+                        message = string.Format("{0} {1}", headers[fieldIndex].Label, message);
+                    }
+
+                    statusEntries.Add(new KeyValuePair<double, string>(entry.RetentionTime, message));
+                }
+            }
+
+            return statusEntries;
         }
 
         private void GetTuneData()
@@ -3112,6 +3198,36 @@ namespace ThermoRawFileReader
             }
 
             return collisionEnergies;
+        }
+
+        /// <summary>
+        /// Double, string key value comparer
+        /// </summary>
+        public class KeyValuePairComparer : IComparer<KeyValuePair<double, string>>
+        {
+            /// <summary>
+            /// Compare two "double, string" key values
+            /// </summary>
+            /// <param name="x">Pair 1</param>
+            /// <param name="y">Pair 2</param>
+            /// <returns>0 if identical, -1 if x is less than y, 1 if x is greater than y</returns>
+            public int Compare(KeyValuePair<double, string> x, KeyValuePair<double, string> y)
+            {
+                // Compare the keys
+                int keyCompare = x.Key.CompareTo(y.Key);
+
+                if (keyCompare != 0)
+                {
+                    return keyCompare;
+                }
+
+                // The keys are the same; compare the values
+                if (x.Value == null && y.Value == null) return 0;
+                if (x.Value == null) return -1;
+                if (y.Value == null) return 1;
+
+                return string.Compare(x.Value, y.Value, StringComparison.Ordinal);
+            }
         }
     }
 }
