@@ -19,6 +19,7 @@
     <Title>ThermoRawFileReader</Title>
     <NoWarn>IDE0028; IDE0290; IDE0301; SYSLIB1045</NoWarn>
     <LangVersion>latest</LangVersion>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
   <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard')) OR $(TargetFramework.StartsWith('net8'))">
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -34,7 +35,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PRISM-Library" Version="2.9.20" />
+    <PackageReference Include="PRISM-Library" Version="2.9.25" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'!='net8.0'">
     <PackageReference Include="ThermoFisher.CommonCore.BackgroundSubtraction" Version="5.0.0.93" />

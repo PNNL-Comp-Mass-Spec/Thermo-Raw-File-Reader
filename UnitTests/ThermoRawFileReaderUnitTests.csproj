@@ -1,37 +1,32 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
     <RootNamespace>RawFileReaderTests</RootNamespace>
     <AssemblyName>RawFileReaderTests</AssemblyName>
     <IsPackable>false</IsPackable>
     <LangVersion>latest</LangVersion>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
-
   <PropertyGroup>
     <NoWarn>IDE0028</NoWarn>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="NUnit" Version="4.3.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
-    <PackageReference Include="PRISM-Library" Version="2.9.20" />
+    <PackageReference Include="PRISM-Library" Version="2.9.25" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\ThermoRawFileReader\ThermoRawFileReader.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Remove="Properties\**" />
     <None Remove="Docs\**" />
   </ItemGroup>
-
-<!-- NOTE: This appears to not be needed with NUnit 4.0, and other changes have also been made to render this obsolete
+  <!-- NOTE: This appears to not be needed with NUnit 4.0, and other changes have also been made to render this obsolete
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="if not exist &quot;%25appdata%25\..\Local\JetBrains\Docs&quot; (mkdir &quot;%25appdata%25\..\Local\JetBrains\Docs&quot;)&#xD;&#xA;xcopy &quot;$(ProjectDir)Docs\*.raw&quot; &quot;%25appdata%25\..\Local\JetBrains\Docs\&quot; /Y /D" />
   </Target>
 -->
-
 </Project>
