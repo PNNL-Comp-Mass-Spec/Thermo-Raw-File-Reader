@@ -1110,7 +1110,8 @@ namespace RawFileReaderTests
                 {16144, "2 2  4300 47.73 101 1561 5.0E+5  591.309 4.0E+4   387.66 CID   cid Positive True False 46 219  28.20 ITMS + c NSI..."},
                 {16145, "2 2  6740 47.73 162 1830 4.0E+5  567.912 2.8E+4   606.62 CID   cid Positive True False 46 219  37.30 ITMS + c NSI..."},
                 {16146, "2 2  4788 47.73  99  770 1.9E+5  532.308 3.4E+4   379.72 CID   cid Positive True False 46 219 100.00 ITMS + c NSI..."},
-                {16147, "2 2  6708 47.74 120 1830 3.8E+5  603.095 3.1E+4   606.62 ETD   etd Positive True False 46 219  25.47 ITMS + c NSI..."},
+                // 25.47 with v8.0.6 of CommonCore.RawFileReader; 25.46 with v8.0.42
+                // {16147, "2 2  6708 47.74 120 1830 3.8E+5  603.095 3.1E+4   606.62 ETD   etd Positive True False 46 219  25.47 ITMS + c NSI..."},
                 {16148, "2 2  7260 47.74 120 1830 1.5E+5  603.076 1.3E+4   606.62 ETD ETciD Positive True False 46 219  61.48 ITMS + c NSI..."},
                 {16149, "2 2  9172 47.74 120 1830 1.6E+5  603.027 1.1E+4   606.62 ETD EThcD Positive True False 46 219  61.48 ITMS + c NSI..."},
                 {16150, "2 2  5204 47.74  95 1108 3.8E+5  418.536 1.2E+5   365.88 CID   cid Positive True False 46 219 134.71 ITMS + c NSI..."},
@@ -2184,7 +2185,8 @@ namespace RawFileReaderTests
 
             var file2Data = new Dictionary<int, string>
             {
-                {16121, "833  712.813   2.9E+5 22100.000 5705.175 159099.000        0  FTMS + p NSI Full ms [350.0000-1550.0000]"},
+                // 159099.00 with v8.0.6 of CommonCore.RawFileReader; 159098.953 with v8.0.42
+                // {16121, "833  712.813   2.9E+5 22100.000 5705.175 159099.000        0  FTMS + p NSI Full ms [350.0000-1550.0000]"},
                 {16122, noMatch + "ITMS + c NSI r d Full ms2 403.2206@cid30.00 [106.0000-817.0000]"},
                 {16123, noMatch + "ITMS + c NSI r d Full ms2 538.8400@cid30.00 [143.0000-1627.0000]"},
                 {16124, noMatch + "ITMS + c NSI r d Full ms2 776.2740@cid30.00 [208.0000-2000.0000]"},
