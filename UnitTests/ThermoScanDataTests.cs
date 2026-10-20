@@ -1741,7 +1741,7 @@ namespace RawFileReaderTests
             TestGetScanDataWork(rawFileName, options, scanStart, scanEnd, expectedData);
         }
 
-        private void TestGetScanDataWork(
+        private static void TestGetScanDataWork(
             string rawFileName,
             ThermoReaderOptions options,
             int scanStart,
@@ -2545,7 +2545,7 @@ namespace RawFileReaderTests
             }
         }
 
-        private void AddEmptyDictionaries(IDictionary<int, Dictionary<string, string>> fileData, int scanStart, int scanEnd)
+        private static void AddEmptyDictionaries(IDictionary<int, Dictionary<string, string>> fileData, int scanStart, int scanEnd)
         {
             for (var scanNum = scanStart; scanNum <= scanEnd; scanNum++)
             {
@@ -2553,7 +2553,7 @@ namespace RawFileReaderTests
             }
         }
 
-        private void AddExpectedTupleAndCount(
+        private static void AddExpectedTupleAndCount(
             IDictionary<string, Dictionary<Tuple<int, double>, int>> expectedData,
             string fileName,
             int tupleKey1,
@@ -2569,7 +2569,7 @@ namespace RawFileReaderTests
             expectedScanInfo.Add(new Tuple<int, double>(tupleKey1, tupleKey2), scanCount);
         }
 
-        private void AddExpectedTupleAndCount(
+        private static void AddExpectedTupleAndCount(
             IDictionary<string, Dictionary<Tuple<string, string>, int>> expectedData,
             string fileName,
             string tupleKey1,
@@ -2585,7 +2585,7 @@ namespace RawFileReaderTests
             expectedScanInfo.Add(new Tuple<string, string>(tupleKey1, tupleKey2), scanCount);
         }
 
-        private FileInfo GetRawDataFile(string rawFileName, bool skipIfMissing = false)
+        private static FileInfo GetRawDataFile(string rawFileName, bool skipIfMissing = false)
         {
             var localDirPath = Path.Combine("..", "..", "Docs");
             const string remoteDirPath = @"\\proto-2\UnitTest_Files\ThermoRawFileReader";
