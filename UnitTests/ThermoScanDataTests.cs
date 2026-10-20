@@ -514,10 +514,12 @@ namespace RawFileReaderTests
 
             var errorLogEntries = reader.GetErrorLogEntries();
 
-            Console.WriteLine(string.Format("{0}: {1}", rawFileName, errorLogEntries.Count));
+            Console.WriteLine(string.Format("{0}: {1} error log entries", rawFileName, errorLogEntries.Count));
 
             if (expectedEntryCount >= 0)
                 Assert.That(errorLogEntries.Count, Is.EqualTo(expectedEntryCount), "Error log entry count mismatch");
+
+            SummarizeAcquisitionLogMessages(errorLogEntries);
         }
 
         // ReSharper disable StringLiteralTypo
@@ -1227,7 +1229,10 @@ namespace RawFileReaderTests
 
                 if (scanInfo.TryGetScanEvent("Ion Injection Time (ms)", out var injectionTimeText, true))
                 {
-                    double.TryParse(injectionTimeText, out ionInjectionTime);
+                    if (!double.TryParse(injectionTimeText, out ionInjectionTime))
+                    {
+                        Assert.Fail($"Failed to parse Ion Injection Time (ms) for scan {scanNumber}: '{injectionTimeText}'");
+                    }
                 }
                 else
                 {
@@ -2437,10 +2442,12 @@ namespace RawFileReaderTests
 
             var statusLogEntries = reader.GetStatusLogEntries();
 
-            Console.WriteLine(string.Format("{0}: {1}", rawFileName, statusLogEntries.Count));
+            Console.WriteLine(string.Format("{0}: {1} status log entries", rawFileName, statusLogEntries.Count));
 
             if (expectedEntryCount >= 0)
                 Assert.That(statusLogEntries.Count, Is.EqualTo(expectedEntryCount), "Status log entry count mismatch");
+
+            SummarizeAcquisitionLogMessages(statusLogEntries);
         }
 
         [Test]
@@ -2619,6 +2626,33 @@ namespace RawFileReaderTests
             Assert.Fail(msg);
 
             return null;
+        }
+
+        private static void SummarizeAcquisitionLogMessages(SortedSet<KeyValuePair<double, string>> logEntries)
+        {
+            var logMessageStats = new Dictionary<string, int>();
+
+            foreach (var logEntry in logEntries)
+            {
+                if (logMessageStats.TryGetValue(logEntry.Value, out var observationCount))
+                {
+                    logMessageStats[logEntry.Value] = observationCount + 1;
+                }
+                else
+                {
+                    logMessageStats.Add(logEntry.Value, 1);
+                }
+            }
+
+            if (logMessageStats.Count == 0)
+                return;
+
+            Console.WriteLine();
+
+            foreach (var logMessage in logMessageStats)
+            {
+                Console.WriteLine(string.Format("{0}: {1}", logMessage.Key, logMessage.Value));
+            }
         }
     }
 }
